@@ -1,0 +1,30 @@
+# JARVIS — Dépendances Python
+# Installer avec : pip install -r requirements.txt
+
+# ── Backend web ───────────────────────────────────────────────
+flask>=2.3.0
+flask-cors>=4.0.0
+
+# ── LLM (Ollama local) ────────────────────────────────────────
+requests>=2.31.0
+
+# ── Text-to-Speech ────────────────────────────────────────────
+edge-tts>=6.1.9
+
+# ── Speech-to-Text ────────────────────────────────────────────
+faster-whisper>=0.10.0
+
+# ── Réduction de bruit audio ──────────────────────────────────
+# deepfilternet>=0.5.6    # Optionnel — nécessite CUDA pour GPU
+                           # Commenter si pas de GPU NVIDIA
+
+# ── Audio ─────────────────────────────────────────────────────
+sounddevice>=0.4.6
+soundfile>=0.12.1
+numpy>=1.24.0
+
+# ── SSH (intégration SOC) ─────────────────────────────────────
+paramiko>=3.3.0
+
+# ── Système ───────────────────────────────────────────────────
+psutil>=5.9.0

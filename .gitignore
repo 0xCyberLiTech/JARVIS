@@ -1,0 +1,32 @@
+# Fichiers sensibles — NE JAMAIS versionner
+jarvis_model.json
+jarvis_llm_params.json
+jarvis_dsp_params.json
+*.key
+*.pem
+config/*.json
+!config/*.example
+
+# Fichiers audio générés
+scripts/static/audio/*.mp3
+scripts/static/audio/*.wav
+
+# Logs
+logs/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+
+# Modèles IA (trop volumineux)
+*.bin
+*.safetensors
+*.onnx
+
+# OS
+.DS_Store
+Thumbs.db
