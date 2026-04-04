@@ -36,11 +36,20 @@ Toutes les données restent sur votre machine. Aucune connexion cloud requise.</
 ## Sommaire
 
 <div align="center">
-
-[Vue d'ensemble](#vue-densemble) &nbsp;·&nbsp; [Architecture](#architecture) &nbsp;·&nbsp; [Screenshots](#screenshots) &nbsp;·&nbsp; [Installation](#installation-rapide)
-<br/>
-[Guide complet](#guide-dinstallation--étape-par-étape) &nbsp;·&nbsp; [Modèles LLM](#modèles-llm) &nbsp;·&nbsp; [Stack technique](#stack-technique) &nbsp;·&nbsp; [Intégration SOC](#intégration-soc)
-
+<table border="0" width="600">
+  <tr>
+    <td align="center" width="150"><a href="#vue-densemble">Vue d'ensemble</a></td>
+    <td align="center" width="150"><a href="#architecture">Architecture</a></td>
+    <td align="center" width="150"><a href="#screenshots">Screenshots</a></td>
+    <td align="center" width="150"><a href="#installation-rapide">Installation</a></td>
+  </tr>
+  <tr>
+    <td align="center"><a href="#guide-dinstallation--étape-par-étape">Guide complet</a></td>
+    <td align="center"><a href="#modèles-llm">Modèles LLM</a></td>
+    <td align="center"><a href="#stack-technique">Stack technique</a></td>
+    <td align="center"><a href="#intégration-soc">Intégration SOC</a></td>
+  </tr>
+</table>
 </div>
 
 ---
