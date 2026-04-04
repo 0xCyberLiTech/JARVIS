@@ -1,0 +1,118 @@
+# ════════════════════════════════════════════════════════════════
+# .gitignore — JARVIS · 0xCyberLiTech
+# ════════════════════════════════════════════════════════════════
+
+# ── SECRETS / CREDENTIALS — exclusion absolue ──────────────────
+scripts/jarvis_secret.key
+scripts/jarvis_auth.json
+scripts/jarvis_emergency.json
+scripts/jarvis_tls.crt
+scripts/jarvis_tls.key
+scripts/jarvis_pve.json
+scripts/soc_config.json
+*.key
+*.pem
+.env
+config/*.json
+!config/*.example
+
+# ── DR opérationnel (privé — vit sur disque + coffre, jamais en vitrine) ──
+RUNBOOK.md
+
+# ── Mémoire interne (source de vérité RAG — privée, jamais en vitrine) ──
+MEMORY.md
+
+# ── Gros binaires (modèles, voix, embeddings) ──────────────────
+models/
+scripts/voices/*.onnx
+scripts/voices/*.onnx.json
+scripts/jarvis_rag/embeddings.npy
+scripts/jarvis_rag/meta.json
+node_modules/
+*.bin
+*.safetensors
+
+# ── Medias volumineux (captures, montages video, photos) ───────
+*.mp4
+*.mov
+*.mkv
+*.webm
+Images/*.jpg
+images/*.jpg
+
+# ── Audio généré (TTS runtime) ─────────────────────────────────
+scripts/static/audio/*.mp3
+scripts/static/audio/*.wav
+scripts/voice/_tts_cache/
+
+# ── Fichier leçons Hermès (mémoire privée — IPs/infra, runtime) ──
+scripts/jarvis_corrections.md
+
+# ── Données runtime (changent en continu, pas du code) ─────────
+scripts/jarvis_facts.json
+scripts/jarvis_memory.json
+scripts/jarvis_memory_summary.json
+scripts/jarvis_soc_actions.json
+scripts/jarvis_soc_autobanned.json
+scripts/jarvis_soc_cooldowns.json
+scripts/jarvis_tasks.json
+scripts/jarvis_dsp_params.json
+scripts/jarvis_llm_params.json
+scripts/jarvis_system_prompt.txt
+scripts/voice_prints/
+scripts/generated_code/
+*.log
+*.log.*
+logs/
+*.jsonl
+
+# ── Artefacts / caches ─────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+.ruff_cache/
+.pytest_cache/
+.coverage
+coverage.json
+htmlcov/
+test-results/
+playwright-report/
+venv/
+
+# ── Snapshots locaux du chantier dette ─────────────────────────
+scripts.snapshot-*/
+scripts.action*/
+scripts.matin-*/
+scripts.aprem-*/
+*.bak
+*.bak[0-9]
+*.bak.*
+
+# ── OS / IDE ───────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.lnk
+
+# ── Code source (vitrine uniquement — code source reste local) ──
+scripts/
+tests/
+tools/
+CLAUDE.md
+build_vitrine.py
+
+# ── Audits de dette internes (constats datés, infra réelle) — LOCAL ──
+AUDIT-DETTE-*.md
+AUDIT_*.md
+BILAN_*.md
+CARTOGRAPHIE_*.md
+COMPTE_RENDU_*.md
+# ── Dossier d'ANALYSES internes (impact/dette/plan/Hermès, infra réelle) — LOCAL, jamais publié (préservé par la DR JARVIS) ──
+ANALYSES/
+
+# ── Doc interne / déploiement — LOCAL uniquement (vitrine = showcase, pas déployable) ──
+DOCUMENTATION/05-INSTALLATION.md
+DOCTRINE.md
+
+
+# Plans de travail INTERNES (findings + infra) — JAMAIS dans la vitrine publique
+PLAN-STABILISATION-*.md
