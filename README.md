@@ -47,6 +47,29 @@
 
 ---
 
+<div align="center">
+
+## À propos & Objectifs.
+
+</div>
+
+Passionné d'intelligence artificielle locale et de cybersécurité, j'ai construit JARVIS avec une conviction simple : **un assistant IA personnel doit rester sous ton contrôle, sur ta machine, sans aucun cloud**.
+
+Inspiré de l'univers Iron Man, JARVIS est un assistant opérationnel 24/7 — voix naturelle, écoute continue, interface holographique — qui tourne entièrement en local grâce à **Ollama** sur un GPU **NVIDIA RTX 5080**. Il surveille mon infrastructure SOC en temps réel, répond à mes questions vocalement, analyse des logs de sécurité, et peut bannir une IP malveillante sur simple commande naturelle.
+
+Avec **17 400+ lignes de code**, 10 onglets, un pipeline audio complet (TTS Neural · STT Whisper · DeepFilterNet), et une intégration SOC avec actions proactives automatiques — ce n'est pas un proof-of-concept. C'est un système en production, mis à jour hebdomadairement.
+
+> **Ce projet a été conçu et développé en collaboration avec [Claude AI](https://claude.ai) (Anthropic) — Claude Code.**
+> L'ironie n'est pas perdue : un assistant IA local construit avec l'aide d'une IA. Mais c'est exactement là la force de cette approche — utiliser Claude Code pour architécter, déboguer et itérer rapidement sur un projet ambitieux. De la gestion du pipeline audio au système de ban automatique SOC, Claude AI a été un véritable co-développeur tout au long du projet.
+
+Le contenu est structuré pour répondre aux besoins de :
+- 🤖 **Passionnés d'IA locale** — déployer un assistant LLM sans cloud, 100% privé
+- 🛡️ **Professionnels IT & SOC** — automatiser les réponses aux incidents de sécurité
+- 🎓 **Étudiants & développeurs** — comprendre Flask, SSE, Whisper, edge-tts en pratique
+- 🚀 **Explorateurs GPU** — exploiter CUDA pour l'inférence LLM + DSP audio en temps réel
+
+---
+
 ## Sommaire
 
 <div align="center">
@@ -294,5 +317,5 @@ JARVIS se connecte au [dashboard SOC](https://github.com/0xCyberLiTech/SOC) pour
 </div>
 
 <div align="center">
-  <b>🔒 Un guide proposé par <a href="https://0xcyberlitech.com/">0xCyberLiTech</a> • Pour des tutoriels accessibles à tous. 🔒</b>
+  <b>🔒 Un projet proposé par <a href="https://github.com/0xCyberLiTech">0xCyberLiTech</a> • Développé en collaboration avec <a href="https://claude.ai">Claude AI</a> (Anthropic) 🔒</b>
 </div>
