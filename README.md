@@ -35,12 +35,13 @@ Toutes les données restent sur votre machine. Aucune connexion cloud requise.</
 
 ## Sommaire
 
-| | |
-|---|---|
-| [Vue d'ensemble](#vue-densemble) | [Architecture](#architecture) |
-| [Screenshots](#screenshots) | [Installation](#installation-rapide) |
-| [Guide complet](#guide-dinstallation--étape-par-étape) | [Modèles LLM](#modèles-llm) |
-| [Stack technique](#stack-technique) | [Intégration SOC](#intégration-soc) |
+<div align="center">
+
+[Vue d'ensemble](#vue-densemble) &nbsp;·&nbsp; [Architecture](#architecture) &nbsp;·&nbsp; [Screenshots](#screenshots) &nbsp;·&nbsp; [Installation](#installation-rapide)
+<br/>
+[Guide complet](#guide-dinstallation--étape-par-étape) &nbsp;·&nbsp; [Modèles LLM](#modèles-llm) &nbsp;·&nbsp; [Stack technique](#stack-technique) &nbsp;·&nbsp; [Intégration SOC](#intégration-soc)
+
+</div>
 
 ---
 
