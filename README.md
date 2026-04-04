@@ -85,28 +85,27 @@
 
 ## Architecture
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                    Interface Web — localhost:5000                  │
-│              Thème holographique · 10 onglets · SSE streaming     │
-└────────────────────────────┬─────────────────────────────────────┘
-                             │ HTTP / Server-Sent Events
-┌────────────────────────────▼─────────────────────────────────────┐
-│                  Flask Backend — jarvis.py                         │
-│                  ~3 600 lignes · 55 routes · 124 fonctions        │
-│                                                                   │
-│   /chat        ──▶  Ollama LLM  (streaming)                       │
-│   /tts         ──▶  edge-tts    (synthèse vocale)                 │
-│   /stt         ──▶  faster-whisper  (transcription micro)         │
-│   /soc/ban     ──▶  SSH ──▶ CrowdSec  (ban-IP)                   │
-│   /soc/restart ──▶  SSH ──▶ systemctl (redémarrage service)       │
-│   /status      ──▶  Dashboard SOC  (état JARVIS)                  │
-└────────────────────────────┬─────────────────────────────────────┘
-                             │ paramiko SSH
-         ┌───────────────────▼───────────────────┐
-         │          Serveur SOC (optionnel)        │
-         │  CrowdSec · fail2ban · nginx · Suricata │
-         └─────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    A["🌐 Interface Web — localhost:5000\nThème holographique · 10 onglets · SSE streaming"]
+
+    A -->|HTTP / Server-Sent Events| B
+
+    subgraph B["⚙️ Flask Backend — jarvis.py\n~3 600 lignes · 55 routes · 124 fonctions"]
+        direction TB
+        C["/chat → Ollama LLM — streaming"]
+        D["/tts → edge-tts — synthèse vocale"]
+        E["/stt → faster-whisper — transcription micro"]
+        F["/soc/ban → SSH → CrowdSec ban-IP"]
+        G["/soc/restart → SSH → systemctl"]
+        H["/status → Dashboard SOC — état JARVIS"]
+    end
+
+    B -->|paramiko SSH| I
+
+    subgraph I["🛡️ Serveur SOC — optionnel"]
+        J["CrowdSec · fail2ban · nginx · Suricata"]
+    end
 ```
 
 ---
