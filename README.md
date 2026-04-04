@@ -88,24 +88,17 @@
 ```mermaid
 flowchart TD
     A["🌐 Interface Web — localhost:5000\nThème holographique · 10 onglets · SSE streaming"]
+    B["⚙️ Flask Backend — jarvis.py\n~3 600 lignes · 55 routes · 124 fonctions"]
+    C["🤖 LLM\n/chat → Ollama streaming"]
+    D["🔊 Audio\n/tts → edge-tts · /stt → Whisper"]
+    E["🛡️ SOC\n/soc/ban · /soc/restart · /status"]
+    F["Serveur SOC — optionnel\nCrowdSec · fail2ban · nginx · Suricata"]
 
     A -->|HTTP / Server-Sent Events| B
-
-    subgraph B["⚙️ Flask Backend — jarvis.py\n~3 600 lignes · 55 routes · 124 fonctions"]
-        direction TB
-        C["/chat → Ollama LLM — streaming"]
-        D["/tts → edge-tts — synthèse vocale"]
-        E["/stt → faster-whisper — transcription micro"]
-        F["/soc/ban → SSH → CrowdSec ban-IP"]
-        G["/soc/restart → SSH → systemctl"]
-        H["/status → Dashboard SOC — état JARVIS"]
-    end
-
-    B -->|paramiko SSH| I
-
-    subgraph I["🛡️ Serveur SOC — optionnel"]
-        J["CrowdSec · fail2ban · nginx · Suricata"]
-    end
+    B --> C
+    B --> D
+    B --> E
+    E -->|paramiko SSH| F
 ```
 
 ---
