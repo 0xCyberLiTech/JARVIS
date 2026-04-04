@@ -100,7 +100,7 @@ Toutes les données restent sur votre machine. Aucune connexion cloud requise.</
 
 ### Interface de conversation & Monitoring système
 
-<table>
+<table border="0" cellspacing="0" cellpadding="8">
   <tr>
     <td width="60%">
       <img src="./images/Jarvis-03.jpg" alt="Interface de conversation LLM" width="100%" />
@@ -115,7 +115,7 @@ Toutes les données restent sur votre machine. Aucune connexion cloud requise.</
 
 ### Paramètres LLM & Gestion des modèles
 
-<table>
+<table border="0" cellspacing="0" cellpadding="8">
   <tr>
     <td width="35%">
       <img src="./images/Jarvis-04.jpg" alt="Paramètres GPU et LLM" width="100%" />
@@ -130,7 +130,7 @@ Toutes les données restent sur votre machine. Aucune connexion cloud requise.</
 
 ### Pipeline audio — DSP & Voice Lab
 
-<table>
+<table border="0" cellspacing="0" cellpadding="8">
   <tr>
     <td width="40%">
       <img src="./images/Jarvis-06.jpg" alt="DSP Audio" width="100%" />
