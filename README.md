@@ -15,6 +15,11 @@
     <img src="https://img.shields.io/badge/Statut-Production-brightgreen?style=flat-square" />
   </p>
 
+  <br/>
+
+  <img src="./images/Jarvis-01.jpg" alt="JARVIS Interface" width="48%" style="border-radius:8px" />
+  <img src="./images/Jarvis-08.jpg" alt="JARVIS Dashboard" width="48%" style="border-radius:8px" />
+
 </div>
 
 ---
