@@ -1,34 +1,48 @@
 <div align="center">
 
-<img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=36&duration=6000&pause=1000000000&color=00FF88&center=true&vCenter=true&width=960&lines=%3E+J.A.R.V.I.S+—+Assistant+IA+Local_" alt="JARVIS" />
+  <br></br>
 
-<br/>
+  <a href="https://github.com/0xCyberLiTech">
+    <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=50&duration=6000&pause=1000000000&color=FF0048&center=true&vCenter=true&width=1100&lines=%3EJARVIS_" alt="Titre dynamique JARVIS" />
+  </a>
 
-<p>
-  <img src="https://img.shields.io/badge/Version-Production-00FF88?style=for-the-badge" />
-  <img src="https://img.shields.io/badge/LLM-Ollama%20100%25%20Local-00FF88?style=for-the-badge&logo=ollama&logoColor=white" />
-  <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white" />
-  <img src="https://img.shields.io/badge/GPU-CUDA%2012-76B900?style=for-the-badge&logo=nvidia&logoColor=white" />
-</p>
+  <br></br>
 
-<p>
-  <img src="https://img.shields.io/badge/TTS-edge--tts%20Neural-4A9EFF?style=flat-square" />
-  <img src="https://img.shields.io/badge/STT-faster--whisper-FF8C00?style=flat-square" />
-  <img src="https://img.shields.io/badge/NR-DeepFilterNet-9B59B6?style=flat-square" />
-  <img src="https://img.shields.io/badge/Backend-Flask-lightgrey?style=flat-square&logo=flask" />
-  <img src="https://img.shields.io/badge/SOC-Intégré-FF4444?style=flat-square" />
-  <img src="https://img.shields.io/badge/Cloud-Zéro-00FF88?style=flat-square" />
-</p>
+  <h2>Laboratoire numérique pour la cybersécurité, Linux & IT.</h2>
 
-<br/>
+  <p align="center">
+    <a href="https://0xcyberlitech.github.io/">
+      <img src="https://img.shields.io/badge/Portfolio-0xCyberLiTech-181717?logo=github&style=flat-square" alt="Portfolio" />
+    </a>
+    <a href="https://github.com/0xCyberLiTech">
+      <img src="https://img.shields.io/badge/Profil-GitHub-181717?logo=github&style=flat-square" alt="Profil GitHub" />
+    </a>
+    <a href="https://github.com/0xCyberLiTech/JARVIS/releases/latest">
+      <img src="https://img.shields.io/github/v/release/0xCyberLiTech/JARVIS?label=version" alt="Latest Release" />
+    </a>
+    <a href="https://github.com/0xCyberLiTech/JARVIS/blob/main/CHANGELOG.md">
+      <img src="https://img.shields.io/badge/📄%20CHANGELOG-JARVIS-blue" alt="Changelog" />
+    </a>
+    <a href="https://github.com/0xCyberLiTech?tab=repositories">
+      <img src="https://img.shields.io/badge/Dépôts-publics-blue?style=flat-square" alt="Dépôts publics" />
+    </a>
+  </p>
 
-<img src="./images/Jarvis-01.jpg" alt="JARVIS — Écran de démarrage" width="95%" />
+</div>
 
-<br/><br/>
+<div align="center">
+  <img src="https://img.icons8.com/fluency/96/000000/cyber-security.png" alt="CyberSec" width="80"/>
+</div>
 
-<i>Assistant IA personnel inspiré de l'univers Iron Man — interface holographique, voix naturelle, écoute vocale continue.<br/>
-Toutes les données restent sur votre machine. Aucune connexion cloud requise.</i>
+<div align="center">
+  <p>
+    <strong>Cybersécurité</strong> <img src="https://img.icons8.com/color/24/000000/lock--v1.png"/> • <strong>Linux Debian</strong> <img src="https://img.icons8.com/color/24/000000/linux.png"/> • <strong>Sécurité informatique</strong> <img src="https://img.icons8.com/color/24/000000/shield-security.png"/>
+  </p>
+</div>
 
+<div align="center">
+  <br/>
+  <img src="./images/Jarvis-01.jpg" alt="JARVIS — Écran de démarrage" width="95%" />
 </div>
 
 ---
@@ -282,15 +296,11 @@ JARVIS se connecte au [dashboard SOC](https://github.com/0xCyberLiTech/SOC) pour
 ---
 
 <div align="center">
+  <a href="https://github.com/0xCyberLiTech" target="_blank" rel="noopener">
+    <img src="https://skillicons.dev/icons?i=linux,debian,bash,docker,nginx,git,vim,python,markdown" alt="Skills" width="440">
+  </a>
+</div>
 
-<br/>
-
-[![SOC Dashboard](https://img.shields.io/badge/Projet%20lié-SOC%20Dashboard-00D9FF?style=for-the-badge&logo=github&logoColor=white)](https://github.com/0xCyberLiTech/SOC)
-&nbsp;
-[![Profil GitHub](https://img.shields.io/badge/Auteur-0xCyberLiTech-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/0xCyberLiTech)
-
-<br/><br/>
-
-<sub>Projet homelab en production — <a href="https://github.com/0xCyberLiTech">0xCyberLiTech</a> · Cybersécurité & IA locale</sub>
-
+<div align="center">
+  <b>🔒 Un guide proposé par <a href="https://0xcyberlitech.com/">0xCyberLiTech</a> • Pour des tutoriels accessibles à tous. 🔒</b>
 </div>
