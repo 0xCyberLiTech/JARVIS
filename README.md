@@ -95,6 +95,8 @@ Le contenu est structuré pour répondre aux besoins de :
 
 **J.A.R.V.I.S** est un assistant IA personnel complet, opérationnel en production 24/7.  
 
+<div align="center">
+
 | Capacité | Détail |
 |----------|--------|
 | **Conversation** | LLM Ollama local — streaming token par token, contexte persistant |
@@ -103,6 +105,8 @@ Le contenu est structuré pour répondre aux besoins de :
 | **SOC** | Ban-IP automatique, restart services, alertes vocales sur menaces |
 | **Multi-modèles** | Changement de LLM à chaud sans redémarrage |
 | **Interface** | 10 onglets — thème holographique sombre — 17 400+ lignes |
+
+</div>
 
 ---
 
@@ -139,6 +143,7 @@ flowchart TD
 
 ### Interface de conversation & Monitoring système
 
+<div align="center">
 <table border="0" cellspacing="0" cellpadding="8">
   <tr>
     <td width="60%">
@@ -151,9 +156,11 @@ flowchart TD
     </td>
   </tr>
 </table>
+</div>
 
 ### Paramètres LLM & Gestion des modèles
 
+<div align="center">
 <table border="0" cellspacing="0" cellpadding="8">
   <tr>
     <td width="35%">
@@ -166,9 +173,11 @@ flowchart TD
     </td>
   </tr>
 </table>
+</div>
 
 ### Pipeline audio — DSP & Voice Lab
 
+<div align="center">
 <table border="0" cellspacing="0" cellpadding="8">
   <tr>
     <td width="40%">
@@ -181,6 +190,7 @@ flowchart TD
     </td>
   </tr>
 </table>
+</div>
 
 ### Intégration SOC — Actions proactives
 
@@ -193,6 +203,7 @@ flowchart TD
 
 ## Guide d'installation — étape par étape
 
+<div align="center">
 <table>
   <tr>
     <th>Étape</th>
@@ -225,6 +236,7 @@ flowchart TD
     <td><a href="./docs/05-INTEGRATION-SOC.md">→ Intégration SOC</a></td>
   </tr>
 </table>
+</div>
 
 ---
 
@@ -258,6 +270,8 @@ cd scripts && python jarvis.py
 
 ## Modèles LLM
 
+<div align="center">
+
 | Modèle | RAM | Points forts |
 |--------|-----|-------------|
 | `phi4` | 8 Go | ⭐ Recommandé — polyvalent, rapide |
@@ -265,6 +279,8 @@ cd scripts && python jarvis.py
 | `phi4-reasoning` | 12 Go | Analyse complexe, SOC |
 | `deepseek-r1:14b` | 14 Go | Raisonnement avancé |
 | `qwen2.5:14b` | 14 Go | Code et analyse |
+
+</div>
 
 ---
 
