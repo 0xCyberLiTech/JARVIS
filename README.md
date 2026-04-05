@@ -70,7 +70,11 @@ Le contenu est structuré pour répondre aux besoins de :
 
 ---
 
+<div align="center">
+
 ## Sommaire
+
+</div>
 
 <div align="center">
 <table border="0" width="600">
@@ -91,7 +95,11 @@ Le contenu est structuré pour répondre aux besoins de :
 
 ---
 
+<div align="center">
+
 ## Vue d'ensemble
+
+</div>
 
 **J.A.R.V.I.S** est un assistant IA personnel complet, opérationnel en production 24/7.  
 
@@ -110,7 +118,11 @@ Le contenu est structuré pour répondre aux besoins de :
 
 ---
 
+<div align="center">
+
 ## Architecture
+
+</div>
 
 ```mermaid
 flowchart TD
@@ -130,9 +142,17 @@ flowchart TD
 
 ---
 
+<div align="center">
+
 ## Screenshots
 
+</div>
+
+<div align="center">
+
 ### Écran de démarrage
+
+</div>
 
 <div align="center">
   <img src="./images/Jarvis-01.jpg" alt="Écran de démarrage JARVIS" width="95%" />
@@ -141,7 +161,11 @@ flowchart TD
 
 <br/>
 
+<div align="center">
+
 ### Interface de conversation & Monitoring système
+
+</div>
 
 <div align="center">
 <table border="0" cellspacing="0" cellpadding="8">
@@ -158,7 +182,11 @@ flowchart TD
 </table>
 </div>
 
+<div align="center">
+
 ### Paramètres LLM & Gestion des modèles
+
+</div>
 
 <div align="center">
 <table border="0" cellspacing="0" cellpadding="8">
@@ -175,7 +203,11 @@ flowchart TD
 </table>
 </div>
 
+<div align="center">
+
 ### Pipeline audio — DSP & Voice Lab
+
+</div>
 
 <div align="center">
 <table border="0" cellspacing="0" cellpadding="8">
@@ -192,7 +224,11 @@ flowchart TD
 </table>
 </div>
 
+<div align="center">
+
 ### Intégration SOC — Actions proactives
+
+</div>
 
 <div align="center">
   <img src="./images/Jarvis-08.jpg" alt="Onglet SOC — Actions proactives" width="95%" />
@@ -201,7 +237,11 @@ flowchart TD
 
 ---
 
+<div align="center">
+
 ## Guide d'installation — étape par étape
+
+</div>
 
 <div align="center">
 <table>
@@ -240,7 +280,11 @@ flowchart TD
 
 ---
 
+<div align="center">
+
 ## Installation rapide
+
+</div>
 
 ```bash
 # 1. Cloner le dépôt
@@ -268,7 +312,11 @@ cd scripts && python jarvis.py
 
 ---
 
+<div align="center">
+
 ## Modèles LLM
+
+</div>
 
 <div align="center">
 
@@ -284,7 +332,11 @@ cd scripts && python jarvis.py
 
 ---
 
+<div align="center">
+
 ## Stack technique
+
+</div>
 
 <div align="center">
 
@@ -302,7 +354,11 @@ cd scripts && python jarvis.py
 
 ---
 
+<div align="center">
+
 ## Intégration SOC
+
+</div>
 
 JARVIS se connecte au [dashboard SOC](https://github.com/0xCyberLiTech/SOC) pour :
 
@@ -314,7 +370,11 @@ JARVIS se connecte au [dashboard SOC](https://github.com/0xCyberLiTech/SOC) pour
 
 ---
 
+<div align="center">
+
 ## Sécurité
+
+</div>
 
 ```
 ✔  Bind 127.0.0.1 — non exposé sur le réseau
