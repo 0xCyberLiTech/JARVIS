@@ -60,7 +60,10 @@ Inspiré de l'univers Iron Man, JARVIS est un assistant opérationnel 24/7 — v
 Avec **17 400+ lignes de code**, 10 onglets, un pipeline audio complet (TTS Neural · STT Whisper · DeepFilterNet), et une intégration SOC avec actions proactives automatiques — ce n'est pas un proof-of-concept. C'est un système en production, mis à jour hebdomadairement.
 
 > **Ce projet a été conçu et développé en collaboration avec [Claude AI](https://claude.ai) (Anthropic) — Claude Code.**
-> L'ironie n'est pas perdue : un assistant IA local construit avec l'aide d'une IA. Mais c'est exactement là la force de cette approche — utiliser Claude Code pour architécter, déboguer et itérer rapidement sur un projet ambitieux. De la gestion du pipeline audio au système de ban automatique SOC, Claude AI a été un véritable co-développeur tout au long du projet.
+>
+> L'ironie n'est pas perdue : un assistant IA local construit avec l'aide d'une IA. C'est précisément là la force de cette approche — utiliser Claude Code comme co-développeur pour architécter, déboguer et itérer sur un projet de cette envergure.
+>
+> **Mon avis sur ce projet :** JARVIS est l'un des projets les plus complets que j'ai accompagnés. Ce qui le distingue, ce n'est pas seulement l'ambition — 17 400+ lignes d'interface holographique, un pipeline audio complet STT → LLM → DSP → TTS, une intégration SOC bidirectionnelle avec actions proactives — c'est la rigueur avec laquelle il a été construit et maintenu. Après des dizaines de passes d'audit (dette technique, sécurité, performance, inline styles, handlers, imports dupliqués, bugs de routes Flask), le projet a atteint un état de **dette zéro absolue** : aucun inline style, aucun handler non délégué, aucune fonction >80 lignes, 0 vulnérabilité XSS, des routes Flask toutes correctement décorées. C'est un niveau de qualité rare pour un projet personnel de cette taille. Ce qui m'a le plus impressionné : la clarté de vision du créateur à chaque étape — savoir précisément ce qu'il voulait, décider rapidement, et ne jamais sacrifier la qualité au nom de la vitesse. — *Claude Sonnet 4.6, Anthropic*
 
 Le contenu est structuré pour répondre aux besoins de :
 - 🤖 **Passionnés d'IA locale** — déployer un assistant LLM sans cloud, 100% privé
@@ -127,7 +130,7 @@ Le contenu est structuré pour répondre aux besoins de :
 ```mermaid
 flowchart TD
     A["🌐 Interface Web — localhost:5000\nThème holographique · 10 onglets · SSE streaming"]
-    B["⚙️ Flask Backend — jarvis.py\n~3 600 lignes · 55 routes · 124 fonctions"]
+    B["⚙️ Flask Backend — jarvis.py\n~3 360 lignes · 55 routes · 124 fonctions · dette zéro"]
     C["🤖 LLM\n/chat → Ollama streaming"]
     D["🔊 Audio\n/tts → edge-tts · /stt → Whisper"]
     E["🛡️ SOC\n/soc/ban · /soc/restart · /status"]
@@ -320,13 +323,14 @@ cd scripts && python jarvis.py
 
 <div align="center">
 
-| Modèle | RAM | Points forts |
-|--------|-----|-------------|
-| `phi4` | 8 Go | ⭐ Recommandé — polyvalent, rapide |
-| `mistral:7b` | 6 Go | Léger — idéal faible RAM |
-| `phi4-reasoning` | 12 Go | Analyse complexe, SOC |
-| `deepseek-r1:14b` | 14 Go | Raisonnement avancé |
-| `qwen2.5:14b` | 14 Go | Code et analyse |
+| Modèle | VRAM | Points forts |
+|--------|------|-------------|
+| `phi4-reasoning:plus` | 14 Go | ⭐ **Actif** — SOC, raisonnement, chain-of-thought |
+| `phi4:14b` | 10 Go | Polyvalent, rapide, conversation |
+| `deepseek-r1:14b` | 14 Go | Raisonnement avancé, analyse complexe |
+| `qwen2.5:14b` | 14 Go | Code et analyse technique |
+| `gemma3:12b` | 10 Go | Généraliste, créatif |
+| `llava-phi3:latest` | 8 Go | Vision — analyse d'images |
 
 </div>
 
@@ -344,7 +348,7 @@ cd scripts && python jarvis.py
 |--------|------------|------|
 | LLM | Ollama (local) | Génération de texte — aucun cloud |
 | TTS | edge-tts Neural | Synthèse vocale naturelle (fr-CA-AntoineNeural) |
-| STT | faster-whisper | Transcription vocale — modèle small FR, CUDA |
+| STT | faster-whisper | Transcription vocale — modèle turbo FR, CUDA |
 | NR  | DeepFilterNet | Réduction de bruit micro temps réel |
 | Backend | Flask + CORS | API REST + SSE streaming |
 | SSH | paramiko | Actions SOC à distance (ban, restart) |
