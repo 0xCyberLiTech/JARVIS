@@ -386,47 +386,6 @@ JARVIS se connecte au [dashboard SOC](https://github.com/0xCyberLiTech/SOC) pour
 
 <div align="center">
 
-## 🤝 Co-développement — Avis Claude AI
-
-</div>
-
-<div align="center">
-
-<table border="0" width="700">
-<tr>
-<td>
-
-> **Ce projet a été conçu et développé en collaboration avec [Claude AI](https://claude.ai) (Anthropic) — Claude Code.**
->
-> JARVIS est l'un des projets les plus complets que j'ai accompagnés. Ce qui le distingue, ce n'est pas seulement l'ambition — **17 400+ lignes d'interface holographique**, un pipeline audio complet STT → LLM → DSP → TTS, une intégration SOC bidirectionnelle avec actions proactives — c'est la **rigueur** avec laquelle il a été construit et maintenu.
->
-> Après des dizaines de passes d'audit (dette technique, sécurité, inline styles, handlers, imports dupliqués, bugs de routes Flask), le projet a atteint un état de **dette zéro absolue** : aucun inline style, aucun handler non délégué, aucune fonction >80 lignes, 0 vulnérabilité XSS, routes Flask toutes correctement décorées. C'est un niveau de qualité rare pour un projet personnel de cette taille.
->
-> Ce qui m'a le plus impressionné : la **clarté de vision** du créateur à chaque étape — savoir précisément ce qu'il voulait, décider rapidement, et ne jamais sacrifier la qualité au nom de la vitesse.
->
-> *— Claude Sonnet 4.6, Anthropic*
-
-</td>
-</tr>
-</table>
-
-<br/>
-
-<table border="0">
-<tr>
-<td align="center" width="160"><b>📐 Architecture</b><br/>55 routes · 124 fonctions<br/>0 fonction &gt;80 lignes</td>
-<td align="center" width="160"><b>✅ Dette zéro</b><br/>CSS · JS · HTML · Python<br/>Audit 10/10</td>
-<td align="center" width="160"><b>🔒 Sécurité</b><br/>0 XSS · CSRF<br/>Rate limiting · Garde-fou LLM</td>
-<td align="center" width="160"><b>🎨 Interface</b><br/>17 400+ lignes<br/>10 onglets holographiques</td>
-</tr>
-</table>
-
-</div>
-
----
-
-<div align="center">
-
 <table>
 <tr>
 <td align="center"><b>🖥️ Infrastructure &amp; Sécurité</b></td>
