@@ -8,7 +8,7 @@
 
   <br></br>
 
-  <h2>Laboratoire numérique pour la cybersécurité, Linux & IT.</h2>
+  <h2>Assistant IA local · voix · interface holographique · automatisation SOC 24/7</h2>
 
   <p align="center">
     <a href="https://0xcyberlitech.github.io/">
@@ -18,13 +18,16 @@
       <img src="https://img.shields.io/badge/Profil-GitHub-181717?logo=github&style=flat-square" alt="Profil GitHub" />
     </a>
     <a href="https://github.com/0xCyberLiTech/JARVIS/releases/latest">
-      <img src="https://img.shields.io/github/v/release/0xCyberLiTech/JARVIS?label=version" alt="Latest Release" />
+      <img src="https://img.shields.io/github/v/release/0xCyberLiTech/JARVIS?label=version&style=flat-square&color=blue" alt="Dernière version" />
     </a>
     <a href="https://github.com/0xCyberLiTech/JARVIS/blob/main/CHANGELOG.md">
-      <img src="https://img.shields.io/badge/📄%20CHANGELOG-JARVIS-blue" alt="Changelog" />
+      <img src="https://img.shields.io/badge/📄%20Changelog-JARVIS-blue?style=flat-square" alt="Changelog" />
     </a>
     <a href="https://github.com/0xCyberLiTech?tab=repositories">
       <img src="https://img.shields.io/badge/Dépôts-publics-blue?style=flat-square" alt="Dépôts publics" />
+    </a>
+    <a href="https://github.com/0xCyberLiTech/JARVIS/graphs/contributors">
+      <img src="https://img.shields.io/badge/👥%20Contributeurs-cliquez%20ici-007ec6?style=flat-square" alt="Contributeurs" />
     </a>
   </p>
 
@@ -36,85 +39,167 @@
 
 <div align="center">
   <p>
-    <strong>Cybersécurité défensive</strong> <img src="https://img.icons8.com/color/24/000000/lock--v1.png"/> &nbsp;•&nbsp; <strong>Homelab en production</strong> <img src="https://img.icons8.com/color/24/000000/linux.png"/> &nbsp;•&nbsp; <strong>IA locale intégrée</strong> <img src="https://img.icons8.com/color/24/000000/shield-security.png"/>
+    <strong>IA 100% locale</strong> <img src="https://img.icons8.com/color/24/000000/lock--v1.png"/> &nbsp;•&nbsp; <strong>Voix naturelle · STT · TTS</strong> <img src="https://img.icons8.com/color/24/000000/linux.png"/> &nbsp;•&nbsp; <strong>Automatisation SOC</strong> <img src="https://img.icons8.com/color/24/000000/shield-security.png"/>
   </p>
 </div>
 
 ---
 
+<h2 align="center">Philosophie du projet</h2>
+
 <div align="center">
+<table>
+<tr>
+<td align="center" width="33%">
 
-## À propos & Objectifs.
+**🤖 100% local, zéro cloud**
 
+Un assistant IA personnel qui tourne sur ta machine, sous ton contrôle, sans envoyer une seule donnée à l'extérieur. Ollama, Whisper, edge-tts : tout s'exécute localement sur GPU NVIDIA RTX 5080.
+
+</td>
+<td align="center" width="33%">
+
+**🛡️ Intelligence défensive intégrée**
+
+JARVIS n'est pas un chatbot. Il surveille l'infrastructure SOC en temps réel, bannit automatiquement les IPs malveillantes, redémarre les services critiques et alerte vocalement sur les menaces.
+
+</td>
+<td align="center" width="33%">
+
+**🎯 Production, pas démo**
+
+17 400+ lignes, 10 onglets, pipeline audio complet, audit 10/10. Mis à jour hebdomadairement sur infrastructure réelle exposée à internet 24h/24.
+
+</td>
+</tr>
+</table>
 </div>
-
-Passionné d'intelligence artificielle locale et de cybersécurité, j'ai construit JARVIS avec une conviction simple : **un assistant IA personnel doit rester sous ton contrôle, sur ta machine, sans aucun cloud**.
-
-Inspiré de l'univers Iron Man, JARVIS est un assistant opérationnel 24/7 — voix naturelle, écoute continue, interface holographique — qui tourne entièrement en local grâce à **Ollama** sur un GPU **NVIDIA RTX 5080**. Il surveille mon infrastructure SOC en temps réel, répond à mes questions vocalement, analyse des logs de sécurité, et peut bannir une IP malveillante sur simple commande naturelle.
-
-Avec **17 400+ lignes de code**, 10 onglets, un pipeline audio complet (TTS Neural · STT Whisper · DeepFilterNet), et une intégration SOC avec actions proactives automatiques — ce n'est pas un proof-of-concept. C'est un système en production, mis à jour hebdomadairement.
-
-Le contenu est structuré pour répondre aux besoins de :
-- 🤖 **Passionnés d'IA locale** — déployer un assistant LLM sans cloud, 100% privé
-- 🛡️ **Professionnels IT & SOC** — automatiser les réponses aux incidents de sécurité
-- 🎓 **Étudiants & développeurs** — comprendre Flask, SSE, Whisper, edge-tts en pratique
-- 🚀 **Explorateurs GPU** — exploiter CUDA pour l'inférence LLM + DSP audio en temps réel
 
 ---
 
+<h2 align="center">Écran de démarrage</h2>
+
 <div align="center">
-
-## Sommaire
-
+  <img src="./images/Jarvis-01.jpg" alt="Écran de démarrage JARVIS" width="95%" />
+  <br/><sub>Initialisation du système — statuts des modules, message de bienvenue</sub>
 </div>
 
+---
+
+<h2 align="center">Conversation & Monitoring système</h2>
+
 <div align="center">
-<table border="0" width="600">
+<table border="0" cellspacing="0" cellpadding="8">
   <tr>
-    <td align="center" width="150"><a href="#vue-densemble">Vue d'ensemble</a></td>
-    <td align="center" width="150"><a href="#architecture">Architecture</a></td>
-    <td align="center" width="150"><a href="#screenshots">Screenshots</a></td>
-    <td align="center" width="150"><a href="#installation-rapide">Installation</a></td>
-  </tr>
-  <tr>
-    <td align="center"><a href="#guide-dinstallation--étape-par-étape">Guide complet</a></td>
-    <td align="center"><a href="#modèles-llm">Modèles LLM</a></td>
-    <td align="center"><a href="#stack-technique">Stack technique</a></td>
-    <td align="center"><a href="#intégration-soc">Intégration SOC</a></td>
+    <td width="60%">
+      <img src="./images/Jarvis-03.jpg" alt="Interface de conversation LLM" width="100%" />
+      <p align="center"><sub>Onglet <b>JARVIS IA</b> — conversation en temps réel, streaming SSE, sidebar système</sub></p>
+    </td>
+    <td width="40%">
+      <img src="./images/Jarvis-02.jpg" alt="Onglet Monitor" width="100%" />
+      <p align="center"><sub>Onglet <b>MONITOR</b> — CPU, RAM, GPU, disques, sparklines 24h</sub></p>
+    </td>
   </tr>
 </table>
 </div>
 
 ---
 
-<div align="center">
-
-## Vue d'ensemble
-
-</div>
-
-**J.A.R.V.I.S** est un assistant IA personnel complet, opérationnel en production 24/7.  
+<h2 align="center">Paramètres LLM & Gestion des modèles</h2>
 
 <div align="center">
-
-| Capacité | Détail |
-|----------|--------|
-| **Conversation** | LLM Ollama local — streaming token par token, contexte persistant |
-| **Voix** | TTS Neural (edge-tts) + STT Whisper + réduction de bruit DeepFilterNet |
-| **Monitoring** | Suivi CPU / RAM / GPU / disques / réseau en temps réel |
-| **SOC** | Ban-IP automatique, restart services, alertes vocales sur menaces |
-| **Multi-modèles** | Changement de LLM à chaud sans redémarrage |
-| **Interface** | 10 onglets — thème holographique sombre — 17 400+ lignes |
-
+<table border="0" cellspacing="0" cellpadding="8">
+  <tr>
+    <td width="35%">
+      <img src="./images/Jarvis-04.jpg" alt="Paramètres GPU et LLM" width="100%" />
+      <p align="center"><sub>Onglet <b>SETTINGS</b> — GPU RTX Health, profils CUDA, sliders LLM</sub></p>
+    </td>
+    <td width="65%">
+      <img src="./images/Jarvis-05.jpg" alt="Profils et presets modèles" width="100%" />
+      <p align="center"><sub>Onglet <b>JARVIS IA</b> — profils prédéfinis (SOC, Code, Conversation, Raisonnement...)</sub></p>
+    </td>
+  </tr>
+</table>
 </div>
 
 ---
 
+<h2 align="center">Pipeline audio — DSP & Voice Lab</h2>
+
 <div align="center">
-
-## Architecture
-
+<table border="0" cellspacing="0" cellpadding="8">
+  <tr>
+    <td width="40%">
+      <img src="./images/Jarvis-06.jpg" alt="DSP Audio" width="100%" />
+      <p align="center"><sub>Onglet <b>DSP AUDIO</b> — égaliseur multi-bandes, compresseur, filtres, visualisation temps réel</sub></p>
+    </td>
+    <td width="60%">
+      <img src="./images/Jarvis-07.jpg" alt="Voice Lab" width="100%" />
+      <p align="center"><sub>Onglet <b>VOICE LAB</b> — source vocale, paramètres fins, bibliothèque de voix, comparateur A/B</sub></p>
+    </td>
+  </tr>
+</table>
 </div>
+
+---
+
+<h2 align="center">Intégration SOC — Actions proactives</h2>
+
+<div align="center">
+  <img src="./images/Jarvis-08.jpg" alt="Onglet SOC — Actions proactives" width="95%" />
+  <br/><sub>Onglet <b>SOC</b> — compteurs de bans/alertes, graphique d'activité 24h, journal horodaté des actions proactives</sub>
+</div>
+
+---
+
+<h2 align="center">Construction par phases</h2>
+
+| # | Phase | Ce qui a été construit | Pourquoi ce choix |
+|---|-------|----------------------|-------------------|
+| 1 | **Backend Flask + streaming** | jarvis.py · 55 routes · SSE token par token · API Ollama | Base unifiée avant tout — toutes les fonctionnalités s'appuient sur ce serveur |
+| 2 | **Pipeline audio** | TTS edge-tts Neural · STT Whisper turbo CUDA · DeepFilterNet NR | L'interaction vocale est le cœur de l'expérience JARVIS — sans ça, c'est juste une web app |
+| 3 | **Interface holographique** | 10 onglets · glassmorphism · 17 400+ lignes · zéro framework | Chaque fonctionnalité mérite sa propre surface — pas de compromis sur l'ergonomie |
+| 4 | **Intégration SOC** | ban-ip · restart-service · alertes vocales · journal horodaté | JARVIS doit pouvoir agir, pas seulement informer — SSH + CrowdSec + fail2ban |
+| 5 | **Auto-engine défensif** | _soc_monitor_loop() · kill chain · exploit gap · ban auto 60s | Le SOC se défend seul même quand l'interface est fermée — JARVIS amplifie quand disponible |
+| 6 | **DSP Audio avancé** | EQ 5 bandes · compresseur · analyseur spectral · TASCAM DAT | Qualité audio professionnelle — la voix de JARVIS doit être claire et agréable |
+| 7 | **Audit 10/10** | 90 passes NDT · 144 corrections · 0 dette technique · AST validé | Un système en production doit être maintenu comme tel — aucun raccourci |
+
+---
+
+<h2 align="center">Points forts</h2>
+
+| | Capacité | Détail |
+|--|----------|--------|
+| 🤖 | **Conversation LLM locale** | Ollama streaming token par token · 6 modèles · changement à chaud · profils liés par modèle |
+| 🔊 | **Pipeline audio complet** | TTS Neural · STT Whisper CUDA · DeepFilterNet NR · EQ DSP · VU-mètres temps réel |
+| 🛡️ | **Auto-engine SOC** | Surveillance 60s · kill chain · exploit gap · ban auto via CrowdSec SSH · restart services |
+| 🎙️ | **Alertes vocales** | TTS automatique sur ÉLEVÉ/CRITIQUE · seuils configurables · cooldowns anti-spam |
+| 🎯 | **Interface holographique** | 10 onglets · glassmorphism · 17 400+ lignes · zéro framework CSS/JS |
+| 📊 | **Monitoring temps réel** | CPU · RAM · GPU RTX 5080 · disques · réseau · sparklines 24h |
+| 🔒 | **Sécurité loopback** | Bind 127.0.0.1 · validation IP stricte · whitelist services · zéro credential dans le code |
+| ✅ | **Audit 10/10** | Zéro dette technique · 90 passes · 144 NDT corrigés · AST validé |
+
+---
+
+<h2 align="center">Stack technique</h2>
+
+```
+OS          Windows 11 Pro
+GPU         NVIDIA RTX 5080 — 16 GB GDDR7 · CUDA 12
+LLM         Ollama (local) — phi4-reasoning:plus · deepseek-r1:14b · phi4:14b · qwen2.5:14b
+TTS         edge-tts Neural — fr-CA-AntoineNeural
+STT         faster-whisper turbo FR — CUDA float16
+NR          DeepFilterNet — réduction bruit micro temps réel
+DSP         numpy/scipy — EQ biquad 5 bandes · compresseur · analyseur spectral
+Backend     Python 3.11 — Flask · SSE streaming · ~3 360 lignes · 55 routes · dette zéro
+Frontend    Vanilla JS + HTML5 — 17 400+ lignes · 10 onglets · zéro dépendance NPM
+SSH         paramiko — actions SOC à distance (ban · restart · monitoring)
+Intégration SOC — CrowdSec · fail2ban · nginx · Suricata
+```
+
+---
+
+<h2 align="center">Architecture</h2>
 
 ```mermaid
 flowchart TD
@@ -134,149 +219,23 @@ flowchart TD
 
 ---
 
-<div align="center">
+<h2 align="center">Par où commencer ?</h2>
 
-## Screenshots
+| Objectif | Point d'entrée |
+|----------|---------------|
+| 📖 **Comprendre l'architecture** et le pipeline LLM + audio | [01-PREREQUIS.md](./docs/01-PREREQUIS.md) → [05-INTEGRATION-SOC.md](./docs/05-INTEGRATION-SOC.md) |
+| ⚙️ **Installer les dépendances** Python + Ollama + CUDA | [Installation rapide](#installation-rapide) ci-dessous |
+| 🔊 **Configurer le pipeline audio** TTS · STT · DeepFilterNet | [03-PIPELINE-AUDIO.md](./docs/03-PIPELINE-AUDIO.md) |
+| 🛡️ **Connecter JARVIS au SOC** pour les actions proactives | [05-INTEGRATION-SOC.md](./docs/05-INTEGRATION-SOC.md) |
 
-</div>
-
-<div align="center">
-
-### Écran de démarrage
-
-</div>
-
-<div align="center">
-  <img src="./images/Jarvis-01.jpg" alt="Écran de démarrage JARVIS" width="95%" />
-  <br/><sub>Initialisation du système — statuts des modules, message de bienvenue</sub>
-</div>
-
-<br/>
-
-<div align="center">
-
-### Interface de conversation & Monitoring système
-
-</div>
-
-<div align="center">
-<table border="0" cellspacing="0" cellpadding="8">
-  <tr>
-    <td width="60%">
-      <img src="./images/Jarvis-03.jpg" alt="Interface de conversation LLM" width="100%" />
-      <p align="center"><sub>Onglet <b>JARVIS IA</b> — conversation en temps réel, streaming SSE, sidebar système</sub></p>
-    </td>
-    <td width="40%">
-      <img src="./images/Jarvis-02.jpg" alt="Onglet Monitor" width="100%" />
-      <p align="center"><sub>Onglet <b>MONITOR</b> — CPU, RAM, GPU, disques, sparklines 24h</sub></p>
-    </td>
-  </tr>
-</table>
-</div>
-
-<div align="center">
-
-### Paramètres LLM & Gestion des modèles
-
-</div>
-
-<div align="center">
-<table border="0" cellspacing="0" cellpadding="8">
-  <tr>
-    <td width="35%">
-      <img src="./images/Jarvis-04.jpg" alt="Paramètres GPU et LLM" width="100%" />
-      <p align="center"><sub>Onglet <b>SETTINGS</b> — GPU RTX Health, profils CUDA, sliders LLM</sub></p>
-    </td>
-    <td width="65%">
-      <img src="./images/Jarvis-05.jpg" alt="Profils et presets modèles" width="100%" />
-      <p align="center"><sub>Onglet <b>JARVIS IA</b> — profils prédéfinis (SOC, Code, Conversation, Raisonnement...)</sub></p>
-    </td>
-  </tr>
-</table>
-</div>
-
-<div align="center">
-
-### Pipeline audio — DSP & Voice Lab
-
-</div>
-
-<div align="center">
-<table border="0" cellspacing="0" cellpadding="8">
-  <tr>
-    <td width="40%">
-      <img src="./images/Jarvis-06.jpg" alt="DSP Audio" width="100%" />
-      <p align="center"><sub>Onglet <b>DSP AUDIO</b> — égaliseur multi-bandes, compresseur, filtres, visualisation temps réel</sub></p>
-    </td>
-    <td width="60%">
-      <img src="./images/Jarvis-07.jpg" alt="Voice Lab" width="100%" />
-      <p align="center"><sub>Onglet <b>VOICE LAB</b> — source vocale, paramètres fins, bibliothèque de voix, comparateur A/B</sub></p>
-    </td>
-  </tr>
-</table>
-</div>
-
-<div align="center">
-
-### Intégration SOC — Actions proactives
-
-</div>
-
-<div align="center">
-  <img src="./images/Jarvis-08.jpg" alt="Onglet SOC — Actions proactives" width="95%" />
-  <br/><sub>Onglet <b>SOC</b> — compteurs de bans/alertes, graphique d'activité 24h, journal horodaté des actions proactives</sub>
-</div>
+> **Ce dépôt met à disposition :**
+> Code source complet · 5 documents techniques · guide d'installation · configurations exemples
+>
+> 🔒 Les scripts opérationnels SOC, les clés SSH et les configurations d'infrastructure restent privés — connaissance construite, pas redistribuée.
 
 ---
 
-<div align="center">
-
-## Guide d'installation — étape par étape
-
-</div>
-
-<div align="center">
-<table>
-  <tr>
-    <th>Étape</th>
-    <th>Description</th>
-    <th>Guide</th>
-  </tr>
-  <tr>
-    <td align="center"><b>01</b></td>
-    <td>Python 3.11, Ollama, CUDA, dépendances</td>
-    <td><a href="./docs/01-PREREQUIS.md">→ Prérequis</a></td>
-  </tr>
-  <tr>
-    <td align="center"><b>02</b></td>
-    <td>LLM local, API Ollama, streaming SSE, gestion modèles</td>
-    <td><a href="./docs/02-LLM-OLLAMA.md">→ LLM Ollama</a></td>
-  </tr>
-  <tr>
-    <td align="center"><b>03</b></td>
-    <td>TTS edge-tts, file d'attente, STT Whisper VAD, DeepFilterNet NR</td>
-    <td><a href="./docs/03-PIPELINE-AUDIO.md">→ Pipeline Audio</a></td>
-  </tr>
-  <tr>
-    <td align="center"><b>04</b></td>
-    <td>Serveur Flask, routes, Server-Sent Events, modèles à chaud</td>
-    <td><a href="./docs/04-BACKEND-FLASK.md">→ Backend Flask</a></td>
-  </tr>
-  <tr>
-    <td align="center"><b>05</b></td>
-    <td>Intégration SOC, ban/unban IP via SSH, alertes proactives auto</td>
-    <td><a href="./docs/05-INTEGRATION-SOC.md">→ Intégration SOC</a></td>
-  </tr>
-</table>
-</div>
-
----
-
-<div align="center">
-
-## Installation rapide
-
-</div>
+<h2 align="center">Installation rapide</h2>
 
 ```bash
 # 1. Cloner le dépôt
@@ -304,13 +263,19 @@ cd scripts && python jarvis.py
 
 ---
 
-<div align="center">
+<h2 align="center">Documentation</h2>
 
-## Modèles LLM
+| # | Document | Description |
+|---|----------|-------------|
+| 01 | [PREREQUIS.md](./docs/01-PREREQUIS.md) | Python 3.11, Ollama, CUDA, dépendances système |
+| 02 | [LLM-OLLAMA.md](./docs/02-LLM-OLLAMA.md) | LLM local, API Ollama, streaming SSE, gestion modèles |
+| 03 | [PIPELINE-AUDIO.md](./docs/03-PIPELINE-AUDIO.md) | TTS edge-tts, file d'attente, STT Whisper VAD, DeepFilterNet NR |
+| 04 | [BACKEND-FLASK.md](./docs/04-BACKEND-FLASK.md) | Serveur Flask, routes, Server-Sent Events, modèles à chaud |
+| 05 | [INTEGRATION-SOC.md](./docs/05-INTEGRATION-SOC.md) | Intégration SOC, ban/unban IP via SSH, alertes proactives auto |
 
-</div>
+---
 
-<div align="center">
+<h2 align="center">Modèles LLM</h2>
 
 | Modèle | VRAM | Points forts |
 |--------|------|-------------|
@@ -318,40 +283,12 @@ cd scripts && python jarvis.py
 | `phi4:14b` | 10 Go | Polyvalent, rapide, conversation |
 | `deepseek-r1:14b` | 14 Go | Raisonnement avancé, analyse complexe |
 | `qwen2.5:14b` | 14 Go | Code et analyse technique |
-| `gemma3:12b` | 10 Go | Généraliste, créatif |
+| `gemma4:latest` | 10 Go | Généraliste, créatif |
 | `llava-phi3:latest` | 8 Go | Vision — analyse d'images |
 
-</div>
-
 ---
 
-<div align="center">
-
-## Stack technique
-
-</div>
-
-<div align="center">
-
-| Couche | Technologie | Rôle |
-|--------|------------|------|
-| LLM | Ollama (local) | Génération de texte — aucun cloud |
-| TTS | edge-tts Neural | Synthèse vocale naturelle (fr-CA-AntoineNeural) |
-| STT | faster-whisper | Transcription vocale — modèle turbo FR, CUDA |
-| NR  | DeepFilterNet | Réduction de bruit micro temps réel |
-| Backend | Flask + CORS | API REST + SSE streaming |
-| SSH | paramiko | Actions SOC à distance (ban, restart) |
-| GPU | CUDA 12 | Accélération STT + NR + inférence LLM |
-
-</div>
-
----
-
-<div align="center">
-
-## Intégration SOC
-
-</div>
+<h2 align="center">Intégration SOC</h2>
 
 JARVIS se connecte au [dashboard SOC](https://github.com/0xCyberLiTech/SOC) pour :
 
@@ -363,11 +300,7 @@ JARVIS se connecte au [dashboard SOC](https://github.com/0xCyberLiTech/SOC) pour
 
 ---
 
-<div align="center">
-
-## Sécurité
-
-</div>
+<h2 align="center">Sécurité</h2>
 
 ```
 ✔  Bind 127.0.0.1 — non exposé sur le réseau
@@ -394,7 +327,6 @@ JARVIS se connecte au [dashboard SOC](https://github.com/0xCyberLiTech/SOC) pour
   <a href="https://www.gnu.org/software/bash/"><img src="https://skillicons.dev/icons?i=bash" width="48" title="Bash" /></a>
   <br/>
   <a href="https://nginx.org"><img src="https://skillicons.dev/icons?i=nginx" width="48" title="Nginx" /></a>
-  <a href="https://www.docker.com"><img src="https://skillicons.dev/icons?i=docker" width="48" title="Docker" /></a>
   <a href="https://git-scm.com"><img src="https://skillicons.dev/icons?i=git" width="48" title="Git" /></a>
 </td>
 <td align="center">
@@ -407,12 +339,8 @@ JARVIS se connecte au [dashboard SOC](https://github.com/0xCyberLiTech/SOC) pour
   <a href="https://code.visualstudio.com"><img src="https://skillicons.dev/icons?i=vscode" width="48" title="VS Code" /></a>
 </td>
 <td align="center">
-  <a href="https://pytorch.org"><img src="https://skillicons.dev/icons?i=pytorch" width="48" title="PyTorch" /></a>
-  <a href="https://www.tensorflow.org"><img src="https://skillicons.dev/icons?i=tensorflow" width="48" title="TensorFlow" /></a>
-  <a href="https://www.raspberrypi.com"><img src="https://skillicons.dev/icons?i=raspberrypi" width="48" title="Raspberry Pi" /></a>
-  <br/><br/>
   <a href="https://ollama.com"><img src="https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white" alt="Ollama" /></a>
-  &nbsp;
+  <br/><br/>
   <a href="https://anthropic.com"><img src="https://img.shields.io/badge/Anthropic-D97757?style=for-the-badge&logo=anthropic&logoColor=white" alt="Anthropic" /></a>
 </td>
 </tr>
@@ -420,6 +348,6 @@ JARVIS se connecte au [dashboard SOC](https://github.com/0xCyberLiTech/SOC) pour
 
 <br/>
 
-<b>🔒 Un projet proposé par <a href="https://github.com/0xCyberLiTech">0xCyberLiTech</a> • Développé en collaboration avec <a href="https://claude.ai">Claude AI</a> (Anthropic) 🔒</b>
+<sub>🔒 Projets proposés par <a href="https://github.com/0xCyberLiTech">0xCyberLiTech</a> · Développés en collaboration avec <a href="https://claude.ai">Claude AI</a> (Anthropic) 🔒</sub>
 
 </div>
