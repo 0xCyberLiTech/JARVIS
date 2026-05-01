@@ -1,3 +1,50 @@
+<div align="center">
+
+  <br></br>
+
+  <a href="https://github.com/0xCyberLiTech">
+    <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=50&duration=6000&pause=1000000000&color=8B5CF6&center=true&vCenter=true&width=1100&lines=%3EJARVIS_" alt="Titre dynamique JARVIS" />
+  </a>
+
+  <br></br>
+
+  <h2>Assistant IA local · voix · interface holographique · automatisation SOC 24/7</h2>
+
+  <p align="center">
+    <a href="https://0xcyberlitech.github.io/">
+      <img src="https://img.shields.io/badge/Portfolio-0xCyberLiTech-181717?logo=github&style=flat-square" alt="Portfolio" />
+    </a>
+    <a href="https://github.com/0xCyberLiTech">
+      <img src="https://img.shields.io/badge/Profil-GitHub-181717?logo=github&style=flat-square" alt="Profil GitHub" />
+    </a>
+    <a href="https://github.com/0xCyberLiTech/JARVIS/releases/latest">
+      <img src="https://img.shields.io/github/v/release/0xCyberLiTech/JARVIS?label=version&style=flat-square&color=blue" alt="Dernière version" />
+    </a>
+    <a href="https://github.com/0xCyberLiTech/JARVIS/blob/main/CHANGELOG.md">
+      <img src="https://img.shields.io/badge/📄%20Changelog-JARVIS-blue?style=flat-square" alt="Changelog" />
+    </a>
+    <a href="https://github.com/0xCyberLiTech?tab=repositories">
+      <img src="https://img.shields.io/badge/Dépôts-publics-blue?style=flat-square" alt="Dépôts publics" />
+    </a>
+    <a href="https://github.com/0xCyberLiTech/JARVIS/graphs/contributors">
+      <img src="https://img.shields.io/badge/👥%20Contributeurs-cliquez%20ici-007ec6?style=flat-square" alt="Contributeurs" />
+    </a>
+  </p>
+
+</div>
+
+<div align="center">
+  <img src="https://img.icons8.com/fluency/96/000000/cyber-security.png" alt="CyberSec" width="80"/>
+</div>
+
+<div align="center">
+  <p>
+    <strong>IA 100% locale</strong> <img src="https://img.icons8.com/color/24/000000/lock--v1.png"/> &nbsp;•&nbsp; <strong>Voix naturelle · STT · TTS</strong> <img src="https://img.icons8.com/color/24/000000/linux.png"/> &nbsp;•&nbsp; <strong>Automatisation SOC</strong> <img src="https://img.icons8.com/color/24/000000/shield-security.png"/>
+  </p>
+</div>
+
+---
+
 # Étape 5 — Intégration SOC
 
 ## Objectif
