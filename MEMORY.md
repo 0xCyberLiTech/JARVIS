@@ -22,7 +22,11 @@
 - 75→76 : 2 smoke tests LLM
 - 76→78 : refactor JS partiel (3 sous-systèmes extraits de jarvis_main.js)
 
-**Refactor JS — reprise 2026-05-14 (soir)** (commit `a118772`) : extraction de **TÂCHES TAB** (`static/js/tasks_tab.js` 129 L) + **WELCOME/boot/preloader** (`static/js/welcome.js` 244 L) — `jarvis_main.js` **7828 → 7464 L** (−364). Zone source 6685-7049 = **sans aucun appel top-level** → extraction provably sûre (pure définitions, scope global, chargées via `<script>` après jarvis_main.js, bodies byte-identiques). `eslint.config.js` : 6 globals cross-file déclarés. `node --check` ×3 OK · eslint 0 erreur. ⚠ Vérif E2E en attente d'un restart JARVIS. Reste : `jarvis_main.js` toujours 7464 L — prochains candidats (audio viz ~1130 L, EQ ~496 L, rack ~667 L, EQ music ~695 L) plus entremêlés (appels top-level).
+**Refactor JS — reprise 2026-05-14 (soir)** : `jarvis_main.js` **7828 → 5896 L (−1932, −25%)** · **5 modules extraits** dans `static/js/`. Méthode : cartographie des appels top-level → extraction de sections sans dépendance d'ordre · bodies **byte-identiques** vérifiés · `node --check` + eslint 0 erreur à chaque étape · `eslint.config.js` globals cross-file déclarés.
+- **#1** `a118772` — `tasks_tab.js` (129 L) + `welcome.js` (244 L, welcome+boot+preloader) — **validé en prod F12 OK**.
+- **#2** `fe1be24` — `eq_parametric.js` (502 L, EQ voix : courbe réponse, analyseur spectral, mémoires) — **validé en prod F12 OK**.
+- **#3** `3f37189` — `eq_music.js` (701 L, EQ DAT player + moteurs TTS) + `audio_mire.js` (383 L, mire de test) — ⚠ vérif E2E en attente d'un restart.
+⚠ Restart JARVIS requis après chaque extraction (`debug=False` → templates en cache). Reste dans `jarvis_main.js` (5896 L) : audio viz STEREOGRAM ~1130 L, AI AUDIO RACK ~667 L, DSP AUDIO SYSTEM ~286 L, CHAT ~525 L, DIAGNOSTIC ~493 L, SETTINGS LLM ~471 L, BOOT ~662 L (contiennent des appels top-level → extraction avec leurs appels, une par une).
 
 **5 commits git atomiques** (dépôt initialisé, 100% local, aucun remote) :
 
