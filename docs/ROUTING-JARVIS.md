@@ -44,12 +44,26 @@ Requête utilisateur (texte ou [VOCAL]…)
 
 | Mode | Modèle Ollama | Trigger | Usage |
 |------|--------------|---------|-------|
-| **SOC** (défaut) | `phi4:14b` (9.1 GB) | Bouton `#btn-mode-soc` ou `POST /api/mode {mode:"soc"}` | Cybersécurité · monitoring nginx/CrowdSec/fail2ban · contexte SOC live injecté |
+| **SOC** (défaut) | `phi4:14b` (9.1 GB) | Bouton `#btn-mode-soc` ou `POST /api/mode {mode:"soc"}` | Cybersécurité · monitoring nginx/CrowdSec/fail2ban · contexte SOC live injecté **côté serveur** (system prompt, frais à chaque appel) |
 | **GENERAL** | `gemma4:latest` (9.6 GB) | `#btn-mode-general` | Conversation fluide · vision multimodale · pas d'infra/SOC |
 | **CODE** | `qwen2.5-coder:14b` (9.0 GB) | `#btn-mode-code` (ouvre aussi le terminal SSH `srv-dev-1`) | Code + infogérance · génération multi-fichiers · SCP+exec sur srv-dev-1 |
 | **CODE REASONING** (CR) | `qwen3:8b` (~5 GB) | `#btn-mode-code-reasoning` | Reasoning natif single-pass avec thinking tokens `<think>…</think>` masqués |
 
 ⚠ **Règle absolue** : la surveillance SOC (auto-engine, alertes vocales, injection contexte monitoring) est active **uniquement en mode SOC**. Modes GENERAL, CODE et CR n'ont aucune action SOC.
+
+---
+
+## Injection du contexte SOC (mode SOC) — 100 % serveur depuis 2026-05-14
+
+En mode SOC, les données `monitoring.json` (srv-ngix) sont injectées dans le **system prompt** — entièrement côté serveur :
+
+- Chaîne : `_chat_build_system_prompt()` → `chat_system_prompt.build()` → `chat_soc_inject.inject()`.
+- Déclenchement : mots-clés SOC (`SOC_KW` / `SOC_VOCAL_KW`) **ou** `force_soc=True` quand `model_override='soc'` (chat du dashboard SOC — chaque message y est une question SOC par nature).
+- Injecté dans le system prompt à **chaque appel**, **jamais dans l'historique** → aucun snapshot périmé empilé. Source de formatage unique : `_build_monitoring_context()` (Python).
+- L'ancienne incrustation **client-side** (snapshot dans le message utilisateur) a été supprimée — elle empilait des données périmées en multi-tours et causait des hallucinations (IPs/scores fantômes).
+- Garde-fou : srv-ngix injoignable → instruction anti-hallucination injectée (« données indisponibles » au lieu d'inventer).
+
+Le contexte expose : IPs déjà bannies CrowdSec, crawlers vérifiés FCrDNS (`verified_bots`), `signal=FORT|faible` par IP Kill Chain (reco de ban proportionnée), horodatage du snapshot cité avec le score.
 
 ---
 
@@ -178,7 +192,7 @@ Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits →
 | [`tts_dedup.py`](../scripts/tts_dedup.py) | 45 | Dedup global TTS |
 | [`chat_capture.py`](../scripts/chat_capture.py) | 45 | Wrapper SSE accumulation |
 | [`chat_system_prompt.py`](../scripts/chat_system_prompt.py) | 50 | Orchestrateur system prompt |
-| [`chat_soc_inject.py`](../scripts/chat_soc_inject.py) | 110 | Injection SOC + 2 listes keywords |
+| [`chat_soc_inject.py`](../scripts/chat_soc_inject.py) | 125 | Injection SOC server-side (system prompt) · 2 listes keywords · `force_soc` · garde-fou srv-ngix injoignable |
 | [`code_reasoning.py`](../scripts/code_reasoning.py) | 175 | Pipeline qwen3:8b CR (thinking parsing) |
 | [`llm_opts.py`](../scripts/llm_opts.py) | 65 | Construction options Ollama |
 | [`stream_tokens.py`](../scripts/stream_tokens.py) | 65 | Stream + découpage TTS |
@@ -190,6 +204,7 @@ Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits →
 
 **Total Python : 31 modules extraits** (Phase 3 : 30 modules ~3034L · session 33b) + `audio_dsp.py` 508L (chantier dette 2026-05-14) → `jarvis.py` 4633L
 **Session 33c — Split JS partiel** : `recorder.js` 660L + `voice_print.js` 852L extraits en IIFE · `jarvis_main.js` 10507→8994L (-14.4%)
-**Chantier dette 2026-05-14** : Ruff 98→0 + `ruff.toml` · git initialisé (16 commits, 100% local) · pre-commit hooks bloquants · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · refactor JS partiel (3 modules : terminal_code/voice_lab/stt)
+**Chantier dette 2026-05-14** : Ruff 98→0 + `ruff.toml` · git initialisé (100% local, aucun remote) · pre-commit hooks bloquants · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · refactor JS partiel (3 modules : terminal_code/voice_lab/stt)
+**Session 2026-05-14 (soir)** : injection SOC 100 % serveur (suppression incrustation client-side `_monCtxStr`/`_buildChatPayload` → fin des hallucinations) · `force_soc` threadé en DI · règle crawlers légitimes + reco de ban proportionnée au signal · garde-fou srv-ngix injoignable
 
 **Score dette technique HONNÊTE 78/100** (recalibré depuis 62 réel · Python serveur excellent · JS reste majoritairement monolithique · pas de CI cloud · pas de tests unitaires)
