@@ -1,5 +1,20 @@
 # JARVIS — Mémoire projet (2026-05-14)
 
+## Injection SOC 100 % serveur + crawlers légitimes — 2026-05-14 (commit `ec8f2df`)
+
+**Déclencheur** : JARVIS hallucinait des analyses SOC (IP fantômes, score faux) et recommandait de bannir des crawlers légitimes (Bingbot/Googlebot).
+
+- **Cause hallucination** : `jarvis_main.js` `_buildChatPayload()` incrustait le snapshot SOC **dans le message utilisateur** → persisté dans l'historique. En multi-tours, le client ne rafraîchissait que le dernier message → les vieux snapshots restaient → phi4 les mélangeait. Idem `SOC/dashboard/js/18-jarvis-chat.js`.
+- **Fix** : suppression de l'injection client-side (`_monCtxStr` + `_SOC_CHAT_KW` + `_MON_NET_SPIKE_S` morts, −83 L). Injection **100 % serveur** via `chat_soc_inject.py` → system prompt, **frais à chaque appel, jamais persisté**, source de formatage unique (Python `_build_monitoring_context`).
+- **`force_soc`** threadé en DI (`api_chat` → `chat_system_prompt.build` → `chat_soc_inject.inject`) : `model_override='soc'` (chat du dashboard SOC) force l'injection même sans mot-clé.
+- **Garde-fou** : srv-ngix injoignable → instruction anti-hallucination dans le system prompt (était côté client, déplacé serveur).
+- **`_build_monitoring_context`** : affiche la liste « IPs DÉJÀ BANNIES par CrowdSec » (corrige les bans redondants) + « Crawlers légitimes vérifiés FCrDNS » + flag `⚠UA-USURPÉ`.
+- **Profil SOC** (`jarvis_prompt_profiles.json`) : règles ABSOLUES — IPs déjà neutralisées + crawlers légitimes (ne jamais bannir un crawler vérifié ; usurpateur = menace réelle).
+- **Auto-engine proactif** (`18-jarvis-engine.js`) **inchangé** — et n'auto-bannira plus un crawler vérifié (exclu de `kill_chain.active_ips` côté SOC). Bilan : **−39 L nettes**, ruff/eslint verts. Côté SOC : commit `7d386c2` (cf. `SOC/MEMORY.md`).
+- **Reco de ban proportionnée** (commit `f17fc66`) : `_kc_ban_signal()` annote chaque IP Kill Chain `signal=FORT|faible` (FORT = EXPLOIT / UA usurpé / hits ≥ `_KC_BAN_SIGNAL_MIN_HITS`=10, plancher aligné sur `banMinCount` auto-engine). Profil SOC : règle ABSOLUE — ne jamais recommander un ban prioritaire sur signal faible (SCAN/RECON isolé = bruit de fond). Fin des recos de ban sur SCAN 1-hit.
+
+---
+
 ## Chantier dette technique — 2026-05-14 — score 62→78/100 (+16)
 
 ⚠ **Recalibration honnête** : le score 91/100 affiché le 2026-05-13 était **encore optimiste**. Audit strict (Ruff 98 erreurs réelles, 0 tests unitaires, 0 CI, 0 hooks, perf jamais profilée) → **point de départ réel 62/100**. Le chantier a fait **62 → 78/100** :
