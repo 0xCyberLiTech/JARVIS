@@ -1360,6 +1360,24 @@ def _pve_context_lines(pve: dict) -> list:
     return lines
 
 
+# Seuil de hits (fenêtre Kill Chain 15 min) au-delà duquel un SCAN/BRUTE/RECON
+# devient un signal FORT digne d'une reco de ban. Plancher aligné sur le
+# banMinCount de l'auto-engine (10-50 selon profil de menace) : en-dessous,
+# c'est du bruit de fond Internet permanent — à surveiller, pas à bannir.
+_KC_BAN_SIGNAL_MIN_HITS = 10
+
+
+def _kc_ban_signal(ip_e: dict) -> str:
+    """Force du signal d'une IP Kill Chain pour une reco de ban — même logique
+    que les seuils de l'auto-engine : EXPLOIT ou UA usurpé sont bannissables
+    même sur 1 hit, le reste seulement si l'activité est soutenue."""
+    if ip_e.get("stage") == "EXPLOIT" or ip_e.get("spoofed_bot"):
+        return "FORT"
+    if (ip_e.get("count") or 0) >= _KC_BAN_SIGNAL_MIN_HITS:
+        return "FORT"
+    return "faible"
+
+
 def _build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS RÉEL (srv-ngix) ===") -> str:
     """Construit le contexte textuel SOC depuis un dict monitoring.json parsé.
     Utilisé par execute_tool('soc_status') et api_chat() pour injection LLM."""
@@ -1410,7 +1428,8 @@ def _build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS 
         for ip_e in active_ips[:10]:
             cs_status = "BLOQUÉE-CS" if ip_e.get("cs_decision") else "⚠ NON-BLOQUÉE"
             spoof = f" ⚠UA-USURPÉ:{ip_e['spoofed_bot']}" if ip_e.get("spoofed_bot") else ""
-            lines.append(f"  {ip_e.get('ip','?')} [{ip_e.get('country','-')}] stage={ip_e.get('stage','?')} hits={ip_e.get('count','?')} [{cs_status}]{spoof}")
+            signal = _kc_ban_signal(ip_e)
+            lines.append(f"  {ip_e.get('ip','?')} [{ip_e.get('country','-')}] stage={ip_e.get('stage','?')} hits={ip_e.get('count','?')} [{cs_status}] signal={signal}{spoof}")
     verified_bots = kc.get("verified_bots", [])
     if verified_bots:
         names = ", ".join(f"{b.get('ip','?')} ({b.get('bot','?')})" for b in verified_bots[:10])
