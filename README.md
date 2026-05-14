@@ -176,16 +176,25 @@ python jarvis.py
 
 ## Qualité — Tests & Linters
 
-Outils installés en `devDependencies` (exécution manuelle, pas de pre-commit hook).
-
 | Commande | Rôle | Pré-requis |
 |----------|------|------------|
-| `npm test` | Suite Playwright E2E (10 tests · ~30s) | JARVIS up sur :5000 |
+| `npm test` | Suite Playwright E2E (23 tests · ~1m48s) | JARVIS up sur :5000 |
 | `npm run test:headed` | Tests E2E avec navigateur visible | JARVIS up |
 | `npm run test:ui` | Mode UI interactif Playwright | JARVIS up |
-| `npm run lint:js` | ESLint sur `jarvis_main.js` + `jarvis_mixing.js` | — |
+| `npm run lint:js` | ESLint sur les fichiers JS applicatifs | — |
 | `npm run lint:py` | Ruff sur `scripts/` | — |
-| `ruff check scripts/ --fix` | Auto-fix Python (34 fixes dispo) | — |
+| `ruff check scripts/` | Lint Python (config `ruff.toml`) | — |
+
+### Pre-commit hooks (bloquants)
+
+Depuis le chantier dette 2026-05-14, un hook `pre-commit` **bloque tout commit**
+qui ne passe pas les linters. Configuration `.pre-commit-config.yaml` — hooks
+100% locaux (aucun téléchargement réseau) :
+- **ruff-check** : lint Python sur les `*.py` modifiés
+- **eslint** : lint JS sur les 4 fichiers applicatifs `static/`
+
+Installation après un clone / une réinstallation : `pre-commit install`
+Bypass exceptionnel (commit urgent) : `git commit --no-verify`
 
 Tests E2E couverts (`tests/e2e/` · **23 tests** · ~1m42s) :
 - **boot** · page charge sans erreur console · 7 tabs rendus
