@@ -242,7 +242,7 @@
        │     et je te réponds      │                          │
 
 
-  LES 8 OUTILS MCP disponibles :
+  LES 10 OUTILS MCP disponibles :
   ┌────────────────────────┬──────────────────────────────────────────────┐
   │ jarvis_chat            │ Envoyer un message à JARVIS (chat complet)   │
   │ jarvis_soc_status      │ État temps réel : bans, ThreatScore, alertes │
@@ -253,6 +253,8 @@
   │ jarvis_proxmox_vms     │ État des VMs Proxmox (qm list live)          │
   │ jarvis_read_file       │ Lire un fichier SSH sur un serveur           │
   │ jarvis_model_switch    │ Changer le modèle Ollama actif               │
+  │ jarvis_last_response   │ Derniers échanges de la conversation JARVIS  │
+  │ jarvis_code_exec       │ Écrit + SCP + exécute un fichier sur srv-dev-1│
   └────────────────────────┴──────────────────────────────────────────────┘
 
   QUI LANCE LE MCP SERVER ?
@@ -421,4 +423,4 @@
 
 ---
 
-*SCHEMA-IA-LOCAL.md · 0xCyberLiTech · 2026-05-10 — v6*
+*SCHEMA-IA-LOCAL.md · 0xCyberLiTech · 2026-05-14 — v8*

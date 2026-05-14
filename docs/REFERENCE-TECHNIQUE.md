@@ -28,13 +28,14 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 | LLM SOC / raisonnement | phi4:14b · 9.1 GB · keep_alive 24h |
 | LLM GÉNÉRAL + VOCAL + vision | gemma4:latest · ~9.6 GB · multimodal · switch manuel ↔ SOC |
 | LLM CODE | qwen2.5-coder:14b · 9.0 GB · dev srv-dev-1 · switch manuel ↔ CODE |
+| LLM CODE REASONING | qwen3:8b · ~5 GB · single-pass thinking `<think>` masqué · switch manuel ↔ C·R |
 | Embeddings RAG | mxbai-embed-large · ~0.7 GB · 1024 dims |
 | RAG | mxbai-embed-large · 599 chunks · seuil 0.35 · TTL 300s |
 | STT | faster-whisper large-v3-turbo · CUDA · FR · initial_prompt SOC |
 | TTS défaut | edge-tts fr-CA-AntoineNeural (HTTPS) |
 | TTS fallback | Kokoro ff_siwis (CUDA) → XTTS v2 58 voix → Piper (onnx) → SAPI5 |
 | DSP | numpy · scipy · DeepFilterNet GPU sm_120 Blackwell |
-| MCP | jarvis_mcp_server.py · 8 outils · stdio pythonw |
+| MCP | jarvis_mcp_server.py · 10 outils · stdio pythonw |
 
 ### 2.2 Métriques fichiers (2026-05-14 · post-chantier dette technique)
 
@@ -53,7 +54,7 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 
 ---
 
-## 3. Routage LLM automatique — 3 branches + bypass ⚡
+## 3. Routage LLM automatique — 4 branches + bypass ⚡
 
 ```
 Message utilisateur
@@ -72,14 +73,17 @@ Message utilisateur
   ├─ 3. 🤖 Branche CODE — _jarvis_mode == 'code' → qwen2.5-coder:14b
   │        + _CODE_SYSTEM_SUFFIX injecté · SSH dev srv-dev-1
   │
-  └─ 4. 🤖 Branche GÉNÉRAL — tout le reste → gemma4:latest
+  ├─ 4. 🤖 Branche CODE REASONING — _jarvis_mode == 'code_reasoning' → qwen3:8b
+  │        + single-pass thinking masqué <think>…</think> · zéro injection SOC/PVE
+  │
+  └─ 5. 🤖 Branche GÉNÉRAL — tout le reste → gemma4:latest
            + profil "◎ Généraliste — Gemma4" · [NO_SOC]
            + infra · quotidien · vision (multimodal)
            + sans contexte sécurité
 ```
 
-**Priorité** : Bypass > SOC > CODE > GÉNÉRAL  
-**Règle** : `soc_trigger=True` force phi4:14b. Switch manuel via boutons `SOC / GÉNÉRAL / CODE` dans l'UI.  
+**Priorité** : Bypass > CODE REASONING > SOC > CODE > GÉNÉRAL  
+**Règle** : `soc_trigger=True` force phi4:14b. Switch manuel via boutons `SOC / GÉNÉRAL / CODE / C·R` dans l'UI.  
 ⚠ Supprimés : phi4-reasoning:plus · qwen2.5:14b · deepseek-r1:14b · llava-phi3:latest (2026-05-08) · nomic-embed-text (2026-05-10)
 
 ### 3.1 Mots-clés SOC — liste exacte
@@ -157,7 +161,7 @@ Déplacement            : mv · cp
 | 2026-05-10 s26  | NDT 100/100 | NDT-DUP SSH `_tool_commande_ssh_run()` · NDT-HTML-MAGIC Jinja2 `{{ dev_ip }}` · NDT-ERR~15 blocs documentés · NDT-DEAD 5 imports/consts supprimés |
 | 2026-05-13 s33  | **89/100** (valeur d'époque) | Phase 3 split monolithe Python complète (30 modules · -31% jarvis.py) · 25 tests E2E Playwright · ESLint 0 errors · audit sécurité 8/10 |
 | 2026-05-13 s33c | **91/100** (valeur d'époque) | Split JS partiel : `recorder.js` + `voice_print.js` extraits · `jarvis_main.js` 10507→8994L (-14.4%) |
-| 2026-05-14       | **78/100 honnête** (recalibré) | ⚠ Audit strict : le 91 était optimiste, départ réel **62/100**. Chantier dette 2026-05-14 (**62→78, +16**) : Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (17 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** (3 modules : terminal_code/voice_lab/stt · jarvis_main.js 8994→7893L -12%) |
+| 2026-05-14       | **78/100 honnête** (recalibré) | ⚠ Audit strict : le 91 était optimiste, départ réel **62/100**. Chantier dette 2026-05-14 (**62→78, +16**) : Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (16 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** (3 modules : terminal_code/voice_lab/stt · jarvis_main.js 8994→7893L -12%) |
 
 ---
 
@@ -242,18 +246,22 @@ Périmètre : `jarvis.py` · `soc.py` · `jarvis_mcp_server.py` · `audio_dsp.py
 
 `pythonw` : supprime la fenêtre console Windows, maintient les pipes stdio MCP.
 
-### 7.2 Les 8 outils MCP
+### 7.2 Les 10 outils MCP
 
 | Outil | Endpoint | Rôle |
 |---|---|---|
-| `jarvis_chat` | POST `/api/chat` SSE | Chat LLM avec routing automatique (3 branches + bypass) |
-| `jarvis_soc_status` | GET `/api/status` | État SOC : menace, bans, services |
+| `jarvis_chat` | POST `/api/chat` SSE | Chat LLM avec routing automatique (4 branches + bypass) |
+| `jarvis_soc_status` | GET `/api/soc/context` | État SOC : menace, bans, services |
 | `jarvis_stats` | GET `/api/stats` | Uptime, GPU, sessions, TTS/STT |
 | `jarvis_soc_ask` | POST `/api/chat` SSE | Question SOC + logs SSH + historique IP 30j |
-| `jarvis_infra_status` | GET `/api/soc/monitor` | monitoring.json live |
+| `jarvis_infra_status` | POST `/api/chat` SSE | État infra (Proxmox VMs, srv-ngix, clt, pa85) |
 | `jarvis_proxmox_vms` | POST `/api/chat` SSE | État VMs Proxmox |
 | `jarvis_read_file` | POST `/api/chat` SSE | Lecture fichiers SSH |
-| `jarvis_model_switch` | POST `/api/model` | Changement modèle Ollama actif |
+| `jarvis_model_switch` | POST `/api/models` | Changement modèle Ollama actif |
+| `jarvis_last_response` | GET `/api/conversation/last` | Derniers échanges de la conversation JARVIS |
+| `jarvis_code_exec` | bypass `_code_scp_exec_sse` | Écrit + SCP + exécute un fichier sur srv-dev-1 |
+
+> Détail complet des 10 outils : voir [`docs/MCP-SERVER.md`](MCP-SERVER.md).
 
 ### 7.3 Injection historique IP dans jarvis_soc_ask
 
@@ -277,13 +285,13 @@ Sans ce cadre = réponse Claude directe.
 
 ```
 jarvis_mcp_server.py (NDT-LONG refactorisé — 0 fonction >80L)
-├── _TOOLS_DEFS        ← 8 outils définis en constante (anciennement 109L inline)
-├── _TOOL_HANDLERS     ← dict nom → handler (anciennement 161L dispatch inline)
+├── _TOOLS_DEFS        ← 10 outils définis en constante
+├── _TOOL_HANDLERS     ← dict nom → handler (dispatch)
 ├── _RE_IPV4           ← regex détection IPv4
 ├── _collect_sse_tokens()  ← consomme le stream SSE JARVIS
-├── _get_ip_history(ip)    ← POST /api/soc/ip-history (timeout 25s)
-├── _get_soc_context_live() ← GET /api/soc/context
-├── 8 × _handle_*()    ← un handler par outil
+├── _fetch_ip_history(ip)  ← POST /api/soc/ip-history
+├── _fetch_soc_context()   ← GET /api/soc/context
+├── 10 × _handle_*()   ← un handler par outil
 ├── list_tools()       ← 2L
 └── call_tool()        ← 13L
 ```

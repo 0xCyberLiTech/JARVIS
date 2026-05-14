@@ -8,7 +8,7 @@ Interface web locale type Iron Man : chat IA, terminal intégré, monitoring GPU
 
 | Composant | Technologie |
 |-----------|-------------|
-| Backend   | Python 3.11 + Flask (port 5000, loopback only) — ~4900 lignes · 73 routes |
+| Backend   | Python 3.11 + Flask (port 5000, loopback only) — jarvis.py 4633 lignes · 75 routes · 31 modules Python extraits |
 | LLM SOC   | Ollama — phi4:14b (SOC défaut · 9.1 GB · full VRAM · zéro swap) |
 | LLM GÉNÉRAL | gemma4:latest (GÉNÉRAL + VOCAL + vision multimodal) |
 | LLM CODE  | qwen2.5-coder:14b (mode CODE · dev srv-dev-1 · 9.0 GB) |
@@ -176,11 +176,19 @@ python jarvis.py
 | [`docs/ROADMAP-V33.md`](docs/ROADMAP-V33.md) | Fonctionnalités v3.3 planifiées |
 | [`MEMORY.md`](MEMORY.md) | État projet, stack, historique corrections |
 
-## Qualité — Tests & Linters
+## Qualité — chantier dette technique 2026-05-14
+
+Audit honnête et chantier de dette : **score recalibré 62 → 78/100** (l'ancien
+« 91/100 » / « 100/100 » étaient optimistes — le NDT script auto mesure le style,
+pas l'architecture/tests/CI). Travaux du chantier :
+- **Dépôt git LOCAL** initialisé (100% local, aucun remote — règle « rien sur le web ») · **16 commits** atomiques
+- **Outillage qualité** : `ruff.toml` (Python, baseline 98 → 0 erreurs · 2 vrais bugs F821 corrigés) · `eslint.config.js` (JS, 0 erreur) · `.pre-commit-config.yaml` (hooks bloquants ruff + eslint, 100% locaux)
+- **Architecture modulaire** : 31 modules Python extraits de `jarvis.py` (6592 → 4633 L) · `audio_dsp.py` (508 L, bloc DSP) · `jarvis.css` éclaté en 8 fichiers `static/css/` · 6 modules JS extraits de `jarvis_main.js`
+- **Tests E2E** : 25 tests Playwright (dont 2 smoke tests LLM `/api/chat`)
 
 | Commande | Rôle | Pré-requis |
 |----------|------|------------|
-| `npm test` | Suite Playwright E2E (23 tests · ~1m48s) | JARVIS up sur :5000 |
+| `npm test` | Suite Playwright E2E (25 tests · ~1m48s) | JARVIS up sur :5000 |
 | `npm run test:headed` | Tests E2E avec navigateur visible | JARVIS up |
 | `npm run test:ui` | Mode UI interactif Playwright | JARVIS up |
 | `npm run lint:js` | ESLint sur les fichiers JS applicatifs | — |
@@ -193,12 +201,12 @@ Depuis le chantier dette 2026-05-14, un hook `pre-commit` **bloque tout commit**
 qui ne passe pas les linters. Configuration `.pre-commit-config.yaml` — hooks
 100% locaux (aucun téléchargement réseau) :
 - **ruff-check** : lint Python sur les `*.py` modifiés
-- **eslint** : lint JS sur les 4 fichiers applicatifs `static/`
+- **eslint** : lint JS sur les fichiers applicatifs `static/`
 
 Installation après un clone / une réinstallation : `pre-commit install`
 Bypass exceptionnel (commit urgent) : `git commit --no-verify`
 
-Tests E2E couverts (`tests/e2e/` · **23 tests** · ~1m42s) :
+Tests E2E couverts (`tests/e2e/` · **25 tests** · 11 fichiers spec) :
 - **boot** · page charge sans erreur console · 7 tabs rendus
 - **api** · `/api/health` · `/api/mode` GET · cycle mode soc↔general (REST)
 - **tabs** · navigation Monitor / SETTINGS / DSP AUDIO
@@ -209,3 +217,4 @@ Tests E2E couverts (`tests/e2e/` · **23 tests** · ~1m42s) :
 - **mode-ui** · clic boutons #btn-mode-general/soc → propagation `/api/mode` (UI ↔ backend)
 - **modals** · DAT/MIXER modals open/close cycle complet
 - **dsp-interactive** · sliders EQ low/high/air → labels mis à jour en temps réel
+- **chat-llm-smoke** · 2 smoke tests LLM — flux SSE réel `/api/chat` (tokens + done:true) + capture historique

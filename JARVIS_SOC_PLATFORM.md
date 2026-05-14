@@ -1,6 +1,6 @@
 # JARVIS SOC PLATFORM — Architecture IA & Cybersécurité Homelab
 ### Agent autonome local · Surveillance proactive · Contrôle d'infrastructure · LLM on-premise
-<!-- 0xCyberLiTech · v2.7 · 2026-05-14 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 25 tests E2E Playwright · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git initialisé (5 commits) + pre-commit hooks bloquants + ruff.toml · score dette HONNÊTE 78/100 (recalibré depuis 62 réel · +16 via chantier dette 2026-05-14 · JS reste majoritairement monolithique, pas de CI cloud) -->
+<!-- 0xCyberLiTech · v2.7 · 2026-05-14 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 25 tests E2E Playwright · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · jarvis_main.js 7893L + 6 modules JS · git initialisé (16 commits, 100% local) + pre-commit hooks bloquants + ruff.toml · score dette HONNÊTE 78/100 (recalibré depuis 62 réel · +16 via chantier dette 2026-05-14 · JS reste majoritairement monolithique, pas de CI cloud) -->
 
 ---
 
@@ -66,7 +66,7 @@ Le système repose sur deux niveaux d'intelligence complémentaires :
 
 | Projet | Hébergement | État |
 |--------|-------------|------|
-| JARVIS | localhost:5000 | ✅ Production · v3.3 · dette zéro |
+| JARVIS | localhost:5000 | ✅ Production · v3.3 · score dette honnête 78/100 (chantier 2026-05-14) |
 | SOC Dashboard | 192.168.1.50:8080 | ✅ v3.97.157 · 35 tuiles · LAN uniquement |
 | srv-ngix | 192.168.1.50 | ✅ nginx · CrowdSec · WAF · audit 10/10 |
 | CLT | 192.168.1.12 | ✅ Apache · SEO validé GSC |
@@ -465,7 +465,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | ✅ | Audit dette technique honnête — score 73 → 84/100 (+11 sur 2026-05-13) | session 33 |
 | ✅ | **Phase 3 split monolithe Python complète** — **30 modules extraits** (Audio/Voice 5 + Bypass 8 + Infra/RAG 2 + Chat/LLM core 15) — `jarvis.py` 6592 → ~4520 (**-2072 lignes · -31%**) — score honnête 84 → **89/100** (+5 · pas 100 car JS toujours monolithique) | session 33b |
 | ✅ | **Split JS partiel** — extraction `recorder.js` (660L) + `voice_print.js` (852L) en IIFE depuis `jarvis_main.js` 10507→8994L (**-14.4%**) — score honnête 89 → 91 (valeur d'époque) | session 33c |
-| ✅ | **Chantier dette technique 2026-05-14** — recalibration honnête (le 91 était optimiste, départ réel **62**) → **78/100** (+16). Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (17 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** : 3 modules extraits de jarvis_main.js (8994→7893L) | 2026-05-14 |
+| ✅ | **Chantier dette technique 2026-05-14** — recalibration honnête (le 91 était optimiste, départ réel **62**) → **78/100** (+16). Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (16 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** : 3 modules extraits de jarvis_main.js (8994→7893L) | 2026-05-14 |
 | 🟡 | SSH write ops partielles — apt upgrade · restart service (validation) | ouvert |
 | 🔵 | Refactor JS — suite incrémentale (méthode validée : fichiers .js scope global) | future session |
 | 🔵 | Tests unitaires Python · profiling performance | future session |
@@ -474,9 +474,9 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 
 ---
 
-## 7bis. Couverture tests E2E (Playwright · session 33)
+## 7bis. Couverture tests E2E (Playwright · session 33 → chantier 2026-05-14)
 
-23 tests automatisés dans `tests/e2e/` qui valident la chaîne complète UI ↔ backend Flask. Suite complète en ~1m42s. Pré-requis : JARVIS up sur :5000.
+25 tests automatisés dans `tests/e2e/` (11 fichiers `.spec.js`) qui valident la chaîne complète UI ↔ backend Flask, dont **2 smoke tests LLM** (`chat-llm-smoke.spec.js` — flux SSE réel `/api/chat`). Suite complète en ~1m48s. Pré-requis : JARVIS up sur :5000.
 
 ### Couverture par fichier
 
@@ -492,6 +492,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | `mode-ui.spec.js` | 1 | Clic boutons mode → propagation `/api/mode` (UI ↔ backend) |
 | `modals.spec.js` | 2 | DAT modal open+close · MIXER modal open+close |
 | `dsp-interactive.spec.js` | 3 | Sliders EQ low/high/air → labels mis à jour temps réel |
+| `chat-llm-smoke.spec.js` | 2 | Flux SSE réel `/api/chat` (tokens + done:true) + capture historique (chantier 2026-05-14) |
 
 ### Commandes
 
@@ -503,7 +504,7 @@ npm run test:ui       # mode UI Playwright
 
 ### Limites connues
 
-- Aucun test n'envoie réellement un message au LLM (latence 3-30s rendrait la suite trop lente)
+- Seuls 2 smoke tests LLM existent (`chat-llm-smoke.spec.js`) — la couverture LLM reste minimale (latence 3-30s rendrait une suite exhaustive trop lente)
 - Aucun test n'envoie réellement de TTS audio (dépend du device)
 - Le mode CODE n'est pas testé via UI (ouvre un WebSocket SSH vers srv-dev-1, side-effect réseau)
 

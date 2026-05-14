@@ -12,7 +12,8 @@
 │  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────┐  │
 │  │  ZONE UI / TABS  │  │  ZONE AUDIO      │  │  ZONE SOC CLIENT     │  │
 │  │  jarvis_main.js  │  │  jarvis_mixing   │  │  jarvis_main.js      │  │
-│  │  10 668 lignes   │  │  1 371 lignes    │  │  (section SOC)       │  │
+│  │  7 893 lignes    │  │  1 375 lignes    │  │  (section SOC)       │  │
+│  │  + 6 modules JS  │  │                  │  │                      │  │
 │  └────────┬─────────┘  └────────┬─────────┘  └──────────┬───────────┘  │
 └───────────┼─────────────────────┼───────────────────────┼──────────────┘
             │  HTTP / SSE          │  Web Audio API        │  poll 30s
@@ -23,8 +24,9 @@
 │  ┌───────────────────────┐   ┌───────────────────────────────────────┐  │
 │  │  ZONE IA              │   │  ZONE SOC SERVEUR                     │  │
 │  │  jarvis.py            │   │  blueprints/soc.py                    │  │
-│  │  4861 lignes          │   │  1555 lignes                          │  │
-│  │  71 routes Flask      │   │  _soc_monitor_loop()  (60s Python)    │  │
+│  │  4633 lignes          │   │  1689 lignes                          │  │
+│  │  75 routes Flask      │   │  _soc_monitor_loop()  (60s Python)    │  │
+│  │  + 31 modules Python  │   │                                       │  │
 │  └───────────────────────┘   └───────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────┘
                   │ Ollama API                          │ SSH (srv-ngix)
@@ -347,6 +349,20 @@ jarvis_main.js
 
 ---
 
+## Architecture modulaire — chantier dette 2026-05-14
+
+`jarvis.py` n'est plus un monolithe : c'est désormais l'**orchestrateur Flask**
+(4633 L) qui délègue à **31 modules Python** extraits dans `scripts/` (audio,
+bypass SSH/VM/backup, infra/RAG, chat/LLM core, `audio_dsp.py`) — voir
+[`docs/ROUTING-JARVIS.md`](docs/ROUTING-JARVIS.md) pour la liste complète.
+Côté frontend : `jarvis_main.js` (7893 L) + **6 modules JS** (`recorder.js`,
+`voice_print.js`, `jarvis_mixing.js` dans `static/` · `terminal_code.js`,
+`voice_lab.js`, `stt.js` dans `static/js/`) ; l'ex-`jarvis.css` monolithique
+est éclaté en **8 fichiers** `static/css/` (core/chat/dsp/terminal-taches/
+hud-welcome/rack/settings-soc/voicelab). Dépôt **git local** (16 commits, aucun
+remote) + **pre-commit hooks bloquants** (ruff + eslint) + `ruff.toml`.
+⚠ Le JS reste majoritairement monolithique — score honnête global 78/100.
+
 ## Modules centralisés — synthèse
 
 | Module | Centralise quoi | Fichier |
@@ -415,10 +431,11 @@ LCM(10,15,30,60) = 60s → alignement théorique — négligeable LAN
 │  • Problème que JARVIS a explicitement escaladé                         │
 └──────────────────────────────┬──────────────────────────────────────────┘
                                │  MCP stdio (.mcp.json)
-                               │  8 outils : jarvis_chat · jarvis_soc_status
-                               │             jarvis_stats · jarvis_soc_ask
-                               │             jarvis_infra_status · jarvis_proxmox_vms
-                               │             jarvis_read_file · jarvis_model_switch
+                               │  10 outils : jarvis_chat · jarvis_soc_status
+                               │              jarvis_stats · jarvis_soc_ask
+                               │              jarvis_infra_status · jarvis_proxmox_vms
+                               │              jarvis_read_file · jarvis_model_switch
+                               │              jarvis_last_response · jarvis_code_exec
                                ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  jarvis_mcp_server.py  (pythonw — stdio — port 0)                       │
@@ -522,4 +539,4 @@ Sans ce cadre = réponse Claude. Différence visuelle immédiate, important pour
 
 ---
 
-*ARCHITECTURE-JARVIS.md · 0xCyberLiTech · 2026-05-10*
+*ARCHITECTURE-JARVIS.md · 0xCyberLiTech · 2026-05-14*

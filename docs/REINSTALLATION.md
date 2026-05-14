@@ -1,7 +1,7 @@
 # JARVIS — Guide de réinstallation Windows
 
 > Document critique — à conserver dans les sauvegardes.
-> Dernière mise à jour : 2026-05-14 — Chantier dette technique : git initialisé (5 commits) + pre-commit hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py · 31 modules Python · jarvis.py 4633L
+> Dernière mise à jour : 2026-05-14 — Chantier dette technique : git initialisé (16 commits, 100% local) + pre-commit hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py · 31 modules Python · jarvis.py 4633L
 
 ---
 
@@ -119,8 +119,8 @@ Windows 11 Pro
 │
 └── JARVIS                                          ← assistant IA local
     ├── racine   : C:\Users\mmsab\Documents\0xCyberLiTech\JARVIS\
-    ├── backend  : scripts\jarvis.py (Flask — port 5000)
-    ├── frontend : scripts\templates\jarvis.html (16918 lignes)
+    ├── backend  : scripts\jarvis.py (orchestrateur Flask — port 5000 — 4633 L + 31 modules Python)
+    ├── frontend : scripts\templates\jarvis.html (shell Jinja2 211 L) + static\jarvis_main.js (7893 L + 6 modules JS) + static\css\ (8 fichiers)
     └── configs  : jarvis_*.json + jarvis_system_prompt.txt
 ```
 
@@ -141,9 +141,9 @@ D:\BACKUP-WINDOWS\                         ← racine sauvegarde
 │   ├── start_dashboard.bat                ← démarrage JARVIS
 │   ├── stop_jarvis.bat                    ← arrêt JARVIS
 │   ├── scripts\
-│   │   ├── jarvis.py                      ← backend Flask (4861 lignes · 71 routes)
+│   │   ├── jarvis.py                      ← orchestrateur Flask (4633 lignes · 75 routes · 31 modules extraits)
 │   │   ├── templates\
-│   │   │   ├── jarvis.html                ← shell Jinja2 (204 lignes)
+│   │   │   ├── jarvis.html                ← shell Jinja2 (211 lignes)
 │   │   │   ├── tabs\                      ← 8 onglets modulaires
 │   │   │   └── partials\modals.html
 │   │   ├── jarvis_system_prompt.txt       ← prompt SOC enrichi

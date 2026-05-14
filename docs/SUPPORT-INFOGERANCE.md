@@ -367,4 +367,4 @@ SSH : `~/.ssh/id_nginx` · `~/.ssh/id_clt` · `~/.ssh/id_pa85` · `~/.ssh/id_pro
 
 ---
 
-*SUPPORT-INFOGERANCE.md · JARVIS 0xCyberLiTech · 2026-05-10 v2.3*
+*SUPPORT-INFOGERANCE.md · JARVIS 0xCyberLiTech · 2026-05-14 v2.5*

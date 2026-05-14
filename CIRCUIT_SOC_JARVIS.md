@@ -410,4 +410,4 @@ Pour un homelab avec une seule VM de prod, cette architecture dépasse largement
 
 ---
 
-*Document mis à jour le 2026-05-10 — 0xCyberLiTech*
+*Document mis à jour le 2026-05-14 — 0xCyberLiTech*

@@ -190,6 +190,6 @@ Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits →
 
 **Total Python : 31 modules extraits** (Phase 3 : 30 modules ~3034L · session 33b) + `audio_dsp.py` 508L (chantier dette 2026-05-14) → `jarvis.py` 4633L
 **Session 33c — Split JS partiel** : `recorder.js` 660L + `voice_print.js` 852L extraits en IIFE · `jarvis_main.js` 10507→8994L (-14.4%)
-**Chantier dette 2026-05-14** : Ruff 98→0 + `ruff.toml` · git initialisé (5 commits, 100% local) · pre-commit hooks bloquants · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait
+**Chantier dette 2026-05-14** : Ruff 98→0 + `ruff.toml` · git initialisé (16 commits, 100% local) · pre-commit hooks bloquants · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · refactor JS partiel (3 modules : terminal_code/voice_lab/stt)
 
 **Score dette technique HONNÊTE 78/100** (recalibré depuis 62 réel · Python serveur excellent · JS reste majoritairement monolithique · pas de CI cloud · pas de tests unitaires)

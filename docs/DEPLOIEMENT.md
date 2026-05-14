@@ -44,10 +44,10 @@ ollama pull mxbai-embed-large     # embeddings RAG (obligatoire · 1024 dims · 
 ```
 JARVIS/
 ├── scripts/
-│   ├── jarvis.py                  ← serveur Flask principal (~4850 lignes · 72 routes · NDT 10/10)
+│   ├── jarvis.py                  ← orchestrateur Flask (4633 lignes · 75 routes · 31 modules Python extraits)
 │   ├── blueprints/
-│   │   └── soc.py                 ← Blueprint SOC (1555 lignes) · SSH 4 hôtes
-│   ├── jarvis_mcp_server.py       ← MCP bridge Claude Code ↔ JARVIS (8 outils)
+│   │   └── soc.py                 ← Blueprint SOC (1689 lignes) · SSH 4 hôtes
+│   ├── jarvis_mcp_server.py       ← MCP bridge Claude Code ↔ JARVIS (10 outils)
 │   ├── templates/
 │   │   ├── jarvis.html            ← shell Jinja2 (204 lignes · 0 handler inline)
 │   │   ├── tabs/                  ← 8 onglets modulaires
@@ -270,7 +270,7 @@ Changer via UI (onglet DSP → panneau voix) ou `jarvis_dsp_params.json` → `tt
 | `/api/memory/summarize-session` | POST | Résumé session en cours (appelé avant arrêt) |
 | `/api/facts` | GET/POST | Faits persistés (mémoire JARVIS) |
 | `/api/boot-id` | GET | ID de démarrage (change à chaque restart Flask) |
-| `/api/mode` | GET/POST | Mode LLM actif (soc/general/code) |
+| `/api/mode` | GET/POST | Mode LLM actif (soc/general/code/code_reasoning) |
 | `/api/soc/heartbeat` | POST | Signal dashboard ouvert (TTL 90s) |
 | `/api/soc/ip-history` | POST | Historique 30j d'une IP (CrowdSec) |
 | `/api/soc/context` | GET | Contexte SOC live (résumé monitoring.json) |
@@ -387,7 +387,7 @@ v3.3  (en cours)
   ✅ Terminal CODE xterm.js + WebSocket PTY SSH srv-dev-1
   ✅ Phase 3 split monolithe Python — 30 modules · session 33b (2026-05-13)
   ✅ Session 33c split JS partiel — recorder.js + voice_print.js extraits · jarvis_main.js -14.4%
-  ✅ Chantier dette technique 2026-05-14 — Ruff 98→0 + git initialisé (17 commits) + pre-commit hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + 2 smoke tests LLM + refactor JS partiel (3 modules) · score honnête global 78/100 (recalibré depuis 62 réel · +16)
+  ✅ Chantier dette technique 2026-05-14 — Ruff 98→0 + git initialisé (16 commits, 100% local) + pre-commit hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + 2 smoke tests LLM + refactor JS partiel (3 modules) · score honnête global 78/100 (recalibré depuis 62 réel · +16)
   ⬜ SSH write ops partielles — apt upgrade · restart service
   🟡 Refactor JS — suite incrémentale (3/N modules faits · jarvis_main.js 8994→7893L · méthode validée)
   ⬜ Tests unitaires Python · profiling performance
@@ -412,7 +412,7 @@ v4.0  (long)    — Service Windows NSSM, Docker Compose, HTTPS mkcert, SSH writ
 | `scripts/static/recorder.js` | **660** | ✅ DAT RECORDER R-1 IIFE |
 | `scripts/static/voice_print.js` | **852** | ✅ Voice Print v2 IIFE |
 | `scripts/static/css/` | 8 fichiers | ✅ ex-`jarvis.css` 5270L → core/chat/dsp/terminal-taches/hud-welcome/rack/settings-soc/voicelab (chantier 2026-05-14) |
-| `ruff.toml` · `.pre-commit-config.yaml` · `.gitignore` | — | ✅ chantier dette 2026-05-14 — git initialisé (5 commits, 100% local) |
+| `ruff.toml` · `.pre-commit-config.yaml` · `.gitignore` | — | ✅ chantier dette 2026-05-14 — git initialisé (16 commits, 100% local) |
 | `scripts/static/css/` (8 fichiers) | ex-5270 | ✅ découpé par secteur (chantier 2026-05-14) · NDT-CSS 0 |
 | `scripts/jarvis_llm_params.json` | — | ✅ phi4:14b · num_ctx:16384 · num_predict:4096 · temp:0.5 · top_k:40 |
 | `scripts/jarvis_dsp_params.json` | — | ✅ tts_engine:edge · tts_default_engine:edge |
@@ -436,4 +436,4 @@ v4.0  (long)    — Service Windows NSSM, Docker Compose, HTTPS mkcert, SSH writ
 
 ---
 
-*Document mis à jour le 2026-05-10 — v3.3*
+*Document mis à jour le 2026-05-14 — v3.3*

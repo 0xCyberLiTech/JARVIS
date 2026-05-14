@@ -105,11 +105,11 @@
 [ ] Réinstaller Ollama (ollama.com) — garder C:\Users\mmsab\.ollama\models\ si le disque survive
 [ ] Réinstaller CUDA / drivers RTX 5080
 
-[ ] Tirer les 5 modèles Ollama (ordre recommandé — ~40 GB total) :
+[ ] Tirer les 5 modèles Ollama (ordre recommandé — ~33 GB total) :
     ollama pull phi4:14b                 # 9.1 GB — SOC (défaut)
-    ollama pull phi4-reasoning:plus      # 11 GB  — CODE REASONING Pass 1
-    ollama pull qwen2.5-coder:14b        # 9.0 GB — CODE + CODE REASONING Pass 2
-    ollama pull gemma4:latest            # 9.6 GB — GÉNÉRAL / VOCAL
+    ollama pull gemma4:latest            # 9.6 GB — GÉNÉRAL / VOCAL / vision
+    ollama pull qwen2.5-coder:14b        # 9.0 GB — CODE (dev srv-dev-1)
+    ollama pull qwen3:8b                 # ~5 GB  — CODE REASONING (thinking <think>)
     ollama pull mxbai-embed-large        # 0.7 GB — RAG embeddings (permanent)
 
 [ ] Installer dépendances Python JARVIS :
