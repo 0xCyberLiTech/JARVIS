@@ -1,0 +1,81 @@
+import globals from 'globals';
+
+export default [
+  {
+    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'script',
+      globals: {
+        ...globals.browser,
+        ...globals.es2022,
+        // Bibliothèques externes chargées via <script>
+        hljs: 'readonly',
+        Terminal: 'readonly',
+        FitAddon: 'readonly',
+        monaco: 'readonly',
+        // Symboles partagés cross-file entre jarvis_main.js et jarvis_mixing.js
+        // (audio nodes, helpers, fonctions globales)
+        _cssVar: 'writable',
+        _esc: 'writable',
+        _ctx: 'writable',
+        audioCtx: 'writable',
+        analyserL: 'writable',
+        analyserR: 'writable',
+        _datAnL: 'writable',
+        _datAnR: 'writable',
+        _dspGainNode: 'writable',
+        _dspCompressor: 'writable',
+        _dspLimiter: 'writable',
+        _dspEqLow: 'writable',
+        _dspEqMid: 'writable',
+        _dspEqHigh: 'writable',
+        _dspEqAir: 'writable',
+        _jarvisPreGain: 'writable',
+        _jarvisBypassGain: 'writable',
+        _mixVuState: 'writable',
+        datPLAY: 'writable',
+        datPAUSE: 'writable',
+        datSTOP: 'writable',
+        mixRefreshDevices: 'writable',
+        queueSpeech: 'writable',
+        // Symboles cross-file vers recorder.js et voice_print.js
+        _SAMPLE_RATE: 'readonly',
+        _disp: 'writable',
+        setEqBand: 'writable',
+        drawEqCurve: 'writable',
+        _dspSchedulePush: 'writable',
+      },
+    },
+    rules: {
+      'no-undef': 'error',
+      'no-unused-vars': ['warn', {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+        caughtErrors: 'none',
+      }],
+      'no-redeclare': 'off',
+      'no-empty': ['warn', { allowEmptyCatch: true }],
+      'no-constant-condition': ['warn', { checkLoops: false }],
+      'no-unreachable': 'warn',
+      'no-dupe-keys': 'error',
+      'no-dupe-args': 'error',
+      'no-func-assign': 'error',
+      'no-self-assign': 'error',
+      'use-isnan': 'error',
+      'valid-typeof': 'error',
+    },
+  },
+  {
+    ignores: [
+      'node_modules/**',
+      'scripts/static/src/**',
+      'scripts/static/jarvis_main.bundle.js',
+      'scripts/static/jarvis_main.bundle.js.map',
+      'scripts/static/highlight.min.js',
+      'scripts/static/xterm*.js',
+      'tests/**',
+      'playwright.config.js',
+    ],
+  },
+];

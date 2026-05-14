@@ -1,0 +1,35 @@
+# ruff.toml — Politique de lint Python JARVIS
+# 0xCyberLiTech · créé 2026-05-14 (chantier dette technique)
+#
+# Principe : garder TOUTES les règles qui détectent de vrais bugs (pyflakes F*,
+# erreurs de syntaxe E9, imports I) — ignorer uniquement les règles purement
+# stylistiques qui entrent en conflit avec des choix de code délibérés.
+
+target-version = "py311"
+
+[lint]
+# Sélection par défaut de ruff (E + F) + tri des imports (I).
+extend-select = ["I"]
+
+ignore = [
+    # E701 — multiple-statements-on-one-line-colon
+    # Style one-liner assumé : `if err: return err` (présent ~65× dans le code).
+    # Concis, lisible, cohérent avec les préférences du projet.
+    "E701",
+
+    # E702 — multiple-statements-on-one-line-semicolon
+    # Couvre notamment le pattern d'auto-installation des dépendances au boot :
+    # `install("flask"); from flask import ...` (try/except ImportError).
+    "E702",
+]
+
+# Note : F821 (undefined-name), F401 (unused-import), F841 (unused-variable)
+# et toutes les règles pyflakes RESTENT actives — ce sont de vrais bugs.
+
+[lint.per-file-ignores]
+# jarvis.py et jarvis_mcp_server.py ouvrent par un bloc d'auto-installation des
+# dépendances (try: import X / except ImportError: install("X"); import X).
+# Ce pattern impose des imports module APRÈS du code → E402 + I001 inévitables
+# et VOLONTAIRES. Les 30 modules extraits restent sous surveillance complète.
+"jarvis.py"            = ["E402", "I001"]
+"jarvis_mcp_server.py" = ["E402"]

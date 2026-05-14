@@ -1,0 +1,228 @@
+  <!-- ═══ ONGLET MONITOR ═══ -->
+  <div id="tab-monitor" class="tab-content">
+  <div class="hud-frame">
+    <div class="chat-corner tl"></div>
+    <div class="chat-corner tr"></div>
+    <div class="chat-corner bl"></div>
+    <div class="chat-corner br"></div>
+    <div class="chat-main-scan"></div>
+    <div class="hud-frame-inner">
+
+    <div class="gpu-label" id="gpu-name">INITIALISATION SYSTEME...</div>
+
+    <div class="gauge-row">
+      <div class="gauge-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="46" fill="none" stroke="#00cfff0a" stroke-width="6"/>
+          <circle id="arc-gpu" cx="55" cy="55" r="46" fill="none" stroke="#00cfff" stroke-width="6" stroke-linecap="round"
+            stroke-dasharray="289.0" stroke-dashoffset="289.0" transform="rotate(-90 55 55)"
+            class="arc-ring arc-ring-cyan"/>
+          <text x="55" y="51" text-anchor="middle" class="svgt-val svgt-lg" fill="#00cfff" id="txt-gpu-util">0%</text>
+          <text x="55" y="63" text-anchor="middle" class="svgt-sub" fill="#00cfff55">GPU</text>
+        </svg>
+        <div class="gauge-label">GPU Util</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="46" fill="none" stroke="#4488ff0a" stroke-width="6"/>
+          <circle id="arc-vram" cx="55" cy="55" r="46" fill="none" stroke="#4488ff" stroke-width="6" stroke-linecap="round"
+            stroke-dasharray="289.0" stroke-dashoffset="289.0" transform="rotate(-90 55 55)"
+            class="arc-ring arc-ring-blue"/>
+          <text x="55" y="47" text-anchor="middle" class="svgt-val svgt-sm" fill="#4488ff" id="txt-vram-used">0</text>
+          <text x="55" y="58" text-anchor="middle" class="svgt-sub" fill="#4488ff77" id="txt-vram-total">/ 0 GB</text>
+          <text x="55" y="68" text-anchor="middle" class="svgt-sub" fill="#4488ff55">VRAM</text>
+        </svg>
+        <div class="gauge-label">VRAM</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="46" fill="none" stroke="#00ff880a" stroke-width="6"/>
+          <circle id="arc-temp" cx="55" cy="55" r="46" fill="none" stroke="#00ff88" stroke-width="6" stroke-linecap="round"
+            stroke-dasharray="289.0" stroke-dashoffset="289.0" transform="rotate(-90 55 55)"
+            class="arc-ring arc-ring-green"/>
+          <text x="55" y="51" text-anchor="middle" class="svgt-val svgt-lg" fill="#00ff88" id="txt-temp">0°</text>
+          <text x="55" y="63" text-anchor="middle" class="svgt-sub" fill="#00ff8855">CELSIUS</text>
+        </svg>
+        <div class="gauge-label">Temperature</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="46" fill="none" stroke="#cc66ff0a" stroke-width="6"/>
+          <circle id="arc-power" cx="55" cy="55" r="46" fill="none" stroke="#cc66ff" stroke-width="6" stroke-linecap="round"
+            stroke-dasharray="289.0" stroke-dashoffset="289.0" transform="rotate(-90 55 55)"
+            class="arc-ring arc-ring-purple"/>
+          <text x="55" y="51" text-anchor="middle" class="svgt-val svgt-md" fill="#cc66ff" id="txt-power">0W</text>
+          <text x="55" y="63" text-anchor="middle" class="svgt-sub" fill="#cc66ff55">POWER</text>
+        </svg>
+        <div class="gauge-label">Puissance</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="46" fill="none" stroke="#00ff880a" stroke-width="6"/>
+          <circle id="arc-cpu" cx="55" cy="55" r="46" fill="none" stroke="#00ff88" stroke-width="6" stroke-linecap="round"
+            stroke-dasharray="289.0" stroke-dashoffset="289.0" transform="rotate(-90 55 55)"
+            class="arc-ring arc-ring-green"/>
+          <text x="55" y="51" text-anchor="middle" class="svgt-val svgt-lg" fill="#00ff88" id="txt-cpu">0%</text>
+          <text x="55" y="63" text-anchor="middle" class="svgt-sub" fill="#00ff8855">CPU</text>
+        </svg>
+        <div class="gauge-label">Processeur</div>
+      </div>
+      <div class="gauge-wrap">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="46" fill="none" stroke="#4488ff0a" stroke-width="6"/>
+          <circle id="arc-ram" cx="55" cy="55" r="46" fill="none" stroke="#4488ff" stroke-width="6" stroke-linecap="round"
+            stroke-dasharray="289.0" stroke-dashoffset="289.0" transform="rotate(-90 55 55)"
+            class="arc-ring arc-ring-blue"/>
+          <text x="55" y="47" text-anchor="middle" class="svgt-val svgt-sm" fill="#4488ff" id="txt-ram-used">0</text>
+          <text x="55" y="58" text-anchor="middle" class="svgt-sub" fill="#4488ff77" id="txt-ram-total">/ 0 GB</text>
+          <text x="55" y="68" text-anchor="middle" class="svgt-sub" fill="#4488ff55">RAM</text>
+        </svg>
+        <div class="gauge-label">RAM Systeme</div>
+      </div>
+    </div>
+
+    <div class="grid-graphs">
+      <div class="graph-panel"><div class="graph-title"><span>GPU</span><span id="g-lbl-gpu">0%</span></div><canvas class="chart" id="chart-gpu" height="70"></canvas></div>
+      <div class="graph-panel"><div class="graph-title"><span>VRAM</span><span id="g-lbl-vram">0 GB</span></div><canvas class="chart" id="chart-vram" height="70"></canvas></div>
+      <div class="graph-panel"><div class="graph-title"><span>TEMP</span><span id="g-lbl-temp">0°C</span></div><canvas class="chart" id="chart-temp" height="70"></canvas></div>
+      <div class="graph-panel"><div class="graph-title"><span>POWER</span><span id="g-lbl-power">0W</span></div><canvas class="chart" id="chart-power" height="70"></canvas></div>
+    </div>
+
+    <div class="grid-panels">
+      <div class="panel">
+        <div class="panel-title">GPU Core</div>
+        <div class="bar-row"><div class="bar-head"><span>UTILISATION</span><span id="d-gpu-util" class="c-cyan">0%</span></div><div class="bar-track"><div class="bar-fill b-cyan" id="b-gpu-util"></div></div></div>
+        <div class="bar-row"><div class="bar-head"><span>ENCODEUR</span><span id="d-enc" class="c-cyan">0%</span></div><div class="bar-track"><div class="bar-fill b-cyan" id="b-enc"></div></div></div>
+        <div class="bar-row"><div class="bar-head"><span>DECODEUR</span><span id="d-dec" class="c-blue">0%</span></div><div class="bar-track"><div class="bar-fill b-blue" id="b-dec"></div></div></div>
+        <div class="bar-row"><div class="bar-head"><span>HORLOGE GPU</span><span id="d-clk-gpu" class="c-cyan">0 MHz</span></div><div class="bar-track"><div class="bar-fill b-cyan" id="b-clk-gpu"></div></div></div>
+        <div class="bar-row"><div class="bar-head"><span>HORLOGE MEM</span><span id="d-clk-mem" class="c-blue">0 MHz</span></div><div class="bar-track"><div class="bar-fill b-blue" id="b-clk-mem"></div></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Thermique &amp; Power</div>
+        <div class="bar-row"><div class="bar-head"><span>TEMPERATURE</span><span id="d-temp" class="c-green">0°C</span></div><div class="bar-track"><div class="bar-fill b-green" id="b-temp"></div></div></div>
+        <div class="bar-row"><div class="bar-head"><span>PUISSANCE</span><span id="d-power" class="c-purple">0 W</span></div><div class="bar-track"><div class="bar-fill b-purple" id="b-power"></div></div></div>
+        <div class="bar-row"><div class="bar-head"><span>VENTILATEUR</span><span id="d-fan" class="c-blue">0%</span></div><div class="bar-track"><div class="bar-fill b-blue" id="b-fan"></div></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Memoire VRAM</div>
+        <div class="bar-row"><div class="bar-head"><span>UTILISEE</span><span id="d-vram" class="c-blue">0 GB</span></div><div class="bar-track"><div class="bar-fill b-blue" id="b-vram"></div></div></div>
+        <div class="stat-row stat-sep"><span class="stat-name">TOTAL</span><span class="stat-val c-white" id="d-vram-total">--</span></div>
+        <div class="stat-row"><span class="stat-name">LIBRE</span><span class="stat-val c-green" id="d-vram-free">--</span></div>
+      </div>
+    </div>
+
+    <div class="grid-bottom">
+      <div class="panel">
+        <div class="panel-title">Processeur</div>
+        <div class="bar-row"><div class="bar-head"><span>UTILISATION</span><span id="d-cpu" class="c-green">0%</span></div><div class="bar-track"><div class="bar-fill b-green" id="b-cpu-p"></div></div></div>
+        <div class="stat-row stat-sep"><span class="stat-name">COEURS</span><span class="stat-val c-white" id="d-cpu-count">--</span></div>
+        <div class="stat-row"><span class="stat-name">FREQUENCE</span><span class="stat-val c-cyan" id="d-cpu-freq">--</span></div>
+        <div class="stat-row"><span class="stat-name">UPTIME</span><span class="stat-val c-blue" id="d-uptime">--</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Reseau</div>
+        <div class="bar-row"><div class="bar-head"><span>UPLOAD</span><span id="d-net-up" class="c-green">0 MB/s</span></div><div class="bar-track"><div class="bar-fill b-green" id="b-net-up"></div></div></div>
+        <div class="bar-row"><div class="bar-head"><span>DOWNLOAD</span><span id="d-net-dn" class="c-cyan">0 MB/s</span></div><div class="bar-track"><div class="bar-fill b-cyan" id="b-net-dn"></div></div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Disque I/O</div>
+        <div class="bar-row"><div class="bar-head"><span>LECTURE</span><span id="d-disk-r" class="c-cyan">0 MB/s</span></div><div class="bar-track"><div class="bar-fill b-cyan" id="b-disk-r"></div></div></div>
+        <div class="bar-row"><div class="bar-head"><span>ECRITURE</span><span id="d-disk-w" class="c-purple">0 MB/s</span></div><div class="bar-track"><div class="bar-fill b-purple" id="b-disk-w"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ══ PANNEAU RTX 5080 AVANCÉ ══ -->
+    <div class="grid-bottom">
+      <!-- Specs statiques -->
+      <div class="panel">
+        <div class="panel-title">RTX 5080 — Specs</div>
+        <div class="stat-row"><span class="stat-name">ARCHITECTURE</span><span class="stat-val c-cyan">Blackwell GB203</span></div>
+        <div class="stat-row"><span class="stat-name">CUDA CORES</span><span class="stat-val c-white">10 752</span></div>
+        <div class="stat-row"><span class="stat-name">MÉMOIRE</span><span class="stat-val c-blue">16 GB GDDR7</span></div>
+        <div class="stat-row"><span class="stat-name">BUS MEM</span><span class="stat-val c-white">256-bit</span></div>
+        <div class="stat-row"><span class="stat-name">BANDE PASS. TH.</span><span class="stat-val c-cyan">960 GB/s</span></div>
+        <div class="stat-row"><span class="stat-name">TDP MAX</span><span class="stat-val c-purple">360 W</span></div>
+      </div>
+      <!-- Métriques avancées live -->
+      <div class="panel">
+        <div class="panel-title">RTX 5080 — Live Avancé</div>
+        <div class="bar-row"><div class="bar-head"><span>MEM UTIL %</span><span id="d-mem-util" class="c-blue">0%</span></div><div class="bar-track"><div class="bar-fill b-blue" id="b-mem-util"></div></div></div>
+        <div class="bar-row"><div class="bar-head"><span>BANDE PASS. EST.</span><span id="d-membw" class="c-cyan">— GB/s</span></div><div class="bar-track"><div class="bar-fill b-cyan" id="b-membw"></div></div></div>
+        <div class="bar-row"><div class="bar-head"><span>BUDGET POWER</span><span id="d-pow-budget" class="c-purple">— %</span></div><div class="bar-track"><div class="bar-fill b-purple" id="b-pow-budget"></div></div></div>
+        <div class="stat-row stat-sep"><span class="stat-name">P-STATE</span><span class="stat-val c-cyan" id="d-pstate">—</span></div>
+        <div class="stat-row"><span class="stat-name">THROTTLE</span><span class="stat-val" id="d-throttle">—</span></div>
+        <div class="stat-row"><span class="stat-name">PCIe LIEN</span><span class="stat-val c-white" id="d-pcie">—</span></div>
+      </div>
+      <!-- Power budget visuel -->
+      <div class="panel">
+        <div class="panel-title">Budget Puissance</div>
+        <div class="bar-row"><div class="bar-head"><span>PUISSANCE</span><span id="d-pow-adv" class="c-purple">0 W</span></div><div class="bar-track"><div class="bar-fill b-purple" id="b-pow-adv"></div></div></div>
+        <div class="stat-row stat-sep"><span class="stat-name">LIMITE</span><span class="stat-val c-white" id="d-pow-limit">— W</span></div>
+        <div class="stat-row"><span class="stat-name">MARGE</span><span class="stat-val c-green" id="d-pow-marge">— W</span></div>
+        <div class="stat-row"><span class="stat-name">EFFICACITÉ</span><span class="stat-val c-cyan" id="d-eff">— %GPU/W</span></div>
+        <div class="stat-row"><span class="stat-name">VRAM LIBRE</span><span class="stat-val c-green" id="d-vram-adv">— GB</span></div>
+      </div>
+    </div>
+
+    <!-- ══ PANNEAU CUDA RUNTIME ══ -->
+    <div class="grid-bottom">
+      <div class="panel">
+        <div class="panel-title">CUDA Runtime</div>
+        <div class="stat-row"><span class="stat-name">CUDA VERSION</span><span class="stat-val c-cyan" id="d-cuda-ver">—</span></div>
+        <div class="stat-row"><span class="stat-name">DRIVER</span><span class="stat-val c-white" id="d-drv-ver">—</span></div>
+        <div class="stat-row"><span class="stat-name">COMPUTE CAP.</span><span class="stat-val c-cyan">sm_120 — Blackwell</span></div>
+        <div class="stat-row"><span class="stat-name">TENSOR CORES</span><span class="stat-val c-blue">336 (5e gén.)</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Horloges Max &amp; Throttle</div>
+        <div class="bar-row"><div class="bar-head"><span>CLK GPU MAX</span><span id="d-max-clk-gpu" class="c-cyan">— MHz</span></div><div class="bar-track"><div class="bar-fill b-cyan" id="b-max-clk-gpu"></div></div></div>
+        <div class="bar-row"><div class="bar-head"><span>CLK MEM MAX</span><span id="d-max-clk-mem" class="c-blue">— MHz</span></div><div class="bar-track"><div class="bar-fill b-blue" id="b-max-clk-mem"></div></div></div>
+        <div class="stat-row stat-sep"><span class="stat-name">THROTTLE RAISON</span><span class="stat-val c-green" id="d-throttle-reason">—</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">Securite Thermique &amp; CUDA</div>
+        <div class="stat-row"><span class="stat-name">SEUIL ALERTE</span><span class="stat-val c-warn" id="d-temp-warn">— °C</span></div>
+        <div class="stat-row"><span class="stat-name">SEUIL RALENTI</span><span class="stat-val c-warn" id="d-temp-slow">— °C</span></div>
+        <div class="stat-row"><span class="stat-name">SEUIL EXTINCTION</span><span class="stat-val c-red" id="d-temp-shut">— °C</span></div>
+        <div class="stat-row stat-sep"><span class="stat-name">PROC. CUDA ACTIFS</span><span class="stat-val c-cyan" id="d-cuda-procs-count">0</span></div>
+        <div class="stat-row"><span class="stat-name">NOMS</span><span class="stat-val stat-val-sm c-white" id="d-cuda-procs">—</span></div>
+      </div>
+    </div>
+
+    <!-- ══ PANNEAU LLM VRAM OLLAMA ══ -->
+    <div class="grid-bottom vram-llm-grid">
+      <div class="panel panel-vram-llm">
+        <div class="panel-title">LLM VRAM — Ollama
+          <span id="vram-llm-alert" class="vram-llm-alert d-none">⚠ DÉBORDEMENT</span>
+        </div>
+        <div class="vram-llm-bar-wrap">
+          <div class="vram-llm-bar" id="vram-llm-bar">
+            <div class="vram-llm-free" id="vram-llm-free" title="Libre"></div>
+          </div>
+        </div>
+        <div class="vram-llm-legend" id="vram-llm-legend">
+          <span class="vram-llm-idle">Aucun modèle chargé</span>
+        </div>
+        <div class="vram-llm-footer">
+          <span class="vram-llm-label">VRAM</span>
+          <span class="vram-llm-val" id="vram-llm-used">— GB</span>
+          <span class="vram-llm-label" id="vram-llm-cap">/ — GB</span>
+          <span class="vram-llm-sep">│</span>
+          <span class="vram-llm-swap-label">SWAP RAM</span>
+          <span class="vram-llm-swap-val" id="vram-llm-swap">0 MB</span>
+        </div>
+        <div class="vram-llm-swap-wrap d-none" id="vram-llm-swap-wrap">
+          <div class="vram-llm-swap-bar" id="vram-llm-swap-bar"></div>
+          <span class="vram-llm-swap-lbl" id="vram-llm-swap-lbl"></span>
+        </div>
+        <div class="vram-stat-extra">
+          <div class="stat-row stat-sep"><span class="stat-name">MODE ACTIF</span><span class="stat-val vram-stat-sm vram-stat-mode" id="vram-stat-mode">—</span></div>
+          <div class="stat-row"><span class="stat-name">TOKENS / S</span><span class="stat-val vram-stat-sm vram-stat-toks" id="vram-stat-toks">—</span></div>
+          <div class="stat-row"><span class="stat-name">NUM CTX</span><span class="stat-val vram-stat-sm vram-stat-ctx" id="vram-stat-ctx">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    </div><!-- end hud-frame-inner -->
+  </div><!-- end hud-frame -->
+  </div><!-- end tab-monitor -->

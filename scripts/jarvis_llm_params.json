@@ -1,0 +1,9 @@
+{
+  "temperature": 0.5,
+  "num_predict": 4096,
+  "top_p": 0.9,
+  "top_k": 40,
+  "repeat_penalty": 1.08,
+  "num_ctx": 16384,
+  "think": false
+}

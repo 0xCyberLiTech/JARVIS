@@ -1,0 +1,69 @@
+  <!-- ═══ ONGLET TÂCHES ═══ -->
+  <div id="tab-taches" class="tab-content">
+    <div class="jarvis-page-wrapper">
+    <div class="chat-corner tl"></div>
+    <div class="chat-corner tr"></div>
+    <div class="chat-corner bl"></div>
+    <div class="chat-corner br"></div>
+    <div class="chat-main-scan"></div>
+    <div class="taches-layout">
+      <!-- Liste des tâches -->
+      <div class="taches-panel">
+        <div class="taches-title">
+          <span>◈ TÂCHES AUTOMATISÉES</span>
+          <span id="taches-count" class="taches-count">0 tâches</span>
+        </div>
+        <div id="taches-list">
+          <span class="taches-empty">Aucune tâche. Créez-en une →</span>
+        </div>
+      </div>
+      <!-- Formulaire + infos -->
+      <div class="taches-form-col">
+        <!-- Créer une tâche -->
+        <div class="taches-panel">
+          <div class="taches-title">◈ NOUVELLE TÂCHE</div>
+          <div class="taches-form-body">
+            <div>
+              <div class="taches-field-lbl">NOM</div>
+              <input type="text" class="task-form-input" id="task-new-name" placeholder="Nom de la tâche...">
+            </div>
+            <div>
+              <div class="taches-field-lbl">COMMANDE</div>
+              <input type="text" class="task-form-input" id="task-new-cmd" placeholder="ex: python script.py">
+            </div>
+            <div>
+              <div class="taches-field-lbl">PLANIFICATION</div>
+              <select class="task-form-input" id="task-new-schedule">
+                <option value="manual">Manuel (déclenchement manuel)</option>
+                <option value="@startup">Au démarrage JARVIS</option>
+                <option value="*/5">Toutes les 5 min</option>
+                <option value="*/15">Toutes les 15 min</option>
+                <option value="*/30">Toutes les 30 min</option>
+                <option value="@hourly">Toutes les heures</option>
+                <option value="@daily">Une fois par jour</option>
+              </select>
+            </div>
+            <div class="taches-notify-row">
+              <label class="taches-notify-lbl">
+                <div class="tts-toggle on" id="task-notify-toggle"><div class="tts-knob"></div></div>
+                Notifier dans le chat
+              </label>
+            </div>
+            <button class="dsp-profile-btn active taches-create-btn" data-action="tacheCreate">⊕ CRÉER LA TÂCHE</button>
+          </div>
+        </div>
+        <!-- Suggestions IA -->
+        <div class="taches-panel taches-panel-purple">
+          <div class="taches-title taches-title-purple">◈ SUGGESTIONS IA</div>
+          <div class="taches-suggestions-col">
+            <button class="term-ai-chip" data-action="_jTacheCpuRam">◎ Surveillance CPU/RAM — 5min</button>
+            <button class="term-ai-chip" data-action="_jTacheBackupJarvis">◎ Sauvegarde JARVIS — quotidien</button>
+            <button class="term-ai-chip" data-action="_jTacheOllama">◎ Ping Ollama — 15min</button>
+            <button class="term-ai-chip" data-action="_jTacheTemp">◎ Nettoyage fichiers temp — quotidien</button>
+            <button class="term-ai-chip" data-action="_jTacheGpu">◎ Log GPU NVIDIA — 10min</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div><!-- end jarvis-page-wrapper -->
+  </div><!-- end tab-taches -->

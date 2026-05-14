@@ -1,0 +1,1472 @@
+  <!-- ═══ ONGLET DSP AUDIO ═══ -->
+  <div id="tab-dsp" class="tab-content">
+  <div class="hud-frame">
+    <div class="chat-corner tl"></div>
+    <div class="chat-corner tr"></div>
+    <div class="chat-corner bl"></div>
+    <div class="chat-corner br"></div>
+    <div class="chat-main-scan"></div>
+    <div class="dsp-layout">
+
+      <!-- Titre principal DSP -->
+      <div class="dsp-header">
+        <div class="dsp-header-left">
+          <span class="dsp-title">DSP AUDIO</span>
+          <span class="dsp-subtitle">// VOICE ENGINE — JARVIS</span>
+        </div>
+        <div class="dsp-header-right">
+          <span id="dsp-chain-status">◉ CHAÎNE ACTIVE</span>
+          <!-- CUDA status badge -->
+          <div id="dsp-cuda-badge" title="Statut accélération CUDA — Whisper STT · DeepFilterNet">
+            <span id="dsp-cuda-dot"></span>
+            <span id="dsp-cuda-label">CUDA —</span>
+            <span id="dsp-cuda-state"></span>
+          </div>
+          <!-- Découplage voix / DSP -->
+          <button id="dsp-voice-decouple-btn" class="dsp-action-btn-green" data-action="toggleDspVoice"
+            title="Voix JARVIS couplée au DSP — cliquer pour découpler">
+            ◈ VOIX DSP
+          </button>
+          <!-- SOC Rapport button -->
+          <button id="dsp-soc-btn" class="dsp-action-btn-green" data-action="dspSocReport" title="Rapport SOC vocal — état sécurité en temps réel">
+            <span id="dsp-soc-ico">⬡</span> SOC
+          </button>
+          <!-- DAT Recorder button -->
+          <button class="dsp-action-btn-amber" data-action="openDatModal">◈ DAT</button>
+          <!-- MIXER button -->
+          <button class="dsp-action-btn-cyan" data-action="openMixerModal">⊞ MIXER</button>
+          <!-- Toggle DSP master -->
+          <label class="row-ac-g6 cursor-ptr">
+            <span class="dsp-toggle-lbl">DSP</span>
+            <div class="tts-toggle" id="dsp-master-toggle" data-action="toggleDspMaster" title="Activer/désactiver le traitement DSP">
+              <div class="tts-knob"></div>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- ═══ AI AUDIO RACK — INTÉGRÉ ═══ -->
+      <div class="dsp-rack-section">
+
+        <!-- Signal chain indicator (compact) -->
+        <div class="rack-indicator">
+          <div class="rack-indicator-led"></div>
+          <span class="rack-indicator-lbl">VOICE PROCESSING ENGINE</span>
+          <span id="rack-sr-badge">48kHz · 16bit</span>
+        </div>
+
+
+        <!-- Signal path visualizer -->
+        <div class="rack-signal-path" id="rack-signal-path">
+          <div class="rack-signal-node active">TTS SOURCE</div>
+          <span class="rack-signal-arrow">──▶</span>
+          <div class="rack-signal-node active" id="rsp-df">DEEPFILTERNET</div>
+          <span class="rack-signal-arrow">──▶</span>
+          <div class="rack-signal-node active" id="rsp-comp">COMPRESSOR</div>
+          <span class="rack-signal-arrow">──▶</span>
+          <div class="rack-signal-node active" id="rsp-gain">GAIN</div>
+          <span class="rack-signal-arrow">──▶</span>
+          <div class="rack-signal-node active" id="rsp-stereo">STEREO</div>
+          <span class="rack-signal-arrow">──▶</span>
+          <div class="rack-signal-node active" id="rsp-analyser">ANALYSER</div>
+          <span class="rack-signal-arrow">──▶</span>
+          <div class="rack-signal-node" id="rsp-fx">FX RACK</div>
+          <span class="rack-signal-arrow">──▶</span>
+          <div class="rack-signal-node active">OUTPUT L+R</div>
+        </div>
+
+        <!-- ═══ UNITÉ 1 — DEEPFILTERNET IA ═══ -->
+        <div class="rack-unit bypassed" id="rack-unit-df">
+          <div class="rack-unit-header">
+            <div class="rack-unit-num">01</div>
+            <div class="rack-unit-name">DEEPFILTERNET</div>
+            <div class="rack-unit-tag tag-ia">◈ IA DÉBRUITAGE</div>
+            <div id="rack-df-status-tag" class="rack-unit-tag tag-off">NON DISPONIBLE</div>
+            <button class="rack-bypass-btn off" id="rack-df-bypass" data-action="rackToggleDf" title="Activer/désactiver DeepFilterNet">⏻</button>
+          </div>
+          <div class="rack-unit-body">
+            <div class="rack-cols-2">
+              <!-- Colonne gauche : paramètres -->
+              <div class="col-g10">
+                <div class="rack-fader-row">
+                  <span class="rack-fader-lbl">ATTÉNUATION</span>
+                  <input type="range" class="rack-fader fader-purple" id="rack-df-atten" min="0" max="100" value="100" step="1" data-oninput="rackDfParam" data-oninput-arg="atten">
+                  <span class="rack-fader-val" id="rack-df-atten-val">100 dB</span>
+                </div>
+                <div class="rack-fader-row">
+                  <span class="rack-fader-lbl">POST-FILTRE</span>
+                  <div class="fl1 row-ac-g8">
+                    <div class="tts-toggle" id="rack-df-postfilter" data-action="rackDfTogglePost"><div class="tts-knob"></div></div>
+                    <span id="rack-df-post-lbl">ACTIVÉ</span>
+                  </div>
+                  <span class="rack-fader-val rack-fader-val-purple">IA</span>
+                </div>
+                <div class="rack-display">
+                  <span>
+                    <span class="rack-display-lbl">SAMPLE RATE</span><br>
+                    <span id="rack-df-sr">48000 Hz</span>
+                  </span>
+                  <span>
+                    <span class="rack-display-lbl">PROCESSEUR</span><br>
+                    <span class="rack-val-purple">CPU</span>
+                  </span>
+                  <span>
+                    <span class="rack-display-lbl">MODÈLE</span><br>
+                    <span class="rack-val-sm">DeepFilterNet3</span>
+                  </span>
+                </div>
+              </div>
+              <!-- Colonne droite : description + état -->
+              <div class="col-g8">
+                <div class="rack-desc-card-purple">
+                  <div class="rack-card-title-purple">◈ DESCRIPTION</div>
+                  <div class="rack-card-text">
+                    Réseau de neurones profond entraîné sur des milliers d'heures de parole.<br>
+                    Supprime bruits de fond, artefacts TTS et imperfections spectrales.<br>
+                    Traitement post-TTS sur CPU — compatible RTX 5080 via CPU fallback.
+                  </div>
+                </div>
+                <div class="rack-status-card">
+                  <div class="rack-card-title">ÉTAT SYSTÈME</div>
+                  <div class="rack-status-row">
+                    <span class="rack-status-key">DISPONIBLE</span>
+                    <span id="rack-df-avail">NON</span>
+                  </div>
+                  <div class="rack-status-row">
+                    <span class="rack-status-key">ACTIF</span>
+                    <span id="rack-df-active">NON</span>
+                  </div>
+                  <div class="rack-status-row">
+                    <span class="rack-status-key">OLLAMA LATENCE</span>
+                    <span id="rack-ollama-lat" class="rack-meta-val">—</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ═══ UNITÉ 3 — COMPRESSEUR DYNAMIQUE ═══ -->
+        <div class="rack-unit" id="rack-unit-comp">
+          <div class="rack-unit-header">
+            <div class="rack-unit-num">03</div>
+            <div class="rack-unit-name">COMPRESSEUR DYNAMIQUE</div>
+            <div class="rack-unit-tag">VCA STYLE</div>
+            <div class="rack-unit-tag tag-ok">ACTIF</div>
+            <button class="rack-bypass-btn on" id="rack-comp-bypass" data-action="rackToggleComp" title="Bypass compresseur">⏻</button>
+          </div>
+          <div class="rack-unit-body">
+            <div class="rack-comp-body">
+              <!-- Sliders 2x2 -->
+              <div class="rack-comp-grid">
+                <div class="rack-fader-row rack-fader-row-v">
+                  <div class="rack-fader-hdr">
+                    <span class="rack-fader-lbl rack-fader-lbl-auto">SEUIL</span>
+                    <span class="rack-fader-val" id="rack-comp-thresh-val">-24 dB</span>
+                  </div>
+                  <input type="range" class="rack-fader fader-amber" id="rack-comp-thresh" min="-60" max="0" value="-24" step="1" data-oninput="rackSyncComp" data-oninput-arg="threshold">
+                </div>
+                <div class="rack-fader-row rack-fader-row-v">
+                  <div class="rack-fader-hdr">
+                    <span class="rack-fader-lbl rack-fader-lbl-auto">RATIO</span>
+                    <span class="rack-fader-val" id="rack-comp-ratio-val">4:1</span>
+                  </div>
+                  <input type="range" class="rack-fader fader-amber" id="rack-comp-ratio" min="1" max="20" value="4" step="0.5" data-oninput="rackSyncComp" data-oninput-arg="ratio">
+                </div>
+                <div class="rack-fader-row rack-fader-row-v">
+                  <div class="rack-fader-hdr">
+                    <span class="rack-fader-lbl rack-fader-lbl-auto">ATTAQUE</span>
+                    <span class="rack-fader-val" id="rack-comp-att-val">3 ms</span>
+                  </div>
+                  <input type="range" class="rack-fader fader-amber" id="rack-comp-att" min="1" max="200" value="3" step="1" data-oninput="rackSyncComp" data-oninput-arg="attack">
+                </div>
+                <div class="rack-fader-row rack-fader-row-v">
+                  <div class="rack-fader-hdr">
+                    <span class="rack-fader-lbl rack-fader-lbl-auto">RELÂCHE</span>
+                    <span class="rack-fader-val" id="rack-comp-rel-val">250 ms</span>
+                  </div>
+                  <input type="range" class="rack-fader fader-amber" id="rack-comp-rel" min="10" max="1000" value="250" step="10" data-oninput="rackSyncComp" data-oninput-arg="release">
+                </div>
+              </div>
+              <!-- GR Meter canvas -->
+              <div class="rack-gr-block">
+                <span class="rack-display-lbl rack-display-lbl-ct">RÉDUCTION GAIN</span>
+                <canvas id="rack-gr-canvas" width="480" height="52"></canvas>
+                <span id="rack-comp-gr" class="rack-lcd-val rack-lcd-val-lg">0.0 dB</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ UNITÉ 4 — STEREO WIDENER (HAAS) ═══ -->
+        <div class="rack-unit" id="rack-unit-stereo">
+          <div class="rack-unit-header">
+            <div class="rack-unit-num">04</div>
+            <div class="rack-unit-name">STEREO WIDENER</div>
+            <div class="rack-unit-tag tag-ok">HAAS EFFECT</div>
+            <div class="rack-unit-tag" id="rack-stereo-tag">L + R</div>
+            <button class="rack-bypass-btn on" id="rack-stereo-bypass" data-action="rackToggleStereo" title="Activer/désactiver le stéréo widener">⏻</button>
+          </div>
+          <div class="rack-unit-body">
+            <div class="rack-cols-2">
+              <!-- Colonne gauche : paramètres -->
+              <div class="col-g10">
+                <div class="rack-fader-row">
+                  <span class="rack-fader-lbl">LARGEUR</span>
+                  <input type="range" class="rack-fader fader-cyan" id="rack-stereo-width" min="0" max="100" value="85" step="1" data-oninput="rackSyncStereoWidth">
+                  <span class="rack-fader-val" id="rack-stereo-width-val">85%</span>
+                </div>
+                <div class="rack-fader-row">
+                  <span class="rack-fader-lbl">DÉLAI R</span>
+                  <input type="range" class="rack-fader fader-cyan" id="rack-haas-delay" min="1" max="30" value="18" step="0.5" data-oninput="rackSyncHaasDelay">
+                  <span class="rack-fader-val" id="rack-haas-delay-val">18.0 ms</span>
+                </div>
+                <!-- Corrélation stéréo -->
+                <div>
+                  <div class="rack-meter-label rack-meter-label-mb">CORRÉLATION L/R</div>
+                  <div class="rack-corr-row">
+                    <span class="rack-corr-neg">-1</span>
+                    <div class="fl1 rack-corr-track">
+                      <!-- barre de corrélation (dynamique) -->
+                      <div id="rack-corr-fill"></div>
+                      <!-- marqueur centre fixe (position 0) -->
+                      <div class="rack-corr-center"></div>
+                    </div>
+                    <span class="rack-corr-pos">+1</span>
+                    <span class="rack-fader-val" id="rack-corr-val">—</span>
+                  </div>
+                </div>
+              </div>
+              <!-- Colonne droite : schéma + infos -->
+              <div class="col-g8">
+                <div class="rack-info-card">
+                  <div class="rack-card-title-sm">◈ HAAS EFFECT</div>
+                  <div class="rack-lbl-sm">
+                    Canal L → signal direct<br>
+                    Canal R → délai Haas (1–30 ms)<br>
+                    Cerveau = largeur stéréo naturelle<br>
+                    Mono compatible : centre préservé
+                  </div>
+                </div>
+                <div class="rack-info-card row-g16">
+                  <div class="col-g4">
+                    <div class="rack-meter-label">CANAL L</div>
+                    <div class="rack-meter rack-meter-w70"><div class="rack-meter-fill" id="rack-vu-stereo-l"></div></div>
+                    <div class="rack-meter-label">CANAL R</div>
+                    <div class="rack-meter rack-meter-w70"><div class="rack-meter-fill rack-meter-fill-lr" id="rack-vu-stereo-r"></div></div>
+                  </div>
+                  <div class="col-g4-ac">
+                    <div class="rack-meter-label">FORMAT</div>
+                    <span id="rack-stereo-fmt" class="rack-meta-val">STEREO WAV</span>
+                    <div class="rack-meter-label rack-meter-label-mt">SR</div>
+                    <span id="rack-stereo-sr" class="rack-meta-val-dim">—</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ UNITÉ 5 — FX RACK MULTI-EFFETS ═══ -->
+        <div class="rack-unit bypassed rack-unit-fx" id="rack-unit-fx">
+          <div class="rack-screw tl"></div><div class="rack-screw tr"></div>
+          <div class="rack-screw bl"></div><div class="rack-screw br"></div>
+          <div class="rack-unit-header">
+            <div class="rack-unit-num rack-unit-num-amber">05</div>
+            <div class="rack-unit-name">FX RACK</div>
+            <div class="rack-unit-tag rack-unit-tag-amber">MULTI-EFFETS</div>
+            <div class="rack-unit-tag tag-ok" id="fx-cuda-tag">◈ WEB AUDIO</div>
+            <div class="rack-unit-hdr-right">
+              <span id="fx-proc-label">BYPASS</span>
+              <button class="rack-bypass-btn off" id="rack-fx-bypass" data-action="rackToggleFx" title="Activer FX Rack">⏻</button>
+            </div>
+          </div>
+
+          <div class="rack-unit-body rack-unit-body-sm">
+
+            <!-- ── LIGNE UNIQUE : TABS TYPE + SÉPARATEUR + MÉMOIRES M1-M10 ── -->
+            <div class="col-g2">
+              <!-- Row 1 : type tabs | sep | M1-M10 -->
+              <div class="rack-fx-tabs-row" id="fx2-tabs">
+                <button class="fx2-tab fx2-active" id="fx2t-reverb"  data-action="fx2SetType" data-args='["reverb"]'>REVERB</button>
+                <button class="fx2-tab"            id="fx2t-delay"   data-action="fx2SetType" data-args='["delay"]'>DELAY</button>
+                <button class="fx2-tab"            id="fx2t-chorus"  data-action="fx2SetType" data-args='["chorus"]'>CHORUS</button>
+                <button class="fx2-tab"            id="fx2t-flanger" data-action="fx2SetType" data-args='["flanger"]'>FLANGER</button>
+                <button class="fx2-tab"            id="fx2t-echo"    data-action="fx2SetType" data-args='["echo"]'>ECHO</button>
+                <button class="fx2-tab"            id="fx2t-phaser"  data-action="fx2SetType" data-args='["phaser"]'>PHASER</button>
+                <button class="fx2-tab"            id="fx2t-exciter" data-action="fx2SetType" data-args='["exciter"]'>EXCITER</button>
+                <div id="fx-mem-sep"></div>
+                <button class="eq-mem-btn rack-mem-btn fx-mem-btn" id="fx-mem-btn-0" title="M1 · Court=rappel · Long=sauvegarder">M1</button>
+                <button class="eq-mem-btn rack-mem-btn fx-mem-btn" id="fx-mem-btn-1" title="M2 · Court=rappel · Long=sauvegarder">M2</button>
+                <button class="eq-mem-btn rack-mem-btn fx-mem-btn" id="fx-mem-btn-2" title="M3 · Court=rappel · Long=sauvegarder">M3</button>
+                <button class="eq-mem-btn rack-mem-btn fx-mem-btn" id="fx-mem-btn-3" title="M4 · Court=rappel · Long=sauvegarder">M4</button>
+                <button class="eq-mem-btn rack-mem-btn fx-mem-btn" id="fx-mem-btn-4" title="M5 · Court=rappel · Long=sauvegarder">M5</button>
+                <button class="eq-mem-btn rack-mem-btn fx-mem-btn" id="fx-mem-btn-5" title="M6 · Court=rappel · Long=sauvegarder">M6</button>
+                <button class="eq-mem-btn rack-mem-btn fx-mem-btn" id="fx-mem-btn-6" title="M7 · Court=rappel · Long=sauvegarder">M7</button>
+                <button class="eq-mem-btn rack-mem-btn fx-mem-btn" id="fx-mem-btn-7" title="M8 · Court=rappel · Long=sauvegarder">M8</button>
+                <button class="eq-mem-btn rack-mem-btn fx-mem-btn" id="fx-mem-btn-8" title="M9 · Court=rappel · Long=sauvegarder">M9</button>
+                <button class="eq-mem-btn rack-mem-btn fx-mem-btn" id="fx-mem-btn-9" title="M10 · Court=rappel · Long=sauvegarder">M10</button>
+              </div>
+              <!-- Row 2 : ✕ alignés sur M1-M10 (spacer JS) -->
+              <div id="fx-mem-clr-row">
+                <div id="fx-mem-spacer"></div>
+                <button class="eq-mem-clr" data-action="fxMemClear" data-args='[0]' title="Effacer M1">✕</button>
+                <button class="eq-mem-clr" data-action="fxMemClear" data-args='[1]' title="Effacer M2">✕</button>
+                <button class="eq-mem-clr" data-action="fxMemClear" data-args='[2]' title="Effacer M3">✕</button>
+                <button class="eq-mem-clr" data-action="fxMemClear" data-args='[3]' title="Effacer M4">✕</button>
+                <button class="eq-mem-clr" data-action="fxMemClear" data-args='[4]' title="Effacer M5">✕</button>
+                <button class="eq-mem-clr" data-action="fxMemClear" data-args='[5]' title="Effacer M6">✕</button>
+                <button class="eq-mem-clr" data-action="fxMemClear" data-args='[6]' title="Effacer M7">✕</button>
+                <button class="eq-mem-clr" data-action="fxMemClear" data-args='[7]' title="Effacer M8">✕</button>
+                <button class="eq-mem-clr" data-action="fxMemClear" data-args='[8]' title="Effacer M9">✕</button>
+                <button class="eq-mem-clr" data-action="fxMemClear" data-args='[9]' title="Effacer M10">✕</button>
+              </div>
+            </div>
+
+            <!-- ── PLUGIN TILE + PRESETS + COMPTEURS dB ── -->
+            <div class="col-g6">
+              <!-- VU L+R conservés hors-vue pour la logique JS (display:none) -->
+              <div class="d-none">
+                <div class="fx-vu-strip" id="fx-vu-l">
+                  <div class="fx-vu-led r" id="fvl-7"></div><div class="fx-vu-led r" id="fvl-6"></div>
+                  <div class="fx-vu-led y" id="fvl-5"></div><div class="fx-vu-led y" id="fvl-4"></div>
+                  <div class="fx-vu-led g" id="fvl-3"></div><div class="fx-vu-led g" id="fvl-2"></div>
+                  <div class="fx-vu-led g" id="fvl-1"></div><div class="fx-vu-led g" id="fvl-0"></div>
+                </div>
+                <div class="fx-vu-strip" id="fx-vu-r">
+                  <div class="fx-vu-led r" id="fvr-7"></div><div class="fx-vu-led r" id="fvr-6"></div>
+                  <div class="fx-vu-led y" id="fvr-5"></div><div class="fx-vu-led y" id="fvr-4"></div>
+                  <div class="fx-vu-led g" id="fvr-3"></div><div class="fx-vu-led g" id="fvr-2"></div>
+                  <div class="fx-vu-led g" id="fvr-1"></div><div class="fx-vu-led g" id="fvr-0"></div>
+                </div>
+              </div>
+              <!-- Row 1 : tuile plugin + presets -->
+              <div class="row-as-g10">
+                <!-- Tuile plugin (gauche) -->
+                <div id="fx2-plugin">
+                  <!-- Rempli par fx2Render() -->
+                </div>
+                <!-- Presets (droite) -->
+                <div id="fx2-presets">
+                  <!-- Rempli par fx2Render() -->
+                </div>
+              </div>
+              <!-- Row 2 : compteurs LCD L/R dB sous les curseurs -->
+              <div class="row-g8">
+                <div class="rack-lcd-block rack-lcd-block-w88">
+                  <span class="rack-display-lbl">FX L</span>
+                  <span id="fx-db-l" class="rack-lcd-val rack-lcd-val-lg">-∞ dB</span>
+                </div>
+                <div class="rack-lcd-block rack-lcd-block-w88">
+                  <span class="rack-display-lbl">FX R</span>
+                  <span id="fx-db-r" class="rack-lcd-val rack-lcd-val-lg">-∞ dB</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ═══ UNITÉ 6 — ANALYSEUR SPECTRAL STÉRÉO ═══ -->
+        <div class="rack-unit" id="rack-unit-analyser">
+          <div class="rack-unit-header">
+            <div class="rack-unit-num">06</div>
+            <div class="rack-unit-name">ANALYSEUR SPECTRAL</div>
+            <div class="rack-unit-tag tag-ia">TEMPS RÉEL</div>
+            <div class="rack-unit-tag tag-ok">L + R</div>
+            <button class="rack-bypass-btn on" id="rack-analyser-bypass" data-action="rackToggleAnalyser" title="Activer/désactiver l'analyseur">⏻</button>
+          </div>
+          <div class="rack-unit-body rack-unit-body-tight">
+            <!-- Boutons mode rack-spectrum -->
+            <div class="dsp-spec-modes">
+              <button class="spec-mode-btn active" id="rspec-mirror" data-action="setRackSpecMode" data-args='["mirror"]'>MIRROR</button>
+              <button class="spec-mode-btn" id="rspec-scope"  data-action="setRackSpecMode" data-args='["scope"]'>SCOPE</button>
+              <button class="spec-mode-btn" id="rspec-piano"  data-action="setRackSpecMode" data-args='["piano"]'>PIANO</button>
+              <button class="spec-mode-btn" id="rspec-split"  data-action="setRackSpecMode" data-args='["split"]'>SPLIT</button>
+            </div>
+            <!-- Canvas spectrum stéréo -->
+            <div class="rack-canvas-wrap">
+              <canvas id="rack-spectrum-canvas" width="1200" height="220"></canvas>
+              <div class="rack-canvas-lbl-l">L</div>
+              <div class="rack-canvas-lbl-r">R</div>
+            </div>
+            <!-- Labels fréquences log (positionnés par JS) -->
+            <div id="rack-freq-labels"></div>
+            <!-- Goniomètre + LCD peak (sans barres VU) -->
+            <div class="rack-gonio-row">
+              <div>
+                <div class="rack-meter-label rack-meter-label-mb">GONIOMÈTRE (PHASE)</div>
+                <canvas id="rack-gonio-canvas" width="80" height="80"></canvas>
+              </div>
+              <div class="rack-peak-row">
+                <div class="rack-lcd-block rack-lcd-block-w88">
+                  <span class="rack-display-lbl">PEAK L</span>
+                  <span id="rack-peak-l-db" class="rack-lcd-val rack-lcd-val-lg">-∞ dB</span>
+                </div>
+                <div class="rack-lcd-block rack-lcd-block-w88">
+                  <span class="rack-display-lbl">PEAK R</span>
+                  <span id="rack-peak-r-db" class="rack-lcd-val rack-lcd-val-lg">-∞ dB</span>
+                </div>
+                <div class="rack-lcd-block rack-lcd-block-w88">
+                  <span class="rack-display-lbl">RMS</span>
+                  <span id="rack-rms-val" class="rack-lcd-val rack-lcd-val-lg">-∞ dB</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ═══ UNITÉ 6 — GAIN MASTER + SORTIE ═══ -->
+        <div class="rack-output">
+          <!-- Header — style dsp-panel-title -->
+          <div class="rack-output-hdr">
+            <span class="rack-output-title">◈ OUTPUT — GAIN MASTER</span>
+            <div class="rack-fader-row fl1">
+              <span class="rack-fader-lbl rack-fader-lbl-50">GAIN</span>
+              <input type="range" class="rack-fader fader-green" id="rack-gain" min="-12" max="12" value="0" step="0.5" data-oninput="rackSyncGain">
+              <span class="rack-fader-val" id="rack-gain-val">0.0 dB</span>
+            </div>
+            <button class="dsp-profile-btn dsp-profile-btn-sm" data-action="rackApplyAll">✓ APPLIQUER</button>
+            <button class="dsp-profile-btn dsp-profile-btn-sm" data-action="rackTestVoice">▶ TEST</button>
+            <button class="rack-bypass-btn on" id="dsp-master-pwr" data-action="rackToggleMaster" title="Marche / Arrêt DSP global">⏻</button>
+          </div>
+          <!-- VU-mètre canvas professionnel L+R -->
+          <div class="rack-canvas-wrap">
+            <canvas id="rack-vu-meter" width="1400" height="168"></canvas>
+            <!-- Valeurs crête DOM (mise à jour par JS pour compatibilité) -->
+            <div id="rack-vu-l"></div>
+            <div id="rack-vu-r"></div>
+            <span id="rack-peak-db"></span>
+          </div>
+        </div>
+
+      </div><!-- end dsp-rack-section -->
+
+      <!-- Analyseur spectral grand format -->
+      <div class="dsp-analyzer-wrap">
+        <div class="dsp-analyzer-header">
+          <span id="spec-fft-label">◈ SPECTRAL ANALYZER — FFT 2048</span>
+          <div class="dsp-analyzer-right">
+            <!-- View modes -->
+            <div class="row-g2">
+              <button class="spec-mode-btn active" data-mode="bars"      data-action="setSpecMode" data-args='["bars"]'>BARS</button>
+              <button class="spec-mode-btn"         data-mode="line"      data-action="setSpecMode" data-args='["line"]'>LINE</button>
+              <button class="spec-mode-btn"         data-mode="fill"      data-action="setSpecMode" data-args='["fill"]'>FILL</button>
+              <button class="spec-mode-btn"         data-mode="mirror"    data-action="setSpecMode" data-args='["mirror"]'>MIRROR</button>
+              <button class="spec-mode-btn"         data-mode="waterfall" data-action="setSpecMode" data-args='["waterfall"]'>WFALL</button>
+              <button class="spec-mode-btn"         data-mode="wave"      data-action="setSpecMode" data-args='["wave"]'>WAVE</button>
+              <button class="spec-mode-btn"         data-mode="dots"      data-action="setSpecMode" data-args='["dots"]'>DOTS</button>
+              <button class="spec-mode-btn"         data-mode="radial"    data-action="setSpecMode" data-args='["radial"]'>RADIAL</button>
+            </div>
+            <!-- FFT size -->
+            <div class="sep"></div>
+            <div class="row-ac-g2">
+              <span class="dsp-fft-lbl">FFT</span>
+              <button class="spec-mode-btn" data-fft="512"  data-action="setSpecFft" data-args='[512]'>512</button>
+              <button class="spec-mode-btn" data-fft="1024" data-action="setSpecFft" data-args='[1024]'>1k</button>
+              <button class="spec-mode-btn active" data-fft="2048" data-action="setSpecFft" data-args='[2048]'>2k</button>
+              <button class="spec-mode-btn" data-fft="4096" data-action="setSpecFft" data-args='[4096]'>4k</button>
+              <button class="spec-mode-btn" data-fft="8192" data-action="setSpecFft" data-args='[8192]'>8k</button>
+            </div>
+            <span id="dsp-db-val" class="dsp-db-val">-∞ dB</span>
+          </div>
+        </div>
+        <canvas id="dsp-canvas"></canvas>
+        <div class="dsp-freq-labels">
+          <span>20Hz</span><span>63Hz</span><span>125Hz</span><span>250Hz</span>
+          <span>500Hz</span><span>1kHz</span><span>2kHz</span><span>4kHz</span>
+          <span>8kHz</span><span>16kHz</span><span>20kHz</span>
+        </div>
+      </div>
+
+      <!-- 3 panneaux : EQ / Effets / Voix -->
+      <div class="dsp-panels-grid">
+
+        <!-- ANALYSEUR SPECTRAL + EQ PARAMÉTRIQUE — unité fusionnée -->
+        <div class="dsp-panel dsp-panel-full" id="dsp-panel-eq">
+          <div class="dsp-panel-title dsp-panel-title-flex">
+            <span>◈ ANALYSEUR SPECTRAL + EQ PARAMÉTRIQUE</span>
+            <div class="row-ac-g4">
+              <!-- FFT size -->
+              <span class="dsp-fft-lbl">FFT</span>
+              <button class="spec-mode-btn" data-fft="1024" data-action="setSpecFft" data-args='[1024]'>1k</button>
+              <button class="spec-mode-btn active" data-fft="2048" data-action="setSpecFft" data-args='[2048]'>2k</button>
+              <button class="spec-mode-btn" data-fft="4096" data-action="setSpecFft" data-args='[4096]'>4k</button>
+              <button class="spec-mode-btn" data-fft="8192" data-action="setSpecFft" data-args='[8192]'>8k</button>
+              <div class="dsp-fft-sep"></div>
+              <!-- Couple JARVIS -->
+              <button id="eq-voice-couple-btn" data-action="toggleEqVoiceCouple"
+                      title="Couple l'EQ à la voix JARVIS">
+                <span id="eq-couple-dot"></span>
+                <span id="eq-couple-label">COUPLÉ VOIX</span>
+              </button>
+              <button class="dsp-wave-btn" data-action="eqPushNow" title="Envoyer à JARVIS">⬆ ENVOYER</button>
+              <button class="dsp-wave-btn" data-action="eqReset">↺ RESET</button>
+              <div class="dsp-fft-sep"></div>
+              <button class="rack-bypass-btn on" id="eq-panel-bypass" data-action="toggleEqPanel" title="Activer/désactiver l'EQ+Analyseur">⏻</button>
+            </div>
+          </div>
+          <!-- Canvas courbe de réponse + spectre fusionné -->
+          <div class="dsp-eq-glow-wrap">
+            <canvas id="eq-curve-canvas"></canvas>
+          </div>
+          <!-- Presets EQ -->
+          <div class="rack-eq-presets rack-eq-row--eq rack-eq-presets-mt" id="dsp-eq-presets">
+            <span class="rack-preset-label">EQ</span>
+            <button class="rack-eq-preset-btn active" data-eq-preset="FLAT"      data-action="applyEqPreset" data-args='["FLAT"]'>FLAT</button>
+            <button class="rack-eq-preset-btn"        data-eq-preset="VOIX"      data-action="applyEqPreset" data-args='["VOIX"]'>VOIX</button>
+            <button class="rack-eq-preset-btn"        data-eq-preset="RADIO"     data-action="applyEqPreset" data-args='["RADIO"]'>RADIO</button>
+            <button class="rack-eq-preset-btn"        data-eq-preset="BROADCAST" data-action="applyEqPreset" data-args='["BROADCAST"]'>BROADCAST</button>
+            <button class="rack-eq-preset-btn"        data-eq-preset="TELEPHONE" data-action="applyEqPreset" data-args='["TELEPHONE"]'>TÉLÉPHONE</button>
+            <button class="rack-eq-preset-btn"        data-eq-preset="CINEMA"    data-action="applyEqPreset" data-args='["CINEMA"]'>CINÉMA</button>
+            <button class="rack-eq-preset-btn"        data-eq-preset="PRESENCE"  data-action="applyEqPreset" data-args='["PRESENCE"]'>PRÉSENCE</button>
+            <button class="rack-eq-preset-btn"        data-eq-preset="STUDIO"    data-action="applyEqPreset" data-args='["STUDIO"]'>STUDIO</button>
+            <button class="rack-eq-preset-btn"        data-eq-preset="GRAVE"     data-action="applyEqPreset" data-args='["GRAVE"]'>GRAVE</button>
+            <button class="rack-eq-preset-btn"        data-eq-preset="SCIFI"     data-action="applyEqPreset" data-args='["SCIFI"]'>SCI-FI</button>
+          </div>
+          <!-- Presets spectraux -->
+          <div class="rack-eq-presets rack-eq-row--spec rack-eq-presets-bt">
+            <span class="rack-preset-label rack-preset-label--spec">SPECTRE</span>
+            <button class="rack-eq-preset-btn rack-spec-btn active" id="spr-jarvis"   data-action="applySpecPreset" data-args='["jarvis"]'>JARVIS</button>
+            <button class="rack-eq-preset-btn rack-spec-btn"        id="spr-plasma"   data-action="applySpecPreset" data-args='["plasma"]'>PLASMA</button>
+            <button class="rack-eq-preset-btn rack-spec-btn"        id="spr-fire"     data-action="applySpecPreset" data-args='["fire"]'>FIRE</button>
+            <button class="rack-eq-preset-btn rack-spec-btn"        id="spr-matrix"   data-action="applySpecPreset" data-args='["matrix"]'>MATRIX</button>
+            <button class="rack-eq-preset-btn rack-spec-btn"        id="spr-void"     data-action="applySpecPreset" data-args='["void"]'>VOID</button>
+            <button class="rack-eq-preset-btn rack-spec-btn"        id="spr-neon"     data-action="applySpecPreset" data-args='["neon"]'>NEON</button>
+            <button class="rack-eq-preset-btn rack-spec-btn"        id="spr-sunset"   data-action="applySpecPreset" data-args='["sunset"]'>SUNSET</button>
+            <button class="rack-eq-preset-btn rack-spec-btn"        id="spr-aurora"   data-action="applySpecPreset" data-args='["aurora"]'>AURORA</button>
+            <button class="rack-eq-preset-btn rack-spec-btn"        id="spr-steel"    data-action="applySpecPreset" data-args='["steel"]'>STEEL</button>
+            <button class="rack-eq-preset-btn rack-spec-btn"        id="spr-storm"    data-action="applySpecPreset" data-args='["storm"]'>STORM</button>
+          </div>
+          <!-- ── MÉMOIRES EQ (10 slots) ── -->
+          <div class="rack-eq-presets rack-eq-row--mem rack-eq-presets-bt">
+            <span class="rack-preset-label rack-preset-label--mem">MEM</span>
+            <button class="eq-mem-btn rack-mem-btn" id="eq-mem-btn-0" title="M1 · Clic court=rappel · Clic long=sauvegarder">M1</button>
+            <button class="eq-mem-btn rack-mem-btn" id="eq-mem-btn-1" title="M2 · Clic court=rappel · Clic long=sauvegarder">M2</button>
+            <button class="eq-mem-btn rack-mem-btn" id="eq-mem-btn-2" title="M3 · Clic court=rappel · Clic long=sauvegarder">M3</button>
+            <button class="eq-mem-btn rack-mem-btn" id="eq-mem-btn-3" title="M4 · Clic court=rappel · Clic long=sauvegarder">M4</button>
+            <button class="eq-mem-btn rack-mem-btn" id="eq-mem-btn-4" title="M5 · Clic court=rappel · Clic long=sauvegarder">M5</button>
+            <button class="eq-mem-btn rack-mem-btn" id="eq-mem-btn-5" title="M6 · Clic court=rappel · Clic long=sauvegarder">M6</button>
+            <button class="eq-mem-btn rack-mem-btn" id="eq-mem-btn-6" title="M7 · Clic court=rappel · Clic long=sauvegarder">M7</button>
+            <button class="eq-mem-btn rack-mem-btn" id="eq-mem-btn-7" title="M8 · Clic court=rappel · Clic long=sauvegarder">M8</button>
+            <button class="eq-mem-btn rack-mem-btn" id="eq-mem-btn-8" title="M9 · Clic court=rappel · Clic long=sauvegarder">M9</button>
+            <button class="eq-mem-btn rack-mem-btn" id="eq-mem-btn-9" title="M10 · Clic court=rappel · Clic long=sauvegarder">M10</button>
+          </div>
+          <!-- Sous-ligne ✕ clear — alignée sur les boutons MEM -->
+          <div class="rack-mem-clr-row">
+            <span class="rack-preset-label rack-preset-label--mem rack-preset-label-ghost">MEM</span>
+            <button class="eq-mem-clr" id="eq-mem-0" data-action="eqMemClear" data-args='[0]' title="Effacer M1">✕</button>
+            <button class="eq-mem-clr" id="eq-mem-1" data-action="eqMemClear" data-args='[1]' title="Effacer M2">✕</button>
+            <button class="eq-mem-clr" id="eq-mem-2" data-action="eqMemClear" data-args='[2]' title="Effacer M3">✕</button>
+            <button class="eq-mem-clr" id="eq-mem-3" data-action="eqMemClear" data-args='[3]' title="Effacer M4">✕</button>
+            <button class="eq-mem-clr" id="eq-mem-4" data-action="eqMemClear" data-args='[4]' title="Effacer M5">✕</button>
+            <button class="eq-mem-clr" id="eq-mem-5" data-action="eqMemClear" data-args='[5]' title="Effacer M6">✕</button>
+            <button class="eq-mem-clr" id="eq-mem-6" data-action="eqMemClear" data-args='[6]' title="Effacer M7">✕</button>
+            <button class="eq-mem-clr" id="eq-mem-7" data-action="eqMemClear" data-args='[7]' title="Effacer M8">✕</button>
+            <button class="eq-mem-clr" id="eq-mem-8" data-action="eqMemClear" data-args='[8]' title="Effacer M9">✕</button>
+            <button class="eq-mem-clr" id="eq-mem-9" data-action="eqMemClear" data-args='[9]' title="Effacer M10">✕</button>
+          </div>
+
+          <!-- 4 bandes EQ — cards paramétriques -->
+          <div class="rack-eq-band-grid">
+
+            <!-- LOW -->
+            <div class="eq-band-card eq-band-low">
+              <div class="row-sb-ac">
+                <span class="eq-band-label">LOW</span>
+                <button class="eq-bypass-btn" id="eq-byp-low" title="Bypass bande" data-action="eqToggleBypass" data-args='["low"]'></button>
+              </div>
+              <div class="eq-type-row">
+                <button class="eq-type-btn" data-band="low" data-type="highpass" data-action="eqSetType" data-args='["low","highpass"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,12 L7,12 C11,12 14,7 17,7 L38,7"/></svg><span>HP</span>
+                </button>
+                <button class="eq-type-btn active" data-band="low" data-type="lowshelf" data-action="eqSetType" data-args='["low","lowshelf"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,3 L9,3 C13,3 15,7 19,7 L38,7"/></svg><span>LS</span>
+                </button>
+                <button class="eq-type-btn" data-band="low" data-type="peaking" data-action="eqSetType" data-args='["low","peaking"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,1 20,1 C28,1 32,7 38,7"/></svg><span>PK</span>
+                </button>
+                <button class="eq-type-btn" data-band="low" data-type="notch" data-action="eqSetType" data-args='["low","notch"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,13 20,13 C28,13 32,7 38,7"/></svg><span>NOTCH</span>
+                </button>
+              </div>
+              <div class="eq-counters">
+                <div class="eq-counter"><span class="eq-counter-val" id="eq-fc-low">80 Hz</span><span class="eq-counter-lbl">FREQ</span></div>
+                <div class="eq-counter"><span class="eq-counter-val" id="eq-gc-low">0.0</span><span class="eq-counter-lbl">GAIN dB</span></div>
+                <div class="eq-counter"><span class="eq-counter-val" id="eq-qc-low">0.7</span><span class="eq-counter-lbl">Q</span></div>
+              </div>
+              <div class="row-ac-g6">
+                <input type="range" class="dsp-hslider eq-slider-low" id="eq-low" min="-12" max="12" value="0" step="0.5" data-oninput="setEqBand" data-oninput-arg="low">
+                <span class="dsp-hslider-val dsp-hslider-val-r" id="eq-low-val">0.0 dB</span>
+              </div>
+            </div>
+
+            <!-- MID -->
+            <div class="eq-band-card eq-band-mid">
+              <div class="row-sb-ac">
+                <span class="eq-band-label">MID</span>
+                <button class="eq-bypass-btn" id="eq-byp-mid" title="Bypass bande" data-action="eqToggleBypass" data-args='["mid"]'></button>
+              </div>
+              <div class="eq-type-row">
+                <button class="eq-type-btn" data-band="mid" data-type="lowshelf" data-action="eqSetType" data-args='["mid","lowshelf"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,3 L9,3 C13,3 15,7 19,7 L38,7"/></svg><span>LS</span>
+                </button>
+                <button class="eq-type-btn active" data-band="mid" data-type="peaking" data-action="eqSetType" data-args='["mid","peaking"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,1 20,1 C28,1 32,7 38,7"/></svg><span>PK</span>
+                </button>
+                <button class="eq-type-btn" data-band="mid" data-type="bandpass" data-action="eqSetType" data-args='["mid","bandpass"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,12 C6,12 10,1 20,1 C30,1 34,12 38,12"/></svg><span>BP</span>
+                </button>
+                <button class="eq-type-btn" data-band="mid" data-type="notch" data-action="eqSetType" data-args='["mid","notch"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,13 20,13 C28,13 32,7 38,7"/></svg><span>NOTCH</span>
+                </button>
+              </div>
+              <div class="eq-counters">
+                <div class="eq-counter"><span class="eq-counter-val" id="eq-fc-mid">315Hz</span><span class="eq-counter-lbl">FREQ</span></div>
+                <div class="eq-counter"><span class="eq-counter-val" id="eq-gc-mid">0.0</span><span class="eq-counter-lbl">GAIN dB</span></div>
+                <div class="eq-counter"><span class="eq-counter-val" id="eq-qc-mid">0.8</span><span class="eq-counter-lbl">Q</span></div>
+              </div>
+              <div class="row-ac-g6">
+                <input type="range" class="dsp-hslider eq-slider-mid" id="eq-mid" min="-12" max="12" value="0" step="0.5" data-oninput="setEqBand" data-oninput-arg="mid">
+                <span class="dsp-hslider-val dsp-hslider-val-r" id="eq-mid-val">0.0 dB</span>
+              </div>
+            </div>
+
+            <!-- HIGH -->
+            <div class="eq-band-card eq-band-high">
+              <div class="row-sb-ac">
+                <span class="eq-band-label">HIGH</span>
+                <button class="eq-bypass-btn" id="eq-byp-high" title="Bypass bande" data-action="eqToggleBypass" data-args='["high"]'></button>
+              </div>
+              <div class="eq-type-row">
+                <button class="eq-type-btn" data-band="high" data-type="peaking" data-action="eqSetType" data-args='["high","peaking"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,1 20,1 C28,1 32,7 38,7"/></svg><span>PK</span>
+                </button>
+                <button class="eq-type-btn" data-band="high" data-type="bandpass" data-action="eqSetType" data-args='["high","bandpass"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,12 C6,12 10,1 20,1 C30,1 34,12 38,12"/></svg><span>BP</span>
+                </button>
+                <button class="eq-type-btn" data-band="high" data-type="notch" data-action="eqSetType" data-args='["high","notch"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,13 20,13 C28,13 32,7 38,7"/></svg><span>NOTCH</span>
+                </button>
+                <button class="eq-type-btn active" data-band="high" data-type="highshelf" data-action="eqSetType" data-args='["high","highshelf"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,7 L20,7 C24,7 26,3 31,3 L38,3"/></svg><span>HS</span>
+                </button>
+              </div>
+              <div class="eq-counters">
+                <div class="eq-counter"><span class="eq-counter-val" id="eq-fc-high">1.25k</span><span class="eq-counter-lbl">FREQ</span></div>
+                <div class="eq-counter"><span class="eq-counter-val" id="eq-gc-high">0.0</span><span class="eq-counter-lbl">GAIN dB</span></div>
+                <div class="eq-counter"><span class="eq-counter-val" id="eq-qc-high">0.9</span><span class="eq-counter-lbl">Q</span></div>
+              </div>
+              <div class="row-ac-g6">
+                <input type="range" class="dsp-hslider eq-slider-high" id="eq-high" min="-12" max="12" value="0" step="0.5" data-oninput="setEqBand" data-oninput-arg="high">
+                <span class="dsp-hslider-val dsp-hslider-val-r" id="eq-high-val">0.0 dB</span>
+              </div>
+            </div>
+
+            <!-- AIR -->
+            <div class="eq-band-card eq-band-air">
+              <div class="row-sb-ac">
+                <span class="eq-band-label">AIR</span>
+                <button class="eq-bypass-btn" id="eq-byp-air" title="Bypass bande" data-action="eqToggleBypass" data-args='["air"]'></button>
+              </div>
+              <div class="eq-type-row">
+                <button class="eq-type-btn" data-band="air" data-type="peaking" data-action="eqSetType" data-args='["air","peaking"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,1 20,1 C28,1 32,7 38,7"/></svg><span>PK</span>
+                </button>
+                <button class="eq-type-btn" data-band="air" data-type="notch" data-action="eqSetType" data-args='["air","notch"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,13 20,13 C28,13 32,7 38,7"/></svg><span>NOTCH</span>
+                </button>
+                <button class="eq-type-btn active" data-band="air" data-type="highshelf" data-action="eqSetType" data-args='["air","highshelf"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,7 L20,7 C24,7 26,3 31,3 L38,3"/></svg><span>HS</span>
+                </button>
+                <button class="eq-type-btn" data-band="air" data-type="lowpass" data-action="eqSetType" data-args='["air","lowpass"]'>
+                  <svg viewBox="0 0 40 14"><path d="M2,7 L18,7 C23,7 27,12 31,12 L38,12"/></svg><span>LP</span>
+                </button>
+              </div>
+              <div class="eq-counters">
+                <div class="eq-counter"><span class="eq-counter-val" id="eq-fc-air">5.00k</span><span class="eq-counter-lbl">FREQ</span></div>
+                <div class="eq-counter"><span class="eq-counter-val" id="eq-gc-air">0.0</span><span class="eq-counter-lbl">GAIN dB</span></div>
+                <div class="eq-counter"><span class="eq-counter-val" id="eq-qc-air">0.7</span><span class="eq-counter-lbl">Q</span></div>
+              </div>
+              <div class="row-ac-g6">
+                <input type="range" class="dsp-hslider eq-slider-air" id="eq-air" min="-12" max="12" value="0" step="0.5" data-oninput="setEqBand" data-oninput-arg="air">
+                <span class="dsp-hslider-val dsp-hslider-val-r" id="eq-air-val">0.0 dB</span>
+              </div>
+            </div>
+
+          </div>
+          <!-- Mini VU meter -->
+          <div class="dsp-level-meter">
+            <div class="dsp-level-bar" id="dsp-vu-bar"></div>
+          </div>
+        </div>
+
+        <!-- ═══ UNITÉ 07 — MOTEUR VOCAL TTS ═══ -->
+        <div class="rack-unit rack-unit-full" id="rack-unit-voice">
+          <div class="rack-unit-header">
+            <div class="rack-unit-num">07</div>
+            <div class="rack-unit-name">MOTEUR VOCAL</div>
+            <div class="rack-unit-tag">TTS ENGINE</div>
+            <div id="tts-engine-badge" class="rack-unit-tag tag-ok"></div>
+            <span id="mire-label"></span>
+            <button class="rack-bypass-btn on" id="rack-voice-bypass" data-action="toggleDspVoice" title="Coupler/découpler voix DSP">⏻</button>
+          </div>
+          <div class="rack-unit-body rack-voice-body-flex">
+
+            <!-- Sélecteur moteur + actions -->
+            <div class="rack-voice-eng-col">
+              <div class="rack-eng-row">
+                <div class="rack-display-lbl rack-eng-lbl">ACTIF</div>
+                <div class="rack-dsp-eng-btns">
+                  <button class="rack-dsp-eng-btn active" id="dsp-eng-edge" data-action="setTtsEngine" data-args='["edge"]'><span class="veng-dot"></span>◉ EDGE</button>
+                  <button class="rack-dsp-eng-btn" id="dsp-eng-kokoro" data-action="setTtsEngine" data-args='["kokoro"]'><span class="veng-dot"></span>◈ KOKORO</button>
+                </div>
+              </div>
+              <div class="rack-eng-row">
+                <div class="rack-display-lbl rack-eng-lbl">DÉFAUT</div>
+                <div class="rack-dsp-eng-btns">
+                  <button class="rack-dsp-eng-btn" id="dsp-def-edge" data-action="setDefaultTtsEngine" data-args='["edge"]'><span class="veng-dot"></span>◉ EDGE</button>
+                  <button class="rack-dsp-eng-btn" id="dsp-def-kokoro" data-action="setDefaultTtsEngine" data-args='["kokoro"]'><span class="veng-dot"></span>◈ KOKORO</button>
+                </div>
+              </div>
+              <div class="rack-eng-row rack-eng-row-mt">
+                <div class="rack-display-lbl rack-eng-lbl">TEST</div>
+                <div class="rack-dsp-eng-btns">
+                  <button class="dsp-profile-btn" data-action="testDspVoice">▶ TEST</button>
+                  <button class="dsp-profile-btn" id="mire-btn" data-action="playMire" title="Mire de test audio 30s">▶ MIRE</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Panneau EDGE -->
+            <div class="rack-info-card-sm rack-voice-panel-flex" id="dsp-panel-edge">
+              <div class="rack-display-lbl rack-display-lbl-mb">VOIX MICROSOFT EDGE (CLOUD)</div>
+              <select class="dsp-voice-sel" id="dsp-voice-sel" data-onchange="setDspVoice"></select>
+              <div class="rack-voice-warning">⚠ Nécessite internet · 6 voix françaises disponibles · Très haute qualité</div>
+            </div>
+
+            <!-- Panneau KOKORO -->
+            <div class="rack-info-card-sm rack-voice-panel-flex d-none" id="dsp-panel-kokoro">
+              <div class="rack-display-lbl rack-display-lbl-mb">◈ KOKORO NEURAL — HEXGRAD 82M</div>
+              <div class="rack-kokoro-info">
+                <div class="rack-led on-green blink-slow"></div>
+                <span class="rack-kokoro-lbl">ff_siwis — SIWIS FR · NEURAL LOCAL · CUDA RTX 5080</span>
+              </div>
+              <div class="rack-fader-row rack-fader-row-mt">
+                <span class="rack-fader-lbl">VITESSE</span>
+                <input type="range" class="rack-fader fader-cyan" id="dsp-kokoro-speed"
+                  min="0.5" max="2.0" step="0.05" value="1.0"
+                  data-oninput="setKokoroSpeed">
+                <span class="rack-fader-val" id="dsp-kokoro-speed-val">1.00×</span>
+              </div>
+              <div class="rack-voice-info">◈ Voix locale · Aucun internet requis · Inférence CUDA · 24 kHz</div>
+            </div>
+
+
+          </div>
+        </div>
+
+        <!-- ═══ UNITÉ 08 — VOICE PRINT — ANALYSE EMPREINTE VOCALE ═══ -->
+        <div class="rack-unit rack-unit-full" id="rack-unit-vp">
+          <div class="rack-unit-header">
+            <div class="rack-unit-num">08</div>
+            <div class="rack-unit-name">VOICE PRINT</div>
+            <div class="rack-unit-tag tag-ok">◈ ANALYSE VOCALE</div>
+            <div class="rack-unit-tag tag-ia">LIBROSA · SCIPY · PITCH · SPECTRE</div>
+            <button class="vp-modal-btn" id="vp-expand-btn" data-action="vpToggleModal" title="Ouvrir en modal plein écran">⤢ MODAL</button>
+          </div>
+          <div class="rack-unit-body vp-rack-body">
+            <div class="vp-body">
+
+              <!-- ── COL 1 : Import · Métriques · Clonage ── -->
+              <div class="vp-left-col">
+
+                <div class="vp-sec-hdr">◈ IMPORT SAMPLE</div>
+                <div class="vp-drop-zone" id="vp-drop-zone">
+                  <span class="vp-drop-icon">⊞</span>
+                  <span class="vp-drop-lbl">DÉPOSER ICI</span>
+                  <span class="vp-drop-sub">WAV · MP3 · FLAC · OGG · 3–30s</span>
+                  <input type="file" id="vp-file-input" accept=".wav,.mp3,.flac,.ogg,.webm">
+                </div>
+                <div class="vp-action-row">
+                  <button class="vp-btn" data-action="vpOpenFile">⬆ CHARGER</button>
+                  <button class="vp-btn vp-btn-mic" id="vp-mic-btn" data-action="vpStartMic">⏺ MIC</button>
+                </div>
+                <div class="vp-file-info" id="vp-file-info">— EN ATTENTE —</div>
+                <div class="vp-spinner" id="vp-spinner">
+                  <div class="vp-spin-ring"></div><span>ANALYSE EN COURS…</span>
+                </div>
+
+                <div class="vp-sec-hdr">◈ BIBLIOTHÈQUE SAMPLES</div>
+                <div class="vp-lib-list" id="vp-lib-list">
+                  <span class="vp-profiles-empty">Chargement…</span>
+                </div>
+
+                <div class="vp-sec-hdr">◈ MÉTRIQUES</div>
+                <div class="vp-metric-grid">
+                  <span class="vp-mk">TYPE VOCAL</span><span class="vp-mv" id="vpm-type">—</span>
+                  <span class="vp-mk">PITCH F0</span><span class="vp-mv" id="vpm-pitch">—</span>
+                  <span class="vp-mk">CENTROÏDE</span><span class="vp-mv" id="vpm-centroid">—</span>
+                  <span class="vp-mk">ROLLOFF 85%</span><span class="vp-mv" id="vpm-rolloff">—</span>
+                  <span class="vp-mk">VOISEMENT</span><span class="vp-mv" id="vpm-voicing">—</span>
+                  <span class="vp-mk">TEXTURE</span><span class="vp-mv" id="vpm-timbre">—</span>
+                  <span class="vp-mk">DYNAMIQUE</span><span class="vp-mv" id="vpm-dynamic">—</span>
+                  <span class="vp-mk">DURÉE / SR</span><span class="vp-mv" id="vpm-dur">—</span>
+                </div>
+
+                <div class="vp-sec-hdr">◈ CLONAGE VOCAL</div>
+                <div class="vp-clone-row">
+                  <button class="vp-clone-btn" id="vp-clone-chatter" data-action="vpClone" data-args='["chatterbox"]'>CHATTERBOX</button>
+                  <button class="vp-clone-btn" id="vp-clone-f5" data-action="vpClone" data-args='["f5"]'>F5-TTS</button>
+                </div>
+                <div class="vp-clone-status" id="vp-clone-status">— Charger un sample d'abord —</div>
+
+              </div>
+
+              <!-- ── COL 2 : Visualisations · Paramètres ── -->
+              <div class="vp-viz-col">
+
+                <div class="vp-sec-hdr">◈ VISUALISATIONS</div>
+
+                <!-- ── SÉLECTEUR VOCAL ── (visible après chargement audio) -->
+                <div id="vp-selector" class="d-none">
+                  <div class="vp-sel-hdr">◈ SÉLECTEUR — GLISSER POUR CHOISIR LA PORTION VOCALE</div>
+                  <canvas id="vp-sel-canvas" class="vp-sel-canvas" height="90"></canvas>
+                  <div class="vp-sel-info-row">
+                    <span class="vp-sel-time" id="vp-sel-start-lbl">0.00s</span>
+                    <span class="vp-sel-dur" id="vp-sel-dur-lbl">— glisser pour sélectionner —</span>
+                    <span class="vp-sel-time" id="vp-sel-end-lbl">0.00s</span>
+                  </div>
+                  <div class="vp-sel-ctrl-row">
+                    <button class="vp-btn vp-btn-play" id="vp-btn-play-all" data-action="vpPlayAll">▶ TOUT</button>
+                    <button class="vp-btn vp-btn-play" id="vp-btn-play-sel" data-action="vpPlaySel" disabled>▶ SÉLECTION</button>
+                    <button class="vp-btn" data-action="vpStopPlay">■ STOP</button>
+                  </div>
+                  <div class="vp-sel-capture-row">
+                    <input class="vp-clone-name-inp" id="vp-clone-name" type="text" placeholder="Nom de la voix…" maxlength="32">
+                  </div>
+                </div>
+
+                <div class="vp-canvas-wrap">
+                  <span class="vp-canvas-lbl">FORME D'ONDE</span>
+                  <canvas id="vp-waveform" class="vp-canvas" height="52"></canvas>
+                </div>
+                <div class="vp-canvas-wrap">
+                  <span class="vp-canvas-lbl">PITCH F0 — FONDAMENTALE (Hz)</span>
+                  <canvas id="vp-pitch" class="vp-canvas" height="52"></canvas>
+                </div>
+                <div class="vp-canvas-wrap">
+                  <span class="vp-canvas-lbl">SPECTRE MEL — EMPREINTE TIMBRALE</span>
+                  <canvas id="vp-spectrum" class="vp-canvas" height="52"></canvas>
+                </div>
+
+                <div class="vp-sec-hdr">◈ PARAMÈTRES ANALYSE</div>
+                <div class="vp-params-grid">
+                  <span class="vp-mk">FMIN</span>
+                  <input type="range" class="rack-fader fader-cyan" id="vp-fmin" min="30" max="200" value="50" step="5" data-oninput="vpParamUpdate">
+                  <span class="vp-mv" id="vp-fmin-v">50 Hz</span>
+                  <span class="vp-mk">FMAX</span>
+                  <input type="range" class="rack-fader fader-cyan" id="vp-fmax" min="400" max="1200" value="800" step="50" data-oninput="vpParamUpdate">
+                  <span class="vp-mv" id="vp-fmax-v">800 Hz</span>
+                  <span class="vp-mk">MEL BINS</span>
+                  <input type="range" class="rack-fader fader-cyan" id="vp-mels" min="16" max="128" value="32" step="16" data-oninput="vpParamUpdate">
+                  <span class="vp-mv" id="vp-mels-v">32</span>
+                </div>
+
+              </div>
+
+              <!-- ── COL 3 : EQ Preset · Profil · Profils ── -->
+              <div class="vp-preset-col">
+
+                <div class="vp-sec-hdr">◈ PRESET EQ VOICE PRINT</div>
+                <div class="vp-eq-preview" id="vp-eq-preview">
+                  <!-- rendered by JS -->
+                </div>
+                <div class="vp-preset-actions">
+                  <button class="vp-btn vp-btn-apply" data-action="vpApplyPreset">◈ APPLIQUER EQ</button>
+                  <button class="vp-btn" data-action="vpExportPreset">⬇ JSON</button>
+                </div>
+
+                <div class="vp-voice-badge" id="vp-voice-badge">— IMPORTER UN SAMPLE —</div>
+
+                <div class="vp-sec-hdr">◈ PROFIL SONORE</div>
+                <div class="vp-profile-card">
+                  <div class="vp-prof-row"><span>TIMBRE</span><span id="vpp-timbre">—</span></div>
+                  <div class="vp-prof-row"><span>TEXTURE</span><span id="vpp-texture">—</span></div>
+                  <div class="vp-prof-row"><span>VOISEMENT</span><span id="vpp-voicing">—</span></div>
+                  <div class="vp-prof-row"><span>DYNAMIQUE</span><span id="vpp-dynamic">—</span></div>
+                </div>
+
+                <div class="vp-sec-hdr">◈ GESTION PROFILS</div>
+                <div class="vp-profiles-save-row">
+                  <input class="vp-profile-name-inp" id="vp-profile-name" type="text" placeholder="Nom du profil…" maxlength="28">
+                  <button class="vp-btn vp-btn-save" data-action="vpSaveProfile" title="Sauvegarder">💾</button>
+                </div>
+                <div class="vp-profiles-list" id="vp-profiles-list">
+                  <span class="vp-profiles-empty">Aucun profil sauvegardé</span>
+                </div>
+
+                <div class="vp-sec-hdr">◈ VOIX CAPTURÉES</div>
+                <div class="vp-prints-list" id="vp-prints-list">
+                  <span class="vp-profiles-empty">Aucune voix capturée</span>
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end dsp-panels-grid -->
+
+
+
+    </div><!-- end dsp-layout -->
+    </div><!-- end hud-frame -->
+  </div><!-- end tab-dsp -->
+
+  <!-- ═══════════════════════════════════════════════
+       DAT RECORDER MODAL — TASCAM DA-60 MkII STYLE
+       ═══════════════════════════════════════════════ -->
+  <div id="dat-modal">
+    <div class="dat-unit">
+
+      <!-- Nameplate -->
+      <div class="dat-nameplate">
+        <div class="dat-nameplate-left">
+          <div class="dat-brand">TASCAM</div>
+          <div class="dat-model">DA-60 MkII &nbsp;·&nbsp; JARVIS R-1</div>
+        </div>
+        <div class="dat-nameplate-right">
+          <div id="dat-status-pill">
+            <div class="dat-led-dot" id="dat-status-led"></div>
+            <span id="dat-status-lbl" class="dat-amber-dim dat-status-text">STOP</span>
+          </div>
+          <button class="dat-fn-btn" data-action="closeDatModal">✕ CLOSE</button>
+        </div>
+      </div>
+
+      <!-- Body: VFD display + jog wheel -->
+      <div class="dat-body">
+
+        <!-- Amber VFD Display -->
+        <div class="dat-display">
+
+          <!-- Indicator row -->
+          <div class="dat-inds">
+            <div class="dat-ind-item"><div class="dat-ind-dot" id="dat-ind-load"></div><span class="dat-ind-lbl" id="dat-ind-lbl-load">⏏ LOAD</span></div>
+            <div class="dat-ind-item"><div class="dat-ind-dot" id="dat-ind-play"></div><span class="dat-ind-lbl" id="dat-ind-lbl-play">▶ PLAY</span></div>
+            <div class="dat-ind-item"><div class="dat-ind-dot" id="dat-ind-pause"></div><span class="dat-ind-lbl" id="dat-ind-lbl-pause">⏸ PAUSE</span></div>
+            <div class="dat-ind-item"><div class="dat-ind-dot on" id="dat-ind-stop"></div><span class="dat-ind-lbl on" id="dat-ind-lbl-stop">■ STOP</span></div>
+            <div class="dat-ind-item"><div class="dat-ind-dot" id="dat-ind-rec"></div><span class="dat-ind-lbl" id="dat-ind-lbl-rec">● REC</span></div>
+            <div class="dat-ind-item"><div class="dat-ind-dot" id="dat-ind-ff"></div><span class="dat-ind-lbl" id="dat-ind-lbl-ff">FF ▶▶</span></div>
+            <div class="dat-ind-item"><div class="dat-ind-dot" id="dat-ind-rew"></div><span class="dat-ind-lbl" id="dat-ind-lbl-rew">◀◀ REW</span></div>
+            <span class="dat-file-size-lbl" id="dat-file-size"></span>
+          </div>
+
+          <!-- Filename scroll -->
+          <div class="dat-display-filename">
+            <div class="dat-filename-inner" id="dat-filename-inner">NO TAPE LOADED — PRESS ⏏ LOAD TO BROWSE</div>
+          </div>
+
+          <!-- 7-segment timecode counter -->
+          <div class="dat-timecode" id="dat-counter">00:00.000</div>
+
+          <!-- Sub info: remain + specs -->
+          <div class="dat-display-sub">
+            <span id="dat-remain" class="dat-amber-dim">REM --:--</span>
+            <div class="dat-mode-tag">PCM DIGITAL</div>
+            <span class="dat-amber-dim dat-spec-lbl">
+              SR <span id="dat-sr-lbl">48000</span> Hz &nbsp;·&nbsp;
+              <span id="dat-bits-lbl">24</span> BIT &nbsp;·&nbsp;
+              <span id="dat-fmt-lbl">WAV</span> &nbsp;·&nbsp; STEREO
+            </span>
+          </div>
+
+          <!-- VU meters canvas (amber phosphor) -->
+          <canvas class="dat-vu-canvas" id="dat-lcd-meters" width="800" height="130"></canvas>
+
+          <!-- Tape progress bar -->
+          <div class="dat-tape-wrap" id="dat-progress-wrap">
+            <div class="dat-tape-fill" id="dat-progress-fill"></div>
+            <div class="dat-tape-head" id="dat-progress-head"></div>
+          </div>
+
+        </div><!-- end dat-display -->
+
+        <!-- Jog wheel -->
+        <div class="dat-jog-wrap">
+          <div class="dat-jog" title="Jog / Shuttle"></div>
+          <span class="dat-jog-lbl">JOG · SHUTTLE</span>
+        </div>
+
+      </div><!-- end dat-body -->
+
+      <!-- SR / BIT / FORMAT function row -->
+      <div class="dat-fn-row">
+        <div class="dat-ctrl-group">
+          <span class="dat-ctrl-lbl">SR</span>
+          <button class="dat-ctrl-btn" id="dat-sr-44" data-action="datSetSR" data-args='[44100]'>44.1k</button>
+          <button class="dat-ctrl-btn active" id="dat-sr-48" data-action="datSetSR" data-args='[48000]'>48k</button>
+        </div>
+        <div class="dat-fn-sep"></div>
+        <div class="dat-ctrl-group">
+          <span class="dat-ctrl-lbl">BIT</span>
+          <button class="dat-ctrl-btn" id="dat-bit-16" data-action="datSetBit" data-args='[16]'>16</button>
+          <button class="dat-ctrl-btn active" id="dat-bit-24" data-action="datSetBit" data-args='[24]'>24</button>
+          <button class="dat-ctrl-btn" id="dat-bit-32" data-action="datSetBit" data-args='[32]'>32f</button>
+        </div>
+        <div class="dat-fn-sep"></div>
+        <div class="dat-ctrl-group">
+          <span class="dat-ctrl-lbl">FORMAT</span>
+          <button class="dat-ctrl-btn active" id="dat-fmt-wav"  data-action="datSetFmt" data-args='["wav"]'>WAV</button>
+          <button class="dat-ctrl-btn" id="dat-fmt-flac" data-action="datSetFmt" data-args='["flac"]'>FLAC</button>
+          <button class="dat-ctrl-btn" id="dat-fmt-mp3"  data-action="datSetFmt" data-args='["mp3"]'>MP3</button>
+          <button class="dat-ctrl-btn" id="dat-fmt-ogg"  data-action="datSetFmt" data-args='["ogg"]'>OGG</button>
+        </div>
+      </div>
+
+      <!-- Transport buttons -->
+      <div class="dat-transport">
+        <button class="dat-btn" id="dat-btn-rew"   data-action="datREW"   title="Retour rapide">◀◀ REW</button>
+        <button class="dat-btn dat-btn-play" id="dat-btn-play"  data-action="datPLAY"  title="Lecture">▶ PLAY</button>
+        <button class="dat-btn" id="dat-btn-pause" data-action="datPAUSE" title="Pause">⏸ PAUSE</button>
+        <button class="dat-btn dat-btn-stop" id="dat-btn-stop"  data-action="datSTOP"  title="Stop">■ STOP</button>
+        <button class="dat-btn" id="dat-btn-ff"    data-action="datFF"    title="Avance rapide">FF ▶▶</button>
+        <div class="dat-sep"></div>
+        <button class="dat-btn dat-btn-rec" id="dat-btn-rec" data-action="datREC" title="Enregistrer">● REC</button>
+        <div class="dat-sep"></div>
+        <button class="dat-btn" data-action="datLOAD" title="Charger un fichier audio">⏏ LOAD</button>
+      </div>
+
+      <!-- Hidden file input -->
+      <input type="file" id="dat-file-input" accept="audio/*" data-onchange="datOnFile">
+
+      <!-- ◈ EQ MUSIC rack — même look que EQ VOIX -->
+      <div class="dat-eq-section">
+        <div class="dat-eq-hdr">
+          <span class="dat-eq-title">◈ EQ MUSIC</span>
+          <span class="dat-eq-subtitle">DAT — bypass EQ VOIX</span>
+        </div>
+        <!-- Presets EQ Music -->
+        <div class="rack-eq-presets rack-eq-presets-dat">
+          <span class="rack-preset-label rack-preset-label-amber">EQ</span>
+          <button class="rack-eq-preset-btn dat-eq-preset-btn active" data-dat-eq-preset="FLAT"       data-action="applyDatEqPreset" data-args='["FLAT"]'>FLAT</button>
+          <button class="rack-eq-preset-btn dat-eq-preset-btn"        data-dat-eq-preset="BASS"       data-action="applyDatEqPreset" data-args='["BASS"]'>BASS</button>
+          <button class="rack-eq-preset-btn dat-eq-preset-btn"        data-dat-eq-preset="BRIGHT"     data-action="applyDatEqPreset" data-args='["BRIGHT"]'>BRIGHT</button>
+          <button class="rack-eq-preset-btn dat-eq-preset-btn"        data-dat-eq-preset="WARM"       data-action="applyDatEqPreset" data-args='["WARM"]'>WARM</button>
+          <button class="rack-eq-preset-btn dat-eq-preset-btn"        data-dat-eq-preset="CLUB"       data-action="applyDatEqPreset" data-args='["CLUB"]'>CLUB</button>
+          <button class="rack-eq-preset-btn dat-eq-preset-btn"        data-dat-eq-preset="ACOUSTIQUE" data-action="applyDatEqPreset" data-args='["ACOUSTIQUE"]'>ACOUSTIQUE</button>
+          <button class="rack-eq-preset-btn dat-eq-preset-btn"        data-dat-eq-preset="ROCK"       data-action="applyDatEqPreset" data-args='["ROCK"]'>ROCK</button>
+          <button class="rack-eq-preset-btn dat-eq-preset-btn"        data-dat-eq-preset="JAZZ"       data-action="applyDatEqPreset" data-args='["JAZZ"]'>JAZZ</button>
+        </div>
+        <!-- Courbe EQ music + spectre DAT -->
+        <div class="dat-eq-canvas-wrap">
+          <canvas id="dat-eq-curve-canvas"></canvas>
+        </div>
+        <!-- 4 bandes EQ music -->
+        <div class="rack-eq-band-grid rack-eq-band-grid-nm">
+
+          <!-- SUB -->
+          <div class="eq-band-card eq-band-sub">
+            <div class="row-sb-ac">
+              <span class="eq-band-label">SUB</span>
+              <button class="eq-bypass-btn" id="dat-eq-byp-sub" title="Bypass bande" data-action="datEqToggleBypass" data-args='["sub"]'></button>
+            </div>
+            <div class="eq-type-row">
+              <button class="eq-type-btn dat-eq-type-btn" data-band="sub" data-type="highpass" data-action="datEqSetType" data-args='["sub","highpass"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,12 L7,12 C11,12 14,7 17,7 L38,7"/></svg>
+                <span>HP</span>
+              </button>
+              <button class="eq-type-btn active dat-eq-type-btn" data-band="sub" data-type="lowshelf" data-action="datEqSetType" data-args='["sub","lowshelf"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,3 L9,3 C13,3 15,7 19,7 L38,7"/></svg>
+                <span>LS</span>
+              </button>
+              <button class="eq-type-btn dat-eq-type-btn" data-band="sub" data-type="peaking" data-action="datEqSetType" data-args='["sub","peaking"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,1 20,1 C28,1 32,7 38,7"/></svg>
+                <span>PK</span>
+              </button>
+              <button class="eq-type-btn dat-eq-type-btn" data-band="sub" data-type="notch" data-action="datEqSetType" data-args='["sub","notch"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,13 20,13 C28,13 32,7 38,7"/></svg>
+                <span>NOTCH</span>
+              </button>
+            </div>
+            <div class="eq-counters">
+              <div class="eq-counter"><span class="eq-counter-val" id="dat-eq-fc-sub">80 Hz</span><span class="eq-counter-lbl">FREQ</span></div>
+              <div class="eq-counter"><span class="eq-counter-val" id="dat-eq-gc-sub">0.0</span><span class="eq-counter-lbl">GAIN dB</span></div>
+              <div class="eq-counter"><span class="eq-counter-val" id="dat-eq-qc-sub">0.7</span><span class="eq-counter-lbl">Q</span></div>
+            </div>
+            <div class="row-ac-g6">
+              <input type="range" class="dsp-hslider dat-eq-slider dat-eq-slider-sub" id="dat-eq-sub" min="-12" max="12" value="0" step="0.5" data-oninput="setDatEqBand" data-oninput-arg="sub">
+              <span class="dsp-hslider-val dsp-hslider-val-r" id="dat-eq-sub-val">0.0 dB</span>
+            </div>
+          </div>
+
+          <!-- BASS -->
+          <div class="eq-band-card eq-band-bass">
+            <div class="row-sb-ac">
+              <span class="eq-band-label">BASS</span>
+              <button class="eq-bypass-btn" id="dat-eq-byp-bass" title="Bypass bande" data-action="datEqToggleBypass" data-args='["bass"]'></button>
+            </div>
+            <div class="eq-type-row">
+              <button class="eq-type-btn dat-eq-type-btn" data-band="bass" data-type="lowshelf" data-action="datEqSetType" data-args='["bass","lowshelf"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,3 L9,3 C13,3 15,7 19,7 L38,7"/></svg>
+                <span>LS</span>
+              </button>
+              <button class="eq-type-btn active dat-eq-type-btn" data-band="bass" data-type="peaking" data-action="datEqSetType" data-args='["bass","peaking"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,1 20,1 C28,1 32,7 38,7"/></svg>
+                <span>PK</span>
+              </button>
+              <button class="eq-type-btn dat-eq-type-btn" data-band="bass" data-type="bandpass" data-action="datEqSetType" data-args='["bass","bandpass"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,12 C6,12 10,1 20,1 C30,1 34,12 38,12"/></svg>
+                <span>BP</span>
+              </button>
+              <button class="eq-type-btn dat-eq-type-btn" data-band="bass" data-type="notch" data-action="datEqSetType" data-args='["bass","notch"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,13 20,13 C28,13 32,7 38,7"/></svg>
+                <span>NOTCH</span>
+              </button>
+            </div>
+            <div class="eq-counters">
+              <div class="eq-counter"><span class="eq-counter-val" id="dat-eq-fc-bass">300Hz</span><span class="eq-counter-lbl">FREQ</span></div>
+              <div class="eq-counter"><span class="eq-counter-val" id="dat-eq-gc-bass">0.0</span><span class="eq-counter-lbl">GAIN dB</span></div>
+              <div class="eq-counter"><span class="eq-counter-val" id="dat-eq-qc-bass">0.8</span><span class="eq-counter-lbl">Q</span></div>
+            </div>
+            <div class="row-ac-g6">
+              <input type="range" class="dsp-hslider dat-eq-slider dat-eq-slider-bass" id="dat-eq-bass" min="-12" max="12" value="0" step="0.5" data-oninput="setDatEqBand" data-oninput-arg="bass">
+              <span class="dsp-hslider-val dsp-hslider-val-r" id="dat-eq-bass-val">0.0 dB</span>
+            </div>
+          </div>
+
+          <!-- MIDS -->
+          <div class="eq-band-card eq-band-mids">
+            <div class="row-sb-ac">
+              <span class="eq-band-label">MIDS</span>
+              <button class="eq-bypass-btn" id="dat-eq-byp-mids" title="Bypass bande" data-action="datEqToggleBypass" data-args='["mids"]'></button>
+            </div>
+            <div class="eq-type-row">
+              <button class="eq-type-btn active dat-eq-type-btn" data-band="mids" data-type="peaking" data-action="datEqSetType" data-args='["mids","peaking"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,1 20,1 C28,1 32,7 38,7"/></svg>
+                <span>PK</span>
+              </button>
+              <button class="eq-type-btn dat-eq-type-btn" data-band="mids" data-type="bandpass" data-action="datEqSetType" data-args='["mids","bandpass"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,12 C6,12 10,1 20,1 C30,1 34,12 38,12"/></svg>
+                <span>BP</span>
+              </button>
+              <button class="eq-type-btn dat-eq-type-btn" data-band="mids" data-type="notch" data-action="datEqSetType" data-args='["mids","notch"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,13 20,13 C28,13 32,7 38,7"/></svg>
+                <span>NOTCH</span>
+              </button>
+              <button class="eq-type-btn dat-eq-type-btn" data-band="mids" data-type="highshelf" data-action="datEqSetType" data-args='["mids","highshelf"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,7 L20,7 C24,7 26,3 31,3 L38,3"/></svg>
+                <span>HS</span>
+              </button>
+            </div>
+            <div class="eq-counters">
+              <div class="eq-counter"><span class="eq-counter-val" id="dat-eq-fc-mids">3.00k</span><span class="eq-counter-lbl">FREQ</span></div>
+              <div class="eq-counter"><span class="eq-counter-val" id="dat-eq-gc-mids">0.0</span><span class="eq-counter-lbl">GAIN dB</span></div>
+              <div class="eq-counter"><span class="eq-counter-val" id="dat-eq-qc-mids">0.9</span><span class="eq-counter-lbl">Q</span></div>
+            </div>
+            <div class="row-ac-g6">
+              <input type="range" class="dsp-hslider dat-eq-slider dat-eq-slider-mids" id="dat-eq-mids" min="-12" max="12" value="0" step="0.5" data-oninput="setDatEqBand" data-oninput-arg="mids">
+              <span class="dsp-hslider-val dsp-hslider-val-r" id="dat-eq-mids-val">0.0 dB</span>
+            </div>
+          </div>
+
+          <!-- TREBLE -->
+          <div class="eq-band-card eq-band-treble">
+            <div class="row-sb-ac">
+              <span class="eq-band-label">TREBLE</span>
+              <button class="eq-bypass-btn" id="dat-eq-byp-treble" title="Bypass bande" data-action="datEqToggleBypass" data-args='["treble"]'></button>
+            </div>
+            <div class="eq-type-row">
+              <button class="eq-type-btn dat-eq-type-btn" data-band="treble" data-type="peaking" data-action="datEqSetType" data-args='["treble","peaking"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,1 20,1 C28,1 32,7 38,7"/></svg>
+                <span>PK</span>
+              </button>
+              <button class="eq-type-btn dat-eq-type-btn" data-band="treble" data-type="notch" data-action="datEqSetType" data-args='["treble","notch"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,7 C8,7 12,13 20,13 C28,13 32,7 38,7"/></svg>
+                <span>NOTCH</span>
+              </button>
+              <button class="eq-type-btn active dat-eq-type-btn" data-band="treble" data-type="highshelf" data-action="datEqSetType" data-args='["treble","highshelf"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,7 L20,7 C24,7 26,3 31,3 L38,3"/></svg>
+                <span>HS</span>
+              </button>
+              <button class="eq-type-btn dat-eq-type-btn" data-band="treble" data-type="lowpass" data-action="datEqSetType" data-args='["treble","lowpass"]'>
+                <svg viewBox="0 0 40 14"><path d="M2,7 L18,7 C23,7 27,12 31,12 L38,12"/></svg>
+                <span>LP</span>
+              </button>
+            </div>
+            <div class="eq-counters">
+              <div class="eq-counter"><span class="eq-counter-val" id="dat-eq-fc-treble">10.0k</span><span class="eq-counter-lbl">FREQ</span></div>
+              <div class="eq-counter"><span class="eq-counter-val" id="dat-eq-gc-treble">0.0</span><span class="eq-counter-lbl">GAIN dB</span></div>
+              <div class="eq-counter"><span class="eq-counter-val" id="dat-eq-qc-treble">0.7</span><span class="eq-counter-lbl">Q</span></div>
+            </div>
+            <div class="row-ac-g6">
+              <input type="range" class="dsp-hslider dat-eq-slider dat-eq-slider-treble" id="dat-eq-treble" min="-12" max="12" value="0" step="0.5" data-oninput="setDatEqBand" data-oninput-arg="treble">
+              <span class="dsp-hslider-val dsp-hslider-val-r" id="dat-eq-treble-val">0.0 dB</span>
+            </div>
+          </div>
+
+        </div><!-- end 4 bandes -->
+      </div><!-- end EQ MUSIC rack -->
+
+    </div><!-- end dat-unit -->
+  </div><!-- end dat-modal -->
+
+  <!-- ═══════════════════════════════════════════════
+       MIXER MODAL — JARVIS CONSOLE
+       ═══════════════════════════════════════════════ -->
+  <div id="mixer-modal">
+    <div class="mixer-unit">
+
+      <!-- Nameplate -->
+      <div class="mixer-nameplate">
+        <div>
+          <div class="mixer-brand">JARVIS CONSOLE</div>
+          <div class="mixer-model">MIXING ENGINE &nbsp;·&nbsp; DSP INTEGRATED &nbsp;·&nbsp; AUTO-DUCK</div>
+        </div>
+        <div class="mixer-nameplate-right">
+          <div class="row-ac-g6">
+            <div id="mix-status-led"></div>
+            <span id="mix-status-lbl">IDLE</span>
+          </div>
+          <button id="mix-dsp-bypass-btn" class="mix-action-btn" data-action="mixToggleDspBypass">⬡ DSP ON</button>
+          <button class="mix-action-btn-ghost" data-action="mixRefreshDevices">↺ REFRESH</button>
+          <button class="dat-fn-btn" data-action="closeMixerModal">✕ CLOSE</button>
+        </div>
+      </div>
+
+      <!-- Body: strips left + DSP panel right -->
+      <div class="mixer-body">
+      <div class="mixer-left">
+      <!-- Channel strips (scrollable, MASTER excluded) -->
+      <div class="mixer-strips" id="mix-strips-row">
+        <!-- JARVIS strip (always present) -->
+        <div class="mix-strip mix-jarvis" id="mix-strip-jarvis">
+          <div class="mix-strip-hdr" data-action="mixSelectChannel" data-args='["jarvis"]'>
+          <div class="mix-strip-label">JARVIS</div>
+          <div class="mix-strip-sub-purple">TTS OUT</div>
+          </div>
+          <canvas class="mix-vu-canvas" id="mix-vu-jarvis" height="80"></canvas>
+          <div class="mix-fader-wrap">
+            <canvas class="mix-grad-canvas" id="mix-grad-jarvis"></canvas>
+            <input type="range" class="mix-fader" id="mix-fader-jarvis" min="0" max="150" value="100"
+                   data-oninput="mixSetGain" data-oninput-arg="jarvis">
+          </div>
+          <input type="range" class="mix-pan" id="mix-pan-jarvis" min="-100" max="100" value="0"
+                 data-oninput="mixSetPan" data-oninput-arg="jarvis" title="Pan">
+          <div class="mix-ms-row">
+            <button class="mix-btn mix-btn-m" id="mix-m-jarvis" data-action="mixToggleMute" data-args='["jarvis"]'>M</button>
+            <button class="mix-btn mix-btn-s" id="mix-s-jarvis" data-action="mixToggleSolo" data-args='["jarvis"]'>S</button>
+          </div>
+          <div class="mix-lcd" id="mix-lcd-jarvis">0.0 dB</div>
+        </div>
+
+        <div class="mix-sep"></div>
+
+        <!-- DAT strip -->
+        <div class="mix-strip mix-strip-dat" id="mix-strip-dat">
+          <div class="mix-strip-hdr" data-action="mixSelectChannel" data-args='["dat"]'>
+          <div class="mix-strip-label mix-strip-label-cyan">DAT</div>
+          <div class="mix-strip-sub">DA-60 MkII</div>
+          </div>
+          <canvas class="mix-vu-canvas" id="mix-vu-dat" height="80"></canvas>
+          <div class="mix-fader-wrap">
+            <canvas class="mix-grad-canvas" id="mix-grad-dat"></canvas>
+            <input type="range" class="mix-fader" id="mix-fader-dat" min="0" max="150" value="100"
+                   data-oninput="mixSetGain" data-oninput-arg="dat">
+          </div>
+          <input type="range" class="mix-pan" id="mix-pan-dat" min="-100" max="100" value="0"
+                 data-oninput="mixSetPan" data-oninput-arg="dat" title="Pan">
+          <div class="mix-ms-row">
+            <button class="mix-btn mix-btn-m" id="mix-m-dat" data-action="mixToggleMute" data-args='["dat"]'>M</button>
+            <button class="mix-btn mix-btn-s" id="mix-s-dat" data-action="mixToggleSolo" data-args='["dat"]'>S</button>
+          </div>
+          <div class="mix-lcd" id="mix-lcd-dat">0.0 dB</div>
+        </div>
+
+        <div class="mix-sep"></div>
+
+        <!-- Dynamic input channels (populated by JS) -->
+        <div id="mix-dynamic-strips"></div>
+
+      </div><!-- end mixer-strips -->
+
+      <!-- Auto-Duck panel (full width in mixer-left) -->
+      <div class="mixer-duck-panel">
+        <button id="mix-duck-toggle" class="mix-action-btn" data-action="mixToggleDuck">◈ TALKOVER</button>
+        <label>ATTÉNUATION</label>
+        <input type="range" id="mix-duck-db" min="-40" max="-3" value="-30" step="1"
+               data-oninput="_jDuckDb">
+        <span class="mixer-duck-lbl" id="mix-duck-db-lbl">-30dB</span>
+        <label>ATTAQUE</label>
+        <input type="range" id="mix-duck-atk" min="50" max="1000" value="200" step="50"
+               data-oninput="_jDuckAtk">
+        <span class="mixer-duck-lbl" id="mix-duck-atk-lbl">200ms</span>
+        <label>RELEASE</label>
+        <input type="range" id="mix-duck-rel" min="100" max="3000" value="800" step="100"
+               data-oninput="_jDuckRel">
+        <span class="mixer-duck-lbl" id="mix-duck-rel-lbl">800ms</span>
+        <div class="mix-duck-status">
+          <div id="mix-duck-led"></div>
+          <span id="mix-duck-lbl">STANDBY</span>
+        </div>
+      </div>
+
+      </div><!-- end mixer-left -->
+
+      <!-- MASTER — colonne fixe entre strips et DSP -->
+      <div class="mix-master-col">
+        <div class="mix-strip mix-master" id="mix-strip-master">
+          <div class="mix-strip-hdr" data-action="mixSelectChannel" data-args='["master"]'>
+            <div class="mix-strip-label">MASTER</div>
+            <div class="mix-strip-sub">OUT</div>
+          </div>
+          <canvas class="mix-vu-canvas" id="mix-vu-master" height="80"></canvas>
+          <div class="mix-fader-wrap">
+            <canvas class="mix-grad-canvas" id="mix-grad-master"></canvas>
+            <input type="range" class="mix-fader" id="mix-fader-master" min="0" max="120" value="100"
+                   data-oninput="mixSetGain" data-oninput-arg="master">
+          </div>
+          <input type="range" class="mix-pan" id="mix-pan-master" min="-100" max="100" value="0"
+                 title="Balance" data-oninput="mixSetPan" data-oninput-arg="master">
+          <div class="mix-ms-row">
+            <button class="mix-btn mix-btn-m" id="mix-m-master" data-action="mixToggleMute" data-args='["master"]'>M</button>
+            <div class="mix-btn-spacer"></div>
+          </div>
+          <div class="mix-lcd" id="mix-lcd-master">0.0 dB</div>
+        </div>
+      </div>
+
+      <!-- ═══ DSP PANEL RIGHT ═══ -->
+      <div class="mix-dsp-panel" id="mix-dsp-panel">
+        <div class="mix-dsp-title">
+          <span>◈ CHANNEL DSP</span>
+          <span class="mix-dsp-subtitle" id="mix-dsp-chan-name">— SELECT A CHANNEL —</span>
+        </div>
+
+        <!-- Large VU meter -->
+        <canvas class="mix-dsp-vu" id="mix-dsp-vu" height="220"></canvas>
+
+        <!-- EQ Section -->
+        <div class="mix-dsp-section mix-dsp-sec-eq">
+          <div class="mix-dsp-sec-hdr" data-action="mixToggleDspSection" data-args='["eq"]'>
+            <span class="mix-dsp-toggle" id="mix-dsp-eq-toggle">
+              <span class="mix-dsp-led" id="mix-dsp-eq-led"></span>EQ
+            </span>
+            <span class="mix-sec-eq">EQUALIZER — 4 BAND</span>
+            <span id="mix-eq-chevron">▾</span>
+          </div>
+          <div class="mix-dsp-sec-body" id="mix-dsp-eq-body">
+            <div class="mix-dsp-row">
+              <span class="mix-dsp-lbl">LOW</span>
+              <span class="mix-freq-lbl">80 Hz</span>
+              <input class="mix-dsp-slider" type="range" id="mix-eq-low" min="-18" max="18" value="0" step="0.5"
+                     data-oninput="mixSetDspParam" data-oninput-arg="eq,low">
+              <span class="mix-dsp-val" id="mix-eq-low-val">0 dB</span>
+            </div>
+            <div class="mix-dsp-row">
+              <span class="mix-dsp-lbl">MID</span>
+              <span class="mix-freq-lbl">1 kHz</span>
+              <input class="mix-dsp-slider" type="range" id="mix-eq-mid" min="-18" max="18" value="0" step="0.5"
+                     data-oninput="mixSetDspParam" data-oninput-arg="eq,mid">
+              <span class="mix-dsp-val" id="mix-eq-mid-val">0 dB</span>
+            </div>
+            <div class="mix-dsp-row">
+              <span class="mix-dsp-lbl">PRESENCE</span>
+              <span class="mix-freq-lbl">5 kHz</span>
+              <input class="mix-dsp-slider" type="range" id="mix-eq-pres" min="-12" max="12" value="0" step="0.5"
+                     data-oninput="mixSetDspParam" data-oninput-arg="eq,pres">
+              <span class="mix-dsp-val" id="mix-eq-pres-val">0 dB</span>
+            </div>
+            <div class="mix-dsp-row">
+              <span class="mix-dsp-lbl">HIGH</span>
+              <span class="mix-freq-lbl">12 kHz</span>
+              <input class="mix-dsp-slider" type="range" id="mix-eq-high" min="-18" max="18" value="0" step="0.5"
+                     data-oninput="mixSetDspParam" data-oninput-arg="eq,high">
+              <span class="mix-dsp-val" id="mix-eq-high-val">0 dB</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compressor Section -->
+        <div class="mix-dsp-section mix-dsp-sec-comp">
+          <div class="mix-dsp-sec-hdr" data-action="mixToggleDspSection" data-args='["comp"]'>
+            <span class="mix-dsp-toggle comp" id="mix-dsp-comp-toggle">
+              <span class="mix-dsp-led" id="mix-dsp-comp-led"></span>COMP
+            </span>
+            <span class="mix-sec-comp">DYNAMICS COMPRESSOR</span>
+            <span id="mix-comp-chevron">▾</span>
+          </div>
+          <div class="mix-dsp-sec-body" id="mix-dsp-comp-body">
+            <div class="mix-dsp-row">
+              <span class="mix-dsp-lbl">THRESHOLD</span>
+              <input class="mix-dsp-slider comp" type="range" id="mix-comp-thr" min="-60" max="0" value="-18" step="1"
+                     data-oninput="mixSetDspParam" data-oninput-arg="comp,threshold">
+              <span class="mix-dsp-val mix-dsp-val-purple" id="mix-comp-thr-val">-18 dB</span>
+            </div>
+            <div class="mix-dsp-row">
+              <span class="mix-dsp-lbl">RATIO</span>
+              <input class="mix-dsp-slider comp" type="range" id="mix-comp-ratio" min="1" max="20" value="4" step="0.5"
+                     data-oninput="mixSetDspParam" data-oninput-arg="comp,ratio">
+              <span class="mix-dsp-val mix-dsp-val-purple" id="mix-comp-ratio-val">4 : 1</span>
+            </div>
+            <div class="mix-dsp-row">
+              <span class="mix-dsp-lbl">KNEE</span>
+              <input class="mix-dsp-slider comp" type="range" id="mix-comp-knee" min="0" max="40" value="10" step="1"
+                     data-oninput="mixSetDspParam" data-oninput-arg="comp,knee">
+              <span class="mix-dsp-val mix-dsp-val-purple" id="mix-comp-knee-val">10 dB</span>
+            </div>
+            <div class="mix-dsp-row">
+              <span class="mix-dsp-lbl">ATTACK</span>
+              <input class="mix-dsp-slider comp" type="range" id="mix-comp-atk" min="0" max="1000" value="10" step="5"
+                     data-oninput="mixSetDspParam" data-oninput-arg="comp,attack">
+              <span class="mix-dsp-val mix-dsp-val-purple" id="mix-comp-atk-val">10 ms</span>
+            </div>
+            <div class="mix-dsp-row">
+              <span class="mix-dsp-lbl">RELEASE</span>
+              <input class="mix-dsp-slider comp" type="range" id="mix-comp-rel" min="10" max="2000" value="100" step="10"
+                     data-oninput="mixSetDspParam" data-oninput-arg="comp,release">
+              <span class="mix-dsp-val mix-dsp-val-purple" id="mix-comp-rel-val">100 ms</span>
+            </div>
+            <div class="mix-dsp-row">
+              <span class="mix-dsp-lbl">MAKEUP</span>
+              <input class="mix-dsp-slider comp" type="range" id="mix-comp-mk" min="-6" max="24" value="0" step="0.5"
+                     data-oninput="mixSetDspParam" data-oninput-arg="comp,makeup">
+              <span class="mix-dsp-val mix-dsp-val-purple" id="mix-comp-mk-val">0 dB</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Limiter Section -->
+        <div class="mix-dsp-section mix-dsp-sec-lim">
+          <div class="mix-dsp-sec-hdr" data-action="mixToggleDspSection" data-args='["lim"]'>
+            <span class="mix-dsp-toggle lim" id="mix-dsp-lim-toggle">
+              <span class="mix-dsp-led" id="mix-dsp-lim-led"></span>LIMIT
+            </span>
+            <span class="mix-sec-lim">BRICK WALL LIMITER</span>
+            <span id="mix-lim-chevron">▾</span>
+          </div>
+          <div class="mix-dsp-sec-body" id="mix-dsp-lim-body">
+            <div class="mix-dsp-row">
+              <span class="mix-dsp-lbl">CEILING</span>
+              <input class="mix-dsp-slider lim" type="range" id="mix-lim-ceil" min="-12" max="0" value="-0.5" step="0.1"
+                     data-oninput="mixSetDspParam" data-oninput-arg="lim,ceiling">
+              <span class="mix-dsp-val mix-dsp-val-red" id="mix-lim-ceil-val">-0.5 dB</span>
+            </div>
+            <div class="mix-dsp-row">
+              <span class="mix-dsp-lbl">RELEASE</span>
+              <input class="mix-dsp-slider lim" type="range" id="mix-lim-rel" min="10" max="1000" value="100" step="10"
+                     data-oninput="mixSetDspParam" data-oninput-arg="lim,limrelease">
+              <span class="mix-dsp-val mix-dsp-val-red" id="mix-lim-rel-val">100 ms</span>
+            </div>
+          </div>
+        </div>
+      </div><!-- end mix-dsp-panel -->
+      </div><!-- end mixer-body -->
+
+    </div><!-- end mixer-unit -->
+  </div><!-- end mixer-modal -->
+
+

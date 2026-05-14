@@ -1,0 +1,36 @@
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+extend-exclude = [
+    "scripts/__pycache__",
+    "scripts/jarvis_rag",
+    "scripts/voices",
+    "scripts/voice_prints",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes (undefined names, unused imports)
+    "W",   # pycodestyle warnings
+    "B",   # flake8-bugbear
+    "I",   # isort (import order)
+    "UP",  # pyupgrade
+]
+
+ignore = [
+    "E501",   # line too long (we handle via formatter)
+    "E402",   # module-level imports not at top (some scripts boot Flask first)
+    "E731",   # lambda assignment
+    "B008",   # function call in default arg
+    "B904",   # raise from in except
+]
+
+[tool.ruff.lint.per-file-ignores]
+"scripts/jarvis.py" = ["F401"]
+"scripts/blueprints/*.py" = ["F401"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

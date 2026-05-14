@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>JARVIS</title>
+<link rel="stylesheet" href="/static/atom-one-dark.min.css">
+<script src="/static/highlight.min.js" async></script>
+<link rel="stylesheet" href="/static/jarvis.css?v={{ boot_id }}">
+<link rel="stylesheet" href="/static/xterm.min.css">
+</head>
+<body>
+
+<!-- Couvre l'interface pendant le check boot-id (évite le flash monitor) -->
+<div id="init-cover"></div>
+<style>#init-cover{position:fixed;inset:0;background:#00020a;z-index:25000;pointer-events:none;transition:opacity .25s ease;animation:_icFade 0.4s ease 12s forwards;animation-fill-mode:forwards}@keyframes _icFade{to{opacity:0;pointer-events:none;visibility:hidden}}</style>
+
+<div class="top-line"></div>
+<div class="corner corner-tl"></div>
+<div class="global-sig">⬡ 0xcyberlitech</div>
+<div class="corner corner-tr"></div>
+<div class="corner corner-bl"></div>
+<div class="corner corner-br"></div>
+
+<div class="hud">
+
+  <header>
+    <div class="logo">J<span>.</span>A<span>.</span>R<span>.</span>V<span>.</span>I<span>.</span>S</div>
+    <div><div class="status-live"><div class="dot"></div>SYSTEM ONLINE</div></div>
+    <div class="header-right">
+      <div id="clock">--:--:--</div>
+      <div>STARK INDUSTRIES</div>
+      <div>BUILD v3.0</div>
+    </div>
+  </header>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <div class="tab"        data-action="switchTab" data-args='["monitor"]'>Monitor</div>
+    <div class="tab active" data-action="switchTab" data-args='["chat"]'>JARVIS AI</div>
+    <div class="tab"        data-action="_jTabSettings">⚙ SETTINGS</div>
+    <div class="tab"        data-action="_jTabDsp">◈ DSP AUDIO</div>
+    <div class="tab"        data-action="_jTabTaches">◈ TÂCHES</div>
+    <div class="tab"        data-action="_jTabVoicelab">✦ VOICE LAB</div>
+    <div class="tab"        data-action="_jTabSoc">◈ SOC</div>
+  </div>
+
+
+  {% include "tabs/tab_monitor.html" %}
+  {% include "tabs/tab_chat.html" %}
+
+  {% include "tabs/tab_settings.html" %}
+  {% include "tabs/tab_dsp.html" %}
+  {% include "tabs/tab_taches.html" %}
+  {% include "tabs/tab_voicelab.html" %}
+  {% include "tabs/tab_soc.html" %}
+
+  <footer>
+    <span>JARVIS SYSTEM MONITOR</span>
+    <span id="f-uptime">REFRESH : 0s</span>
+    <span>STARK INDUSTRIES &copy; 2026</span>
+  </footer>
+
+</div>
+
+
+<script>window.JARVIS_CONFIG = { monEndpoint: {{ mon_endpoint | tojson }} };</script>
+<script src="/static/xterm.min.js"></script>
+<script src="/static/xterm-addon-fit.min.js"></script>
+<script src="/static/jarvis_main.js?v={{ boot_id }}"></script>
+<script src="/static/jarvis_mixing.js?v={{ boot_id }}"></script>
+<script src="/static/recorder.js?v={{ boot_id }}"></script>
+<script src="/static/voice_print.js?v={{ boot_id }}"></script>
+<script>
+'use strict';
+// ── Dispatcher data-action (remplace tous les onclick="..." inline) ──
+document.addEventListener('click', function(e){
+  var el = e.target.closest('[data-action]');
+  if(!el) return;
+  var fn = el.dataset.action;
+  var args = el.dataset.args;
+  if(typeof window[fn]==='function'){
+    try{ window[fn].apply(null, args ? JSON.parse(args) : []); }catch(x){}
+  }
+});
+// ── Wrappers multi-call (tabs navigation) ────────────────────────────
+function _jTabSettings(){ switchTab('settings'); loadLlmParams(); loadPromptProfiles(); loadSecurityLog(); loadFacts(); loadMemorySummary(); loadRagStatus(); }
+function _jTabDsp(){ switchTab('dsp'); initDsp(); }
+function _jTabTaches(){ switchTab('taches'); initTaches(); }
+function _jTabVoicelab(){ switchTab('voicelab'); initVoiceLab(); }
+function _jTabSoc(){ switchTab('soc'); initSocTab(); }
+// ── Wrappers tab_chat.html ────────────────────────────────────────────
+function _jReplayLast(){ replayMessage(_lastJarvisText); }
+// ── Wrappers tab_dsp.html ─────────────────────────────────────────────
+// ── Wrappers tab_taches.html ──────────────────────────────────────────
+function _jTacheCpuRam(){ tacheInsertSuggestion('Surveillance système','python -c "import psutil; print(psutil.cpu_percent(),psutil.virtual_memory().percent)"','*/5'); }
+function _jTacheBackupJarvis(){ tacheInsertSuggestion('Sauvegarde JARVIS','xcopy /s /y "C:\\Users\\mmsab\\Documents\\JARVIS" "C:\\Backup\\JARVIS"','@daily'); }
+function _jTacheOllama(){ tacheInsertSuggestion('Vérification Ollama','curl -s http://localhost:11434/api/tags','*/15'); }
+function _jTacheTemp(){ tacheInsertSuggestion('Nettoyage temp','del /q /f %TEMP%\\*.tmp','@daily'); }
+function _jTacheGpu(){ tacheInsertSuggestion('Log GPU','nvidia-smi --query-gpu=temperature.gpu,utilization.gpu,memory.used --format=csv,noheader','*/10'); }
+// ── Wrappers oninput DOM inline (tab_dsp.html) ────────────────────────
+function _jDuckDb(v){ var el=document.getElementById('mix-duck-db-lbl'); if(el) el.textContent=v+'dB'; }
+function _jDuckAtk(v){ var el=document.getElementById('mix-duck-atk-lbl'); if(el) el.textContent=v+'ms'; }
+function _jDuckRel(v){ var el=document.getElementById('mix-duck-rel-lbl'); if(el) el.textContent=v+'ms'; }
+// ── Wrapper oninput divers ────────────────────────────────────────────
+function _jSystemPromptInput(){ _updateActivePromptBadge(null); }
+// ── Dispatcher data-oninput ───────────────────────────────────────────
+document.addEventListener('input', function(e){
+  var el = e.target, fn = el.dataset.oninput;
+  if(!fn || typeof window[fn]!=='function') return;
+  var arg = el.dataset.oninputArg;
+  try{
+    if(!arg){ window[fn](el.value); }
+    else if(arg.indexOf(',')!==-1){ window[fn].apply(null, arg.split(',').concat([el.value])); }
+    else{ window[fn](arg, el.value); }
+  }catch(x){}
+});
+// ── Dispatcher data-onchange ──────────────────────────────────────────
+document.addEventListener('change', function(e){
+  var el = e.target, fn = el.dataset.onchange;
+  if(!fn || typeof window[fn]!=='function') return;
+  try{
+    if(el.dataset.onchangeSelf) window[fn](el);
+    else if(el.type==='file')   window[fn](el.files[0]);
+    else                        window[fn](el.value);
+  }catch(x){}
+});
+// ── CSS hover (remplace onmouseover/onmouseout/onmouseenter/onmouseleave cosmétiques) ──
+(function(){ var s=document.createElement('style');
+  s.textContent=
+    '#dsp-voice-badge:hover{color:#00cfff!important;border-color:#00cfff55!important}'+
+    '#dsp-voice-decouple-btn:hover{opacity:.8}'+
+    '#dsp-soc-btn:hover{box-shadow:0 0 16px #00ff8844!important;border-color:#00ff8844!important}'+
+    '[data-action="openDatModal"]:hover{box-shadow:0 0 16px #e8700044!important}'+
+    '[data-action="openMixerModal"]:hover{box-shadow:0 0 16px #00cfff44!important}'+
+    '#btn-model-test:hover{color:#00cfff!important;border-color:#00cfff55!important}'+
+    '[data-action="vlabResetAll"]:hover{color:#ffcc00!important;border-color:rgba(255,204,0,.5)!important;box-shadow:0 0 10px rgba(255,204,0,.15)!important}';
+  document.head.appendChild(s); })();
+// ── Liaisons événements — handlers nécessitant event ou this ─────────
+(function(){
+  var _b = function(id, fn){ var el = document.getElementById(id); if(el) el.addEventListener('click', fn); };
+  _b('dat-modal',           function(e){ if(e.target===this) closeDatModal(); });
+  _b('mixer-modal',         function(e){ if(e.target===this) closeMixerModal(); });
+  _b('dat-progress-wrap',   function(e){ datSeek(e); });
+  _b('mix-dsp-eq-toggle',   function(e){ e.stopPropagation(); mixToggleDsp('eq'); });
+  _b('mix-dsp-comp-toggle', function(e){ e.stopPropagation(); mixToggleDsp('comp'); });
+  _b('mix-dsp-lim-toggle',  function(e){ e.stopPropagation(); mixToggleDsp('lim'); });
+  _b('task-notify-toggle',  function(){ this.classList.toggle('on'); });
+  var _bw = document.getElementById('btn-web'); if(_bw) _bw.addEventListener('contextmenu', function(e){ e.preventDefault(); toggleWebDiag(e); });
+  // modal-editor (textarea) remplacé par Monaco Editor — listener scroll supprimé
+  // ── Boutons mémoire FX (10 slots) ─────────────────────────────────────
+  [0,1,2,3,4,5,6,7,8,9].forEach(function(i){
+    var btn = document.getElementById('fx-mem-btn-'+i);
+    if(!btn) return;
+    btn.addEventListener('mousedown',  function(){ fxMemPress(i); });
+    btn.addEventListener('mouseup',    function(){ fxMemRelease(i); });
+    btn.addEventListener('mouseleave', function(){ fxMemRelease(i); });
+  });
+  // ── Boutons mémoire EQ (10 slots) ─────────────────────────────────────
+  [0,1,2,3,4,5,6,7,8,9].forEach(function(i){
+    var btn = document.getElementById('eq-mem-btn-'+i);
+    if(!btn) return;
+    btn.addEventListener('mousedown',  function(){ eqMemPress(i); });
+    btn.addEventListener('mouseup',    function(){ eqMemRelease(i); });
+    btn.addEventListener('mouseleave', function(){ eqMemRelease(i); });
+  });
+  // ── Canvas EQ courbe ──────────────────────────────────────────────────
+  var _ec = document.getElementById('eq-curve-canvas');
+  if(_ec){
+    _ec.addEventListener('mousedown',  function(e){ eqCanvasDown(e); });
+    _ec.addEventListener('mousemove',  function(e){ eqCanvasMove(e); });
+    _ec.addEventListener('mouseup',    function(e){ eqCanvasUp(e); });
+    _ec.addEventListener('mouseleave', function(e){ eqCanvasLeave(e); });
+    _ec.addEventListener('wheel',      function(e){ eqCanvasWheel(e); });
+  }
+  // ── Canvas DAT EQ ─────────────────────────────────────────────────────
+  var _dc = document.getElementById('dat-eq-curve-canvas');
+  if(_dc){
+    _dc.addEventListener('mousedown',  function(e){ datEqCanvasDown(e); });
+    _dc.addEventListener('wheel',      function(e){ datEqCanvasWheel(e); });
+    document.addEventListener('mousemove', function(e){ datEqCanvasMove(e); });
+    document.addEventListener('mouseup',   function(){ datEqCanvasUp(); });
+  }
+  // ── Inputs clavier ────────────────────────────────────────────────────
+  var _tk = document.getElementById('task-new-cmd');
+  if(_tk) _tk.addEventListener('keydown', function(e){ if(e.key==='Enter') tacheCreate(); });
+  // ── Modal éditeur (keydown / mousemove / keyup) ───────────────────────
+  var _me2 = document.getElementById('modal-editor');
+  if(_me2){
+    _me2.addEventListener('keydown',   function(e){ editorKeyDown(e); });
+    _me2.addEventListener('mousemove', function(){ updateCursor(); });
+    _me2.addEventListener('keyup',     function(){ updateCursor(); });
+  }
+})();
+</script>
+
+{% include "partials/modals.html" %}
+
+<!-- Terminal CODE SSH srv-dev-1 — look JARVIS TERMINAL (hors .hud pour position:fixed) -->
+<div id="dev-terminal-overlay" class="d-none">
+  <div id="dev-terminal" class="dev-terminal-panel">
+    <div class="chat-corner tl"></div>
+    <div class="chat-corner tr"></div>
+    <div class="chat-corner bl"></div>
+    <div class="chat-corner br"></div>
+    <div class="dev-term-topbar">
+      <div class="term-logo-hex">◆</div>
+      <div class="term-header-text">
+        <div class="term-header-title">JARVIS TERMINAL</div>
+        <div class="term-header-sub" id="dev-term-subtitle">SSH // root@srv-dev-1 // PTY XTERM-256COLOR</div>
+      </div>
+      <div class="term-header-right">
+        <span class="term-cwd">{{ dev_ip }} : {{ dev_port }}</span>
+        <span class="term-header-status" id="dev-term-status">● CONNEXION…</span>
+      </div>
+      <button class="term-action-btn term-action-send" data-action="devSendToMainChat" title="Envoyer le contenu du terminal au chat JARVIS pour analyse">📤 Chat</button>
+      <button class="term-action-btn" data-action="devTerminalClear">◌ CLEAR</button>
+      <button class="term-action-btn" data-action="devTerminalClose">✕</button>
+    </div>
+    <div class="dev-term-body">
+      <nav class="dev-term-sidebar">
+        <span class="dev-sidebar-label">◈ SYS</span>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["ls -la --color=auto\n"]'><span class="dsb-icon">▸</span>ls -la</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["pwd\n"]'><span class="dsb-icon">▸</span>pwd</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["df -h\n"]'><span class="dsb-icon">▸</span>df -h</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["free -h\n"]'><span class="dsb-icon">▸</span>free -h</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["uptime && cat /proc/loadavg\n"]'><span class="dsb-icon">▸</span>uptime</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["ip -c a\n"]'><span class="dsb-icon">▸</span>ip a</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["ss -tlnp\n"]'><span class="dsb-icon">▸</span>ports</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["ps aux --sort=-%cpu | head -20\n"]'><span class="dsb-icon">▸</span>ps cpu</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["htop\n"]'><span class="dsb-icon">▸</span>htop</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["systemctl --failed\n"]'><span class="dsb-icon">▸</span>failed</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["journalctl -xe --no-pager | tail -30\n"]'><span class="dsb-icon">▸</span>journal</button>
+        <span class="dev-sidebar-label">◈ DEV</span>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["git status\n"]'><span class="dsb-icon">▸</span>git st</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["git log --oneline --color -15\n"]'><span class="dsb-icon">▸</span>git log</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["git diff --stat\n"]'><span class="dsb-icon">▸</span>git diff</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["python3 --version && pip3 list 2>/dev/null | head -20\n"]'><span class="dsb-icon">▸</span>python3</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["find . -name \"*.py\" -not -path \"./.git/*\" | head -20\n"]'><span class="dsb-icon">▸</span>find py</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["tail -n 50 /var/log/syslog\n"]'><span class="dsb-icon">▸</span>syslog</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["cat /etc/os-release\n"]'><span class="dsb-icon">▸</span>os info</button>
+        <button class="dev-sidebar-btn" data-action="devTerminalSend" data-args='["uname -a\n"]'><span class="dsb-icon">▸</span>uname</button>
+        <div id="dev-ctx-section" class="d-none">
+          <div class="dev-sidebar-sep"></div>
+          <span class="dev-sidebar-label dev-ctx-label">◈ CTX</span>
+          <div id="dev-ctx-btns"></div>
+        </div>
+      </nav>
+      <div id="dev-xterm-container" class="dev-xterm-container"></div>
+    </div>
+    <!-- HUD ressources VM srv-dev-1 -->
+    <div class="dev-vm-hud" id="dev-vm-hud">
+      <span class="dev-hud-host" id="dev-hud-host-label">● srv-dev-1</span>
+      <span class="dev-hud-sep">│</span>
+      <span class="dev-hud-label">LOAD</span>
+      <span class="dev-hud-val" id="dhud-load">—</span>
+      <span class="dev-hud-sep">│</span>
+      <span class="dev-hud-label">RAM</span>
+      <div class="dev-hud-bar-wrap"><div class="dev-hud-bar" id="dhud-ram-bar"></div></div>
+      <span class="dev-hud-val" id="dhud-ram">—</span>
+      <span class="dev-hud-sep">│</span>
+      <span class="dev-hud-label">DISK</span>
+      <div class="dev-hud-bar-wrap"><div class="dev-hud-bar" id="dhud-disk-bar"></div></div>
+      <span class="dev-hud-val" id="dhud-disk">—</span>
+      <span class="dev-hud-sep">│</span>
+      <span class="dev-hud-label">NET</span>
+      <span class="dev-hud-val" id="dhud-net">—</span>
+      <span class="dev-hud-sep">│</span>
+      <span class="dev-hud-label">UP</span>
+      <span class="dev-hud-val" id="dhud-uptime">—</span>
+    </div>
+    <!-- Barre JARVIS inline au bas du terminal -->
+    <div class="dev-jarvis-bar">
+      <div class="dev-jarvis-response d-none" id="dev-jarvis-response">
+        <span class="dev-jarvis-resp-label">◈ JARVIS</span>
+        <button class="dev-jarvis-resp-close" data-action="devJarvisCloseResponse">✕</button>
+        <div class="dev-jarvis-resp-text" id="dev-jarvis-resp-text"></div>
+      </div>
+      <div class="dev-jarvis-err-hint d-none" id="dev-jarvis-err-hint"></div>
+      <div class="dev-jarvis-card">
+        <textarea class="dev-jarvis-input" id="dev-jarvis-input" placeholder="Demandez à JARVIS depuis le terminal…"></textarea>
+        <div class="dev-jarvis-footer">
+          <span class="dev-jarvis-logo">◆ JARVIS</span>
+          <div class="dev-jarvis-actions">
+            <button class="dev-jarvis-send" data-action="devJarvisSend">▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

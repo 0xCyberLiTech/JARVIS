@@ -1,0 +1,29 @@
+{
+  "folders": [
+    {
+      "name": "JARVIS — Assistant IA local",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/*.pyc": true,
+      "**/voices/.cache": true,
+      "**/models/*.gguf": true
+    },
+    "editor.wordWrap": "on",
+    "editor.tabSize": 4,
+    "files.encoding": "utf8",
+    "files.eol": "\n",
+    "python.defaultInterpreterPath": "python"
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.pylance",
+      "ms-vscode.live-server",
+      "ecmel.vscode-html-css"
+    ]
+  }
+}

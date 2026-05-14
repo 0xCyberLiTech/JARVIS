@@ -1,0 +1,58 @@
+  <!-- ═══ ONGLET TERMINAL ═══ -->
+  <div id="tab-terminal" class="tab-content">
+    <div class="term-wrapper">
+    <div class="chat-corner tl"></div>
+    <div class="chat-corner tr"></div>
+    <div class="chat-corner bl"></div>
+    <div class="chat-corner br"></div>
+    <div class="term-layout">
+
+      <!-- ── Header Neural Interface ── -->
+      <div class="term-topbar">
+        <div class="term-logo-hex">⌨</div>
+        <div class="term-header-text">
+          <div class="term-header-title">JARVIS TERMINAL</div>
+          <div class="term-header-sub">SHELL ACCESS // SECURE // v3.0</div>
+        </div>
+        <div class="term-header-right">
+          <span class="term-cwd" id="term-cwd">C:\...</span>
+          <span class="term-header-status" id="term-status">● SESSION ACTIVE</span>
+        </div>
+        <button class="term-action-btn" data-action="termFontSize" data-args='[-1]' title="Réduire la police">A−</button>
+        <button class="term-action-btn" data-action="termFontSize" data-args='[1]'  title="Agrandir la police">A+</button>
+        <button class="term-action-btn" data-action="termClear">◌ CLEAR</button>
+        <button class="term-action-btn" data-action="termAskJarvis">◈ JARVIS</button>
+      </div>
+
+      <!-- ── Zone output ── -->
+      <div class="term-output" id="term-output">
+        <div class="term-line term-line-sys">◈ JARVIS TERMINAL — ↑/↓ historique · CTRL+L effacer · ENTRÉE exécuter</div>
+      </div>
+
+      <!-- ── Barre de commandes unifiée ── -->
+      <div class="term-cmd-bar">
+        <!-- Raccourcis rapides -->
+        <div class="term-quick-bar">
+          <span class="term-quick-label">CMDS ◈</span>
+          <button class="term-quick-btn" data-action="termFill" data-args='["dir"]'>dir</button>
+          <button class="term-quick-btn" data-action="termFill" data-args='["python --version"]'>python</button>
+          <button class="term-quick-btn" data-action="termFill" data-args='["pip list"]'>pip list</button>
+          <button class="term-quick-btn" data-action="termFill" data-args='["netstat -ano | findstr :5000"]'>port 5000</button>
+          <button class="term-quick-btn" data-action="termFill" data-args='["git status"]'>git status</button>
+          <button class="term-quick-btn" data-action="termFill" data-args='["git log --oneline -10"]'>git log</button>
+          <button class="term-quick-btn" data-action="termFill" data-args='["tasklist | findstr python"]'>ps python</button>
+          <button class="term-quick-btn" data-action="termFill" data-args='["ipconfig"]'>ipconfig</button>
+          <button class="term-quick-btn" data-action="termFill" data-args='["systeminfo | findstr /C:\"Total Physical Memory\""]'>ram</button>
+        </div>
+        <!-- Input style chat -->
+        <div class="term-input-bar">
+          <span class="term-input-prefix">▸</span>
+          <input id="term-input" type="text" placeholder="ENTREZ UNE COMMANDE..." autocomplete="off" spellcheck="false">
+          <button class="term-action-btn" data-action="termAskJarvis">◈ IA</button>
+          <button class="term-action-btn primary" data-action="termExec">⏎ EXEC</button>
+        </div>
+      </div>
+
+    </div>
+    </div><!-- end term-wrapper -->
+  </div><!-- end tab-terminal -->

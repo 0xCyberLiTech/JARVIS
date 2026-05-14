@@ -1,0 +1,345 @@
+  <!-- ═══ ONGLET SETTINGS ═══ -->
+  <div id="tab-settings" class="tab-content">
+  <div class="hud-frame">
+    <div class="chat-corner tl"></div>
+    <div class="chat-corner tr"></div>
+    <div class="chat-corner bl"></div>
+    <div class="chat-corner br"></div>
+    <div class="chat-main-scan"></div>
+    <div class="settings-layout">
+
+      <!-- Colonne gauche : paramètres LLM -->
+      <div class="settings-col">
+
+        <!-- GPU Health live -->
+        <div class="settings-card" id="stg-gpu-card">
+          <div class="settings-card-title stg-card-title-flex">
+            <span>// GPU HEALTH — RTX 5080</span>
+            <span id="stg-gpu-dot" class="stg-gpu-dot"></span>
+          </div>
+
+          <div class="health-row">
+            <div class="health-label-row">
+              <span class="health-label">VRAM</span>
+              <span class="health-value" id="h-vram-val">— / 16 GB</span>
+            </div>
+            <div class="health-track">
+              <div class="health-fill safe" id="h-vram-fill"></div>
+            </div>
+            <div class="health-zones"><div class="hz-safe"></div><div class="hz-warn"></div><div class="hz-crit"></div></div>
+            <div class="hz-labels"><span>0</span><span>11.2 GB</span><span>13.6 GB</span><span>16 GB</span></div>
+          </div>
+
+          <div class="health-row">
+            <div class="health-label-row">
+              <span class="health-label">GPU</span>
+              <span class="health-value" id="h-gpu-val">—%</span>
+            </div>
+            <div class="health-track">
+              <div class="health-fill safe" id="h-gpu-fill"></div>
+            </div>
+            <div class="health-zones"><div class="hz-safe"></div><div class="hz-warn"></div><div class="hz-crit"></div></div>
+            <div class="hz-labels"><span>0%</span><span>70%</span><span>85%</span><span>100%</span></div>
+          </div>
+
+          <div class="health-row">
+            <div class="health-label-row">
+              <span class="health-label">TEMPÉRATURE</span>
+              <span class="health-value" id="h-temp-val">—°C</span>
+            </div>
+            <div class="health-track">
+              <div class="health-fill safe" id="h-temp-fill"></div>
+            </div>
+            <div class="health-zones"><div class="hz-safe"></div><div class="hz-warn"></div><div class="hz-crit"></div></div>
+            <div class="hz-labels"><span>0°C</span><span>70°C</span><span>85°C</span><span>100°C</span></div>
+          </div>
+
+          <div class="health-row">
+            <div class="health-label-row">
+              <span class="health-label">POWER</span>
+              <span class="health-value" id="h-pow-val">— W</span>
+            </div>
+            <div class="health-track">
+              <div class="health-fill safe" id="h-pow-fill"></div>
+            </div>
+            <div class="health-zones"><div class="hz-safe"></div><div class="hz-warn"></div><div class="hz-crit"></div></div>
+            <div class="hz-labels"><span>0W</span><span>252W</span><span>306W</span><span>360W</span></div>
+          </div>
+        </div>
+
+        <!-- Impact paramètres sur VRAM -->
+        <div class="settings-card" id="stg-impact-card">
+          <div class="settings-card-title">// IMPACT SUR LA RTX 5080</div>
+
+          <div class="impact-bar-row">
+            <span class="impact-bar-label">LONGUEUR</span>
+            <div class="impact-bar-track"><div class="impact-bar-fill impact-bar-fill-main" id="imp-predict"></div></div>
+            <span class="impact-tag tag-low" id="imp-predict-tag">LÉGER</span>
+          </div>
+          <div class="impact-bar-row">
+            <span class="impact-bar-label">DIVERSITÉ</span>
+            <div class="impact-bar-track"><div class="impact-bar-fill impact-bar-fill-sub" id="imp-topk"></div></div>
+            <span class="impact-tag tag-low" id="imp-topk-tag">LÉGER</span>
+          </div>
+          <div class="impact-bar-row">
+            <span class="impact-bar-label">CRÉATIVITÉ</span>
+            <div class="impact-bar-track"><div class="impact-bar-fill impact-bar-fill-sub" id="imp-temp"></div></div>
+            <span class="impact-tag tag-low" id="imp-temp-tag">LÉGER</span>
+          </div>
+
+          <div class="stg-divider"></div>
+          <div class="stg-section-lbl-dim">VRAM ESTIMÉE</div>
+          <div class="vram-estimate-bar">
+            <div class="vram-model-fill" id="vram-model-fill"></div>
+            <div class="vram-kv-fill"    id="vram-kv-fill"></div>
+          </div>
+          <div class="vram-legend">
+            <div class="vram-legend-item"><div class="vleg-dot vleg-dot-model"></div><span>Modèle ~9.1 GB</span></div>
+            <div class="vram-legend-item"><div class="vleg-dot vleg-dot-kv"></div><span id="vram-kv-label">KV cache ~1 GB</span></div>
+          </div>
+          <div class="vram-free-label" id="vram-free-label">Libre estimé : ~5.9 GB — ZONE SÛRE ✓</div>
+        </div>
+
+        <!-- Profils pré-configurés RTX 5080 -->
+        <div class="settings-card">
+          <div class="settings-card-title">// PROFILS RTX 5080</div>
+          <div class="profile-grid">
+            <button class="profile-btn" data-action="applyProfile" data-args='["rapide"]'>
+              <span class="profile-icon">⚡</span>
+              <span class="profile-name">RAPIDE</span>
+              <span class="profile-sub">Réponses courtes · modèle actif</span>
+            </button>
+            <button class="profile-btn" data-action="applyProfile" data-args='["equilibre"]'>
+              <span class="profile-icon">⚖</span>
+              <span class="profile-name">ÉQUILIBRÉ</span>
+              <span class="profile-sub">Usage général · défaut</span>
+            </button>
+            <button class="profile-btn" data-action="applyProfile" data-args='["code"]'>
+              <span class="profile-icon">{'>'}_</span>
+              <span class="profile-name">CODE</span>
+              <span class="profile-sub">Précision max · longues réponses</span>
+            </button>
+            <button class="profile-btn" data-action="applyProfile" data-args='["creatif"]'>
+              <span class="profile-icon">✦</span>
+              <span class="profile-name">CRÉATIF</span>
+              <span class="profile-sub">Imagination · rédaction</span>
+            </button>
+            <button class="profile-btn" data-action="applyProfile" data-args='["precis"]'>
+              <span class="profile-icon">◎</span>
+              <span class="profile-name">PRÉCIS</span>
+              <span class="profile-sub">Déterministe · faits</span>
+            </button>
+            <button class="profile-btn profile-btn-rtx" data-action="applyProfile" data-args='["rtx5080"]'>
+              <span class="profile-icon">▣</span>
+              <span class="profile-name">RTX 5080 MAX</span>
+              <span class="profile-sub">VRAM full · qualité max</span>
+            </button>
+          </div>
+          <div id="profile-active" class="stg-profile-active">PROFIL ACTIF : ÉQUILIBRÉ</div>
+        </div>
+
+        <div class="settings-card">
+          <div class="settings-card-title">// PARAMÈTRES LLM</div>
+
+          <div class="stg-row">
+            <label class="stg-label">TEMPÉRATURE <span class="stg-hint">créativité</span></label>
+            <div class="stg-slider-wrap">
+              <input type="range" class="stg-slider" id="s-temperature" min="0" max="2" step="0.05" value="0.7" data-oninput="updateSliderVal" data-oninput-arg="temperature">
+              <span class="stg-val" id="v-temperature">0.70</span>
+            </div>
+            <div class="stg-desc">0 = déterministe · 1 = normal · 2 = très créatif</div>
+          </div>
+
+          <div class="stg-row">
+            <label class="stg-label">TOP-P <span class="stg-hint">nucleus sampling</span></label>
+            <div class="stg-slider-wrap">
+              <input type="range" class="stg-slider" id="s-top_p" min="0.1" max="1" step="0.05" value="0.9" data-oninput="updateSliderVal" data-oninput-arg="top_p">
+              <span class="stg-val" id="v-top_p">0.90</span>
+            </div>
+            <div class="stg-desc">Probabilité cumulée des tokens candidats</div>
+          </div>
+
+          <div class="stg-row">
+            <label class="stg-label">TOP-K <span class="stg-hint">diversité</span></label>
+            <div class="stg-slider-wrap">
+              <input type="range" class="stg-slider" id="s-top_k" min="1" max="100" step="1" value="40" data-oninput="updateSliderVal" data-oninput-arg="top_k">
+              <span class="stg-val" id="v-top_k">40</span>
+            </div>
+            <div class="stg-desc">Nombre de tokens candidats retenus</div>
+          </div>
+
+          <div class="stg-row">
+            <label class="stg-label">LONGUEUR MAX <span class="stg-hint">tokens</span></label>
+            <div class="stg-slider-wrap">
+              <input type="range" class="stg-slider" id="s-num_predict" min="128" max="4096" step="128" value="1024" data-oninput="updateSliderVal" data-oninput-arg="num_predict">
+              <span class="stg-val" id="v-num_predict">1024</span>
+            </div>
+            <div class="stg-desc">Nombre maximal de tokens générés par réponse</div>
+          </div>
+
+          <div class="stg-row">
+            <label class="stg-label">REPEAT PENALTY <span class="stg-hint">répétition</span></label>
+            <div class="stg-slider-wrap">
+              <input type="range" class="stg-slider" id="s-repeat_penalty" min="1" max="2" step="0.05" value="1.1" data-oninput="updateSliderVal" data-oninput-arg="repeat_penalty">
+              <span class="stg-val" id="v-repeat_penalty">1.10</span>
+            </div>
+            <div class="stg-desc">Pénalité pour les répétitions (1 = aucune)</div>
+          </div>
+
+          <div class="stg-row">
+            <label class="stg-label">CONTEXTE <span class="stg-hint">tokens</span></label>
+            <div class="stg-slider-wrap">
+              <input type="range" class="stg-slider" id="s-num_ctx" min="512" max="16384" step="512" value="8192" data-oninput="updateSliderVal" data-oninput-arg="num_ctx">
+              <span class="stg-val" id="v-num_ctx">2048</span>
+            </div>
+            <div class="stg-desc">Fenêtre de contexte — valeur basse = réponse plus rapide</div>
+          </div>
+
+          <!-- ── Presets Latence ── -->
+          <div class="stg-latency-wrap">
+            <div class="stg-section-lbl">◈ OPTIMISATION LATENCE</div>
+            <div class="stg-latency-grid">
+              <button class="latency-btn latency-btn-fast" data-action="applyLatencyPreset" data-args='["fast"]'>
+                ⚡ RAPIDE<span>ctx:1024 · tok:512</span>
+              </button>
+              <button class="latency-btn latency-btn-bal" data-action="applyLatencyPreset" data-args='["balanced"]'>
+                ◈ ÉQUILIBRÉ<span>ctx:2048 · tok:1024</span>
+              </button>
+              <button class="latency-btn latency-btn-qual" data-action="applyLatencyPreset" data-args='["quality"]'>
+                ◉ QUALITÉ<span>ctx:4096 · tok:2048</span>
+              </button>
+            </div>
+            <div id="latency-preset-status" class="stg-status"></div>
+          </div>
+
+          <div class="stg-actions">
+            <button class="stg-btn stg-btn-apply" data-action="applyLlmParams">✓ APPLIQUER</button>
+            <button class="stg-btn stg-btn-reset" data-action="resetLlmParams">↺ RESET</button>
+          </div>
+          <div id="stg-status" class="stg-status stat-sep"></div>
+        </div>
+      </div>
+
+      <!-- Colonne droite : prompt système -->
+      <div class="settings-col settings-col-wide">
+        <div class="settings-card settings-card-col">
+          <div class="settings-card-title stg-card-title-flex">
+            <span>// PROMPT SYSTÈME</span>
+            <div class="stg-card-actions">
+              <button class="stg-btn stg-btn-reset stg-btn-sm" data-action="reloadSystemPrompt" title="Recharger depuis le disque">⟳ RECHARGER</button>
+              <button class="stg-btn stg-btn-apply stg-btn-sm" data-action="saveSystemPrompt">✓ SAUVEGARDER</button>
+            </div>
+          </div>
+          <div class="stg-prompt-header">
+            <div class="stg-prompt-meta">Instructions de comportement de JARVIS — modifiez avec précaution</div>
+            <div id="active-prompt-profile-badge" class="stg-prompt-badge">◈ PERSONNALISÉ</div>
+          </div>
+          <textarea id="system-prompt-editor" class="stg-textarea" placeholder="Chargement..." data-oninput="_jSystemPromptInput"></textarea>
+
+          <!-- Barre d'état + actions -->
+          <div class="stg-prompt-footer">
+            <span id="stg-prompt-status" class="stg-prompt-status"></span>
+            <div class="stg-prompt-actions">
+              <button class="stg-btn stg-btn-reset stg-btn-sm" data-action="resetSystemPrompt">↺ DÉFAUT</button>
+              <button class="stg-btn stg-btn-apply stg-btn-sm" data-action="openSavePromptProfile">+ PROFIL</button>
+            </div>
+          </div>
+
+          <!-- Gestion des profils prompt -->
+          <div class="stg-profiles-section">
+            <div class="stg-profiles-lbl">◈ PROFILS SAUVEGARDÉS</div>
+            <div id="prompt-profiles-list">
+              <span class="stg-profiles-empty">Chargement...</span>
+            </div>
+            <!-- Modal inline: saisie nom de profil -->
+            <div id="save-profile-form" class="stg-save-form">
+              <div class="stg-card-actions">
+                <input id="profile-name-input" type="text" placeholder="Nom du profil..." maxlength="40" class="stg-profile-input">
+                <button class="stg-btn stg-btn-apply stg-btn-sm" data-action="confirmSavePromptProfile">✓</button>
+                <button class="stg-btn stg-btn-reset stg-btn-sm" data-action="closeSavePromptProfile">✕</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── SÉCURITÉ INTERNE JARVIS ── -->
+    <div class="settings-card settings-card-mt">
+      <div class="settings-card-title stg-card-title-flex">
+        <span>// SÉCURITÉ INTERNE JARVIS</span>
+        <div class="stg-card-actions">
+          <span id="sec-counters" class="sec-counters"></span>
+          <button class="stg-btn stg-btn-apply stg-btn-xs" data-action="loadSecurityLog">⟳ ACTUALISER</button>
+          <button class="stg-btn stg-btn-reset stg-btn-xs" data-action="clearSecurityLog">⌫ VIDER</button>
+        </div>
+      </div>
+      <div class="sec-meta">Tentatives bloquées par les filtres internes JARVIS depuis le démarrage</div>
+      <div id="sec-events-list">
+        <span class="stg-profiles-empty">Chargement...</span>
+      </div>
+    </div>
+
+    <!-- ── FAITS PERSISTANTS ── -->
+    <div class="settings-card settings-card-mt">
+      <div class="settings-card-title stg-card-title-flex">
+        <span>// FAITS PERSISTANTS</span>
+        <div class="stg-card-actions">
+          <span id="facts-count" class="sec-counters"></span>
+          <button class="stg-btn stg-btn-apply stg-btn-xs" data-action="loadFacts">⟳ ACTUALISER</button>
+        </div>
+      </div>
+      <div class="sec-meta">Injectés dans chaque requête LLM — survivent aux redémarrages et au clear mémoire</div>
+      <div id="facts-list" class="stg-facts-list"><span class="stg-profiles-empty">Chargement...</span></div>
+      <div class="stg-fact-add-row">
+        <input id="fact-new-input" type="text" placeholder="Ajouter un fait persistant..." class="stg-profile-input stg-fact-input" maxlength="200">
+        <button class="stg-btn stg-btn-apply stg-btn-sm" data-action="addFact">+ AJOUTER</button>
+      </div>
+      <div id="facts-status" class="stg-status"></div>
+    </div>
+
+    <!-- ── MÉMOIRE LONG TERME ── -->
+    <div class="settings-card settings-card-mt">
+      <div class="settings-card-title stg-card-title-flex">
+        <span>// MÉMOIRE LONG TERME</span>
+        <div class="stg-card-actions">
+          <button class="stg-btn stg-btn-apply stg-btn-xs" data-action="loadMemorySummary">⟳ ACTUALISER</button>
+          <button class="stg-btn stg-btn-reset stg-btn-xs" data-action="clearMemorySummary">⌫ VIDER</button>
+        </div>
+      </div>
+      <div class="sec-meta">Résumés auto-générés des conversations passées — se déclenche quand l'historique dépasse 60 messages</div>
+      <div id="memory-summary-list"><span class="stg-profiles-empty">Chargement...</span></div>
+    </div>
+
+    <!-- ── RAG — BASE DE CONNAISSANCES ── -->
+    <div class="settings-card settings-card-mt">
+      <div class="settings-card-title stg-card-title-flex">
+        <span>// BASE DE CONNAISSANCES — RAG</span>
+        <div class="stg-card-actions">
+          <span id="rag-chunks-count" class="sec-counters"></span>
+          <button class="stg-btn stg-btn-apply stg-btn-xs" data-action="loadRagStatus">⟳ STATUT</button>
+          <button class="stg-btn stg-btn-reset stg-btn-xs" data-action="ragClear">⌫ VIDER INDEX</button>
+        </div>
+      </div>
+      <div class="sec-meta">Recherche sémantique locale · modèle requis : <code>ollama pull mxbai-embed-large</code></div>
+      <div id="rag-sources-list"><span class="stg-profiles-empty">Chargement...</span></div>
+
+      <div class="stg-divider"></div>
+      <div class="stg-section-lbl">INDEXER UN FICHIER</div>
+      <div class="stg-fact-add-row">
+        <input id="rag-file-path" type="text" placeholder="Chemin absolu — ex: C:\Users\mmsab\Documents\0xCyberLiTech\JARVIS\MEMORY.md" class="stg-profile-input stg-fact-input">
+        <button class="stg-btn stg-btn-apply stg-btn-sm" data-action="ragIndexFile">◈ INDEXER</button>
+      </div>
+
+      <div class="stg-divider"></div>
+      <div class="stg-section-lbl">AJOUTER UNE NOTE</div>
+      <textarea id="rag-note-input" class="stg-textarea stg-textarea-sm" placeholder="Note à mémoriser dans la base de connaissances..."></textarea>
+      <div class="stg-card-actions stg-rag-note-actions">
+        <button class="stg-btn stg-btn-apply stg-btn-sm" data-action="ragAddNote">+ MÉMORISER</button>
+      </div>
+      <div id="rag-status" class="stg-status"></div>
+    </div>
+
+    </div><!-- end hud-frame -->
+  </div><!-- end tab-settings -->

@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "title": "SYSTÈME JARVIS — INITIALISATION",
+  "lines": [
+    "Bonjour, Marc.",
+    "",
+    "Je suis JARVIS — votre interface d'intelligence artificielle personnelle.",
+    "Système actuellement en phase de développement actif.",
+    "",
+    "▸ Modèle LLM : phi4:14b via Ollama",
+    "▸ Synthèse vocale : Edge TTS — Antoine Neural",
+    "▸ Traitement DSP : EQ · Compresseur · DeepFilterNet",
+    "▸ Modules actifs : Terminal · Fichiers · Tâches · Audio",
+    "▸ Accélération CUDA : sm_120 Blackwell — Whisper STT GPU · Ollama LLM GPU",
+    "",
+    "Chaque session enrichit le système.",
+    "Chaque requête affine ma compréhension.",
+    "",
+    "— Prêt à vous assister. Que souhaitez-vous accomplir aujourd'hui ?"
+  ],
+  "last_updated": "2026-03-22",
+  "updated_by": "système"
+}

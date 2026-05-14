@@ -1,0 +1,209 @@
+  <!-- ═══ ONGLET VOICE LAB ═══ -->
+  <div id="tab-voicelab" class="tab-content">
+  <div class="vlab-frame">
+    <div class="vlab-frame-scan"></div>
+    <div class="vlab-frame-noise"></div>
+    <div class="chat-corner tl"></div>
+    <div class="chat-corner tr"></div>
+    <div class="chat-corner bl"></div>
+    <div class="chat-corner br"></div>
+  <div class="vlab-frame-inner">
+
+    <!-- Header -->
+    <div class="vlab-header">
+      <div class="vlab-header-left">
+        <span class="vlab-title">VOICE LAB</span>
+        <span class="vlab-subtitle">// TTS DESIGNER — STARK INDUSTRIES</span>
+      </div>
+      <div class="vlab-header-right">
+        <div class="rack-led on-green blink-slow"></div>
+        <span class="vlab-engine-ready">◉ ENGINE READY</span>
+      </div>
+    </div>
+
+    <div class="vlab-layout">
+
+      <!-- ── COLONNE GAUCHE ── -->
+      <div class="vlab-left">
+
+        <!-- 01 — SOURCE VOCALE -->
+        <div class="vlab-panel">
+          <div class="vlab-panel-hdr">
+            <div class="rack-screw tl"></div><div class="rack-screw tr"></div>
+            <div class="vlab-panel-num">01</div>
+            <div class="vlab-section-title">SOURCE VOCALE</div>
+            <div class="rack-unit-tag tag-ia">◈ TTS ENGINE</div>
+            <div id="vlab-engine-led" class="rack-led on-amber"></div>
+          </div>
+          <div class="vlab-panel-body">
+            <div class="vlab-engine-row">
+              <button class="vlab-engine-btn" id="vlab-eng-kokoro" data-action="vlabSetEngine" data-args='["kokoro"]'>◉ KOKORO</button>
+              <button class="vlab-engine-btn" id="vlab-eng-piper"  data-action="vlabSetEngine" data-args='["piper"]'>◉ PIPER</button>
+              <button class="vlab-engine-btn" id="vlab-eng-sapi"   data-action="vlabSetEngine" data-args='["sapi"]'>◉ SAPI</button>
+              <button class="vlab-engine-btn" id="vlab-eng-edge"   data-action="vlabSetEngine" data-args='["edge"]'>◉ EDGE</button>
+            </div>
+            <div class="rack-section rack-section-sm">
+              <div class="rack-section-lbl">VOIX SÉLECTIONNÉE</div>
+              <select id="vlab-voice-sel" class="vlab-voice-sel" data-onchange="vlabSetVoice">
+                <option value="">— chargement des voix —</option>
+              </select>
+            </div>
+            <div class="vlab-status" id="vlab-engine-status">◉ EN ATTENTE</div>
+          </div>
+        </div>
+
+        <!-- 02 — PARAMÈTRES VOCAUX -->
+        <div class="vlab-panel">
+          <div class="vlab-panel-hdr">
+            <div class="rack-screw tl"></div><div class="rack-screw tr"></div>
+            <div class="vlab-panel-num">02</div>
+            <div class="vlab-section-title">PARAMÈTRES VOCAUX</div>
+            <div class="rack-unit-tag tag-ok">◈ DSP SYNC</div>
+            <button class="vlab-reset-btn" data-action="vlabResetAll"
+              title="Réinitialiser tous les paramètres vocaux aux valeurs par défaut">
+              ↺ RESET
+            </button>
+          </div>
+          <div class="vlab-panel-body">
+            <div class="rack-fader-row">
+              <span class="rack-fader-lbl">VITESSE</span>
+              <input type="range" class="rack-fader fader-cyan" id="vlab-speed"
+                min="0.5" max="2.0" step="0.05" value="1.0"
+                data-oninput="vlabSlider" data-oninput-arg="speed">
+              <span class="rack-fader-val" id="vlab-speed-val">1.00×</span>
+            </div>
+            <div class="rack-fader-row">
+              <span class="rack-fader-lbl">HAUTEUR</span>
+              <input type="range" class="rack-fader fader-cyan" id="vlab-pitch"
+                min="-12" max="12" step="1" value="0"
+                data-oninput="vlabSlider" data-oninput-arg="pitch">
+              <span class="rack-fader-val" id="vlab-pitch-val">0 st</span>
+            </div>
+            <div class="rack-fader-row">
+              <span class="rack-fader-lbl">VOLUME</span>
+              <input type="range" class="rack-fader fader-green" id="vlab-volume"
+                min="0" max="150" step="1" value="100"
+                data-oninput="vlabSlider" data-oninput-arg="volume">
+              <span class="rack-fader-val fader-val-green" id="vlab-volume-val">100%</span>
+            </div>
+
+            <!-- EQ Quick — horizontal rows -->
+            <div class="rack-section">
+              <div class="rack-section-lbl">ÉGALISATION RAPIDE</div>
+              <div class="vlab-eq-col">
+                <div class="rack-fader-row">
+                  <span class="rack-fader-lbl rack-fader-lbl-w">LOW</span>
+                  <input type="range" class="rack-fader fader-blue" id="vlab-eq-low"
+                    min="-12" max="12" step="1" value="0"
+                    data-oninput="vlabEq" data-oninput-arg="low">
+                  <span class="rack-fader-val fader-val-blue rack-fader-lbl-w" id="vlab-eq-low-val">0 dB</span>
+                </div>
+                <div class="rack-fader-row">
+                  <span class="rack-fader-lbl rack-fader-lbl-w">MID</span>
+                  <input type="range" class="rack-fader fader-cyan" id="vlab-eq-mid"
+                    min="-12" max="12" step="1" value="0"
+                    data-oninput="vlabEq" data-oninput-arg="mid">
+                  <span class="rack-fader-val rack-fader-lbl-w" id="vlab-eq-mid-val">0 dB</span>
+                </div>
+                <div class="rack-fader-row">
+                  <span class="rack-fader-lbl rack-fader-lbl-w">HIGH</span>
+                  <input type="range" class="rack-fader fader-green" id="vlab-eq-high"
+                    min="-12" max="12" step="1" value="0"
+                    data-oninput="vlabEq" data-oninput-arg="high">
+                  <span class="rack-fader-val fader-val-green rack-fader-lbl-w" id="vlab-eq-high-val">0 dB</span>
+                </div>
+                <div class="rack-fader-row">
+                  <span class="rack-fader-lbl rack-fader-lbl-w">AIR</span>
+                  <input type="range" class="rack-fader fader-purple" id="vlab-eq-air"
+                    min="-12" max="12" step="1" value="0"
+                    data-oninput="vlabEq" data-oninput-arg="air">
+                  <span class="rack-fader-val fader-val-purple rack-fader-lbl-w" id="vlab-eq-air-val">0 dB</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 03 — PHRASE DE TEST -->
+        <div class="vlab-panel vlab-panel-green">
+          <div class="vlab-panel-hdr">
+            <div class="rack-screw tl"></div><div class="rack-screw tr"></div>
+            <div class="vlab-panel-num">03</div>
+            <div class="vlab-section-title">PHRASE DE TEST</div>
+            <div id="vlab-play-led" class="rack-led"></div>
+          </div>
+          <div class="vlab-panel-body">
+            <textarea id="vlab-phrase" class="vlab-phrase-input" rows="2"
+              placeholder="Saisissez une phrase pour tester la voix…"
+              >Bonsoir. Je suis JARVIS, votre assistant personnel.</textarea>
+            <div class="vlab-btn-row">
+              <button class="vlab-btn primary" data-action="vlabPreview">▶ ÉCOUTER</button>
+              <button class="vlab-btn danger"  data-action="vlabStop">⏹ STOP</button>
+              <button class="vlab-btn purple"  data-action="vlabSyncToDsp">⇥ APPLIQUER AU DSP</button>
+            </div>
+            <div class="vlab-status" id="vlab-play-status"></div>
+            <canvas id="vlab-wave"></canvas>
+          </div>
+        </div>
+
+      </div><!-- end vlab-left -->
+
+      <!-- ── COLONNE DROITE ── -->
+      <div class="vlab-right">
+
+        <!-- 04 — BIBLIOTHÈQUE DE PRESETS -->
+        <div class="vlab-panel vlab-panel-purple vlab-panel-grow">
+          <div class="vlab-panel-hdr">
+            <div class="rack-screw tl"></div><div class="rack-screw tr"></div>
+            <div class="vlab-panel-num">04</div>
+            <div class="vlab-section-title">BIBLIOTHÈQUE</div>
+            <div class="rack-unit-tag tag-purple">◈ PRESETS</div>
+          </div>
+          <div class="vlab-panel-body">
+            <div class="vlab-preset-list" id="vlab-preset-list"></div>
+            <div class="vlab-divider"></div>
+            <div class="vlab-btn-row">
+              <button class="vlab-btn primary" data-action="vlabSavePreset">◈ SAUVER</button>
+              <button class="vlab-btn danger"  data-action="vlabDeletePreset">✕ SUPPRIMER</button>
+            </div>
+            <div class="vlab-btn-row">
+              <button class="vlab-btn" data-action="vlabExportPresets">⬇ EXPORTER</button>
+              <button class="vlab-btn" data-action="vlabImportPresets">⬆ IMPORTER</button>
+            </div>
+            <input type="file" id="vlab-import-file" accept=".json" data-onchange="vlabDoImport" data-onchange-self="1">
+            <div class="vlab-status" id="vlab-preset-status"></div>
+          </div>
+        </div>
+
+        <!-- 05 — COMPARATEUR A/B -->
+        <div class="vlab-panel vlab-panel-violet">
+          <div class="vlab-panel-hdr">
+            <div class="rack-screw tl"></div><div class="rack-screw tr"></div>
+            <div class="vlab-panel-num">05</div>
+            <div class="vlab-section-title">COMPARATEUR A/B</div>
+          </div>
+          <div class="vlab-panel-body">
+            <div class="vlab-ab-row">
+              <span class="vlab-ab-label">A</span>
+              <select id="vlab-ab-a" class="vlab-ab-sel"><option value="">— sélectionner —</option></select>
+            </div>
+            <div class="vlab-ab-row">
+              <span class="vlab-ab-label">B</span>
+              <select id="vlab-ab-b" class="vlab-ab-sel"><option value="">— sélectionner —</option></select>
+            </div>
+            <div class="vlab-btn-row vlab-btn-row-mt">
+              <button class="vlab-btn purple" data-action="vlabAbTest" data-args='["a"]'>▶ A</button>
+              <button class="vlab-btn purple" data-action="vlabAbTest" data-args='["b"]'>▶ B</button>
+              <button class="vlab-btn"        data-action="vlabAbSwitch">↔ SWITCH</button>
+            </div>
+            <div class="vlab-status" id="vlab-ab-status"></div>
+          </div>
+        </div>
+
+      </div><!-- end vlab-right -->
+
+    </div><!-- end vlab-layout -->
+
+  </div><!-- end vlab-frame-inner -->
+  </div><!-- end vlab-frame -->
+  </div><!-- end tab-voicelab -->

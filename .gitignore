@@ -1,0 +1,42 @@
+# ════════════════════════════════════════════════════════════════
+# .gitignore — JARVIS · 0xCyberLiTech
+# Dépôt 100% LOCAL — aucun remote configuré.
+# Ce fichier protège quand même les secrets au cas où un remote
+# serait ajouté un jour.
+# ════════════════════════════════════════════════════════════════
+
+# ── SECRETS / CREDENTIALS — exclusion absolue ──────────────────
+scripts/jarvis_secret.key
+scripts/jarvis_pve.json
+scripts/soc_config.json
+
+# ── Gros binaires (modèles, voix, embeddings) ──────────────────
+models/
+scripts/voices/*.onnx
+scripts/voices/*.onnx.json
+scripts/jarvis_rag/embeddings.npy
+scripts/jarvis_rag/meta.json
+node_modules/
+
+# ── Données runtime (changent en continu, pas du code) ─────────
+scripts/jarvis_facts.json
+scripts/jarvis_memory.json
+scripts/jarvis_memory_summary.json
+scripts/jarvis_soc_actions.json
+scripts/jarvis_soc_autobanned.json
+scripts/jarvis_soc_cooldowns.json
+scripts/voice_prints/
+scripts/generated_code/
+*.log
+
+# ── Artefacts / caches ─────────────────────────────────────────
+__pycache__/
+*.pyc
+.ruff_cache/
+test-results/
+playwright-report/
+
+# ── Snapshots locaux du chantier dette (Copy-Item) ─────────────
+scripts.snapshot-*/
+scripts.action*/
+*.bak
