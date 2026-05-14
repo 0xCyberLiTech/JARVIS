@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js'],
+    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -45,6 +45,17 @@ export default [
         setEqBand: 'writable',
         drawEqCurve: 'writable',
         _dspSchedulePush: 'writable',
+        // Symboles cross-file jarvis_main.js ↔ js/terminal_code.js
+        // (Terminal CODE extrait — chantier 2026-05-14 · scope global partagé)
+        _SOC_REFRESH_MS: 'readonly',
+        _devWs: 'writable',
+        _devXterm: 'writable',
+        _devFit: 'writable',
+        _devHostKey: 'writable',
+        _devSetStatus: 'writable',
+        sendMessage: 'writable',
+        setModeSoc: 'writable',
+        devTerminalOpen: 'writable',
       },
     },
     rules: {
