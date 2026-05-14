@@ -75,6 +75,7 @@ def inject(
     last_user: str,
     is_vocal: bool,
     soc_ctx_injected: bool,
+    force_soc: bool = False,
     *,
     fetch_monitoring_fn,
     build_monitoring_context_fn,
@@ -83,11 +84,14 @@ def inject(
 
     Retourne (system_prompt_modifié, soc_trigger_bool).
 
+    `force_soc` : déclenche l'injection même sans mot-clé SOC — utilisé quand
+    l'appelant cible explicitement le mode SOC (model_override='soc', ex. le
+    chat du dashboard SOC où chaque message est une question SOC par nature).
     `fetch_monitoring_fn(force: bool) -> (ok, raw_json)` : récupère monitoring.json
     `build_monitoring_context_fn(data: dict) -> str` : formate pour injection LLM
     """
     kw_list = SOC_VOCAL_KW if is_vocal else SOC_KW
-    soc_trigger = any(kw in last_user.lower() for kw in kw_list)
+    soc_trigger = force_soc or any(kw in last_user.lower() for kw in kw_list)
     if "[NO_SOC]" in system:
         soc_trigger = False
     if last_user and soc_trigger and not soc_ctx_injected:
@@ -101,5 +105,14 @@ def inject(
                 "\n\nVoici les données SOC actuelles de srv-ngix récupérées en temps réel :\n"
                 + soc_ctx
                 + "\n\nUtilise ces données pour répondre précisément à la question."
+            )
+        else:
+            # srv-ngix injoignable : garde-fou anti-hallucination — le LLM ne
+            # doit JAMAIS inventer un état SOC à partir de rien.
+            system += (
+                "\n\n[DONNÉES SOC INDISPONIBLES — srv-ngix non joignable au moment "
+                "de la requête. INTERDICTION ABSOLUE d'analyser, estimer ou inventer "
+                "un état SOC. Répondre uniquement : « Données temps réel SOC non "
+                "disponibles — connexion srv-ngix requise. »]"
             )
     return system, soc_trigger

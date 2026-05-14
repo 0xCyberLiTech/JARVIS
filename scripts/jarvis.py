@@ -1409,7 +1409,12 @@ def _build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS 
         lines.append(f"IPs actives (Kill Chain) : {len(active_ips)} | EXPLOIT total: {exploit_total} | EXPLOIT non bloquées: {exploit_unblocked}")
         for ip_e in active_ips[:10]:
             cs_status = "BLOQUÉE-CS" if ip_e.get("cs_decision") else "⚠ NON-BLOQUÉE"
-            lines.append(f"  {ip_e.get('ip','?')} [{ip_e.get('country','-')}] stage={ip_e.get('stage','?')} hits={ip_e.get('count','?')} [{cs_status}]")
+            spoof = f" ⚠UA-USURPÉ:{ip_e['spoofed_bot']}" if ip_e.get("spoofed_bot") else ""
+            lines.append(f"  {ip_e.get('ip','?')} [{ip_e.get('country','-')}] stage={ip_e.get('stage','?')} hits={ip_e.get('count','?')} [{cs_status}]{spoof}")
+    verified_bots = kc.get("verified_bots", [])
+    if verified_bots:
+        names = ", ".join(f"{b.get('ip','?')} ({b.get('bot','?')})" for b in verified_bots[:10])
+        lines.append(f"Crawlers légitimes vérifiés FCrDNS ({len(verified_bots)}) — EXCLUS de la Kill Chain, NE JAMAIS recommander de les bannir : {names}")
     net_spikes = d.get("net_spikes", [])
     if net_spikes:
         recent = [s for s in net_spikes if time.time() - s.get("ts", 0) < _NET_SPIKE_WINDOW_S]
@@ -2924,10 +2929,10 @@ _pve_context_summary = _pve_api.context_summary
 _chat_inject_pve     = _pve_api.chat_inject
 
 
-def _chat_inject_soc(system, last_user, is_vocal, soc_ctx_injected):
+def _chat_inject_soc(system, last_user, is_vocal, soc_ctx_injected, force_soc=False):
     """Wrapper DI — délègue à chat_soc_inject.inject() avec les helpers monitoring."""
     return _chat_soc.inject(
-        system, last_user, is_vocal, soc_ctx_injected,
+        system, last_user, is_vocal, soc_ctx_injected, force_soc,
         fetch_monitoring_fn=_fetch_monitoring,
         build_monitoring_context_fn=_build_monitoring_context,
     )
@@ -3767,7 +3772,8 @@ def _chat_generate(ctx: "LlmCtx", no_tools=False):
 
 
 def _chat_build_system_prompt(last_user: str, web_enabled: bool,
-                              soc_ctx_injected: bool, is_vocal: bool) -> tuple[str, bool]:
+                              soc_ctx_injected: bool, is_vocal: bool,
+                              force_soc: bool = False) -> tuple[str, bool]:
     """Wrapper DI — délègue à chat_system_prompt.build() avec les helpers runtime."""
     return _chat_sp.build(
         last_user, web_enabled, soc_ctx_injected, is_vocal,
@@ -3778,6 +3784,7 @@ def _chat_build_system_prompt(last_user: str, web_enabled: bool,
         web_search_fn=web_search,
         soc_inject_fn=_chat_inject_soc,
         pve_inject_fn=_chat_inject_pve,
+        force_soc=force_soc,
     )
 
 
@@ -3838,7 +3845,11 @@ def api_chat():
             mimetype="text/event-stream", headers=_SSE_HEADERS)
 
     # ── 3. System prompt + RAG + web + SOC/PVE live ───────────────────────────
-    system, soc_trigger = _chat_build_system_prompt(last_user, web_enabled, soc_ctx_injected, is_vocal)
+    # model_override='soc' (chat du dashboard SOC) → injection SOC forcée même
+    # sans mot-clé : chaque message y est une question SOC par nature.
+    system, soc_trigger = _chat_build_system_prompt(
+        last_user, web_enabled, soc_ctx_injected, is_vocal,
+        force_soc=(model_override == "soc"))
 
     # ── 4. Routing modèle ─────────────────────────────────────────────────────
     active_model, route = _chat_resolve_model(is_vocal, no_tools, model_override)

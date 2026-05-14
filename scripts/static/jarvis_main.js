@@ -21,7 +21,6 @@ var _STG_GPU_POLL_MS   = 5000;   // poll GPU dans l'onglet Settings
 var _DRIFT_INTERVAL_MS = 1800;   // animation drift preloader
 var _UPD_INTERVAL_MS   = 2200;   // animation update preloader
 var _TASKS_POLL_MS     = 60000;  // intervalle check tâches planifiées
-var _MON_NET_SPIKE_S   = 3600;   // fenêtre pics réseau contexte SOC (aligné _NET_SPIKE_WINDOW_S Python)
 var _DSP_INIT_DELAY_MS  = 60;    // délai init DSP à l'ouverture de l'onglet (EQ curve + sliders)
 var _TTS_STATUS_POLL_MS = 15000; // intervalle poll statut TTS (Kokoro/Piper/SAPI5)
 var _VRAM_POLL_MS       = 15000; // intervalle poll VRAM / modèles Ollama
@@ -165,11 +164,12 @@ async function refreshSocTab() {
 }
 
 
-// ── Contexte SOC temps réel — même circuit que SOC dashboard ──────────────
-// Poll de fond 30s → window._jarvisMonData (zéro latence au send time)
-// Fallback live fetch si données absentes (premier message uniquement)
+// ── Contexte SOC temps réel ───────────────────────────────────────────────
+// Poll de fond 30s → window._jarvisMonData : sert UNIQUEMENT l'alerte vocale
+// proactive (checkThreatLevel). L'injection du contexte SOC dans le chat est
+// 100 % côté serveur (chat_soc_inject.py → system prompt, frais à chaque appel,
+// jamais persisté dans l'historique) — source unique _build_monitoring_context.
 var _MON_ENDPOINT  = (window.JARVIS_CONFIG && window.JARVIS_CONFIG.monEndpoint) || 'http://192.168.1.50:8080/monitoring.json';
-var _SOC_CHAT_KW   = /\b(soc|score|menace|threat|ban|crowdsec|fail2ban|attaque|alerte|alert|monitor|s[eé]curit[eé]|d[eé]fense|intrusion|suricata|hacker|incident|srv.ngix|bouncer|ufw|waf|ddos|bruteforce|brute.force|exploit|cve|rce|injection|anomalie|kill.chain|recon|reconnaissance|niveau.menace|threat.level)\b/i;
 window._jarvisMonData = null;
 
 // ── Alerte vocale proactive SOC (piste 4 — checkThreatLevel) ────
@@ -212,77 +212,12 @@ function checkThreatLevel(d) {
   setInterval(_pollMon, _SOC_REFRESH_MS);
 })();
 
-function _monCtxStr(d){
-  var cs   = d.crowdsec  || {};
-  var f2b  = d.fail2ban  || {};
-  var sys_ = d.system    || {};
-  var mem  = sys_.memory || {};
-  var load = sys_.load   || {};
-  var disk = sys_.disk   || {};
-  var traf = d.traffic   || {};
-  var kc   = d.kill_chain|| {};
-  var svc  = d.services  || {};
-  var score  = d.threat_score != null ? d.threat_score : '?';
-  var level  = d.threat_level || 'INCONNU';
-  var lines  = [
-    '=== DONNÉES SOC EN TEMPS RÉEL (srv-ngix) ===',
-    'Généré le      : ' + (d.generated_at || '?'),
-    'SCORE OFFICIEL : ' + level + ' (' + score + '/100) — pré-calculé par monitoring_gen.py, source de vérité unique. NE PAS recalculer.',
-    'CrowdSec       : ' + (cs.active_decisions != null ? cs.active_decisions : '?') + ' IP(s) bannies actives | alertes 24h : ' + (cs.alerts_24h != null ? cs.alerts_24h : '?'),
-    'Fail2ban       : ' + (f2b.total_banned != null ? f2b.total_banned : '?') + ' IP(s) bannies actives',
-    'RAM            : ' + (mem.pct != null ? mem.pct : '?') + '% (' + (mem.used_mb||'?') + ' Mo / ' + (mem.total_mb||'?') + ' Mo)',
-    'Load CPU       : ' + (load['1m']||'?') + ' (1m) / ' + (load['5m']||'?') + ' (5m) / ' + (load['15m']||'?') + ' (15m)',
-    'Disque /var/www: ' + (disk.pct != null ? disk.pct : '?') + '% utilisé',
-    'Requêtes 24h   : ' + (traf.total_requests != null ? traf.total_requests : '?'),
-    'Erreurs 5xx    : ' + (traf.status_5xx != null ? traf.status_5xx : '?') + ' (' + (traf.error_rate != null ? traf.error_rate : '?') + '% taux d\'erreur)',
-  ];
-  Object.keys(svc).forEach(function(s){
-    var v = svc[s];
-    var st = typeof v === 'string' ? v : (v ? 'UP' : 'DOWN');
-    lines.push('Service ' + s + ' : ' + st);
-  });
-  var ips = kc.active_ips || [];
-  if(ips.length){
-    var expTotal  = ips.filter(function(i){ return i.stage==='EXPLOIT'; }).length;
-    var expNoBan  = ips.filter(function(i){ return i.stage==='EXPLOIT' && !i.cs_decision; }).length;
-    lines.push('IPs actives (Kill Chain) : ' + ips.length + ' | EXPLOIT total: ' + expTotal + ' | EXPLOIT non bloquées: ' + expNoBan);
-    ips.slice(0,10).forEach(function(e){
-      var cs_st = e.cs_decision ? 'BLOQUÉE-CS' : '⚠ NON-BLOQUÉE';
-      lines.push('  ' + (e.ip||'?') + ' [' + (e.country||'-') + '] stage=' + (e.stage||'?') + ' hits=' + (e.count||'?') + ' [' + cs_st + ']');
-    });
-  }
-  var spikes = d.net_spikes || [];
-  if(spikes.length){
-    var now = Date.now()/1000;
-    var recent = spikes.filter(function(s){ return (now - (s.ts||0)) < _MON_NET_SPIKE_S; });
-    if(recent.length){
-      var ls = recent[recent.length-1];
-      lines.push('Pic réseau récent (<1h) : TX=' + (ls.tx_mbps||0) + ' Mbps / RX=' + (ls.rx_mbps||0) + ' Mbps (baseline TX:' + (ls.avg_tx_mbps||0) + ' / RX:' + (ls.avg_rx_mbps||0) + ' Mbps)');
-    }
-    lines.push('Pics réseau (7j) : ' + spikes.length + ' détectés');
-  }
-  lines.push('');
-  lines.push("⚠ RÈGLE ABSOLUE — FIDÉLITÉ SOC : utilise UNIQUEMENT les IPs, scores, niveaux et services listés ci-dessus. Interdiction formelle d'inventer ou d'extrapoler toute donnée absente de ce contexte. Si une information est manquante, indiquer 'non disponible'.");
-  return lines.join('\n');
-}
-
+// Payload chat : l'historique part TEL QUEL — aucune incrustation de contexte
+// SOC côté client. Le serveur (chat_soc_inject.py) détecte les mots-clés SOC et
+// injecte les données fraîches dans le system prompt à chaque appel. Avantages :
+// zéro données périmées dans l'historique, source de formatage unique (Python).
 async function _buildChatPayload(hist, opts){
-  var last = hist.length ? hist[hist.length-1] : null;
-  var outHist = hist;
-  var injected = false;
-  if(last && last.role === 'user' && _SOC_CHAT_KW.test(last.content)){
-    var d = window._jarvisMonData;
-    if(!d){
-      try{ var r = await fetch(_MON_ENDPOINT); if(r.ok){ d = await r.json(); window._jarvisMonData = d; } }catch(e){ _jwarn('[JARVIS] SOC context fetch error', e); }
-    }
-    if(d){
-      outHist = hist.slice(0,-1).concat([{role:'user', content: _monCtxStr(d) + '\n\n' + last.content}]);
-      injected = true;
-    } else {
-      outHist = hist.slice(0,-1).concat([{role:'user', content: '[DONNÉES SOC INDISPONIBLES — srv-ngix non joignable au moment de la requête. INTERDICTION ABSOLUE d\'analyser, estimer ou inventer un état SOC. Répondre uniquement : "Données temps réel SOC non disponibles — connexion srv-ngix requise."]\n\n' + last.content}]);
-    }
-  }
-  var base = {history: outHist, web_search: window._webSearchEnabled || false, soc_ctx_injected: injected};
+  var base = {history: hist, web_search: window._webSearchEnabled || false, soc_ctx_injected: false};
   return opts ? Object.assign(base, opts) : base;
 }
 

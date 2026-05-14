@@ -27,11 +27,13 @@ def build(
     web_search_fn,
     soc_inject_fn,
     pve_inject_fn,
+    force_soc: bool = False,
 ) -> tuple[str, bool]:
     """Construit le system prompt complet : faits + RAG + web + SOC/PVE live.
 
     Retourne (system_prompt_complet, soc_trigger).
     `soc_trigger` indique si le SOC a été déclenché (utilisé pour stats/log côté appelant).
+    `force_soc` : force l'injection SOC même sans mot-clé (model_override='soc').
     """
     system = facts_inject_fn(system_prompt)
     if len(last_user.strip()) >= 60 or rag_relevant_re.search(last_user):
@@ -42,6 +44,6 @@ def build(
             f"pour la question de l'utilisateur:\n{web_search_fn(last_user)}\n"
             "Utilise ces informations pour enrichir ta réponse si pertinent."
         )
-    system, soc_trigger = soc_inject_fn(system, last_user, is_vocal, soc_ctx_injected)
+    system, soc_trigger = soc_inject_fn(system, last_user, is_vocal, soc_ctx_injected, force_soc)
     system = pve_inject_fn(system, last_user)
     return system, soc_trigger
