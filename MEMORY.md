@@ -22,6 +22,8 @@
 - 75→76 : 2 smoke tests LLM
 - 76→78 : refactor JS partiel (3 sous-systèmes extraits de jarvis_main.js)
 
+**Refactor JS — reprise 2026-05-14 (soir)** (commit `a118772`) : extraction de **TÂCHES TAB** (`static/js/tasks_tab.js` 129 L) + **WELCOME/boot/preloader** (`static/js/welcome.js` 244 L) — `jarvis_main.js` **7828 → 7464 L** (−364). Zone source 6685-7049 = **sans aucun appel top-level** → extraction provably sûre (pure définitions, scope global, chargées via `<script>` après jarvis_main.js, bodies byte-identiques). `eslint.config.js` : 6 globals cross-file déclarés. `node --check` ×3 OK · eslint 0 erreur. ⚠ Vérif E2E en attente d'un restart JARVIS. Reste : `jarvis_main.js` toujours 7464 L — prochains candidats (audio viz ~1130 L, EQ ~496 L, rack ~667 L, EQ music ~695 L) plus entremêlés (appels top-level).
+
 **5 commits git atomiques** (dépôt initialisé, 100% local, aucun remote) :
 
 | Commit | Action | Détail |
