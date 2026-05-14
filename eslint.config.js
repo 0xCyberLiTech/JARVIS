@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js', 'scripts/static/js/audio_mire.js', 'scripts/static/js/eq_music.js'],
+    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js', 'scripts/static/js/audio_mire.js', 'scripts/static/js/eq_music.js', 'scripts/static/js/audio_viz.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -145,6 +145,21 @@ export default [
         switchTab: 'writable',
         syncDspVoices: 'writable',
         testDspVoice: 'writable',
+        // Symboles cross-file jarvis_main.js ↔ js/audio_viz.js
+        // (AUDIO VIZ extrait — chantier dette 2026-05-14)
+        _analyserEnabled: 'writable',
+        _drawGrMeter: 'writable',
+        _ensureAudioCtx: 'writable',
+        _haasDelayNode: 'writable',
+        _haasGainNode: 'writable',
+        _lastJarvisText: 'writable',
+        _scopeGain: 'writable',
+        _setAllReplayBusy: 'writable',
+        _specBinMap: 'writable',
+        _specColorTable: 'writable',
+        _stereoActive: 'writable',
+        busy: 'writable',
+        ttsEnabled: 'writable',
       },
     },
     rules: {
