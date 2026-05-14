@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js'],
+    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -79,6 +79,14 @@ export default [
         _dspPitchSemi: 'writable',
         _dspPlaybackRate: 'writable',
         _fetchDspParams: 'writable',
+        // Symboles cross-file jarvis_main.js ↔ js/tasks_tab.js + js/welcome.js
+        // (TÂCHES TAB + WELCOME extraits — chantier dette 2026-05-14)
+        _TASKS_POLL_MS: 'readonly',
+        _DSP_PUSH_MS: 'readonly',
+        _EQ_REDRAW_MS: 'readonly',
+        _buildChatPayload: 'writable',
+        _startPreloader: 'writable',
+        loadWelcome: 'writable',
       },
     },
     rules: {
