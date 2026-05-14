@@ -1396,10 +1396,11 @@ def _build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS 
     req_24h  = traf.get("total_requests", 0)
     score  = d.get("threat_score", 0)
     threat = d.get("threat_level", "FAIBLE")
+    generated_at = d.get('generated_at', '?')
     lines = [
         header,
-        f"Généré le      : {d.get('generated_at','?')}",
-        f"SCORE OFFICIEL : {threat} ({score}/100) — pré-calculé par monitoring_gen.py, source de vérité unique. NE PAS recalculer.",
+        f"Généré le      : {generated_at}",
+        f"SCORE OFFICIEL : {threat} ({score}/100) au snapshot {generated_at} — valeur LIVE recalculée chaque minute par monitoring_gen.py, source de vérité unique. NE PAS recalculer. Cite TOUJOURS cet horodatage avec le score.",
         f"CrowdSec       : {cs_bans} IP(s) bannies actives | alertes 24h : {cs.get('alerts_24h','?')}",
         f"Fail2ban       : {f2b_bans} IP(s) bannies actives",
         f"RAM            : {mem.get('pct','?')}% ({mem.get('used_mb','?')} Mo / {mem.get('total_mb','?')} Mo)",
