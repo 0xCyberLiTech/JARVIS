@@ -39,4 +39,6 @@ playwright-report/
 # ── Snapshots locaux du chantier dette (Copy-Item) ─────────────
 scripts.snapshot-*/
 scripts.action*/
+scripts.matin-*/
+scripts.aprem-*/
 *.bak
