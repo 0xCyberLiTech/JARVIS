@@ -1,7 +1,0 @@
-# .gitattributes — JARVIS · 0xCyberLiTech
-# Créé 2026-05-14 (chantier dette technique)
-
-# jarvis_system_prompt.txt est réécrit par JARVIS via Python write_text()
-# (4 call sites dans jarvis.py) → toujours en LF. On force LF côté git pour
-# éviter un faux "fichier modifié" CRLF↔LF à chaque boot.
-scripts/jarvis_system_prompt.txt text eol=lf

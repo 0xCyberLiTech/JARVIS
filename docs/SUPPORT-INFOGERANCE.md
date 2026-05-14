@@ -1,5 +1,5 @@
 # JARVIS — Guide de référence
-<!-- 2026-05-14 — v2.5 — Chantier dette technique : git initialisé + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + audio_dsp.py · 31 modules Python · jarvis.py 4633L · score honnête 76/100 -->
+<!-- 2026-05-14 — v2.5 — Chantier dette technique : git initialisé + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + audio_dsp.py · 31 modules Python · jarvis.py 4633L · score honnête 78/100 -->
 
 Assistant IA personnel 0xCyberLiTech — infogérance réseau + assistant quotidien.  
 ⚡ = bypass Python direct (sans LLM, instantané) · 🤖 = via LLM (raisonnement)

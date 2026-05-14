@@ -1,5 +1,5 @@
 ﻿# Circuit logique SOC + JARVIS — 0xCyberLiTech
-**Date : 2026-05-14 — v2.4** · routing 4 branches (soc/general/code/code_reasoning) · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git initialisé + pre-commit hooks · score honnête 76/100 (chantier dette 2026-05-14 : 62→76)
+**Date : 2026-05-14 — v2.4** · routing 4 branches (soc/general/code/code_reasoning) · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git initialisé + pre-commit hooks · score honnête 78/100 (chantier dette 2026-05-14 : 62→78)
 
 ---
 

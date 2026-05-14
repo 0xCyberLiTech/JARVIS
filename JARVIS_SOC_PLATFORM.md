@@ -1,6 +1,6 @@
 # JARVIS SOC PLATFORM — Architecture IA & Cybersécurité Homelab
 ### Agent autonome local · Surveillance proactive · Contrôle d'infrastructure · LLM on-premise
-<!-- 0xCyberLiTech · v2.7 · 2026-05-14 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 25 tests E2E Playwright · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git initialisé (5 commits) + pre-commit hooks bloquants + ruff.toml · score dette HONNÊTE 76/100 (recalibré depuis 62 réel · +14 via chantier dette 2026-05-14 · JS reste majoritairement monolithique, pas de CI cloud) -->
+<!-- 0xCyberLiTech · v2.7 · 2026-05-14 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 25 tests E2E Playwright · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git initialisé (5 commits) + pre-commit hooks bloquants + ruff.toml · score dette HONNÊTE 78/100 (recalibré depuis 62 réel · +16 via chantier dette 2026-05-14 · JS reste majoritairement monolithique, pas de CI cloud) -->
 
 ---
 
@@ -90,8 +90,9 @@ Windows 11 — localhost:5000
 │   └── tabs/              tab_monitor · tab_chat · tab_settings · tab_dsp
 │                          tab_terminal · tab_taches · tab_voicelab · tab_soc
 └── static/
-    ├── jarvis_main.js     8994 L · ⚠ reste majoritairement monolithique
+    ├── jarvis_main.js     7893 L · ⚠ reste majoritairement monolithique
     ├── jarvis_mixing.js   1375 L · recorder.js 660 L · voice_print.js 852 L
+    ├── js/               terminal_code.js 445L · voice_lab.js 580L · stt.js 113L (refactor 2026-05-14)
     └── css/               8 fichiers par secteur (ex-jarvis.css 5270L · chantier 2026-05-14)
 ```
 
@@ -413,7 +414,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | Imports inutilisés | 0 |
 | Regex inconsistantes | 3 corrigées |
 | Code mort introduit cette session | 0 |
-| **jarvis.py final** | **4633 L · 31 modules extraits · score dette HONNÊTE 76/100** (recalibré depuis 62 réel · +14 via chantier dette 2026-05-14 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py) |
+| **jarvis.py final** | **4633 L · 31 modules extraits · score dette HONNÊTE 78/100** (recalibré depuis 62 réel · +16 via chantier dette 2026-05-14 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py) |
 
 ### 5.7 Validé en prod
 
@@ -464,12 +465,12 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | ✅ | Audit dette technique honnête — score 73 → 84/100 (+11 sur 2026-05-13) | session 33 |
 | ✅ | **Phase 3 split monolithe Python complète** — **30 modules extraits** (Audio/Voice 5 + Bypass 8 + Infra/RAG 2 + Chat/LLM core 15) — `jarvis.py` 6592 → ~4520 (**-2072 lignes · -31%**) — score honnête 84 → **89/100** (+5 · pas 100 car JS toujours monolithique) | session 33b |
 | ✅ | **Split JS partiel** — extraction `recorder.js` (660L) + `voice_print.js` (852L) en IIFE depuis `jarvis_main.js` 10507→8994L (**-14.4%**) — score honnête 89 → 91 (valeur d'époque) | session 33c |
-| ✅ | **Chantier dette technique 2026-05-14** — recalibration honnête (le 91 était optimiste, départ réel **62**) → **76/100** (+14). Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (5 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait (jarvis.py -477L) | 2026-05-14 |
+| ✅ | **Chantier dette technique 2026-05-14** — recalibration honnête (le 91 était optimiste, départ réel **62**) → **78/100** (+16). Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (17 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** : 3 modules extraits de jarvis_main.js (8994→7893L) | 2026-05-14 |
 | 🟡 | SSH write ops partielles — apt upgrade · restart service (validation) | ouvert |
-| 🔵 | GitHub Actions CI + tests intégration LLM réel | future session |
-| 🔵 | Refactor JS complet — `jarvis_main.js` reste à 8994L · 9 modules ES candidats · pas urgent | future session |
+| 🔵 | Refactor JS — suite incrémentale (méthode validée : fichiers .js scope global) | future session |
+| 🔵 | Tests unitaires Python · profiling performance | future session |
 
-**Reste reporté :** GitHub Actions CI · tests intégration LLM réel · refactor JS complet · décision fichiers runtime trackés.
+**Reste reporté :** refactor JS (suite incrémentale) · tests unitaires Python · profiling perf · CI cloud (incompatible « rien sur le web »).
 
 ---
 
