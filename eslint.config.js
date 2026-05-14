@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js', 'scripts/static/js/audio_mire.js', 'scripts/static/js/eq_music.js', 'scripts/static/js/audio_viz.js', 'scripts/static/js/settings_llm.js'],
+    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js', 'scripts/static/js/audio_mire.js', 'scripts/static/js/eq_music.js', 'scripts/static/js/audio_viz.js', 'scripts/static/js/settings_llm.js', 'scripts/static/js/dsp_audio.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -172,6 +172,26 @@ export default [
         _updateActivePromptBadge: 'writable',
         loadPromptProfiles: 'writable',
         updateImpactBars: 'writable',
+        // Symboles cross-file jarvis_main.js ↔ js/dsp_audio.js
+        // (DSP AUDIO SYSTEM extrait — chantier dette 2026-05-14)
+        _FX2: 'writable',
+        _fx2Type: 'writable',
+        _fx2Vals: 'writable',
+        _fxActive: 'writable',
+        _fxConvolver: 'writable',
+        _fxDryGain: 'writable',
+        _fxRefreshIr: 'writable',
+        _fxSetWetDry: 'writable',
+        _fxType: 'writable',
+        _fxWetGain: 'writable',
+        _refreshDspSliders: 'writable',
+        _stereoWidth: 'writable',
+        _updateDspChainStatus: 'writable',
+        eqSetType: 'writable',
+        eqToggleBypass: 'writable',
+        rackInitFaders: 'writable',
+        rackSyncHaasDelay: 'writable',
+        rackSyncStereoWidth: 'writable',
       },
     },
     rules: {
