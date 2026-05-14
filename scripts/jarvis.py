@@ -1393,6 +1393,15 @@ def _build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS 
     for s, v in svc.items():
         status = v if isinstance(v, str) else ("UP" if v else "DOWN")
         lines.append(f"Service {s:12s}: {status}")
+    cs_banned = cs.get("decisions_detail", {})
+    if cs_banned:
+        shown = sorted(cs_banned.items())[:25]
+        lines.append("")
+        lines.append(f"IPs DÉJÀ BANNIES par CrowdSec ({len(cs_banned)} au total — déjà neutralisées, NE PAS recommander de les bannir) :")
+        for ip, meta in shown:
+            lines.append(f"  {ip} — scénario={meta.get('scenario','?')} stage={meta.get('stage','?')}")
+        if len(cs_banned) > len(shown):
+            lines.append(f"  … et {len(cs_banned) - len(shown)} autre(s) IP(s) déjà bannie(s) non listée(s)")
     active_ips = kc.get("active_ips", [])
     if active_ips:
         exploit_unblocked = sum(1 for ip in active_ips if ip.get("stage") == "EXPLOIT" and not ip.get("cs_decision"))
