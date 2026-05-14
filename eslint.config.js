@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js'],
+    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js', 'scripts/static/js/audio_mire.js', 'scripts/static/js/eq_music.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -114,6 +114,37 @@ export default [
         eqBqCoeffs: 'writable',
         eqBqResponse: 'writable',
         eqPushNow: 'writable',
+        // Symboles cross-file jarvis_main.js ↔ js/eq_music.js + js/audio_mire.js
+        // (EQ MUSIC + MIRE extraits — chantier dette 2026-05-14)
+        DAT_EQ_BANDS: 'readonly',
+        _TTS_STATUS_POLL_MS: 'readonly',
+        _canvasCoords: 'writable',
+        _datEqBandIdx: 'writable',
+        _dspInited: 'writable',
+        _dspRafId: 'writable',
+        _dspVolume: 'writable',
+        _eqPanelOn: 'writable',
+        _lastLocalEngine: 'writable',
+        _syncDefaultEngineButtons: 'writable',
+        _syncRangeSlider: 'writable',
+        addMessage: 'writable',
+        datEqSetFreq: 'writable',
+        datEqSetQ: 'writable',
+        datEqSetType: 'writable',
+        datEqToggleBypass: 'writable',
+        drawDatEqCurve: 'writable',
+        eqSetFreq: 'writable',
+        eqSetQ: 'writable',
+        initDsp: 'writable',
+        pushDspParamsToBackend: 'writable',
+        setDatEqBand: 'writable',
+        setDspCompressor: 'writable',
+        setDspGain: 'writable',
+        setKokoroSpeed: 'writable',
+        startDspDraw: 'writable',
+        switchTab: 'writable',
+        syncDspVoices: 'writable',
+        testDspVoice: 'writable',
       },
     },
     rules: {
