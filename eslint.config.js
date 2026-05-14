@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js', 'scripts/static/js/audio_mire.js', 'scripts/static/js/eq_music.js', 'scripts/static/js/audio_viz.js', 'scripts/static/js/settings_llm.js', 'scripts/static/js/dsp_audio.js'],
+    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js', 'scripts/static/js/audio_mire.js', 'scripts/static/js/eq_music.js', 'scripts/static/js/audio_viz.js', 'scripts/static/js/settings_llm.js', 'scripts/static/js/dsp_audio.js', 'scripts/static/js/boot_init.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -192,6 +192,32 @@ export default [
         rackInitFaders: 'writable',
         rackSyncHaasDelay: 'writable',
         rackSyncStereoWidth: 'writable',
+        // Symboles cross-file jarvis_main.js ↔ js/boot_init.js
+        // (BOOT SEQUENCE + RACK FX + INIT extraits — chantier dette 2026-05-14)
+        _BOOTID_POLL_MS: 'readonly',
+        _COVER_SAFE_MS: 'readonly',
+        _DRAW_INTERVAL_MS: 'readonly',
+        _LS_MODE: 'readonly',
+        _MODE_CODE: 'readonly',
+        _MODE_CODE_REASONING: 'readonly',
+        _MODE_GENERAL: 'readonly',
+        _TICK_INTERVAL_MS: 'readonly',
+        _VOIX_PULSE_MS: 'readonly',
+        _applyModeProfile: 'writable',
+        _clearUnitVu: 'writable',
+        _compActive: 'writable',
+        _dfActive: 'writable',
+        _fxUpdateCudaScreen: 'writable',
+        _fxVuLevel: 'writable',
+        _jarvisMode: 'writable',
+        _patchDsp: 'writable',
+        _pollOllamaStatus: 'writable',
+        _rackUpdateVu: 'writable',
+        _rackVuInterval: 'writable',
+        _updateModeBtn: 'writable',
+        checkWebStatus: 'writable',
+        closeCodeModal: 'writable',
+        loadMemory: 'writable',
       },
     },
     rules: {
