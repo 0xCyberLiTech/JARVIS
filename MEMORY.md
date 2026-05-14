@@ -39,7 +39,7 @@
 
 **Reste reporté** : refactor JS (suite incrémentale, méthode validée) · CI cloud (incompatible « rien sur le web ») · profiling perf · tests unitaires Python.
 
-**État après chantier (2026-05-14)** : jarvis.py 4633L · 31 modules Python · jarvis_main.js 7893L + 6 modules JS · jarvis.css → 8 fichiers · git 16 commits (dépôt local) · pre-commit hooks bloquants · ruff 0 · eslint 0 · 25 tests E2E · **score honnête 78/100**.
+**État après chantier (2026-05-14)** : jarvis.py 4633L · 31 modules Python · jarvis_main.js 7893L + 6 modules JS · jarvis.css → 8 fichiers · dépôt git local (100% local, aucun remote) · pre-commit hooks bloquants · ruff 0 · eslint 0 · 25 tests E2E · **score honnête 78/100**. *(NB : ne pas citer un nombre de commits exact en mémoire — il s'auto-invalide à chaque commit ; cf. correction off-by-N.)*
 
 ### ⚠ Leçons audit — pièges à ne pas réintroduire
 
