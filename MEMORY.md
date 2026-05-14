@@ -22,12 +22,13 @@
 - 75→76 : 2 smoke tests LLM
 - 76→78 : refactor JS partiel (3 sous-systèmes extraits de jarvis_main.js)
 
-**Refactor JS — reprise 2026-05-14 (soir)** : `jarvis_main.js` **7828 → 4767 L (−3061, −39%)** · **6 modules extraits** dans `static/js/`. Méthode : cartographie des appels top-level → extraction de sections sans dépendance d'ordre (appels top-level internes embarqués avec leur module) · bodies **byte-identiques** vérifiés · `node --check` + eslint 0 erreur à chaque étape · `eslint.config.js` globals cross-file déclarés.
-- **#1** `a118772` — `tasks_tab.js` (129 L) + `welcome.js` (244 L, welcome+boot+preloader) — **validé prod F12 OK**.
-- **#2** `fe1be24` — `eq_parametric.js` (502 L, EQ voix : courbe réponse, analyseur spectral, mémoires) — **validé prod F12 OK**.
-- **#3** `3f37189` — `eq_music.js` (701 L, EQ DAT player + moteurs TTS) + `audio_mire.js` (383 L, mire de test) — **validé prod F12 OK**.
-- **#4** `0c5d110` — `audio_viz.js` (1138 L, toute la viz audio : Web Audio stéréo, STEREOGRAM 3D, GR meter, VU-mètre, goniomètre, spectral, sonar, circulaire) — ⚠ vérif E2E en attente d'un restart.
-⚠ Restart JARVIS requis après chaque extraction (`debug=False` → templates en cache). Reste dans `jarvis_main.js` (4767 L) : AI AUDIO RACK ~667 L, CHAT ~525 L, DIAGNOSTIC ~493 L, SETTINGS LLM ~471 L, BOOT ~662 L, GPU MONITOR ~337 L, DSP AUDIO SYSTEM ~286 L (la plupart avec appels top-level → extraction avec leurs appels, une par une).
+**Refactor JS — reprise 2026-05-14 (soir)** : `jarvis_main.js` **7828 → 4297 L (−3531, −45%)** · **7 modules extraits** dans `static/js/`. Méthode : cartographie des appels top-level → extraction de sections sans dépendance d'ordre · bodies **byte-identiques** vérifiés · `node --check` + eslint 0 erreur à chaque étape · `eslint.config.js` globals cross-file déclarés. ⚠ **Procédure renforcée après régression #4** : vérifier aussi les `const/let/var` partagés utilisés au top-level par les scripts chargés AVANT le module.
+- **#1** `a118772` — `tasks_tab.js` (129 L) + `welcome.js` (244 L) — **validé prod**.
+- **#2** `fe1be24` — `eq_parametric.js` (502 L, EQ voix) — **validé prod**.
+- **#3** `3f37189` — `eq_music.js` (701 L) + `audio_mire.js` (383 L) — **validé prod**.
+- **#4** `0c5d110` — `audio_viz.js` (1138 L, toute la viz audio) — **régression d'ordre** : `audio_viz.js` définit `const _SAMPLE_RATE` requis au top-level par `recorder.js`/`eq_parametric.js` chargés avant → corrigé `c83f57f` (`audio_viz.js` chargé juste après `jarvis_main.js`, position d'origine du bloc viz) — **validé prod après fix**.
+- **#5** `5f57018` — `settings_llm.js` (477 L, params LLM, profils prompt, system prompt, faits, mémoire LT, RAG) — ⚠ vérif E2E en attente d'un restart.
+⚠ Restart JARVIS requis après chaque extraction (`debug=False` → templates en cache). Reste dans `jarvis_main.js` (4297 L) : AI AUDIO RACK ~677 L, BOOT ~662 L, CHAT ~525 L, DIAGNOSTIC ~493 L (listeners chat parasites L1864/2057/2060), SOC GRAPHIQUES ~362 L, GPU MONITOR ~338 L, DSP AUDIO SYSTEM ~286 L.
 
 **5 commits git atomiques** (dépôt initialisé, 100% local, aucun remote) :
 
