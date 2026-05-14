@@ -25,6 +25,7 @@ scripts/jarvis_memory_summary.json
 scripts/jarvis_soc_actions.json
 scripts/jarvis_soc_autobanned.json
 scripts/jarvis_soc_cooldowns.json
+scripts/jarvis_dsp_params.json    # réglages EQ/DSP réécrits à chaque clic UI · défauts dans jarvis.py:87
 scripts/voice_prints/
 scripts/generated_code/
 *.log
