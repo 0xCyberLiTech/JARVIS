@@ -1,0 +1,28 @@
+# .pre-commit-config.yaml — JARVIS · 0xCyberLiTech
+# Créé 2026-05-14 (chantier dette technique · Action #2)
+#
+# Hooks 100% LOCAUX : utilisent ruff + eslint déjà installés sur la machine.
+# Aucun téléchargement réseau (pas de repo distant pre-commit).
+# Comportement BLOQUANT : un commit est refusé si ruff ou eslint trouve une erreur.
+#
+# Bypass exceptionnel (commit urgent) : git commit --no-verify
+
+repos:
+  - repo: local
+    hooks:
+      # ── Ruff — lint Python (utilise ruff.toml du repo) ──────────
+      - id: ruff-check
+        name: ruff check (Python)
+        entry: python -m ruff check
+        language: system
+        types: [python]
+        require_serial: true
+
+      # ── ESLint — lint JS (utilise eslint.config.js du repo) ─────
+      # Limité aux fichiers applicatifs déclarés dans eslint.config.js
+      - id: eslint
+        name: eslint (JS)
+        entry: npx --no-install eslint
+        language: system
+        files: ^scripts/static/(jarvis_main|jarvis_mixing|recorder|voice_print)\.js$
+        require_serial: true
