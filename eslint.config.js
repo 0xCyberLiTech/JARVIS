@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js', 'scripts/static/js/audio_mire.js', 'scripts/static/js/eq_music.js', 'scripts/static/js/audio_viz.js'],
+    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js', 'scripts/static/js/audio_mire.js', 'scripts/static/js/eq_music.js', 'scripts/static/js/audio_viz.js', 'scripts/static/js/settings_llm.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -160,6 +160,18 @@ export default [
         _stereoActive: 'writable',
         busy: 'writable',
         ttsEnabled: 'writable',
+        // Symboles cross-file jarvis_main.js ↔ js/settings_llm.js
+        // (SETTINGS LLM extrait — chantier dette 2026-05-14)
+        _LS_PROMPT_PROFILE: 'readonly',
+        _clearAfter: 'writable',
+        _fetchFacts: 'writable',
+        _fetchLlmParams: 'writable',
+        _fetchPromptProfiles: 'writable',
+        _jwarn: 'writable',
+        _stColor: 'writable',
+        _updateActivePromptBadge: 'writable',
+        loadPromptProfiles: 'writable',
+        updateImpactBars: 'writable',
       },
     },
     rules: {
