@@ -154,7 +154,7 @@ Validation automatisée (`tests/e2e/`) :
 
 Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits → `jarvis.py` 6592 → **4633 lignes**.
 
-⚠ **Note honnête** : score dette technique global = **78/100** (pas 100). Recalibré le 2026-05-14 (le 91/100 affiché en session 33c était optimiste, départ réel 62). Le chantier dette du 2026-05-14 a fait +16 : Ruff 98→0 + git initialisé + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + `audio_dsp.py` + 2 smoke tests LLM + refactor JS partiel (3 modules extraits · `jarvis_main.js` 8994→7893L). Reste à faire : refactor JS (suite incrémentale), tests unitaires Python, profiling perf. Voir `~/.claude/.../jarvis_dette_technique_etat.md` pour la décomposition complète.
+⚠ **Note honnête** : score dette technique global = **~82/100** (pas 100). Recalibré le 2026-05-14 (le 91/100 affiché en session 33c était optimiste, départ réel 62). Chantier dette 2026-05-14 +16 (→78) : Ruff 98→0 + git + hooks + ruff.toml + CSS 8 fichiers + `audio_dsp.py` + 2 smoke tests LLM + refactor JS partiel. Refactor JS du soir +4 (→~82) : `jarvis_main.js` **7828→4013 L** (−49%), **11 modules** extraits dans `static/js/`. Reste : finir le refactor JS (~4013 L), tests unitaires Python, profiling perf.
 
 ### Audio/Voice (5)
 | Module | Lignes | Rôle |
@@ -203,8 +203,9 @@ Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits →
 | [`chat_generate.py`](../scripts/chat_generate.py) | 60 | Top-level wrapper avec error handling |
 
 **Total Python : 31 modules extraits** (Phase 3 : 30 modules ~3034L · session 33b) + `audio_dsp.py` 508L (chantier dette 2026-05-14) → `jarvis.py` 4633L
-**Session 33c — Split JS partiel** : `recorder.js` 660L + `voice_print.js` 852L extraits en IIFE · `jarvis_main.js` 10507→8994L (-14.4%)
+**Session 33c — Split JS partiel** : `recorder.js` 660L + `voice_print.js` 852L extraits en IIFE
 **Chantier dette 2026-05-14** : Ruff 98→0 + `ruff.toml` · git initialisé (100% local, aucun remote) · pre-commit hooks bloquants · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · refactor JS partiel (3 modules : terminal_code/voice_lab/stt)
 **Session 2026-05-14 (soir)** : injection SOC 100 % serveur (suppression incrustation client-side `_monCtxStr`/`_buildChatPayload` → fin des hallucinations) · `force_soc` threadé en DI · règle crawlers légitimes + reco de ban proportionnée au signal · garde-fou srv-ngix injoignable
+**Refactor JS 2026-05-14 (soir)** : `jarvis_main.js` **7828→4013 L (−49%)** · **11 modules** extraits dans `static/js/` : terminal_code·voice_lab·stt + tasks_tab·welcome·eq_parametric·eq_music·audio_mire·audio_viz·settings_llm·dsp_audio. Méthode vérifiée (bodies byte-identiques · `node --check` · eslint 0 · validation E2E prod). ⚠ `audio_viz.js` chargé juste après `jarvis_main.js` (définit `_SAMPLE_RATE`, requis au top-level par `recorder.js`).
 
-**Score dette technique HONNÊTE 78/100** (recalibré depuis 62 réel · Python serveur excellent · JS reste majoritairement monolithique · pas de CI cloud · pas de tests unitaires)
+**Score dette technique HONNÊTE ~82/100** (recalibré depuis 62 réel · Python serveur excellent · refactor JS bien avancé mais pas fini · pas de CI cloud · pas de tests unitaires Python)

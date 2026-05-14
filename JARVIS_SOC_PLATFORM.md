@@ -1,6 +1,6 @@
 # JARVIS SOC PLATFORM — Architecture IA & Cybersécurité Homelab
 ### Agent autonome local · Surveillance proactive · Contrôle d'infrastructure · LLM on-premise
-<!-- 0xCyberLiTech · v2.7 · 2026-05-14 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 25 tests E2E Playwright · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · jarvis_main.js 7893L + 6 modules JS · git initialisé (16 commits, 100% local) + pre-commit hooks bloquants + ruff.toml · score dette HONNÊTE 78/100 (recalibré depuis 62 réel · +16 via chantier dette 2026-05-14 · JS reste majoritairement monolithique, pas de CI cloud) -->
+<!-- 0xCyberLiTech · v2.8 · 2026-05-14 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 25 tests E2E Playwright · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · refactor JS soir : jarvis_main.js 7828→4013L (−49%), 11 modules static/js/ · git local + pre-commit hooks bloquants + ruff.toml · score dette HONNÊTE ~82/100 (recalibré depuis 62 réel · +16 chantier dette + 4 refactor JS soir · reste : finir JS, tests unitaires Python, CI cloud) -->
 
 ---
 
@@ -90,9 +90,9 @@ Windows 11 — localhost:5000
 │   └── tabs/              tab_monitor · tab_chat · tab_settings · tab_dsp
 │                          tab_terminal · tab_taches · tab_voicelab · tab_soc
 └── static/
-    ├── jarvis_main.js     7893 L · ⚠ reste majoritairement monolithique
+    ├── jarvis_main.js     4013 L · refactor JS 2026-05-14 soir (7828→4013, −49%)
     ├── jarvis_mixing.js   1375 L · recorder.js 660 L · voice_print.js 852 L
-    ├── js/               terminal_code.js 445L · voice_lab.js 580L · stt.js 113L (refactor 2026-05-14)
+    ├── js/               11 modules : terminal_code·voice_lab·stt·tasks_tab·welcome·eq_parametric·eq_music·audio_mire·audio_viz·settings_llm·dsp_audio
     └── css/               8 fichiers par secteur (ex-jarvis.css 5270L · chantier 2026-05-14)
 ```
 

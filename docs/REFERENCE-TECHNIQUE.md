@@ -44,11 +44,11 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 | `scripts/jarvis.py` | **4 633** | 75 routes · NDT 100/100 · routing **4 branches** SOC/GÉNÉRAL/CODE/CR · réduit via Phase 3 (30 modules) + audio_dsp.py (chantier 2026-05-14) |
 | `scripts/blueprints/soc.py` | 1 689 | Blueprint SOC · auto-engine · SSH 4 hôtes · `/api/soc/ip-history` · fix race condition `_soc_actions_save` (2026-05-13) |
 | `scripts/jarvis_mcp_server.py` | ~430 | **10 outils** · `_TOOLS_DEFS` · streamable-HTTP port 5010 · 0 fonction >80L |
-| `scripts/static/jarvis_main.js` | **7 893** | ⚠ **reste majoritairement monolithique** · refactor JS partiel (8994→7893 · -12% · 3 modules extraits) |
-| `scripts/static/js/` (3 modules) | ~1 138 | terminal_code.js 445L + voice_lab.js 580L + stt.js 113L (refactor JS 2026-05-14) |
+| `scripts/static/jarvis_main.js` | **4 013** | 🟡 refactor JS 2026-05-14 soir : 7828→4013 (−49%) · 11 modules extraits · reste à finir |
+| `scripts/static/js/` (11 modules) | ~5 000 | terminal_code·voice_lab·stt + tasks_tab·welcome·eq_parametric·eq_music·audio_mire·audio_viz·settings_llm·dsp_audio (refactor JS 2026-05-14) |
 | **31 modules Python extraits** | **~3 540** | Phase 3 : Audio/Voice 5 + Bypass 8 + Infra/RAG 2 + Chat/LLM core 15 + `audio_dsp.py` 508L (chantier 2026-05-14) — voir [`ROUTING-JARVIS.md`](ROUTING-JARVIS.md) |
 | `scripts/static/css/` | 8 fichiers | ex-`jarvis.css` 5270L → core/chat/dsp/terminal-taches/hud-welcome/rack/settings-soc/voicelab (chantier 2026-05-14) |
-| `scripts/templates/jarvis.html` | 211 | Shell Jinja2 · 0 handler inline · charge 8 `<link>` CSS + 7 `<script>` JS |
+| `scripts/templates/jarvis.html` | ~215 | Shell Jinja2 · 0 handler inline · charge 8 `<link>` CSS + 15 `<script>` JS |
 | RAG `jarvis_rag/meta.json` | 599 chunks | MEMORY.md×2 + CIRCUIT_SOC (49) + RUNBOOK (15) |
 | `jarvis_prompt_profiles.json` | — | 7 profils · Généraliste Gemma4 · 3 RÈGLES ABSOLUES (Qwen2.5/DeepSeek/LLaVA supprimés) |
 
@@ -161,7 +161,8 @@ Déplacement            : mv · cp
 | 2026-05-10 s26  | NDT 100/100 | NDT-DUP SSH `_tool_commande_ssh_run()` · NDT-HTML-MAGIC Jinja2 `{{ dev_ip }}` · NDT-ERR~15 blocs documentés · NDT-DEAD 5 imports/consts supprimés |
 | 2026-05-13 s33  | **89/100** (valeur d'époque) | Phase 3 split monolithe Python complète (30 modules · -31% jarvis.py) · 25 tests E2E Playwright · ESLint 0 errors · audit sécurité 8/10 |
 | 2026-05-13 s33c | **91/100** (valeur d'époque) | Split JS partiel : `recorder.js` + `voice_print.js` extraits · `jarvis_main.js` 10507→8994L (-14.4%) |
-| 2026-05-14       | **78/100 honnête** (recalibré) | ⚠ Audit strict : le 91 était optimiste, départ réel **62/100**. Chantier dette 2026-05-14 (**62→78, +16**) : Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (16 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** (3 modules : terminal_code/voice_lab/stt · jarvis_main.js 8994→7893L -12%) |
+| 2026-05-14       | **78/100 honnête** (recalibré) | ⚠ Audit strict : le 91 était optimiste, départ réel **62/100**. Chantier dette 2026-05-14 (**62→78, +16**) : Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (100% local) · **pre-commit hooks bloquants** · `jarvis.css` → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** (3 modules : terminal_code/voice_lab/stt) |
+| 2026-05-14 soir  | **~82/100 honnête** | **Refactor JS massif** : `jarvis_main.js` 7828→**4013 L** (−49%) · **11 modules** extraits dans `static/js/` (tasks_tab·welcome·eq_parametric·eq_music·audio_mire·audio_viz·settings_llm·dsp_audio) · méthode vérifiée (bodies byte-identiques · node --check · eslint 0 · validation E2E prod à chaque étape) · 1 régression d'ordre détectée+corrigée |
 
 ---
 
@@ -169,7 +170,7 @@ Déplacement            : mv · cp
 
 ⚠ **Distinction critique** :
 - **NDT 100/100** = score script automatisé maison (D1/D2/D6/D13 dans le code Python). Mesure fonction longue, silent pass, magic numbers, params >6. Reste vrai au 2026-05-14.
-- **Score honnête global 78/100** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf). Recalibré honnêtement le 2026-05-14 : le 91/100 affiché en session 33c était optimiste (départ réel 62), le chantier dette a fait +16. NDT ne voit pas que le JS reste majoritairement monolithique, l'absence de CI cloud, l'absence de tests unitaires, etc.
+- **Score honnête global ~82/100** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf). Recalibré honnêtement le 2026-05-14 : le 91/100 affiché en session 33c était optimiste (départ réel 62), le chantier dette a fait +16 (→78), puis le refactor JS du soir +4 (jarvis_main.js 7828→4013, 11 modules). Reste : finir le refactor JS, tests unitaires Python, profiling perf, CI cloud.
 
 ### NDT (script automatisé) — 100/100
 

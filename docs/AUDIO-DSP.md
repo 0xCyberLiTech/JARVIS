@@ -32,7 +32,7 @@ Référence technique : la chaîne audio JARVIS (TTS → DSP → output) côté 
                                     │
                                     ▼ (WAV stream HTTP)
 ┌──────────────────────────────────────────────────────────────────────────┐
-│  CÔTÉ NAVIGATEUR (Web Audio API · jarvis_main.js + jarvis_mixing.js)     │
+│  CÔTÉ NAVIGATEUR (Web Audio API · audio_viz.js + dsp_audio.js + mixing) │
 │                                                                          │
 │  source ─► AnalyserL/R ─► EQ 4 bandes ─► Comp voix ─► Limiter voix ─►   │
 │                                                                          │
@@ -47,7 +47,7 @@ Référence technique : la chaîne audio JARVIS (TTS → DSP → output) côté 
 
 ## 1. Web Audio Graph (côté navigateur)
 
-Implémentation : [`scripts/static/jarvis_main.js`](../scripts/static/jarvis_main.js) lignes ~4815-4862 + helpers `jarvis_mixing.js`.
+Implémentation (refactor JS 2026-05-14) : graphe Web Audio + visualiseurs dans [`scripts/static/js/audio_viz.js`](../scripts/static/js/audio_viz.js) · chaîne DSP UI (gain/comp/limiter/EQ, FX convolver) dans [`scripts/static/js/dsp_audio.js`](../scripts/static/js/dsp_audio.js) · EQ paramétrique dans `js/eq_parametric.js` · helpers mixer dans `jarvis_mixing.js`.
 
 ### Voice channel (signal principal)
 
@@ -84,7 +84,7 @@ Implémentation : [`scripts/static/jarvis_main.js`](../scripts/static/jarvis_mai
 
 ### Cache IR (Impulse Response)
 
-`_fxIrCacheKey` (jarvis_main.js) — l'IR est régénérée uniquement si `(type, vals)` changent. Évite la re-FFT 3-4 secondes à chaque ajustement de slider FX. Helper `_fxRefreshIr()`/`_fxEnsureIr()`.
+`_fxIrCacheKey` (`js/dsp_audio.js`) — l'IR est régénérée uniquement si `(type, vals)` changent. Évite la re-FFT 3-4 secondes à chaque ajustement de slider FX. Helper `_fxRefreshIr()`/`_fxEnsureIr()`.
 
 ---
 

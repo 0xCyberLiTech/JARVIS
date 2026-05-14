@@ -53,11 +53,11 @@ JARVIS/
 │   │   ├── tabs/                  ← 8 onglets modulaires
 │   │   └── partials/modals.html
 │   ├── static/
-│   │   ├── jarvis_main.js         ← JS principal (7893 lignes · ⚠ reste majoritairement monolithique)
+│   │   ├── jarvis_main.js         ← JS principal (4013 lignes · refactor JS 2026-05-14 : 7828→4013, −49%)
 │   │   ├── jarvis_mixing.js       ← DSP mixer (1375 lignes)
 │   │   ├── recorder.js            ← DAT RECORDER R-1 IIFE (660 lignes)
 │   │   ├── voice_print.js         ← Voice Print v2 IIFE (852 lignes)
-│   │   ├── js/                    ← modules extraits : terminal_code.js · voice_lab.js · stt.js (refactor 2026-05-14)
+│   │   ├── js/                    ← 11 modules extraits : terminal_code · voice_lab · stt · tasks_tab · welcome · eq_parametric · eq_music · audio_mire · audio_viz · settings_llm · dsp_audio
 │   │   └── css/                   ← 8 fichiers CSS par secteur (ex-jarvis.css 5270L · chantier 2026-05-14)
 │   ├── jarvis_llm_params.json     ← paramètres LLM persistés
 │   ├── jarvis_prompt_profiles.json ← 7 profils (Qwen2.5/DeepSeek/LLaVA/SOC-Rapide/Infra supprimés)
@@ -389,7 +389,7 @@ v3.3  (en cours)
   ✅ Session 33c split JS partiel — recorder.js + voice_print.js extraits · jarvis_main.js -14.4%
   ✅ Chantier dette technique 2026-05-14 — Ruff 98→0 + git initialisé (16 commits, 100% local) + pre-commit hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + 2 smoke tests LLM + refactor JS partiel (3 modules) · score honnête global 78/100 (recalibré depuis 62 réel · +16)
   ⬜ SSH write ops partielles — apt upgrade · restart service
-  🟡 Refactor JS — suite incrémentale (3/N modules faits · jarvis_main.js 8994→7893L · méthode validée)
+  🟡 Refactor JS — bien avancé (jarvis_main.js 7828→4013L −49% · 11 modules static/js/ · 2026-05-14 soir) · reste ~4013L
   ⬜ Tests unitaires Python · profiling performance
 v3.4  (moyen)   — WebSocket Monitor, historique chat SQLite, graphiques Chart.js, alerte GPU
 v4.0  (long)    — Service Windows NSSM, Docker Compose, HTTPS mkcert, SSH write ops matures
@@ -405,10 +405,10 @@ v4.0  (long)    — Service Windows NSSM, Docker Compose, HTTPS mkcert, SSH writ
 | **31 modules Python extraits** | **~3540** | ✅ Phase 3 (30 modules) + `audio_dsp.py` 508L (chantier 2026-05-14) — voir [`ROUTING-JARVIS.md`](ROUTING-JARVIS.md) |
 | `scripts/blueprints/soc.py` | 1689 | ✅ rsyslog v1.6.1 · SSH 4 hôtes · `_ssh_base()` générique · fix race condition `_soc_actions_save` |
 | `scripts/jarvis_mcp_server.py` | ~430 | ✅ **10 outils MCP** · JARVIS_HEADER · `jarvis_soc_ask` historique IP 30j · streamable-HTTP port 5010 |
-| `scripts/templates/jarvis.html` | 211 | ✅ 0 handler inline · charge 8 `<link>` CSS + 4 `<script>` JS |
-| `scripts/static/jarvis_main.js` | **7893** | ⚠ **reste majoritairement monolithique** · refactor JS partiel (8994→7893 · -12%) |
+| `scripts/templates/jarvis.html` | ~215 | ✅ 0 handler inline · charge 8 `<link>` CSS + 15 `<script>` JS (jarvis_main + 14 modules) |
+| `scripts/static/jarvis_main.js` | **4013** | 🟡 refactor JS 2026-05-14 soir : 7828→4013 (−49%) · 11 modules extraits · reste à finir |
 | `scripts/static/jarvis_mixing.js` | 1375 | ✅ DSP mixer stéréo |
-| `scripts/static/js/` (3 modules) | 1138 | ✅ terminal_code.js 445L + voice_lab.js 580L + stt.js 113L (refactor 2026-05-14) |
+| `scripts/static/js/` (11 modules) | ~5000 | ✅ terminal_code·voice_lab·stt + tasks_tab·welcome·eq_parametric·eq_music·audio_mire·audio_viz·settings_llm·dsp_audio (refactor 2026-05-14) |
 | `scripts/static/recorder.js` | **660** | ✅ DAT RECORDER R-1 IIFE |
 | `scripts/static/voice_print.js` | **852** | ✅ Voice Print v2 IIFE |
 | `scripts/static/css/` | 8 fichiers | ✅ ex-`jarvis.css` 5270L → core/chat/dsp/terminal-taches/hud-welcome/rack/settings-soc/voicelab (chantier 2026-05-14) |

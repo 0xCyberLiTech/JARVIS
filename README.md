@@ -48,11 +48,11 @@ JARVIS/
 │   │   ├── tabs/                      ← 8 onglets inclus
 │   │   └── partials/modals.html       ← modaux globaux
 │   ├── static/
-│   │   ├── jarvis_main.js             ← JS principal (7893 lignes · ⚠ reste majoritairement monolithique)
+│   │   ├── jarvis_main.js             ← JS principal (4013 lignes · refactor JS 2026-05-14 : 7828→4013, −49%)
 │   │   ├── jarvis_mixing.js           ← DSP mixer stéréo (1375 lignes)
 │   │   ├── recorder.js                ← DAT RECORDER R-1 IIFE (660 lignes)
 │   │   ├── voice_print.js             ← Voice Print v2 IIFE (852 lignes)
-│   │   ├── js/                        ← modules extraits : terminal_code.js · voice_lab.js · stt.js (refactor 2026-05-14)
+│   │   ├── js/                        ← 11 modules extraits : terminal_code·voice_lab·stt·tasks_tab·welcome·eq_parametric·eq_music·audio_mire·audio_viz·settings_llm·dsp_audio
 │   │   └── css/                       ← 8 fichiers CSS par secteur (chantier 2026-05-14 · ex-jarvis.css 5270L)
 │   ├── jarvis_rag/                    ← base de connaissances locale
 │   │   ├── meta.json                  ← 599 chunks (MEMORY.md×2 + CIRCUIT_SOC + RUNBOOK)
@@ -181,9 +181,9 @@ python jarvis.py
 Audit honnête et chantier de dette : **score recalibré 62 → 78/100** (l'ancien
 « 91/100 » / « 100/100 » étaient optimistes — le NDT script auto mesure le style,
 pas l'architecture/tests/CI). Travaux du chantier :
-- **Dépôt git LOCAL** initialisé (100% local, aucun remote — règle « rien sur le web ») · **16 commits** atomiques
+- **Dépôt git LOCAL** initialisé (100% local, aucun remote — règle « rien sur le web ») · commits atomiques
 - **Outillage qualité** : `ruff.toml` (Python, baseline 98 → 0 erreurs · 2 vrais bugs F821 corrigés) · `eslint.config.js` (JS, 0 erreur) · `.pre-commit-config.yaml` (hooks bloquants ruff + eslint, 100% locaux)
-- **Architecture modulaire** : 31 modules Python extraits de `jarvis.py` (6592 → 4633 L) · `audio_dsp.py` (508 L, bloc DSP) · `jarvis.css` éclaté en 8 fichiers `static/css/` · 6 modules JS extraits de `jarvis_main.js`
+- **Architecture modulaire** : 31 modules Python extraits de `jarvis.py` (6592 → 4633 L) · `audio_dsp.py` (508 L, bloc DSP) · `jarvis.css` éclaté en 8 fichiers `static/css/` · **refactor JS 2026-05-14** : `jarvis_main.js` 7828 → 4013 L (−49%), **11 modules** extraits dans `static/js/`
 - **Tests E2E** : 25 tests Playwright (dont 2 smoke tests LLM `/api/chat`)
 
 | Commande | Rôle | Pré-requis |

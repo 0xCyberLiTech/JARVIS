@@ -1,7 +1,7 @@
 # JARVIS — Guide de réinstallation Windows
 
 > Document critique — à conserver dans les sauvegardes.
-> Dernière mise à jour : 2026-05-14 — Chantier dette technique : git initialisé (16 commits, 100% local) + pre-commit hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py · 31 modules Python · jarvis.py 4633L
+> Dernière mise à jour : 2026-05-14 — Chantier dette : git local + pre-commit hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py · 31 modules Python · jarvis.py 4633L · refactor JS soir : jarvis_main.js 7828→4013 L, 11 modules static/js/
 
 ---
 
@@ -120,7 +120,7 @@ Windows 11 Pro
 └── JARVIS                                          ← assistant IA local
     ├── racine   : C:\Users\mmsab\Documents\0xCyberLiTech\JARVIS\
     ├── backend  : scripts\jarvis.py (orchestrateur Flask — port 5000 — 4633 L + 31 modules Python)
-    ├── frontend : scripts\templates\jarvis.html (shell Jinja2 211 L) + static\jarvis_main.js (7893 L + 6 modules JS) + static\css\ (8 fichiers)
+    ├── frontend : scripts\templates\jarvis.html (shell Jinja2) + static\jarvis_main.js (4013 L — refactor JS 2026-05-14, 7828→4013) + static\js\ (11 modules) + static\css\ (8 fichiers)
     └── configs  : jarvis_*.json + jarvis_system_prompt.txt
 ```
 

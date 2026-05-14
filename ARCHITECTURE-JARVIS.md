@@ -1,5 +1,5 @@
 # JARVIS — Architecture & Zones fonctionnelles
-<!-- v1.9 — 2026-05-14 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · NDT 100/100 (script auto) · score honnête global 78/100 (recalibré : départ réel 62, +16 via chantier dette 2026-05-14) · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · refactor JS partiel : 3 modules extraits (jarvis_main.js 8994→7893L -12%) · git initialisé + pre-commit hooks bloquants + ruff.toml · ⚠ JS reste majoritairement monolithique (7893L) -->
+<!-- v2.0 — 2026-05-14 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · NDT 100/100 (script auto) · score honnête global ~82/100 (recalibré : départ réel 62, +16 chantier dette + 4 refactor JS soir) · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · refactor JS 2026-05-14 soir : jarvis_main.js 7828→4013L (−49%), 11 modules static/js/ · git local + pre-commit hooks bloquants + ruff.toml -->
 
 ---
 
@@ -12,8 +12,8 @@
 │  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────┐  │
 │  │  ZONE UI / TABS  │  │  ZONE AUDIO      │  │  ZONE SOC CLIENT     │  │
 │  │  jarvis_main.js  │  │  jarvis_mixing   │  │  jarvis_main.js      │  │
-│  │  7 893 lignes    │  │  1 375 lignes    │  │  (section SOC)       │  │
-│  │  + 6 modules JS  │  │                  │  │                      │  │
+│  │  4 013 lignes    │  │  1 375 lignes    │  │  (section SOC)       │  │
+│  │  + 14 modules JS │  │                  │  │                      │  │
 │  └────────┬─────────┘  └────────┬─────────┘  └──────────┬───────────┘  │
 └───────────┼─────────────────────┼───────────────────────┼──────────────┘
             │  HTTP / SSE          │  Web Audio API        │  poll 30s
@@ -355,12 +355,13 @@ jarvis_main.js
 (4633 L) qui délègue à **31 modules Python** extraits dans `scripts/` (audio,
 bypass SSH/VM/backup, infra/RAG, chat/LLM core, `audio_dsp.py`) — voir
 [`docs/ROUTING-JARVIS.md`](docs/ROUTING-JARVIS.md) pour la liste complète.
-Côté frontend : `jarvis_main.js` (7893 L) + **6 modules JS** (`recorder.js`,
-`voice_print.js`, `jarvis_mixing.js` dans `static/` · `terminal_code.js`,
-`voice_lab.js`, `stt.js` dans `static/js/`) ; l'ex-`jarvis.css` monolithique
-est éclaté en **8 fichiers** `static/css/` (core/chat/dsp/terminal-taches/
-hud-welcome/rack/settings-soc/voicelab). Dépôt **git local** (16 commits, aucun
-remote) + **pre-commit hooks bloquants** (ruff + eslint) + `ruff.toml`.
+Côté frontend (refactor JS 2026-05-14 soir) : `jarvis_main.js` **7828→4013 L
+(−49%)** + **14 modules JS** — `jarvis_mixing.js`, `recorder.js`,
+`voice_print.js` dans `static/` · **11 modules** dans `static/js/` :
+terminal_code, voice_lab, stt, tasks_tab, welcome, eq_parametric, eq_music,
+audio_mire, audio_viz, settings_llm, dsp_audio. L'ex-`jarvis.css` monolithique
+est éclaté en **8 fichiers** `static/css/`. Dépôt **git local** (aucun remote)
++ **pre-commit hooks bloquants** (ruff + eslint) + `ruff.toml`.
 ⚠ Le JS reste majoritairement monolithique — score honnête global 78/100.
 
 ## Modules centralisés — synthèse
