@@ -1,5 +1,5 @@
 # JARVIS — Guide de référence
-<!-- 2026-05-13 — v2.4 — Phase 3 split monolithe Python : 30 modules · jarvis.py 6592→4520L (-31%) · session 33c split JS partiel : recorder.js + voice_print.js extraits · jarvis_main.js -14.4% · score honnête 91/100 -->
+<!-- 2026-05-14 — v2.5 — Chantier dette technique : git initialisé + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + audio_dsp.py · 31 modules Python · jarvis.py 4633L · score honnête 75/100 -->
 
 Assistant IA personnel 0xCyberLiTech — infogérance réseau + assistant quotidien.  
 ⚡ = bypass Python direct (sans LLM, instantané) · 🤖 = via LLM (raisonnement)

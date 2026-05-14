@@ -136,11 +136,11 @@ Validation automatisée (`tests/e2e/`) :
 
 ---
 
-## Phase 3 — Modules Python extraits (session 33b · 2026-05-13)
+## Modules Python extraits — Phase 3 (session 33b) + chantier dette (2026-05-14)
 
-Le monolithe `jarvis.py` a été allégé de **~2072 lignes** (**-31%**) réparties en **30 modules dédiés**.
+Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits → `jarvis.py` 6592 → **4633 lignes**.
 
-⚠ **Note honnête** : score dette technique global = **91/100** (pas 100). Session 33c a extrait `recorder.js` (660L) + `voice_print.js` (852L) en IIFE → `jarvis_main.js` 10507→8994L (-14.4%). Le refactor JS complet reste à faire (8994L dans 1 fichier), pas de CI/CD, et tests E2E ne couvrent pas le flux LLM réel. Voir `~/.claude/.../jarvis_dette_technique_etat.md` pour la décomposition complète.
+⚠ **Note honnête** : score dette technique global = **75/100** (pas 100). Recalibré le 2026-05-14 (le 91/100 affiché en session 33c était optimiste, départ réel 62). Le chantier dette du 2026-05-14 a fait +13 : Ruff 98→0 + git initialisé + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + `audio_dsp.py`. Reste à faire : refactor JS complet (`jarvis_main.js` 8994L), CI cloud, tests intégration LLM réel. Voir `~/.claude/.../jarvis_dette_technique_etat.md` pour la décomposition complète.
 
 ### Audio/Voice (5)
 | Module | Lignes | Rôle |
@@ -188,7 +188,8 @@ Le monolithe `jarvis.py` a été allégé de **~2072 lignes** (**-31%**) répart
 | [`chat_stream.py`](../scripts/chat_stream.py) | 45 | Orchestrateur stream |
 | [`chat_generate.py`](../scripts/chat_generate.py) | 60 | Top-level wrapper avec error handling |
 
-**Total Python : 3034 lignes extraites · 30 modules**
-**Session 33c — Split JS partiel : 1512 lignes extraites · 2 nouveaux fichiers IIFE** (`recorder.js` 660L + `voice_print.js` 852L) · `jarvis_main.js` 10507→8994L (-14.4%) · suppression 666L code mort obsolète
+**Total Python : 31 modules extraits** (Phase 3 : 30 modules ~3034L · session 33b) + `audio_dsp.py` 508L (chantier dette 2026-05-14) → `jarvis.py` 4633L
+**Session 33c — Split JS partiel** : `recorder.js` 660L + `voice_print.js` 852L extraits en IIFE · `jarvis_main.js` 10507→8994L (-14.4%)
+**Chantier dette 2026-05-14** : Ruff 98→0 + `ruff.toml` · git initialisé (5 commits, 100% local) · pre-commit hooks bloquants · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait
 
-**Score dette technique HONNÊTE 91/100** (Python serveur excellent · JS partiellement modularisé mais reste majoritairement monolithique · pas de CI)
+**Score dette technique HONNÊTE 75/100** (recalibré depuis 62 réel · Python serveur excellent · JS reste majoritairement monolithique · pas de CI cloud · pas de tests unitaires)

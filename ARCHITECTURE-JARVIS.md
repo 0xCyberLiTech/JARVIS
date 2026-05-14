@@ -1,5 +1,5 @@
 # JARVIS — Architecture & Zones fonctionnelles
-<!-- v1.7 — 2026-05-13 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · NDT 100/100 (script auto) · score honnête global 91/100 · Phase 3 split monolithe Python complète : 30 modules · jarvis.py -31% (6592→4520L) · session 33c split JS partiel : recorder.js (660L) + voice_print.js (852L) extraits · jarvis_main.js 10507→8994L (-14.4%) · ⚠ JS reste majoritairement monolithique -->
+<!-- v1.8 — 2026-05-14 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · NDT 100/100 (script auto) · score honnête global 75/100 (recalibré : départ réel 62, +13 via chantier dette 2026-05-14) · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git initialisé + pre-commit hooks bloquants + ruff.toml · ⚠ JS reste majoritairement monolithique (8994L) -->
 
 ---
 

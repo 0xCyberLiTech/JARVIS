@@ -1,7 +1,7 @@
 # JARVIS — Guide de réinstallation Windows
 
 > Document critique — à conserver dans les sauvegardes.
-> Dernière mise à jour : 2026-05-13 — Phase 3 split monolithe Python complète : 30 modules · jarvis.py 6592→4520L (-31%)
+> Dernière mise à jour : 2026-05-14 — Chantier dette technique : git initialisé (5 commits) + pre-commit hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py · 31 modules Python · jarvis.py 4633L
 
 ---
 

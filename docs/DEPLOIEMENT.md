@@ -1,6 +1,6 @@
 # JARVIS — Procédure de Déploiement, Exploitation & Améliorations
 
-> Version 3.3 — Mai 2026 (mise à jour 2026-05-08)
+> Version 3.3 — Mai 2026 (mise à jour 2026-05-14 — chantier dette technique)
 > Machine cible : Windows 11 Pro · RTX 5080 (Blackwell 16 GB GDDR7, sm_120) · Python 3.11
 
 ---
@@ -53,11 +53,11 @@ JARVIS/
 │   │   ├── tabs/                  ← 8 onglets modulaires
 │   │   └── partials/modals.html
 │   ├── static/
-│   │   ├── jarvis_main.js         ← JS principal (8994 lignes · -14.4% vs session 33 via split partiel)
+│   │   ├── jarvis_main.js         ← JS principal (8994 lignes · ⚠ reste majoritairement monolithique)
 │   │   ├── jarvis_mixing.js       ← DSP mixer (1375 lignes)
-│   │   ├── jarvis.css             ← styles (5180 lignes)
-│   │   ├── recorder.js            ← DAT RECORDER R-1 IIFE (660 lignes · session 33c)
-│   │   └── voice_print.js         ← Voice Print v2 IIFE (852 lignes · session 33c)
+│   │   ├── recorder.js            ← DAT RECORDER R-1 IIFE (660 lignes)
+│   │   ├── voice_print.js         ← Voice Print v2 IIFE (852 lignes)
+│   │   └── css/                   ← 8 fichiers CSS par secteur (ex-jarvis.css 5270L · chantier 2026-05-14)
 │   ├── jarvis_llm_params.json     ← paramètres LLM persistés
 │   ├── jarvis_prompt_profiles.json ← 7 profils (Qwen2.5/DeepSeek/LLaVA/SOC-Rapide/Infra supprimés)
 │   ├── jarvis_dsp_params.json     ← paramètres DSP audio
@@ -384,31 +384,34 @@ v3.3  (en cours)
   ✅ Rapport quotidien vocal + corrélation temporelle campagnes /24
   ✅ Proxmox API directe — _pve_fetch_state() · ticket+token auth · cache 30s
   ✅ Terminal CODE xterm.js + WebSocket PTY SSH srv-dev-1
-  ✅ Phase 3 split monolithe Python complète — 30 modules · jarvis.py -31% (2026-05-13 · score honnête global 89/100)
-  ✅ Session 33c split JS partiel — recorder.js (660L) + voice_print.js (852L) extraits · jarvis_main.js -14.4% · score honnête global 91/100
+  ✅ Phase 3 split monolithe Python — 30 modules · session 33b (2026-05-13)
+  ✅ Session 33c split JS partiel — recorder.js + voice_print.js extraits · jarvis_main.js -14.4%
+  ✅ Chantier dette technique 2026-05-14 — Ruff 98→0 + git initialisé (5 commits) + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + audio_dsp.py · score honnête global 75/100 (recalibré depuis 62 réel · +13)
   ⬜ SSH write ops partielles — apt upgrade · restart service
-  ⬜ Refactor JS modulaire (jarvis_main.js 9927L · abandonné session 30)
-  ⬜ CI/CD + pre-commit hook ESLint + Ruff
+  ⬜ Refactor JS complet (jarvis_main.js 8994L · reste majoritairement monolithique)
+  ⬜ CI cloud (GitHub Actions) + tests intégration LLM réel
 v3.4  (moyen)   — WebSocket Monitor, historique chat SQLite, graphiques Chart.js, alerte GPU
 v4.0  (long)    — Service Windows NSSM, Docker Compose, HTTPS mkcert, SSH write ops matures
 ```
 
 ---
 
-## 12. ÉTAT DES FICHIERS (mis à jour 2026-05-13 · Phase 3 split monolithe complète)
+## 12. ÉTAT DES FICHIERS (mis à jour 2026-05-14 · post-chantier dette technique)
 
 | Fichier | Lignes | État |
 |---------|--------|------|
-| `scripts/jarvis.py` | **~4520** | ✅ 72+ routes · NDT 100/100 · routing **4 branches** SOC/GÉNÉRAL/CODE/CR · **réduit -31% via 30 modules extraits** |
-| **30 modules Python extraits** (Phase 3) | **3034** | ✅ Audio/Voice 5 + Bypass 8 + Infra/RAG 2 + Chat/LLM core 15 — voir [`ROUTING-JARVIS.md`](ROUTING-JARVIS.md) |
-| `scripts/blueprints/soc.py` | 1689 | ✅ rsyslog v1.6.1 · SSH 4 hôtes · `_ssh_base()` générique · fix race condition `_soc_actions_save` (2026-05-13) |
+| `scripts/jarvis.py` | **4633** | ✅ 75 routes · NDT 100/100 · routing **4 branches** SOC/GÉNÉRAL/CODE/CR · réduit via 31 modules extraits |
+| **31 modules Python extraits** | **~3540** | ✅ Phase 3 (30 modules) + `audio_dsp.py` 508L (chantier 2026-05-14) — voir [`ROUTING-JARVIS.md`](ROUTING-JARVIS.md) |
+| `scripts/blueprints/soc.py` | 1689 | ✅ rsyslog v1.6.1 · SSH 4 hôtes · `_ssh_base()` générique · fix race condition `_soc_actions_save` |
 | `scripts/jarvis_mcp_server.py` | ~430 | ✅ **10 outils MCP** · JARVIS_HEADER · `jarvis_soc_ask` historique IP 30j · streamable-HTTP port 5010 |
-| `scripts/templates/jarvis.html` | 204 | ✅ 0 handler inline |
-| `scripts/static/jarvis_main.js` | **8994** | ⚠ **majoritairement monolithique** · NDT 10/10 · -14.4% session 33c via split partiel (recorder + voice_print extraits) |
+| `scripts/templates/jarvis.html` | 211 | ✅ 0 handler inline · charge 8 `<link>` CSS + 4 `<script>` JS |
+| `scripts/static/jarvis_main.js` | **8994** | ⚠ **reste majoritairement monolithique** · refactor JS complet reporté |
 | `scripts/static/jarvis_mixing.js` | 1375 | ✅ DSP mixer stéréo |
-| `scripts/static/recorder.js` | **660** | ✅ DAT RECORDER R-1 IIFE · session 33c |
-| `scripts/static/voice_print.js` | **852** | ✅ Voice Print v2 IIFE · session 33c |
-| `scripts/static/jarvis.css` | 5180+ | ✅ NDT-CSS 0 · `.impact-bar-lv-*` classes · 0 doublon |
+| `scripts/static/recorder.js` | **660** | ✅ DAT RECORDER R-1 IIFE |
+| `scripts/static/voice_print.js` | **852** | ✅ Voice Print v2 IIFE |
+| `scripts/static/css/` | 8 fichiers | ✅ ex-`jarvis.css` 5270L → core/chat/dsp/terminal-taches/hud-welcome/rack/settings-soc/voicelab (chantier 2026-05-14) |
+| `ruff.toml` · `.pre-commit-config.yaml` · `.gitignore` | — | ✅ chantier dette 2026-05-14 — git initialisé (5 commits, 100% local) |
+| `scripts/static/css/` (8 fichiers) | ex-5270 | ✅ découpé par secteur (chantier 2026-05-14) · NDT-CSS 0 |
 | `scripts/jarvis_llm_params.json` | — | ✅ phi4:14b · num_ctx:16384 · num_predict:4096 · temp:0.5 · top_k:40 |
 | `scripts/jarvis_dsp_params.json` | — | ✅ tts_engine:edge · tts_default_engine:edge |
 | `scripts/jarvis_model.json` | — | ✅ phi4:14b |

@@ -1,4 +1,29 @@
-# JARVIS — Mémoire projet (2026-05-13)
+# JARVIS — Mémoire projet (2026-05-14)
+
+## Chantier dette technique — 2026-05-14 — score 62→75/100 (+13)
+
+⚠ **Recalibration honnête** : le score 91/100 affiché le 2026-05-13 était **encore optimiste**. Audit strict (Ruff 98 erreurs réelles, 0 tests unitaires, 0 CI, 0 hooks, perf jamais profilée) → **point de départ réel 62/100**. Le chantier a fait **62 → 75/100**.
+
+**5 commits git atomiques** (dépôt initialisé, 100% local, aucun remote) :
+
+| Commit | Action | Détail |
+|--------|--------|--------|
+| `a530dc6` | Baseline + #1 Ruff | 98→0 erreurs · 2 bugs F821 réels corrigés (`_torch` import lazy → CUDA reverb actif · `VOICES_DIR` → `_tts_eng.VOICES_DIR`) · `ruff.toml` (E701/E702 ignorés = style · E402/I001 per-file jarvis.py+mcp) |
+| — | git init | `.gitignore` protège `jarvis_secret.key` + `jarvis_pve.json` + `soc_config.json` · 132 fichiers, 0 secret tracké · `core.autocrlf false` |
+| `b46eae2` | #2 Pre-commit hooks | `.pre-commit-config.yaml` 100% local (ruff + eslint, zéro réseau) · BLOQUANT · testé négatif (faute F821 → commit bloqué) + positif |
+| `ad4629f` | Doc README | section pre-commit hooks |
+| `dd3b803` | #7 Split CSS | `jarvis.css` 5270L → 8 fichiers `static/css/` (core/chat/dsp/terminal-taches/hud-welcome/rack/settings-soc/voicelab) · concat = MD5 identique prouvé · `jarvis.html` 1→8 `<link>` |
+| `21806e3` | #4 audio_dsp.py | bloc DSP (25 fonctions ~470L) → `audio_dsp.py` 508L · DI sur DSP_PARAMS via wrapper · jarvis.py 5110→**4633L** (-9.3%) |
+
+**Validations** : E2E 23/23 à chaque action · ruff 0 · hash CSS identique · test audio DSP réel OK.
+
+⚠ **Pivot assumé en cours de chantier** : le plan initial "3 blueprints Flask" (audio/admin/chat) a été **abandonné** — les routes Flask sont trop couplées à l'état partagé avec le chat (queues TTS, `speak()`, `_chat_stream_active`). Risque élevé, pas modéré. Remplacé par l'extraction du **bloc DSP pur** (`audio_dsp.py`) — méthode éprouvée des 30 modules session 33, faible risque.
+
+**Reste reporté** : GitHub Actions CI · tests intégration LLM réel · refactor JS complet (`jarvis_main.js` 8994L) · décision sur fichiers runtime trackés (`jarvis_dsp_params.json`, `jarvis_system_prompt.txt`).
+
+**État après chantier** : jarvis.py 4633L · 31 modules Python (30 session 33 + audio_dsp.py) · jarvis.css → 8 fichiers · git 5 commits · pre-commit hooks bloquants · ruff 0 erreur.
+
+---
 
 ## Session 33c — Split JS partiel : recorder.js + voice_print.js (2026-05-13)
 

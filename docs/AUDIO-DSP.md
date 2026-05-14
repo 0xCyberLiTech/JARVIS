@@ -245,7 +245,8 @@ Suite Playwright `tests/e2e/dsp-voicelab.spec.js` + `dsp-interactive.spec.js` :
 | 33 | 2026-05-13 | 3 fixes terminal CODE (clear xterm + retrait `&& clear` + PROMPT_COMMAND) — pas DSP mais même fichier `jarvis_main.js` |
 | 33 | 2026-05-13 | **Phase 3 split monolithe** — extraction de 4 modules audio depuis `jarvis.py` : `stt.py` (97L) · `voice_lab.py` (167L) · `tts_engines.py` (280L) · `deepfilter.py` (132L). Maintenance audio désormais ciblée. |
 | 33 | 2026-05-13 | **Phase 3 complète** — 30 modules extraits au total (audio + bypass + SSH + Proxmox API + RAG + chat orchestration + LLM CR). `jarvis.py` 6592→4520L (-31%). NDT script auto 100/100, score honnête global 89/100 (JS toujours monolithique, pas de CI/CD). |
-| 33c | 2026-05-13 | **Split JS partiel** — extraction `recorder.js` (660L · DAT RECORDER R-1) + `voice_print.js` (852L · Voice Print v2) en IIFE depuis `jarvis_main.js` 10507→8994L (-14.4%). Suppression artefacts obsolètes (vp_iife_new.js + vp_rebuild.py). 23 E2E pass, ESLint 0 errors. Score honnête 89 → 91/100. |
+| 33c | 2026-05-13 | **Split JS partiel** — extraction `recorder.js` (660L · DAT RECORDER R-1) + `voice_print.js` (852L · Voice Print v2) en IIFE depuis `jarvis_main.js` 10507→8994L (-14.4%). Suppression artefacts obsolètes (vp_iife_new.js + vp_rebuild.py). 23 E2E pass, ESLint 0 errors. |
+| — | 2026-05-14 | **Chantier dette — extraction `audio_dsp.py`** — bloc DSP audio (25 fonctions ~470L) extrait de `jarvis.py` vers `audio_dsp.py` (508L) : reverb convolution + FX rack (delay/chorus/phaser/flanger/echo/exciter) + filtres biquad + enrichisseur voix + compresseur + `apply_dsp_to_mp3`. Découplage `DSP_PARAMS` via DI (wrapper jarvis.py préserve les 9 call sites). FIX bug F821 `_torch` (import lazy → active réellement le CUDA reverb). jarvis.py 5110→4633L. 23 E2E pass, test audio réel OK. |
 
 ---
 
@@ -256,7 +257,8 @@ Suite Playwright `tests/e2e/dsp-voicelab.spec.js` + `dsp-interactive.spec.js` :
 | Web Audio graph voice | `scripts/static/jarvis_main.js:~4815-4862` |
 | Cache IR FX | `scripts/static/jarvis_main.js` (`_fxRefreshIr` / `_fxEnsureIr`) |
 | Helpers mixing | `scripts/static/jarvis_mixing.js` |
-| TTS engines | [`scripts/tts_engines.py`](../scripts/tts_engines.py) (drivers purs) + `jarvis.py` (routes/queues/DSP) |
+| TTS engines | [`scripts/tts_engines.py`](../scripts/tts_engines.py) (drivers purs) + `jarvis.py` (routes/queues) |
+| Chaîne DSP serveur | [`scripts/audio_dsp.py`](../scripts/audio_dsp.py) (reverb/FX/biquad/compress/`apply_dsp_to_mp3`) — wrapper DI dans `jarvis.py` |
 | STT init | [`scripts/stt.py:_get_whisper`](../scripts/stt.py) (faster-whisper lazy CUDA) |
 | STT initial_prompt | [`scripts/stt.py:_STT_INITIAL_PROMPT`](../scripts/stt.py) (vocabulaire SOC) |
 | DeepFilterNet init | [`scripts/deepfilter.py:_load`](../scripts/deepfilter.py) (lazy + silence loguru) |

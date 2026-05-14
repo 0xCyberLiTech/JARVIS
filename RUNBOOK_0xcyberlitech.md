@@ -1,6 +1,6 @@
 # RUNBOOK — 0xCyberLiTech
 <!-- Document maître — reconstruction infrastructure complète -->
-<!-- Mis à jour : 2026-05-13 — Phase 3 split monolithe Python complète : 30 modules · jarvis.py 6592→4520L (-31%) -->
+<!-- Mis à jour : 2026-05-14 — Chantier dette technique : git initialisé + pre-commit hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py · 31 modules Python · jarvis.py 4633L · score honnête 75/100 -->
 
 ---
 

@@ -38,8 +38,8 @@ Arrêt : `stop_jarvis.bat` ou raccourci `JARVIS - Arrêt.lnk` sur le bureau.
 ```
 JARVIS/
 ├── scripts/
-│   ├── jarvis.py                      ← serveur Flask principal (~4520 lignes · 72+ routes · réduit -31% via Phase 3 split)
-│   ├── 30 modules dédiés/             ← Phase 3 (2026-05-13) : audio (5) + bypass (8) + infra (2) + chat/LLM (15) — voir docs/ROUTING-JARVIS.md
+│   ├── jarvis.py                      ← serveur Flask principal (4633 lignes · 75 routes · réduit via Phase 3 split + audio_dsp.py)
+│   ├── 31 modules dédiés/             ← Phase 3 : audio (5) + bypass (8) + infra (2) + chat/LLM (15) + audio_dsp.py (chantier 2026-05-14) — voir docs/ROUTING-JARVIS.md
 │   ├── blueprints/
 │   │   └── soc.py                     ← Blueprint SOC (1689 lignes · auto-engine · SSH 4 hôtes)
 │   ├── jarvis_mcp_server.py           ← MCP bridge Claude Code ↔ JARVIS (10 outils)
@@ -48,10 +48,11 @@ JARVIS/
 │   │   ├── tabs/                      ← 8 onglets inclus
 │   │   └── partials/modals.html       ← modaux globaux
 │   ├── static/
-│   │   ├── jarvis_main.js             ← JS principal (8994 lignes · -14.4% vs session 33 via split partiel session 33c)
+│   │   ├── jarvis_main.js             ← JS principal (8994 lignes · ⚠ reste majoritairement monolithique)
 │   │   ├── jarvis_mixing.js           ← DSP mixer stéréo (1375 lignes)
-│   │   ├── recorder.js                ← DAT RECORDER R-1 IIFE (660 lignes · session 33c)
-│   │   └── voice_print.js             ← Voice Print v2 IIFE (852 lignes · session 33c)
+│   │   ├── recorder.js                ← DAT RECORDER R-1 IIFE (660 lignes)
+│   │   ├── voice_print.js             ← Voice Print v2 IIFE (852 lignes)
+│   │   └── css/                       ← 8 fichiers CSS par secteur (chantier 2026-05-14 · ex-jarvis.css 5270L)
 │   ├── jarvis_rag/                    ← base de connaissances locale
 │   │   ├── meta.json                  ← 599 chunks (MEMORY.md×2 + CIRCUIT_SOC + RUNBOOK)
 │   │   └── embeddings.npy             ← vecteurs mxbai-embed-large float32 1024-dim
@@ -73,7 +74,7 @@ JARVIS/
 │   ├── DEPLOIEMENT.md                 ← exploitation, API, dépannage
 │   ├── REINSTALLATION.md              ← réinstallation Windows complète
 │   ├── AUDIT_JARVIS.md                ← audit sécurité (10/10)
-│   └── REFERENCE-TECHNIQUE.md         ← référence complète (NDT 100/100 script auto · score honnête global 91/100)
+│   └── REFERENCE-TECHNIQUE.md         ← référence complète (NDT 100/100 script auto · score honnête global 75/100)
 ├── README.md
 └── MEMORY.md
 ```
@@ -170,7 +171,7 @@ python jarvis.py
 | [`docs/MCP-SERVER.md`](docs/MCP-SERVER.md) | **MCP server** : pont Claude ↔ JARVIS · 10 outils détaillés · config Claude Desktop · watchdog |
 | [`docs/AUDIO-DSP.md`](docs/AUDIO-DSP.md) | **Audio DSP** : Web Audio graph (EQ+Comp+Limiter+FX) · 4 engines TTS · STT large-v3-turbo · DeepFilterNet CUDA · Voice Lab |
 | [`docs/AUDIT_JARVIS.md`](docs/AUDIT_JARVIS.md) | Audit sécurité — 10/10 — v2.6 — 0 gap |
-| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence v1.4 — NDT 100/100 (script auto) · **score honnête global 91/100** (Phase 3 Python complète + split JS partiel session 33c : recorder.js + voice_print.js extraits · JS reste majoritairement monolithique + pas de CI) |
+| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence v1.5 — NDT 100/100 (script auto) · **score honnête global 75/100** (recalibré depuis 62 réel · +13 via chantier dette 2026-05-14 : git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py) |
 | [`docs/ROADMAP-V33.md`](docs/ROADMAP-V33.md) | Fonctionnalités v3.3 planifiées |
 | [`MEMORY.md`](MEMORY.md) | État projet, stack, historique corrections |
 

@@ -1,6 +1,6 @@
 # JARVIS SOC PLATFORM — Architecture IA & Cybersécurité Homelab
 ### Agent autonome local · Surveillance proactive · Contrôle d'infrastructure · LLM on-premise
-<!-- 0xCyberLiTech · v2.6 · 2026-05-13 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 23 tests E2E Playwright · ESLint 0 errors · MCP 10 outils · Phase 3 split monolithe Python complète (30 modules · jarvis.py -2072L · -31%) · session 33c split JS partiel : recorder.js (660L) + voice_print.js (852L) extraits · jarvis_main.js 10507→8994L (-14.4%) · score dette HONNÊTE 91/100 (JS reste majoritairement monolithique, pas de CI) -->
+<!-- 0xCyberLiTech · v2.7 · 2026-05-14 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 23 tests E2E Playwright · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git initialisé (5 commits) + pre-commit hooks bloquants + ruff.toml · score dette HONNÊTE 75/100 (recalibré depuis 62 réel · +13 via chantier dette 2026-05-14 · JS reste majoritairement monolithique, pas de CI cloud) -->
 
 ---
 
@@ -81,17 +81,18 @@ Le système repose sur deux niveaux d'intelligence complémentaires :
 
 ```
 Windows 11 — localhost:5000
-├── jarvis.py              Flask · ~4520 L · 72 routes · host=127.0.0.1 (réduit de 6592L · 30 modules extraits)
-├── blueprints/soc.py      Blueprint SOC · 1555 L · rsyslog v1.6.1
+├── jarvis.py              Flask · 4633 L · 75 routes · host=127.0.0.1 (31 modules extraits)
+├── blueprints/soc.py      Blueprint SOC · 1689 L · rsyslog v1.6.1
+├── audio_dsp.py           Chaîne DSP audio · 508 L (extrait chantier 2026-05-14)
+├── 30 modules Phase 3     audio · bypass · infra/RAG · chat/LLM core
 ├── templates/
-│   ├── jarvis.html        Shell Jinja2 · 204 L · ?v={{ boot_id }} cache-bust
+│   ├── jarvis.html        Shell Jinja2 · 211 L · ?v={{ boot_id }} cache-bust
 │   └── tabs/              tab_monitor · tab_chat · tab_settings · tab_dsp
 │                          tab_terminal · tab_taches · tab_voicelab · tab_soc
 └── static/
-    ├── jarvis_main.js     0 NDT · 0 magic number · 0 style inline
-    ├── jarvis_main.min.js 315 Ko · rebuild 2026-05-08 (NDT final)
-    ├── jarvis.css         0 doublon · 0 règle morte · NDT 10/10
-    └── jarvis.min.css     206 Ko
+    ├── jarvis_main.js     8994 L · ⚠ reste majoritairement monolithique
+    ├── jarvis_mixing.js   1375 L · recorder.js 660 L · voice_print.js 852 L
+    └── css/               8 fichiers par secteur (ex-jarvis.css 5270L · chantier 2026-05-14)
 ```
 
 **LLM (Ollama local) :**
@@ -399,7 +400,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 
 | Correction | Détail |
 |------------|--------|
-| Cache navigateur | `SEND_FILE_MAX_AGE_DEFAULT=0` + `?v={{ boot_id }}` sur jarvis_main.min.js |
+| Cache navigateur | `SEND_FILE_MAX_AGE_DEFAULT=0` + `?v={{ boot_id }}` sur jarvis_main.js + 8 fichiers css/ |
 | `_rag_live_query` orpheline | Stub `return []` jamais appelé — supprimé |
 | `arr[eê]` résiduel `_INFRA_KW` | Aligné avec VM regexes → `arr[eêé]te[rz]?[sz]?` |
 
@@ -412,7 +413,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | Imports inutilisés | 0 |
 | Regex inconsistantes | 3 corrigées |
 | Code mort introduit cette session | 0 |
-| **jarvis.py final** | **~4520 L · 30 modules extraits · score dette HONNÊTE 91/100** (Python Phase 3 complète + split JS partiel session 33c · jarvis_main.js -14.4% · 2026-05-13) |
+| **jarvis.py final** | **4633 L · 31 modules extraits · score dette HONNÊTE 75/100** (recalibré depuis 62 réel · +13 via chantier dette 2026-05-14 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py) |
 
 ### 5.7 Validé en prod
 
@@ -462,12 +463,13 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | ✅ | Linters intégrés — Ruff (Python) · ESLint (JS) · 0 errors · 96+132 warnings tolérés | session 33 |
 | ✅ | Audit dette technique honnête — score 73 → 84/100 (+11 sur 2026-05-13) | session 33 |
 | ✅ | **Phase 3 split monolithe Python complète** — **30 modules extraits** (Audio/Voice 5 + Bypass 8 + Infra/RAG 2 + Chat/LLM core 15) — `jarvis.py` 6592 → ~4520 (**-2072 lignes · -31%**) — score honnête 84 → **89/100** (+5 · pas 100 car JS toujours monolithique) | session 33b |
-| ✅ | **Split JS partiel** — extraction `recorder.js` (660L) + `voice_print.js` (852L) en IIFE depuis `jarvis_main.js` 10507→8994L (**-14.4%**) — suppression artefacts obsolètes (`vp_iife_new.js` 638L + `vp_rebuild.py` 28L = -666L code mort) — 23 E2E pass · ESLint 0 errors — score honnête 89 → **91/100** (+2 · pas plus car JS reste majoritairement monolithique) | session 33c |
+| ✅ | **Split JS partiel** — extraction `recorder.js` (660L) + `voice_print.js` (852L) en IIFE depuis `jarvis_main.js` 10507→8994L (**-14.4%**) — score honnête 89 → 91 (valeur d'époque) | session 33c |
+| ✅ | **Chantier dette technique 2026-05-14** — recalibration honnête (le 91 était optimiste, départ réel **62**) → **75/100** (+13). Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (5 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait (jarvis.py -477L) | 2026-05-14 |
 | 🟡 | SSH write ops partielles — apt upgrade · restart service (validation) | ouvert |
-| 🔵 | Phase 3 (suite) — bypass commands SSH/VM/backup/code (~600L) + Chat/LLM core (couplage profond) | future session |
+| 🔵 | GitHub Actions CI + tests intégration LLM réel | future session |
 | 🔵 | Refactor JS complet — `jarvis_main.js` reste à 8994L · 9 modules ES candidats · pas urgent | future session |
 
-**Prochaine session :** SSH write ops partielles (apt upgrade / restart) — stabilisation routing préalable requise.
+**Reste reporté :** GitHub Actions CI · tests intégration LLM réel · refactor JS complet · décision fichiers runtime trackés.
 
 ---
 
@@ -506,9 +508,9 @@ npm run test:ui       # mode UI Playwright
 
 ---
 
-## 7ter. Phase 3 — Split monolithe (session 33 · 2026-05-13)
+## 7ter. Split monolithe — Phase 3 (session 33) + chantier dette (2026-05-14)
 
-**30 modules extraits** depuis `jarvis.py` 6592L → ~4520L (**-2072 lignes**, soit **-31% du monolithe**) — Phase 3 COMPLÈTE.
+**31 modules extraits** depuis `jarvis.py` 6592L → **4633L** — Phase 3 (30 modules, session 33b) + `audio_dsp.py` (chantier dette 2026-05-14).
 
 | Module | Lignes | Domaine | Couplage |
 |--------|--------|---------|----------|
@@ -519,6 +521,9 @@ npm run test:ui       # mode UI Playwright
 | [`scripts/vision.py`](scripts/vision.py) | 100 | Analyse image gemma4 multimodal | Découplé RAG (passé en param) |
 | [`scripts/bypass_simple.py`](scripts/bypass_simple.py) | 38 | Bypass datetime (regex + SSE) | Aucun (datetime stdlib) |
 | [`scripts/security_whitelists.py`](scripts/security_whitelists.py) | 105 | BLOCKED_SSH (29 patterns) + ALLOWED_RESTART_SVCS + ALLOWED_APT_PKGS + check_write_op() + parse_upgradable_packages() | Aucun (validation pure) |
+| [`scripts/audio_dsp.py`](scripts/audio_dsp.py) | 508 | Chaîne DSP audio : reverb convolution + FX rack (6 effets) + biquad + compresseur + apply_dsp_to_mp3 | DI sur DSP_PARAMS (wrapper jarvis.py) — chantier 2026-05-14 |
+
+> Note : tableau partiel — voir [`ROUTING-JARVIS.md`](docs/ROUTING-JARVIS.md) pour les 31 modules complets.
 
 ### Pattern d'extraction validé
 
@@ -535,7 +540,7 @@ npm run test:ui       # mode UI Playwright
 
 ### Bénéfices observés
 
-- Maintenance ciblée : bug audio engine X → direct dans `tts_engines.py`, pas dans 6592L
+- Maintenance ciblée : bug audio engine X → direct dans `tts_engines.py`, pas dans le monolithe
 - Audit sécurité : `security_whitelists.py` = couche défensive isolée, immédiatement reviewable
 - Tests unitaires possibles : `from stt import transcribe; transcribe("test.wav")` sans booter Flask
 - Stack traces pointent les modules dédiés (debug plus rapide)
