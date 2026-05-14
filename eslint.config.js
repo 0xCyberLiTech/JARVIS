@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js'],
+    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -87,6 +87,33 @@ export default [
         _buildChatPayload: 'writable',
         _startPreloader: 'writable',
         loadWelcome: 'writable',
+        // Symboles cross-file jarvis_main.js ↔ js/eq_parametric.js
+        // (EQ PARAMÉTRIQUE extrait — chantier dette 2026-05-14)
+        EQ_BANDS: 'readonly',
+        SPEC_PRESETS: 'readonly',
+        _dspAnalyser: 'writable',
+        _dspDataArray: 'writable',
+        _dspVoiceBypass: 'writable',
+        _dspVoiceDecoupled: 'writable',
+        _eqDrag: 'writable',
+        _eqFreqRange: 'writable',
+        _eqGhost: 'writable',
+        _eqGhostAlpha: 'writable',
+        _eqHoverX: 'writable',
+        _eqLastCombined: 'writable',
+        _eqMemLoad: 'writable',
+        _eqState: 'writable',
+        _eqVoiceCoupled: 'writable',
+        _rackSpecMode: 'writable',
+        _specMode: 'writable',
+        _specPeaks: 'writable',
+        _updateEqCoupleBadges: 'writable',
+        _wfCanvas: 'writable',
+        _wfColor: 'writable',
+        _wfCtx2: 'writable',
+        eqBqCoeffs: 'writable',
+        eqBqResponse: 'writable',
+        eqPushNow: 'writable',
       },
     },
     rules: {
