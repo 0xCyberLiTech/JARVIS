@@ -41,6 +41,17 @@
 
 **État après chantier (2026-05-14)** : jarvis.py 4633L · 31 modules Python · jarvis_main.js 7893L + 6 modules JS · jarvis.css → 8 fichiers · git 17 commits · pre-commit hooks bloquants · ruff 0 · eslint 0 · 25 tests E2E · **score honnête 78/100**.
 
+### ⚠ Leçons audit — pièges à ne pas réintroduire
+
+3 régressions causées par mes propres audits (session 30) — à mémoriser :
+- **sed sur magic numbers** : `5010 → _MCP_PORT` avait touché des strings/f-strings sans interpolation (5 sites cassés). → un remplacement de constante doit exclure les littéraux chaîne.
+- **audit CSS vars "inutilisées"** : `--orange2`/`--pink` supprimées car "0 usage hex" — mais utilisées via `_cssVar()` en JS. → toujours scanner aussi les `_cssVar()` JS avant de supprimer une var CSS.
+- **refactor JS hybride legacy/ESM** : `var X = window._X` + bundle ESM = TDZ + scope chain bugs (esbuild abandonné le 2026-05-12). → soit 100% ESM, soit fichiers `.js` scope global classiques, jamais d'hybride.
+
+### Reste pour viser 100/100
+
+Refactor JS incrémental (méthode validée) · CI cloud (incompatible « rien sur le web » — alternative : hook `pre-push` local) · profiling perf (TTS / RAG / Ollama swap) · tests unitaires Python (31 modules, pytest) · extraction routes Flask en blueprints (risque élevé — couplage état chat) · cleanup ruff cosmétique (96 E701/E702) + 132 ESLint warnings.
+
 ---
 
 ## Session 33c — Split JS partiel : recorder.js + voice_print.js (2026-05-13)

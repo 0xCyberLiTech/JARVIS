@@ -27,12 +27,15 @@ scripts/jarvis_soc_autobanned.json
 scripts/jarvis_soc_cooldowns.json
 # réglages EQ/DSP réécrits à chaque clic UI · défauts dans jarvis.py:87
 scripts/jarvis_dsp_params.json
+# params LLM (num_ctx adaptatif) réécrits au runtime · défauts dans le code
+scripts/jarvis_llm_params.json
 # prompt système réécrit par _applyModeProfile à chaque switch de mode
 # (état runtime volatil — régénéré au boot via _applyModeProfile('soc'))
 scripts/jarvis_system_prompt.txt
 scripts/voice_prints/
 scripts/generated_code/
 *.log
+*.log.*
 
 # ── Artefacts / caches ─────────────────────────────────────────
 __pycache__/
