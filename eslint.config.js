@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js'],
+    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -56,6 +56,12 @@ export default [
         sendMessage: 'writable',
         setModeSoc: 'writable',
         devTerminalOpen: 'writable',
+        // Symboles cross-file jarvis_main.js ↔ js/stt.js
+        // (STT WHISPER extrait — chantier 2026-05-14)
+        stopJarvis: 'writable',
+        sttToggle: 'writable',
+        sttCheckStatus: 'writable',
+        _currentAudioSource: 'writable',
         // Symboles cross-file jarvis_main.js ↔ js/voice_lab.js
         // (VOICE LAB IIFE extrait — chantier 2026-05-14)
         escHtml: 'writable',
