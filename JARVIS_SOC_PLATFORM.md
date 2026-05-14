@@ -1,6 +1,6 @@
 # JARVIS SOC PLATFORM — Architecture IA & Cybersécurité Homelab
 ### Agent autonome local · Surveillance proactive · Contrôle d'infrastructure · LLM on-premise
-<!-- 0xCyberLiTech · v2.7 · 2026-05-14 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 23 tests E2E Playwright · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git initialisé (5 commits) + pre-commit hooks bloquants + ruff.toml · score dette HONNÊTE 75/100 (recalibré depuis 62 réel · +13 via chantier dette 2026-05-14 · JS reste majoritairement monolithique, pas de CI cloud) -->
+<!-- 0xCyberLiTech · v2.7 · 2026-05-14 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 25 tests E2E Playwright · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git initialisé (5 commits) + pre-commit hooks bloquants + ruff.toml · score dette HONNÊTE 76/100 (recalibré depuis 62 réel · +14 via chantier dette 2026-05-14 · JS reste majoritairement monolithique, pas de CI cloud) -->
 
 ---
 
@@ -413,7 +413,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | Imports inutilisés | 0 |
 | Regex inconsistantes | 3 corrigées |
 | Code mort introduit cette session | 0 |
-| **jarvis.py final** | **4633 L · 31 modules extraits · score dette HONNÊTE 75/100** (recalibré depuis 62 réel · +13 via chantier dette 2026-05-14 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py) |
+| **jarvis.py final** | **4633 L · 31 modules extraits · score dette HONNÊTE 76/100** (recalibré depuis 62 réel · +14 via chantier dette 2026-05-14 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py) |
 
 ### 5.7 Validé en prod
 
@@ -464,7 +464,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | ✅ | Audit dette technique honnête — score 73 → 84/100 (+11 sur 2026-05-13) | session 33 |
 | ✅ | **Phase 3 split monolithe Python complète** — **30 modules extraits** (Audio/Voice 5 + Bypass 8 + Infra/RAG 2 + Chat/LLM core 15) — `jarvis.py` 6592 → ~4520 (**-2072 lignes · -31%**) — score honnête 84 → **89/100** (+5 · pas 100 car JS toujours monolithique) | session 33b |
 | ✅ | **Split JS partiel** — extraction `recorder.js` (660L) + `voice_print.js` (852L) en IIFE depuis `jarvis_main.js` 10507→8994L (**-14.4%**) — score honnête 89 → 91 (valeur d'époque) | session 33c |
-| ✅ | **Chantier dette technique 2026-05-14** — recalibration honnête (le 91 était optimiste, départ réel **62**) → **75/100** (+13). Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (5 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait (jarvis.py -477L) | 2026-05-14 |
+| ✅ | **Chantier dette technique 2026-05-14** — recalibration honnête (le 91 était optimiste, départ réel **62**) → **76/100** (+14). Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (5 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait (jarvis.py -477L) | 2026-05-14 |
 | 🟡 | SSH write ops partielles — apt upgrade · restart service (validation) | ouvert |
 | 🔵 | GitHub Actions CI + tests intégration LLM réel | future session |
 | 🔵 | Refactor JS complet — `jarvis_main.js` reste à 8994L · 9 modules ES candidats · pas urgent | future session |
@@ -531,7 +531,7 @@ npm run test:ui       # mode UI Playwright
 2. **API publique** snake_case sans underscore prefix pour les exports
 3. **`jarvis.py`** : `import <domain> as _<domain>` (alias underscore pour cohérence)
 4. **Routes Flask** restent dans jarvis.py (couplage Flask) mais délèguent à `_<domain>.func()`
-5. **Validation** : `py_compile` + restart JARVIS + `npm test` (23 E2E) → zéro régression à chaque palier
+5. **Validation** : `py_compile` + restart JARVIS + `npm test` (25 E2E) → zéro régression à chaque palier
 
 ### Reste à extraire (sessions futures)
 

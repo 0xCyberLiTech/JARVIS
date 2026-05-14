@@ -1,5 +1,5 @@
 # JARVIS — Architecture & Zones fonctionnelles
-<!-- v1.8 — 2026-05-14 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · NDT 100/100 (script auto) · score honnête global 75/100 (recalibré : départ réel 62, +13 via chantier dette 2026-05-14) · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git initialisé + pre-commit hooks bloquants + ruff.toml · ⚠ JS reste majoritairement monolithique (8994L) -->
+<!-- v1.8 — 2026-05-14 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · NDT 100/100 (script auto) · score honnête global 76/100 (recalibré : départ réel 62, +14 via chantier dette 2026-05-14) · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git initialisé + pre-commit hooks bloquants + ruff.toml · ⚠ JS reste majoritairement monolithique (8994L) -->
 
 ---
 

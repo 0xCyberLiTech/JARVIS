@@ -74,7 +74,7 @@ JARVIS/
 │   ├── DEPLOIEMENT.md                 ← exploitation, API, dépannage
 │   ├── REINSTALLATION.md              ← réinstallation Windows complète
 │   ├── AUDIT_JARVIS.md                ← audit sécurité (10/10)
-│   └── REFERENCE-TECHNIQUE.md         ← référence complète (NDT 100/100 script auto · score honnête global 75/100)
+│   └── REFERENCE-TECHNIQUE.md         ← référence complète (NDT 100/100 script auto · score honnête global 76/100)
 ├── README.md
 └── MEMORY.md
 ```
@@ -171,7 +171,7 @@ python jarvis.py
 | [`docs/MCP-SERVER.md`](docs/MCP-SERVER.md) | **MCP server** : pont Claude ↔ JARVIS · 10 outils détaillés · config Claude Desktop · watchdog |
 | [`docs/AUDIO-DSP.md`](docs/AUDIO-DSP.md) | **Audio DSP** : Web Audio graph (EQ+Comp+Limiter+FX) · 4 engines TTS · STT large-v3-turbo · DeepFilterNet CUDA · Voice Lab |
 | [`docs/AUDIT_JARVIS.md`](docs/AUDIT_JARVIS.md) | Audit sécurité — 10/10 — v2.6 — 0 gap |
-| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence v1.5 — NDT 100/100 (script auto) · **score honnête global 75/100** (recalibré depuis 62 réel · +13 via chantier dette 2026-05-14 : git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py) |
+| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence v1.5 — NDT 100/100 (script auto) · **score honnête global 76/100** (recalibré depuis 62 réel · +14 via chantier dette 2026-05-14 : git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py) |
 | [`docs/ROADMAP-V33.md`](docs/ROADMAP-V33.md) | Fonctionnalités v3.3 planifiées |
 | [`MEMORY.md`](MEMORY.md) | État projet, stack, historique corrections |
 

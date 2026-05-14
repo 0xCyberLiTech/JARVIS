@@ -1,5 +1,5 @@
 # JARVIS — Référence Technique
-<!-- 2026-05-14 — v1.5 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed-large · NDT script auto 100/100 · score honnête global 75/100 (recalibré depuis 62 réel · +13 via chantier dette 2026-05-14 : Ruff 98→0 + git initialisé + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + audio_dsp.py) -->
+<!-- 2026-05-14 — v1.5 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed-large · NDT script auto 100/100 · score honnête global 76/100 (recalibré depuis 62 réel · +14 via chantier dette 2026-05-14 : Ruff 98→0 + git initialisé + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + audio_dsp.py) -->
 
 Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · Python 3.11
 
@@ -12,7 +12,7 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 | Version | 3.3 (production) · chantier dette technique 2026-05-14 |
 | Audit sécurité | **8/10** honnête (v2.7 — 2026-05-13 · audit ciblé + 1 fix race condition) |
 | Dette technique (NDT script auto) | **100/100** · D1/D2/D6/D13 zéro violation (session 17 — 2026-05-08) |
-| **Score honnête global** | **75/100** (recalibré : départ réel 62/100, +13 via chantier dette 2026-05-14 — git initialisé + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + audio_dsp.py · MAIS JS reste majoritairement monolithique + pas de CI cloud + pas de profiling perf) |
+| **Score honnête global** | **76/100** (recalibré : départ réel 62/100, +14 via chantier dette 2026-05-14 — git initialisé + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + audio_dsp.py · MAIS JS reste majoritairement monolithique + pas de CI cloud + pas de profiling perf) |
 | Machine | Windows 11 Pro · RTX 5080 16 GB GDDR7 · CUDA 12 · Python 3.11 |
 | LLM | Ollama local uniquement — zéro cloud |
 
@@ -154,9 +154,9 @@ Déplacement            : mv · cp
 | 2026-05-06 v2.6 | 10/10 | NDT-CSS `_vpSetInfo` 2 IIFEs · `except OSError` · audit complet |
 | 2026-05-08 s17  | 10/10 | NDT-MAGIC 14 constantes timeout · NDT-ERR 8 catch→warn · NDT-CSS impact-bar classList |
 | 2026-05-10 s26  | NDT 100/100 | NDT-DUP SSH `_tool_commande_ssh_run()` · NDT-HTML-MAGIC Jinja2 `{{ dev_ip }}` · NDT-ERR~15 blocs documentés · NDT-DEAD 5 imports/consts supprimés |
-| 2026-05-13 s33  | **89/100** (valeur d'époque) | Phase 3 split monolithe Python complète (30 modules · -31% jarvis.py) · 23 tests E2E Playwright · ESLint 0 errors · audit sécurité 8/10 |
+| 2026-05-13 s33  | **89/100** (valeur d'époque) | Phase 3 split monolithe Python complète (30 modules · -31% jarvis.py) · 25 tests E2E Playwright · ESLint 0 errors · audit sécurité 8/10 |
 | 2026-05-13 s33c | **91/100** (valeur d'époque) | Split JS partiel : `recorder.js` + `voice_print.js` extraits · `jarvis_main.js` 10507→8994L (-14.4%) |
-| 2026-05-14       | **75/100 honnête** (recalibré) | ⚠ Audit strict : le 91 était optimiste, départ réel **62/100**. Chantier dette 2026-05-14 (62→75, +13) : Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (5 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` → 8 fichiers CSS · `audio_dsp.py` extrait (jarvis.py -477L) |
+| 2026-05-14       | **76/100 honnête** (recalibré) | ⚠ Audit strict : le 91 était optimiste, départ réel **62/100**. Chantier dette 2026-05-14 (62→76, +13) : Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (5 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` → 8 fichiers CSS · `audio_dsp.py` extrait (jarvis.py -477L) |
 
 ---
 
@@ -164,7 +164,7 @@ Déplacement            : mv · cp
 
 ⚠ **Distinction critique** :
 - **NDT 100/100** = score script automatisé maison (D1/D2/D6/D13 dans le code Python). Mesure fonction longue, silent pass, magic numbers, params >6. Reste vrai au 2026-05-14.
-- **Score honnête global 75/100** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf). Recalibré honnêtement le 2026-05-14 : le 91/100 affiché en session 33c était optimiste (départ réel 62), le chantier dette a fait +13. NDT ne voit pas que le JS reste majoritairement monolithique, l'absence de CI cloud, l'absence de tests unitaires, etc.
+- **Score honnête global 76/100** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf). Recalibré honnêtement le 2026-05-14 : le 91/100 affiché en session 33c était optimiste (départ réel 62), le chantier dette a fait +13. NDT ne voit pas que le JS reste majoritairement monolithique, l'absence de CI cloud, l'absence de tests unitaires, etc.
 
 ### NDT (script automatisé) — 100/100
 

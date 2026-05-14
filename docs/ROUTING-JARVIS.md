@@ -140,7 +140,7 @@ Validation automatisée (`tests/e2e/`) :
 
 Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits → `jarvis.py` 6592 → **4633 lignes**.
 
-⚠ **Note honnête** : score dette technique global = **75/100** (pas 100). Recalibré le 2026-05-14 (le 91/100 affiché en session 33c était optimiste, départ réel 62). Le chantier dette du 2026-05-14 a fait +13 : Ruff 98→0 + git initialisé + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + `audio_dsp.py`. Reste à faire : refactor JS complet (`jarvis_main.js` 8994L), CI cloud, tests intégration LLM réel. Voir `~/.claude/.../jarvis_dette_technique_etat.md` pour la décomposition complète.
+⚠ **Note honnête** : score dette technique global = **76/100** (pas 100). Recalibré le 2026-05-14 (le 91/100 affiché en session 33c était optimiste, départ réel 62). Le chantier dette du 2026-05-14 a fait +13 : Ruff 98→0 + git initialisé + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + `audio_dsp.py`. Reste à faire : refactor JS complet (`jarvis_main.js` 8994L), CI cloud, tests intégration LLM réel. Voir `~/.claude/.../jarvis_dette_technique_etat.md` pour la décomposition complète.
 
 ### Audio/Voice (5)
 | Module | Lignes | Rôle |
@@ -192,4 +192,4 @@ Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits →
 **Session 33c — Split JS partiel** : `recorder.js` 660L + `voice_print.js` 852L extraits en IIFE · `jarvis_main.js` 10507→8994L (-14.4%)
 **Chantier dette 2026-05-14** : Ruff 98→0 + `ruff.toml` · git initialisé (5 commits, 100% local) · pre-commit hooks bloquants · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait
 
-**Score dette technique HONNÊTE 75/100** (recalibré depuis 62 réel · Python serveur excellent · JS reste majoritairement monolithique · pas de CI cloud · pas de tests unitaires)
+**Score dette technique HONNÊTE 76/100** (recalibré depuis 62 réel · Python serveur excellent · JS reste majoritairement monolithique · pas de CI cloud · pas de tests unitaires)

@@ -1,8 +1,8 @@
 # JARVIS — Mémoire projet (2026-05-14)
 
-## Chantier dette technique — 2026-05-14 — score 62→75/100 (+13)
+## Chantier dette technique — 2026-05-14 — score 62→76/100 (+14)
 
-⚠ **Recalibration honnête** : le score 91/100 affiché le 2026-05-13 était **encore optimiste**. Audit strict (Ruff 98 erreurs réelles, 0 tests unitaires, 0 CI, 0 hooks, perf jamais profilée) → **point de départ réel 62/100**. Le chantier a fait **62 → 75/100**.
+⚠ **Recalibration honnête** : le score 91/100 affiché le 2026-05-13 était **encore optimiste**. Audit strict (Ruff 98 erreurs réelles, 0 tests unitaires, 0 CI, 0 hooks, perf jamais profilée) → **point de départ réel 62/100**. Le chantier a fait **62 → 75/100** (+13), puis **+1 via 2 smoke tests LLM → 76/100**.
 
 **5 commits git atomiques** (dépôt initialisé, 100% local, aucun remote) :
 
@@ -15,13 +15,19 @@
 | `dd3b803` | #7 Split CSS | `jarvis.css` 5270L → 8 fichiers `static/css/` (core/chat/dsp/terminal-taches/hud-welcome/rack/settings-soc/voicelab) · concat = MD5 identique prouvé · `jarvis.html` 1→8 `<link>` |
 | `21806e3` | #4 audio_dsp.py | bloc DSP (25 fonctions ~470L) → `audio_dsp.py` 508L · DI sur DSP_PARAMS via wrapper · jarvis.py 5110→**4633L** (-9.3%) |
 
-**Validations** : E2E 23/23 à chaque action · ruff 0 · hash CSS identique · test audio DSP réel OK.
+**Suite de session** (commits `a8be8a7` + `5cc9d47` + `0cd56c5`) :
+- **2 smoke tests LLM** `tests/e2e/chat-llm-smoke.spec.js` : flux SSE réel `/api/chat` (tokens + done:true) + capture historique. Comble le trou « zéro coverage LLM ». **25/25 E2E pass**. Score 75 → **76/100**.
+- **Fichiers runtime tranchés** : `jarvis_dsp_params.json` → gitignoré (état runtime, défauts dans le code) · `jarvis_system_prompt.txt` → reste versionné + `.gitattributes` eol=lf (fini le faux « modifié » CRLF/LF à chaque boot).
 
-⚠ **Pivot assumé en cours de chantier** : le plan initial "3 blueprints Flask" (audio/admin/chat) a été **abandonné** — les routes Flask sont trop couplées à l'état partagé avec le chat (queues TTS, `speak()`, `_chat_stream_active`). Risque élevé, pas modéré. Remplacé par l'extraction du **bloc DSP pur** (`audio_dsp.py`) — méthode éprouvée des 30 modules session 33, faible risque.
+**Validations** : E2E 25/25 · ruff 0 · hash CSS identique · test audio DSP réel OK.
 
-**Reste reporté** : GitHub Actions CI · tests intégration LLM réel · refactor JS complet (`jarvis_main.js` 8994L) · décision sur fichiers runtime trackés (`jarvis_dsp_params.json`, `jarvis_system_prompt.txt`).
+⚠ **Pivot assumé en cours de chantier** : le plan initial "3 blueprints Flask" (audio/admin/chat) **abandonné** — routes Flask trop couplées à l'état partagé chat (queues TTS, `speak()`, `_chat_stream_active`). Remplacé par extraction du **bloc DSP pur** (`audio_dsp.py`).
 
-**État après chantier** : jarvis.py 4633L · 31 modules Python (30 session 33 + audio_dsp.py) · jarvis.css → 8 fichiers · git 5 commits · pre-commit hooks bloquants · ruff 0 erreur.
+⚠ **Split JS — NON FAIT, verdict honnête** : aucune section de `jarvis_main.js` (8994L) n'est extractible proprement. recorder.js/voice_print.js l'étaient car DÉJÀ des IIFE ; les autres sections = fonctions au scope global qui s'appellent en croix (249 globales). Le refactor JS = **chantier dédié avec bundler (Vite/esbuild)**, pas du grignotage.
+
+**Reste reporté** : refactor JS (chantier bundler dédié) · CI cloud (incompatible « rien sur le web ») · profiling perf · tests unitaires Python.
+
+**État après chantier (2026-05-14)** : jarvis.py 4633L · 31 modules Python · jarvis.css → 8 fichiers · git 9 commits · pre-commit hooks bloquants · ruff 0 erreur · 25 tests E2E (23 UI + 2 smoke LLM).
 
 ---
 

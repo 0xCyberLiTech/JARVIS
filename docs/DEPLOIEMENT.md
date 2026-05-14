@@ -386,7 +386,7 @@ v3.3  (en cours)
   ✅ Terminal CODE xterm.js + WebSocket PTY SSH srv-dev-1
   ✅ Phase 3 split monolithe Python — 30 modules · session 33b (2026-05-13)
   ✅ Session 33c split JS partiel — recorder.js + voice_print.js extraits · jarvis_main.js -14.4%
-  ✅ Chantier dette technique 2026-05-14 — Ruff 98→0 + git initialisé (5 commits) + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + audio_dsp.py · score honnête global 75/100 (recalibré depuis 62 réel · +13)
+  ✅ Chantier dette technique 2026-05-14 — Ruff 98→0 + git initialisé (5 commits) + pre-commit hooks bloquants + ruff.toml + CSS 8 fichiers + audio_dsp.py · score honnête global 76/100 (recalibré depuis 62 réel · +13)
   ⬜ SSH write ops partielles — apt upgrade · restart service
   ⬜ Refactor JS complet (jarvis_main.js 8994L · reste majoritairement monolithique)
   ⬜ CI cloud (GitHub Actions) + tests intégration LLM réel
