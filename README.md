@@ -75,7 +75,7 @@ JARVIS/
 │   ├── DEPLOIEMENT.md                 ← exploitation, API, dépannage
 │   ├── REINSTALLATION.md              ← réinstallation Windows complète
 │   ├── AUDIT_JARVIS.md                ← audit sécurité (10/10)
-│   └── REFERENCE-TECHNIQUE.md         ← référence complète (NDT 100/100 script auto · score honnête global ~90/100 honnête (35% coverage lignes, 568 tests))
+│   └── REFERENCE-TECHNIQUE.md         ← référence complète (NDT 100/100 script auto · score honnête global ~91/100 honnête (39% coverage lignes, 682 tests))
 ├── README.md
 └── MEMORY.md
 ```
@@ -172,13 +172,13 @@ python jarvis.py
 | [`docs/MCP-SERVER.md`](docs/MCP-SERVER.md) | **MCP server** : pont Claude ↔ JARVIS · 10 outils détaillés · config Claude Desktop · watchdog |
 | [`docs/AUDIO-DSP.md`](docs/AUDIO-DSP.md) | **Audio DSP** : Web Audio graph (EQ+Comp+Limiter+FX) · 4 engines TTS · STT large-v3-turbo · DeepFilterNet CUDA · Voice Lab |
 | [`docs/AUDIT_JARVIS.md`](docs/AUDIT_JARVIS.md) | Audit sécurité — 10/10 — v2.6 — 0 gap |
-| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence v1.5 — NDT 100/100 (script auto) · **score honnête global ~90/100** (recalibré depuis 62 réel · +28 via chantier dette 2026-05-14/15 : git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS −98,1% + 568 tests pytest sur 27/34 modules avec coverage 35% lignes + fix perf IPv6 + hook pre-push) |
+| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence v1.5 — NDT 100/100 (script auto) · **score honnête global ~91/100** (recalibré depuis 62 réel · +29 via chantier dette 2026-05-14/15 : git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS −98,1% + 682 tests pytest sur 32/34 modules avec coverage 39% lignes + fix perf IPv6 + hook pre-push) |
 | [`docs/ROADMAP-V33.md`](docs/ROADMAP-V33.md) | Fonctionnalités v3.3 planifiées |
 | [`MEMORY.md`](MEMORY.md) | État projet, stack, historique corrections |
 
 ## Qualité — chantier dette technique 2026-05-14/15
 
-Audit honnête et chantier de dette : **score recalibré 62 → ~90/100 honnête (35% coverage lignes, 568 tests)** (l'ancien
+Audit honnête et chantier de dette : **score recalibré 62 → ~91/100 honnête (39% coverage lignes, 682 tests)** (l'ancien
 « 91/100 » / « 100/100 » étaient optimistes — le NDT script auto mesure le style,
 pas l'architecture/tests/CI). Travaux du chantier :
 - **Dépôt git LOCAL** initialisé (100% local, aucun remote — règle « rien sur le web ») · commits atomiques

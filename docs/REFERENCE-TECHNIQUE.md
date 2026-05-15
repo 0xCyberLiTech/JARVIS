@@ -1,5 +1,5 @@
 # JARVIS — Référence Technique
-<!-- 2026-05-15 — v1.7 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed-large · NDT script auto 100/100 · score honnête global 90/100 (recalibré depuis 62 réel · +28 via chantier dette 2026-05-14/15 : Ruff 98→0 + git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS jarvis_main.js 7828→148L (-98,1%) + 568 tests pytest sur 27/34 modules coverage 35% lignes + fix perf IPv6 + hook pre-push) -->
+<!-- 2026-05-15 — v1.8 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed-large · NDT script auto 100/100 · score honnête global 91/100 (recalibré depuis 62 réel · +29 via chantier dette 2026-05-14/15 : Ruff 98→0 + git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS jarvis_main.js 7828→148L (-98,1%) + 682 tests pytest sur 32/34 modules coverage 39% lignes + fix perf IPv6 + hook pre-push) -->
 
 Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · Python 3.11
 
@@ -12,7 +12,7 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 | Version | 3.3 (production) · chantier dette technique 2026-05-14/15 |
 | Audit sécurité | **8/10** honnête (v2.7 — 2026-05-13 · audit ciblé + 1 fix race condition) |
 | Dette technique (NDT script auto) | **100/100** · D1/D2/D6/D13 zéro violation (session 17 — 2026-05-08) |
-| **Score honnête global** | **90/100** (recalibré post-audit pytest --cov : départ réel 62/100, +28 via chantier dette 2026-05-14/15 — git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS jarvis_main.js 7828→148L (−98,1%) + 568 tests pytest sur 27/34 modules avec coverage 35% lignes + fix perf IPv6 −97% latence interne · MAIS pas de CI cloud — alternative locale pre-push) |
+| **Score honnête global** | **91/100** (recalibré post-audit pytest --cov : départ réel 62/100, +29 via chantier dette 2026-05-14/15 — git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS jarvis_main.js 7828→148L (−98,1%) + 682 tests pytest sur 32/34 modules avec coverage 39% lignes + fix perf IPv6 −97% latence interne · MAIS pas de CI cloud — alternative locale pre-push) |
 | Machine | Windows 11 Pro · RTX 5080 16 GB GDDR7 · CUDA 12 · Python 3.11 |
 | LLM | Ollama local uniquement — zéro cloud |
 
@@ -163,7 +163,7 @@ Déplacement            : mv · cp
 | 2026-05-13 s33c | **91/100** (valeur d'époque) | Split JS partiel : `recorder.js` + `voice_print.js` extraits · `jarvis_main.js` 10507→8994L (-14.4%) |
 | 2026-05-14       | **78/100 honnête** (recalibré) | ⚠ Audit strict : le 91 était optimiste, départ réel **62/100**. Chantier dette 2026-05-14 (**62→78, +16**) : Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (100% local) · **pre-commit hooks bloquants** · `jarvis.css` → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** (3 modules : terminal_code/voice_lab/stt) |
 | 2026-05-14 soir  | **~82/100 honnête** | **Refactor JS massif** : `jarvis_main.js` 7828→**4013 L** (−49%) · **11 modules** extraits dans `static/js/` · méthode byte-identique vérifiée (node --check · eslint 0 · validation E2E prod) · 1 régression d'ordre détectée+corrigée |
-| 2026-05-15       | **~90/100 honnête** | **Refactor JS terminé** + **Phase 4 tests massifs** : `jarvis_main.js` 4013→**148 L** (−98,1% cumul depuis 7828) · 21 modules JS · **568 tests pytest** sur 27/34 modules avec coverage **35% lignes** (proxmox_api 93%, voice_lab 71%, soc.py 33%, jarvis.py 26%, audio_dsp 25%) · **fix perf systémique IPv6** (-97% latence interne via `OLLAMA_URL`/`JARVIS_BASE` → `127.0.0.1`) · **hook pre-push pytest** · 3 bugs prod détectés+fixés · outil `tools/profile_perf.py` |
+| 2026-05-15       | **~91/100 honnête** | **Refactor JS terminé** + **Phase 4 tests massifs étendus** : `jarvis_main.js` 4013→**148 L** (−98,1% cumul depuis 7828) · 21 modules JS · **682 tests pytest** sur 32/34 modules (94%) avec coverage **39% lignes** (proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26%, audio_dsp 25%) · **fix perf systémique IPv6** (-97% latence interne via `OLLAMA_URL`/`JARVIS_BASE` → `127.0.0.1`) · **hook pre-push pytest** · 3 bugs prod détectés+fixés · outil `tools/profile_perf.py` |
 
 ---
 
@@ -171,7 +171,7 @@ Déplacement            : mv · cp
 
 ⚠ **Distinction critique** :
 - **NDT 100/100** = score script automatisé maison (D1/D2/D6/D13 dans le code Python). Mesure fonction longue, silent pass, magic numbers, params >6. Reste vrai au 2026-05-15.
-- **Score honnête global ~90/100** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf). Recalibré honnêtement le 2026-05-15 post-audit pytest --cov : le 91/100 affiché en session 33c était optimiste (départ réel 62), chantier 2026-05-14/15 a fait +28 (→90) via : git+hooks+CSS, refactor JS jarvis_main.js sous 150 L (−98,1%), 568 tests pytest avec coverage 35% lignes, fix perf IPv6, hook pre-push. Reste pour 95+ : tester tts_engines/bypass_backup/deepfilter/stt/ssh_terminal · profiling TTS détaillé · circuit breaker Ollama · CI cloud (impossible « rien sur le web »).
+- **Score honnête global ~91/100** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf). Recalibré honnêtement le 2026-05-15 post-audit pytest --cov : le 91/100 affiché en session 33c était optimiste (départ réel 62), chantier 2026-05-14/15 a fait +29 (→91) via : git+hooks+CSS, refactor JS jarvis_main.js sous 150 L (−98,1%), 682 tests pytest sur 32/34 modules avec coverage 39% lignes, fix perf IPv6, hook pre-push. Reste pour 95+ : tester tts_engines (199 stmts, 4 engines async/CUDA) + jarvis_mcp_server (211 stmts, FastMCP) · profiling TTS détaillé · circuit breaker Ollama · CI cloud (impossible « rien sur le web »).
 
 ### NDT (script automatisé) — 100/100
 

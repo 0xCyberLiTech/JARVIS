@@ -1,6 +1,6 @@
 # JARVIS SOC PLATFORM — Architecture IA & Cybersécurité Homelab
 ### Agent autonome local · Surveillance proactive · Contrôle d'infrastructure · LLM on-premise
-<!-- 0xCyberLiTech · v2.9 · 2026-05-15 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 25 tests E2E Playwright + 568 tests pytest sur 27/34 modules avec coverage 35% lignes · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · refactor JS terminé : jarvis_main.js 7828→148L (−98,1%), 21 modules · git local + pre-commit hooks bloquants + hook pre-push pytest + ruff.toml · fix perf IPv6 (-97% latence interne) · score dette HONNÊTE ~90/100 (recalibré post-audit pytest --cov · +28 chantier dette 2026-05-14/15) -->
+<!-- 0xCyberLiTech · v3.0 · 2026-05-15 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 25 tests E2E Playwright + 682 tests pytest sur 32/34 modules avec coverage 39% lignes · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · refactor JS terminé : jarvis_main.js 7828→148L (−98,1%), 21 modules · git local + pre-commit hooks bloquants + hook pre-push pytest + ruff.toml · fix perf IPv6 (-97% latence interne) · score dette HONNÊTE ~91/100 (recalibré post-audit pytest --cov · +29 chantier dette 2026-05-14/15) -->
 
 ---
 
@@ -414,7 +414,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | Imports inutilisés | 0 |
 | Regex inconsistantes | 3 corrigées |
 | Code mort introduit cette session | 0 |
-| **jarvis.py final** | **4633 L · 31 modules extraits · jarvis_main.js 148 L (−98,1%) · score dette HONNÊTE 90/100** (recalibré post-audit pytest --cov · +28 via chantier 2026-05-14/15 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py + refactor JS terminé + 568 tests pytest avec coverage 35% lignes + fix perf IPv6 + hook pre-push) |
+| **jarvis.py final** | **4633 L · 31 modules extraits · jarvis_main.js 148 L (−98,1%) · score dette HONNÊTE 91/100** (recalibré post-audit pytest --cov · +29 via chantier 2026-05-14/15 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py + refactor JS terminé + 682 tests pytest sur 32/34 modules avec coverage 39% lignes + fix perf IPv6 + hook pre-push) |
 
 ### 5.7 Validé en prod
 
@@ -466,7 +466,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | ✅ | **Phase 3 split monolithe Python complète** — **30 modules extraits** (Audio/Voice 5 + Bypass 8 + Infra/RAG 2 + Chat/LLM core 15) — `jarvis.py` 6592 → ~4520 (**-2072 lignes · -31%**) — score honnête 84 → **89/100** (+5 · pas 100 car JS toujours monolithique) | session 33b |
 | ✅ | **Split JS partiel** — extraction `recorder.js` (660L) + `voice_print.js` (852L) en IIFE depuis `jarvis_main.js` 10507→8994L (**-14.4%**) — score honnête 89 → 91 (valeur d'époque) | session 33c |
 | ✅ | **Chantier dette technique 2026-05-14** — recalibration honnête (le 91 était optimiste, départ réel **62**) → **78/100** (+16). Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (100% local) · **pre-commit hooks bloquants** · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** : 3 modules extraits de jarvis_main.js (8994→7893L) | 2026-05-14 |
-| ✅ | **Chantier dette technique 2026-05-15 (extension massive)** — score 78 → **90/100** (+12). **Refactor JS terminé** (`jarvis_main.js` 7828→**148 L** −98,1% cumul, 21 modules) · **568 tests pytest** sur 27/34 modules avec **coverage 35% lignes** (proxmox_api 93%, voice_lab 71%, soc.py 33%, jarvis.py 26% via Flask test_client) · **Phase 3 fix perf IPv6** (-97% latence interne via `OLLAMA_URL`/`JARVIS_BASE` → 127.0.0.1) · **hook pre-push pytest** · 3 bugs prod détectés+fixés (load-order, tts_cleaner, IPv6) · outil `tools/profile_perf.py` | 2026-05-15 |
+| ✅ | **Chantier dette technique 2026-05-15 (extension massive)** — score 78 → **91/100** (+13). **Refactor JS terminé** (`jarvis_main.js` 7828→**148 L** −98,1% cumul, 21 modules) · **682 tests pytest** sur 32/34 modules avec **coverage 39% lignes** (proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26% via Flask test_client) · **Phase 3 fix perf IPv6** (-97% latence interne via `OLLAMA_URL`/`JARVIS_BASE` → 127.0.0.1) · **hook pre-push pytest** · 3 bugs prod détectés+fixés (load-order, tts_cleaner, IPv6) · outil `tools/profile_perf.py` | 2026-05-15 |
 | 🟡 | SSH write ops partielles — apt upgrade · restart service (validation) | ouvert |
 | 🔵 | Pour 95+ : tests modules I/O restants (tts_engines, bypass_backup, deepfilter, stt) · profiling TTS détaillé · circuit breaker Ollama formel | future session |
 | 🔵 | Tests unitaires Python · profiling performance | future session |
