@@ -387,10 +387,10 @@ v3.3  (en cours)
   ✅ Terminal CODE xterm.js + WebSocket PTY SSH srv-dev-1
   ✅ Phase 3 split monolithe Python — 30 modules · session 33b (2026-05-13)
   ✅ Session 33c split JS partiel — recorder.js + voice_print.js extraits · jarvis_main.js -14.4%
-  ✅ Chantier dette technique 2026-05-14/15 — Ruff 98→0 + git local + pre-commit hooks + hook pre-push pytest + ruff.toml + CSS 8 fichiers + audio_dsp.py + 705 tests pytest sur 33/34 modules (coverage 39% lignes) + refactor JS jarvis_main.js 7828→148 L (−98,1%) + 21 modules JS + fix perf IPv6 (-97% latence interne) · **score honnête global 92/100** (recalibré depuis 62 réel · +29)
+  ✅ Chantier dette technique 2026-05-14/15 — Ruff 98→0 + git local + pre-commit hooks + hook pre-push pytest + ruff.toml + CSS 8 fichiers + audio_dsp.py + **799 tests pytest sur 34/34 modules (100%)** (coverage 39% lignes · tts_engines 83% + jarvis_mcp_server 91% + ollama_circuit 100%) + refactor JS jarvis_main.js 7828→148 L (−98,1%) + 21 modules JS + fix perf IPv6 (-97% latence interne) + **circuit breaker Ollama étendu 8 call-sites** + bouton SOC PING JARVIS enrichi état Ollama + **pré-warm Kokoro CUDA au boot** (élimine cold start 42.8 s) + **profiling TTS détaillé** (`tools/profile_tts.py`) · **score honnête global 93/100** (recalibré depuis 62 réel · +31)
   ⬜ SSH write ops partielles — apt upgrade · restart service
   ✅ Refactor JS terminé (jarvis_main.js 7828→148 L · −98,1% cumul · 21 modules)
-  ⬜ Tests unitaires Python · profiling performance
+  ✅ Tests unitaires Python (799 tests · 34/34 modules) · profiling performance (`profile_perf.py` + `profile_tts.py`)
 v3.4  (moyen)   — WebSocket Monitor, historique chat SQLite, graphiques Chart.js, alerte GPU
 v4.0  (long)    — Service Windows NSSM, Docker Compose, HTTPS mkcert, SSH write ops matures
 ```
