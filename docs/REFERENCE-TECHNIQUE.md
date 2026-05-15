@@ -35,7 +35,7 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 | TTS défaut | edge-tts fr-CA-AntoineNeural (HTTPS) |
 | TTS fallback | Kokoro ff_siwis (CUDA) → XTTS v2 58 voix → Piper (onnx) → SAPI5 |
 | DSP | numpy · scipy · DeepFilterNet GPU sm_120 Blackwell |
-| MCP | jarvis_mcp_server.py · 10 outils · stdio pythonw |
+| MCP | jarvis_mcp_server.py · **11 outils** (+`jarvis_defense_24h` 2026-05-16) · stdio pythonw |
 
 ### 2.2 Métriques fichiers (2026-05-14 · post-chantier dette technique)
 
@@ -43,7 +43,7 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 |---|---|---|
 | `scripts/jarvis.py` | **4 633** | 75 routes · NDT 100/100 · routing **4 branches** SOC/GÉNÉRAL/CODE/CR · réduit via Phase 3 (30 modules) + audio_dsp.py (chantier 2026-05-14) |
 | `scripts/blueprints/soc.py` | 1 689 | Blueprint SOC · auto-engine · SSH 4 hôtes · `/api/soc/ip-history` · fix race condition `_soc_actions_save` (2026-05-13) |
-| `scripts/jarvis_mcp_server.py` | ~430 | **10 outils** · `_TOOLS_DEFS` · streamable-HTTP port 5010 · 0 fonction >80L |
+| `scripts/jarvis_mcp_server.py` | ~430 | **11 outils** · `_TOOLS_DEFS` · streamable-HTTP port 5010 · 0 fonction >80L |
 | `scripts/static/jarvis_main.js` | **4 013** | 🟡 refactor JS 2026-05-14 soir : 7828→4013 (−49%) · 11 modules extraits · reste à finir |
 | `scripts/static/js/` (11 modules) | ~5 000 | terminal_code·voice_lab·stt + tasks_tab·welcome·eq_parametric·eq_music·audio_mire·audio_viz·settings_llm·dsp_audio (refactor JS 2026-05-14) |
 | **31 modules Python extraits** | **~3 540** | Phase 3 : Audio/Voice 5 + Bypass 8 + Infra/RAG 2 + Chat/LLM core 15 + `audio_dsp.py` 508L (chantier 2026-05-14) — voir [`ROUTING-JARVIS.md`](ROUTING-JARVIS.md) |
@@ -248,7 +248,7 @@ Périmètre : `jarvis.py` · `soc.py` · `jarvis_mcp_server.py` · `audio_dsp.py
 
 `pythonw` : supprime la fenêtre console Windows, maintient les pipes stdio MCP.
 
-### 7.2 Les 10 outils MCP
+### 7.2 Les 11 outils MCP
 
 | Outil | Endpoint | Rôle |
 |---|---|---|
@@ -263,7 +263,7 @@ Périmètre : `jarvis.py` · `soc.py` · `jarvis_mcp_server.py` · `audio_dsp.py
 | `jarvis_last_response` | GET `/api/conversation/last` | Derniers échanges de la conversation JARVIS |
 | `jarvis_code_exec` | bypass `_code_scp_exec_sse` | Écrit + SCP + exécute un fichier sur srv-dev-1 |
 
-> Détail complet des 10 outils : voir [`docs/MCP-SERVER.md`](MCP-SERVER.md).
+> Détail complet des 11 outils : voir [`docs/MCP-SERVER.md`](MCP-SERVER.md).
 
 ### 7.3 Injection historique IP dans jarvis_soc_ask
 
@@ -287,7 +287,7 @@ Sans ce cadre = réponse Claude directe.
 
 ```
 jarvis_mcp_server.py (NDT-LONG refactorisé — 0 fonction >80L)
-├── _TOOLS_DEFS        ← 10 outils définis en constante
+├── _TOOLS_DEFS        ← 11 outils définis en constante
 ├── _TOOL_HANDLERS     ← dict nom → handler (dispatch)
 ├── _RE_IPV4           ← regex détection IPv4
 ├── _collect_sse_tokens()  ← consomme le stream SSE JARVIS

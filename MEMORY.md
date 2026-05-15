@@ -1,4 +1,16 @@
-# JARVIS — Mémoire projet (2026-05-14)
+# JARVIS — Mémoire projet (2026-05-16)
+
+## Intégration SOC defense_24h — 2026-05-16 (commit `ed8f3a8`)
+
+Nouveau résumé compact des actions défensives 24h alimente JARVIS via 3 canaux complémentaires (source : `defense_aggregator.py` côté SOC, cron 60 s).
+
+- **Route HTTP `/api/soc/defense`** (cache 30 s) — `blueprints/soc.py:_fetch_defense()` + endpoint dérivé du `monitoring_url` (même host:port, fichier différent). Pas de fallback SSH (defense est secondaire).
+- **Injection bloc compact dans system prompt phi4 mode SOC** — `chat_soc_inject.py:_format_defense_block()` (~400 chars : KPI + pic horaire + top 5 pays/AS/scénarios). Activé via `fetch_defense_fn=_fetch_defense` passé en DI dans `_chat_inject_soc`. Phi4 répond direct aux questions « combien de bans / quel pays attaque le plus / quelle heure de pointe » sans recalculer depuis monitoring.json brut (210 Ko → 0,4 Ko de contexte LLM).
+- **Outil MCP `jarvis_defense_24h`** (11e outil, était 10) — `jarvis_mcp_server.py:_handle_jarvis_defense_24h()` formate le JSON en bloc texte JARVIS_HEADER. Permet à Claude Code (MCP client) d'interroger ce résumé en 1 call au lieu de parser monitoring.json. **+2 tests pytest** (799 → 801) + tests `compte_10` renommés `compte_11`.
+
+Pattern « Single Source of Truth » : 1 fichier JSON côté SOC → 3 consommateurs (humain navigateur / phi4 chat / Claude MCP). 0 régression, ruff/eslint 0, tests existants intacts.
+
+
 
 ## Injection SOC 100 % serveur + crawlers légitimes — 2026-05-14 (commit `ec8f2df`)
 

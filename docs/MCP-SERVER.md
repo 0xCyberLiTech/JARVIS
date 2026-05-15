@@ -19,7 +19,7 @@ Le serveur MCP (Model Context Protocol) expose JARVIS comme un set d'**outils** 
 │  ╔═══════════════════════════════════════════════╗               │
 │  ║  jarvis_mcp_server.py   (Windows · port 5010) ║               │
 │  ║  Starlette + uvicorn + MCP SDK                ║               │
-│  ║  10 outils @app.list_tools()                  ║               │
+│  ║  11 outils @app.list_tools()                  ║               │
 │  ╚═══════════════════════════════════════════════╝               │
 │         │ HTTP REST + SSE                                        │
 │         ▼                                                        │
@@ -43,7 +43,7 @@ Le serveur MCP (Model Context Protocol) expose JARVIS comme un set d'**outils** 
 
 ---
 
-## Les 10 outils MCP
+## Les 11 outils MCP
 
 Tous les outils retournent du `TextContent` préfixé par `JARVIS_HEADER` (cartouche ASCII identifiant la source).
 
@@ -105,6 +105,13 @@ Tous les outils retournent du `TextContent` préfixé par `JARVIS_HEADER` (carto
 **Sécurité :** uniquement srv-dev-1 (`192.168.1.21`) · héritage `_BLOCKED_SSH` (rm, mkfs, dd, shutdown, etc.)
 **Endpoint :** bypass Python `_detect_code_command` → `_code_scp_exec_sse`
 
+### 11. `jarvis_defense_24h`
+**Description :** Résumé compact des actions défensives 24h sur srv-ngix — KPI agrégés (bans CrowdSec, blocks WAF CLT/PA85, alertes Suricata sev1/sev2, GeoBlock, fail2ban actifs, UFW), heatmap horaire, top pays/AS/scénarios, timeline rétrochrono. Source pré-calculée par `defense_aggregator.py` côté SOC (cron 60 s) → `defense_24h.json` (16 Ko, **13× plus compact** que monitoring.json).
+**Params :** aucun
+**Usage :** « combien de bans aujourd'hui ? quel pays attaque le plus ? quelle heure de pointe ? » sans avoir à parser le brut.
+**Endpoint :** `GET /api/soc/defense` (cache 30s côté JARVIS · proxy vers `http://192.168.1.50:8080/defense_24h.json`)
+**Pattern :** Single Source of Truth — même fichier consommé par la page web `/defense.html`, le bloc d'injection phi4 mode SOC, et cet outil MCP.
+
 ---
 
 ## Configuration Claude Desktop
@@ -124,11 +131,11 @@ Ajoute à `%APPDATA%\Claude\claude_desktop_config.json` :
 }
 ```
 
-Puis redémarre Claude Desktop. Les 10 outils apparaissent sous "jarvis" dans le menu MCP de Claude.
+Puis redémarre Claude Desktop. Les 11 outils apparaissent sous "jarvis" dans le menu MCP de Claude.
 
 **Vérification :**
 - `http://localhost:5010/health` → devrait retourner `{"status": "ok"}`
-- Dans Claude Desktop, demander : "list les outils MCP disponibles" — les 10 outils `jarvis_*` doivent apparaître
+- Dans Claude Desktop, demander : "list les outils MCP disponibles" — les 11 outils `jarvis_*` doivent apparaître
 
 ---
 
@@ -184,7 +191,7 @@ Toutes les réponses MCP sont préfixées par un cartouche ASCII pour identifier
 
 | Symbole | `jarvis_mcp_server.py:ligne` | Rôle |
 |---------|------------------------------|------|
-| `_TOOLS_DEFS` | 143 | Liste des 10 outils MCP (Tool objects) |
+| `_TOOLS_DEFS` | 143 | Liste des 11 outils MCP (Tool objects) |
 | `@app.list_tools()` | 213 | Handler MCP qui expose `_TOOLS_DEFS` au client |
 | `@app.call_tool()` | 369 | Dispatcher qui route le nom d'outil → fonction Python |
 | `_collect_sse_tokens()` | 53 | Helper async : appelle endpoint SSE JARVIS et accumule les tokens |

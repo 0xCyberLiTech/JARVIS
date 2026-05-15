@@ -47,7 +47,7 @@ JARVIS/
 │   ├── jarvis.py                  ← orchestrateur Flask (4633 lignes · 75 routes · 31 modules Python extraits)
 │   ├── blueprints/
 │   │   └── soc.py                 ← Blueprint SOC (1689 lignes) · SSH 4 hôtes
-│   ├── jarvis_mcp_server.py       ← MCP bridge Claude Code ↔ JARVIS (10 outils)
+│   ├── jarvis_mcp_server.py       ← MCP bridge Claude Code ↔ JARVIS (11 outils)
 │   ├── templates/
 │   │   ├── jarvis.html            ← shell Jinja2 (204 lignes · 0 handler inline)
 │   │   ├── tabs/                  ← 8 onglets modulaires
@@ -404,7 +404,7 @@ v4.0  (long)    — Service Windows NSSM, Docker Compose, HTTPS mkcert, SSH writ
 | `scripts/jarvis.py` | **4633** | ✅ 75 routes · NDT 100/100 · routing **4 branches** SOC/GÉNÉRAL/CODE/CR · réduit via 31 modules extraits |
 | **31 modules Python extraits** | **~3540** | ✅ Phase 3 (30 modules) + `audio_dsp.py` 508L (chantier 2026-05-14) — voir [`ROUTING-JARVIS.md`](ROUTING-JARVIS.md) |
 | `scripts/blueprints/soc.py` | 1689 | ✅ rsyslog v1.6.1 · SSH 4 hôtes · `_ssh_base()` générique · fix race condition `_soc_actions_save` |
-| `scripts/jarvis_mcp_server.py` | ~430 | ✅ **10 outils MCP** · JARVIS_HEADER · `jarvis_soc_ask` historique IP 30j · streamable-HTTP port 5010 |
+| `scripts/jarvis_mcp_server.py` | ~440 | ✅ **11 outils MCP** (+`jarvis_defense_24h` 2026-05-16) · JARVIS_HEADER · `jarvis_soc_ask` historique IP 30j · streamable-HTTP port 5010 |
 | `scripts/templates/jarvis.html` | ~215 | ✅ 0 handler inline · charge 8 `<link>` CSS + 15 `<script>` JS (jarvis_main + 14 modules) |
 | `scripts/static/jarvis_main.js` | **4013** | 🟡 refactor JS 2026-05-14 soir : 7828→4013 (−49%) · 11 modules extraits · reste à finir |
 | `scripts/static/jarvis_mixing.js` | 1375 | ✅ DSP mixer stéréo |

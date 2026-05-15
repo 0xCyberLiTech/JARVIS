@@ -432,7 +432,7 @@ LCM(10,15,30,60) = 60s → alignement théorique — négligeable LAN
 │  • Problème que JARVIS a explicitement escaladé                         │
 └──────────────────────────────┬──────────────────────────────────────────┘
                                │  MCP stdio (.mcp.json)
-                               │  10 outils : jarvis_chat · jarvis_soc_status
+                               │  11 outils : jarvis_chat · jarvis_soc_status
                                │              jarvis_stats · jarvis_soc_ask
                                │              jarvis_infra_status · jarvis_proxmox_vms
                                │              jarvis_read_file · jarvis_model_switch
