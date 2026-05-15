@@ -2,7 +2,7 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js', 'scripts/static/js/audio_mire.js', 'scripts/static/js/eq_music.js', 'scripts/static/js/audio_viz.js', 'scripts/static/js/gpu_monitor.js', 'scripts/static/js/settings_llm.js', 'scripts/static/js/dsp_audio.js', 'scripts/static/js/audio_rack.js', 'scripts/static/js/chat_ui.js', 'scripts/static/js/chat_core.js', 'scripts/static/js/boot_init.js'],
+    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js', 'scripts/static/js/audio_mire.js', 'scripts/static/js/eq_music.js', 'scripts/static/js/audio_viz.js', 'scripts/static/js/gpu_monitor.js', 'scripts/static/js/settings_llm.js', 'scripts/static/js/dsp_audio.js', 'scripts/static/js/audio_rack.js', 'scripts/static/js/soc_tab.js', 'scripts/static/js/chat_ui.js', 'scripts/static/js/chat_core.js', 'scripts/static/js/boot_init.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -221,6 +221,10 @@ export default [
         // Symboles cross-file jarvis_main.js ↔ js/audio_rack.js
         // (AI AUDIO RACK + helpers EQ extraits — chantier dette 2026-05-15)
         _rackSyncFromDsp: 'writable',
+        // Symboles cross-file jarvis_main.js ↔ js/soc_tab.js
+        // (SOC TAB + SOC GRAPHIQUES extraits — chantier dette 2026-05-15)
+        _BTN_COOLDOWN_MS: 'readonly',
+        _socAutoRefresh: 'writable',
         // Symboles cross-file jarvis_main.js ↔ js/gpu_monitor.js
         // (GPU MONITOR extrait — anneaux CPU/RAM/GPU/VRAM — chantier dette 2026-05-15)
         _POLL_STATS_MS: 'readonly',
