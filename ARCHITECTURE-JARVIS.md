@@ -1,5 +1,5 @@
 # JARVIS — Architecture & Zones fonctionnelles
-<!-- v2.5 — 2026-05-15 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · NDT 100/100 (script auto) · score honnête global ~91/100 RECALIBRÉ post-audit pytest --cov (départ réel 62, +29 chantier dette) · refactor JS jarvis_main.js 7828→148L (−98,1%) 21 modules · 682 tests pytest sur 32/34 modules avec coverage 39% lignes (proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26%) · fix perf IPv6 -97% latence interne · hook pre-push pytest · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git local + pre-commit hooks bloquants + ruff.toml -->
+<!-- v2.6 — 2026-05-15 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · NDT 100/100 (script auto) · score honnête global ~92/100 RECALIBRÉ post-audit pytest --cov (départ réel 62, +30 chantier dette) · refactor JS jarvis_main.js 7828→148L (−98,1%) 21 modules · 705 tests pytest sur 33/34 modules avec coverage 39% lignes (proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26%) · fix perf IPv6 -97% latence interne · circuit breaker Ollama (3 états + indicateur HUD) · hook pre-push pytest · 32 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git local + pre-commit hooks bloquants + ruff.toml -->
 
 ---
 
@@ -362,7 +362,7 @@ terminal_code, voice_lab, stt, tasks_tab, welcome, eq_parametric, eq_music,
 audio_mire, audio_viz, settings_llm, dsp_audio. L'ex-`jarvis.css` monolithique
 est éclaté en **8 fichiers** `static/css/`. Dépôt **git local** (aucun remote)
 + **pre-commit hooks bloquants** (ruff + eslint) + `ruff.toml`.
-Refactor JS **terminé** 2026-05-14/15 : `jarvis_main.js` 7828→148 L (−98,1% cumul), 15 modules extraits dans `static/js/` (18 modules total). **682 tests pytest** sur 32/34 modules Python (94%) avec coverage **39% lignes** (audit pytest --cov rigoureux : proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26%). Fix perf IPv6 (`OLLAMA_URL` + `JARVIS_BASE` → `127.0.0.1` explicite) : −97% latence sur clients internes (MCP, soc.py auto-engine). Hook pre-push pytest installé. Score honnête global ~91/100 (recalibré post-audit honnête).
+Refactor JS **terminé** 2026-05-14/15 : `jarvis_main.js` 7828→148 L (−98,1% cumul), 15 modules extraits dans `static/js/` (18 modules total). **705 tests pytest** sur 33/34 modules Python (97%) avec coverage **39% lignes** (audit pytest --cov rigoureux : proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26%). Fix perf IPv6 (`OLLAMA_URL` + `JARVIS_BASE` → `127.0.0.1` explicite) : −97% latence sur clients internes (MCP, soc.py auto-engine). **Circuit breaker Ollama** (`scripts/ollama_circuit.py` · 3 états + backoff exponentiel + indicateur HUD `● OLLAMA`). Hook pre-push pytest installé. Score honnête global ~92/100 (recalibré post-audit honnête).
 
 ## Modules centralisés — synthèse
 

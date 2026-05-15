@@ -15,7 +15,7 @@
 
 ---
 
-## Chantier dette technique — 2026-05-14/15 — score 62→91/100 honnête (+29)
+## Chantier dette technique — 2026-05-14/15 — score 62→92/100 honnête (+30)
 
 ⚠ **2e recalibration honnête (post-audit pytest --cov)** : les annonces récentes 92-94 étaient optimistes — basées sur "70% des modules testés" qui ≠ "70% lignes couvertes". L'audit pytest --cov rigoureux a révélé une coverage RÉELLE de 12% (les 11 modules non testés représentaient 66% du code total : jarvis.py 2891 stmts à 0%, blueprints/soc.py 963 stmts à 0%). Phase 4 a corrigé cela.
 
@@ -30,6 +30,7 @@ Le chantier a fait **62 → 91/100** (recalibré honnêtement) :
 - 88→88 : refactor JS FINAL #12-#13 — `jarvis_main.js` 1181→148 L (−98,1% cumul) · refactor officiellement terminé
 - 88→90 : **Phase 4 — coverage massivement augmentée** — hook pre-push pytest installé · 132 tests supplémentaires (38 soc.py + 28 jarvis.py + 27 proxmox_api + 39 voice_lab) · **coverage TOTAL 12% → 35% (+23 pts)** · 568 tests pytest au total · 27/34 modules touchés (79%)
 - 90→91 : **Phase 4 extension viser 95** — 114 tests supplémentaires sur 5 modules I/O (22 ssh_terminal + 18 rag_live + 22 stt + 34 bypass_backup + 18 deepfilter) · **coverage TOTAL 35% → 39% (+4 pts)** · ssh_terminal 100%, stt 98%, rag_live 92%, bypass_backup 96%, deepfilter 84% · 682 tests pytest au total · **32/34 modules touchés (94%)**
+- 91→92 : **Circuit breaker Ollama** (commit `8ebbbad` + UI fix `227405b` + nomenclature `6514570`) — module `ollama_circuit.py` (110 L · state machine 3 états CLOSED/OPEN/HALF_OPEN · backoff exponentiel ×2 plafonné à 5 min · thread-safe · singleton) + 23 tests (705 tests total) + wrapping chat principal `jarvis.py:1786` (refus immédiat si Ollama down 3 erreurs consécutives) + endpoint `/api/ollama-status` enrichi + indicateur HUD visuel (`●` + label "OLLAMA" vert/orange/rouge selon état) · UX : quand Ollama tombe, JARVIS reste réactif (refus 1ms vs timeout 30s) + diagnostic instantané pour user (rouge clignotant)
 
 **Refactor JS — reprise 2026-05-14 (soir) + continuation 2026-05-15** : `jarvis_main.js` **7828 → 1181 L (−6647, −85%)** · **13 modules extraits** dans `static/js/`. Méthode : cartographie des appels top-level → extraction de sections sans dépendance d'ordre · bodies **byte-identiques** vérifiés · `node --check` + eslint 0 erreur à chaque étape · `eslint.config.js` globals cross-file déclarés. ⚠ **Procédure renforcée après régression #4 ET #9** : vérifier aussi les `const/let/var` partagés utilisés au top-level par les scripts chargés AVANT le module (NE PAS exclure const/let/var du grep load-order — leçon des fix `_LS_PROMPT_PROFILE` et `_origAddMessage`).
 - **#1** `a118772` — `tasks_tab.js` (129 L) + `welcome.js` (244 L) — **validé prod**.

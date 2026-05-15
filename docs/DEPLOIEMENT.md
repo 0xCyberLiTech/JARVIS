@@ -387,7 +387,7 @@ v3.3  (en cours)
   ✅ Terminal CODE xterm.js + WebSocket PTY SSH srv-dev-1
   ✅ Phase 3 split monolithe Python — 30 modules · session 33b (2026-05-13)
   ✅ Session 33c split JS partiel — recorder.js + voice_print.js extraits · jarvis_main.js -14.4%
-  ✅ Chantier dette technique 2026-05-14/15 — Ruff 98→0 + git local + pre-commit hooks + hook pre-push pytest + ruff.toml + CSS 8 fichiers + audio_dsp.py + 682 tests pytest sur 32/34 modules (coverage 39% lignes) + refactor JS jarvis_main.js 7828→148 L (−98,1%) + 21 modules JS + fix perf IPv6 (-97% latence interne) · **score honnête global 91/100** (recalibré depuis 62 réel · +29)
+  ✅ Chantier dette technique 2026-05-14/15 — Ruff 98→0 + git local + pre-commit hooks + hook pre-push pytest + ruff.toml + CSS 8 fichiers + audio_dsp.py + 705 tests pytest sur 33/34 modules (coverage 39% lignes) + refactor JS jarvis_main.js 7828→148 L (−98,1%) + 21 modules JS + fix perf IPv6 (-97% latence interne) · **score honnête global 92/100** (recalibré depuis 62 réel · +29)
   ⬜ SSH write ops partielles — apt upgrade · restart service
   ✅ Refactor JS terminé (jarvis_main.js 7828→148 L · −98,1% cumul · 21 modules)
   ⬜ Tests unitaires Python · profiling performance

@@ -154,7 +154,7 @@ Validation automatisée (`tests/e2e/`) :
 
 Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits → `jarvis.py` 6592 → **4633 lignes**.
 
-⚠ **Note honnête** : score dette technique global = **~91/100** (pas 100). Recalibré le 2026-05-15 post-audit pytest --cov. Chantier 2026-05-14/15 cumul **62→91** : Ruff 98→0 + git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + `audio_dsp.py` + **refactor JS terminé** (`jarvis_main.js` 7828→**148 L** −98,1%, 21 modules JS) + **682 tests pytest** sur 32/34 modules avec **coverage 39% lignes** + fix perf IPv6 (-97% latence interne). Reste pour 95+ : tester tts_engines (199 stmts) + jarvis_mcp_server (211 stmts), profiling TTS détaillé, circuit breaker Ollama.
+⚠ **Note honnête** : score dette technique global = **~92/100** (pas 100). Recalibré le 2026-05-15 post-audit pytest --cov. Chantier 2026-05-14/15 cumul **62→91** : Ruff 98→0 + git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + `audio_dsp.py` + **refactor JS terminé** (`jarvis_main.js` 7828→**148 L** −98,1%, 21 modules JS) + **705 tests pytest** sur 33/34 modules avec **coverage 39% lignes** + fix perf IPv6 (-97% latence interne). Reste pour 95+ : tester tts_engines (199 stmts) + jarvis_mcp_server (211 stmts), profiling TTS détaillé, circuit breaker Ollama.
 
 ### Audio/Voice (5)
 | Module | Lignes | Rôle |
@@ -208,4 +208,4 @@ Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits →
 **Session 2026-05-14 (soir)** : injection SOC 100 % serveur (suppression incrustation client-side `_monCtxStr`/`_buildChatPayload` → fin des hallucinations) · `force_soc` threadé en DI · règle crawlers légitimes + reco de ban proportionnée au signal · garde-fou srv-ngix injoignable
 **Refactor JS 2026-05-14/15 (TERMINÉ)** : `jarvis_main.js` **7828→148 L (−98,1% cumul)** · **21 modules JS** (15 dans `static/js/` + 6 historiques). Méthode byte-identique vérifiée (bodies identiques · `node --check` · eslint 0 · validation E2E prod à chaque étape). ⚠ `audio_viz.js` chargé juste après `jarvis_main.js` (définit `_SAMPLE_RATE`, requis au top-level par `recorder.js`). ⚠ `chat_ui.js` AVANT `chat_core.js` (chat_core utilise `addMessage`/`history`/`_esc`). ⚠ `soc_tab.js` AVANT `chat_core.js` (chat_core utilise `_buildChatPayload`).
 
-**Score dette technique HONNÊTE ~91/100** (recalibré post-audit pytest --cov · 682 tests pytest sur 32/34 modules avec coverage 39% lignes · refactor JS terminé · fix perf IPv6 · hook pre-push pytest)
+**Score dette technique HONNÊTE ~92/100** (recalibré post-audit pytest --cov · 705 tests pytest sur 33/34 modules avec coverage 39% lignes · refactor JS terminé · fix perf IPv6 · hook pre-push pytest)
