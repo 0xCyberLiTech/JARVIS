@@ -67,10 +67,10 @@ def clean_for_tts(text: str) -> str:
     text = re.sub(r'^\s*\d+\.\s+', '', text, flags=re.MULTILINE)
     # Puces "- " "* " "+ " en début de ligne
     text = re.sub(r'^\s*[-*+]\s+', '', text, flags=re.MULTILINE)
+    # Images ![alt](url) → supprime (DOIT venir avant les liens, sinon le ! reste en garbage)
+    text = re.sub(r'!\[[^\]]*\]\([^\)]+\)', '', text)
     # Liens [texte](url) → texte
     text = re.sub(r'\[([^\]]+)\]\([^\)]+\)', r'\1', text)
-    # Images ![alt](url) → supprime
-    text = re.sub(r'!\[[^\]]*\]\([^\)]+\)', '', text)
     # Tableaux markdown : lignes | col | col | → retire les pipes
     text = re.sub(r'\|', ' ', text)
     # Lignes de séparateur --- === *** ___
