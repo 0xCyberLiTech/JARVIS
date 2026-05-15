@@ -154,7 +154,7 @@ Validation automatisée (`tests/e2e/`) :
 
 Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits → `jarvis.py` 6592 → **4633 lignes**.
 
-⚠ **Note honnête** : score dette technique global = **~82/100** (pas 100). Recalibré le 2026-05-14 (le 91/100 affiché en session 33c était optimiste, départ réel 62). Chantier dette 2026-05-14 +16 (→78) : Ruff 98→0 + git + hooks + ruff.toml + CSS 8 fichiers + `audio_dsp.py` + 2 smoke tests LLM + refactor JS partiel. Refactor JS du soir +4 (→~82) : `jarvis_main.js` **7828→4013 L** (−49%), **11 modules** extraits dans `static/js/`. Reste : finir le refactor JS (~4013 L), tests unitaires Python, profiling perf.
+⚠ **Note honnête** : score dette technique global = **~90/100** (pas 100). Recalibré le 2026-05-15 post-audit pytest --cov. Chantier 2026-05-14/15 cumul **62→90** : Ruff 98→0 + git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + `audio_dsp.py` + **refactor JS terminé** (`jarvis_main.js` 7828→**148 L** −98,1%, 21 modules JS) + **568 tests pytest** sur 27/34 modules avec **coverage 35% lignes** + fix perf IPv6 (-97% latence interne). Reste pour 95+ : tester tts_engines/bypass_backup/deepfilter, profiling TTS détaillé, circuit breaker Ollama.
 
 ### Audio/Voice (5)
 | Module | Lignes | Rôle |
@@ -206,6 +206,6 @@ Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits →
 **Session 33c — Split JS partiel** : `recorder.js` 660L + `voice_print.js` 852L extraits en IIFE
 **Chantier dette 2026-05-14** : Ruff 98→0 + `ruff.toml` · git initialisé (100% local, aucun remote) · pre-commit hooks bloquants · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · refactor JS partiel (3 modules : terminal_code/voice_lab/stt)
 **Session 2026-05-14 (soir)** : injection SOC 100 % serveur (suppression incrustation client-side `_monCtxStr`/`_buildChatPayload` → fin des hallucinations) · `force_soc` threadé en DI · règle crawlers légitimes + reco de ban proportionnée au signal · garde-fou srv-ngix injoignable
-**Refactor JS 2026-05-14 (soir)** : `jarvis_main.js` **7828→4013 L (−49%)** · **11 modules** extraits dans `static/js/` : terminal_code·voice_lab·stt + tasks_tab·welcome·eq_parametric·eq_music·audio_mire·audio_viz·settings_llm·dsp_audio. Méthode vérifiée (bodies byte-identiques · `node --check` · eslint 0 · validation E2E prod). ⚠ `audio_viz.js` chargé juste après `jarvis_main.js` (définit `_SAMPLE_RATE`, requis au top-level par `recorder.js`).
+**Refactor JS 2026-05-14/15 (TERMINÉ)** : `jarvis_main.js` **7828→148 L (−98,1% cumul)** · **21 modules JS** (15 dans `static/js/` + 6 historiques). Méthode byte-identique vérifiée (bodies identiques · `node --check` · eslint 0 · validation E2E prod à chaque étape). ⚠ `audio_viz.js` chargé juste après `jarvis_main.js` (définit `_SAMPLE_RATE`, requis au top-level par `recorder.js`). ⚠ `chat_ui.js` AVANT `chat_core.js` (chat_core utilise `addMessage`/`history`/`_esc`). ⚠ `soc_tab.js` AVANT `chat_core.js` (chat_core utilise `_buildChatPayload`).
 
-**Score dette technique HONNÊTE ~82/100** (recalibré depuis 62 réel · Python serveur excellent · refactor JS bien avancé mais pas fini · pas de CI cloud · pas de tests unitaires Python)
+**Score dette technique HONNÊTE ~90/100** (recalibré post-audit pytest --cov · 568 tests pytest sur 27/34 modules avec coverage 35% lignes · refactor JS terminé · fix perf IPv6 · hook pre-push pytest)

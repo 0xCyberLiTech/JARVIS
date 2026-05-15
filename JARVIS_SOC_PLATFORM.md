@@ -1,6 +1,6 @@
 # JARVIS SOC PLATFORM — Architecture IA & Cybersécurité Homelab
 ### Agent autonome local · Surveillance proactive · Contrôle d'infrastructure · LLM on-premise
-<!-- 0xCyberLiTech · v2.8 · 2026-05-14 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 25 tests E2E Playwright · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · refactor JS soir : jarvis_main.js 7828→4013L (−49%), 11 modules static/js/ · git local + pre-commit hooks bloquants + ruff.toml · score dette HONNÊTE ~82/100 (recalibré depuis 62 réel · +16 chantier dette + 4 refactor JS soir · reste : finir JS, tests unitaires Python, CI cloud) -->
+<!-- 0xCyberLiTech · v2.9 · 2026-05-15 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed · 25 tests E2E Playwright + 568 tests pytest sur 27/34 modules avec coverage 35% lignes · ESLint 0 errors · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · refactor JS terminé : jarvis_main.js 7828→148L (−98,1%), 21 modules · git local + pre-commit hooks bloquants + hook pre-push pytest + ruff.toml · fix perf IPv6 (-97% latence interne) · score dette HONNÊTE ~90/100 (recalibré post-audit pytest --cov · +28 chantier dette 2026-05-14/15) -->
 
 ---
 
@@ -66,7 +66,7 @@ Le système repose sur deux niveaux d'intelligence complémentaires :
 
 | Projet | Hébergement | État |
 |--------|-------------|------|
-| JARVIS | localhost:5000 | ✅ Production · v3.3 · score dette honnête ~89/100 (recalibré post-audit pytest --cov : refactor JS −98,1% + 502 tests pytest sur 25/34 modules avec coverage 32% lignes + fix perf IPv6 + hook pre-push) |
+| JARVIS | localhost:5000 | ✅ Production · v3.3 · score dette honnête ~90/100 (recalibré post-audit pytest --cov : refactor JS −98,1% + 568 tests pytest sur 27/34 modules avec coverage 35% lignes + fix perf IPv6 + hook pre-push) |
 | SOC Dashboard | 192.168.1.50:8080 | ✅ v3.97.157 · 35 tuiles · LAN uniquement |
 | srv-ngix | 192.168.1.50 | ✅ nginx · CrowdSec · WAF · audit 10/10 |
 | CLT | 192.168.1.12 | ✅ Apache · SEO validé GSC |
@@ -414,7 +414,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | Imports inutilisés | 0 |
 | Regex inconsistantes | 3 corrigées |
 | Code mort introduit cette session | 0 |
-| **jarvis.py final** | **4633 L · 31 modules extraits · score dette HONNÊTE 78/100** (recalibré depuis 62 réel · +16 via chantier dette 2026-05-14 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py) |
+| **jarvis.py final** | **4633 L · 31 modules extraits · jarvis_main.js 148 L (−98,1%) · score dette HONNÊTE 90/100** (recalibré post-audit pytest --cov · +28 via chantier 2026-05-14/15 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py + refactor JS terminé + 568 tests pytest avec coverage 35% lignes + fix perf IPv6 + hook pre-push) |
 
 ### 5.7 Validé en prod
 
@@ -465,9 +465,10 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | ✅ | Audit dette technique honnête — score 73 → 84/100 (+11 sur 2026-05-13) | session 33 |
 | ✅ | **Phase 3 split monolithe Python complète** — **30 modules extraits** (Audio/Voice 5 + Bypass 8 + Infra/RAG 2 + Chat/LLM core 15) — `jarvis.py` 6592 → ~4520 (**-2072 lignes · -31%**) — score honnête 84 → **89/100** (+5 · pas 100 car JS toujours monolithique) | session 33b |
 | ✅ | **Split JS partiel** — extraction `recorder.js` (660L) + `voice_print.js` (852L) en IIFE depuis `jarvis_main.js` 10507→8994L (**-14.4%**) — score honnête 89 → 91 (valeur d'époque) | session 33c |
-| ✅ | **Chantier dette technique 2026-05-14** — recalibration honnête (le 91 était optimiste, départ réel **62**) → **78/100** (+16). Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (16 commits, 100% local) · **pre-commit hooks bloquants** · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** : 3 modules extraits de jarvis_main.js (8994→7893L) | 2026-05-14 |
+| ✅ | **Chantier dette technique 2026-05-14** — recalibration honnête (le 91 était optimiste, départ réel **62**) → **78/100** (+16). Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (100% local) · **pre-commit hooks bloquants** · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** : 3 modules extraits de jarvis_main.js (8994→7893L) | 2026-05-14 |
+| ✅ | **Chantier dette technique 2026-05-15 (extension massive)** — score 78 → **90/100** (+12). **Refactor JS terminé** (`jarvis_main.js` 7828→**148 L** −98,1% cumul, 21 modules) · **568 tests pytest** sur 27/34 modules avec **coverage 35% lignes** (proxmox_api 93%, voice_lab 71%, soc.py 33%, jarvis.py 26% via Flask test_client) · **Phase 3 fix perf IPv6** (-97% latence interne via `OLLAMA_URL`/`JARVIS_BASE` → 127.0.0.1) · **hook pre-push pytest** · 3 bugs prod détectés+fixés (load-order, tts_cleaner, IPv6) · outil `tools/profile_perf.py` | 2026-05-15 |
 | 🟡 | SSH write ops partielles — apt upgrade · restart service (validation) | ouvert |
-| 🔵 | Refactor JS — suite incrémentale (méthode validée : fichiers .js scope global) | future session |
+| 🔵 | Pour 95+ : tests modules I/O restants (tts_engines, bypass_backup, deepfilter, stt) · profiling TTS détaillé · circuit breaker Ollama formel | future session |
 | 🔵 | Tests unitaires Python · profiling performance | future session |
 
 **Reste reporté :** refactor JS (suite incrémentale) · tests unitaires Python · profiling perf · CI cloud (incompatible « rien sur le web »).
