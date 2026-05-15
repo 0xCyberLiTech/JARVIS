@@ -92,6 +92,11 @@
   .status-live { display:flex; align-items:center; gap:8px; color:#00ff88; font-size:.68rem; letter-spacing:3px; }
   .dot { width:8px; height:8px; border-radius:50%; background:#00ff88; box-shadow:0 0 10px #00ff88; animation:blink 1.4s infinite; }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.15} }
+  /* Indicateur circuit breaker Ollama (3 états) */
+  .ollama-circuit { display:inline-block; margin-left:10px; font-size:.9rem; transition:color .3s; cursor:help; }
+  .ollama-circuit.cb-closed    { color:#00ff88; text-shadow:0 0 6px rgba(0,255,136,.6); }
+  .ollama-circuit.cb-half_open { color:#ffaa00; text-shadow:0 0 6px rgba(255,170,0,.6); animation:blink 1.0s infinite; }
+  .ollama-circuit.cb-open      { color:#ff3030; text-shadow:0 0 8px rgba(255,48,48,.8); animation:blink 0.6s infinite; }
   @keyframes dsp-cuda-pulse { 0%,100%{box-shadow:0 0 6px rgba(0,255,136,.5);} 50%{box-shadow:0 0 18px rgba(0,255,136,.9), 0 0 32px rgba(0,255,136,.3);} }
   .dsp-cuda-on #dsp-cuda-dot { background:#00ff88; animation:dsp-cuda-pulse 1.8s ease-in-out infinite; }
   .dsp-cuda-on { border-color:rgba(0,255,136,.4) !important; background:rgba(0,255,136,.04) !important; }

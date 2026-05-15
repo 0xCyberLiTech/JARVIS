@@ -1783,7 +1783,15 @@ def stream_llm(messages, model_override=None, options_override=None):
     }
     _in_think = False
     _tbuf     = ""
-    with req.post(f"{OLLAMA_URL}/api/chat", json=payload, stream=True, timeout=_OLLAMA_STREAM_TIMEOUT_S) as resp:
+    # Circuit breaker : si Ollama est down (3 erreurs récentes), refus immédiat (1ms au lieu de 30s timeout)
+    from ollama_circuit import OllamaUnavailable
+    from ollama_circuit import circuit as _ollama_circuit
+    try:
+        resp = _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/chat", json=payload, stream=True, timeout=_OLLAMA_STREAM_TIMEOUT_S)
+    except OllamaUnavailable as e:
+        yield f"[JARVIS] {e}", True
+        return
+    with resp:
         for line in resp.iter_lines():
             if not line:
                 continue
@@ -2355,12 +2363,16 @@ def api_save_code():
 @app.route("/api/ollama-status", methods=["GET"])
 def api_ollama_status():
     import urllib.request as _ur
+
+    from ollama_circuit import circuit as _ollama_circuit
     try:
         with _ur.urlopen("http://127.0.0.1:11434/api/tags", timeout=_OLLAMA_STATUS_TIMEOUT_S) as r:
             running = r.status == 200
     except Exception:
         running = False
-    return Response(json.dumps({"running": running}), mimetype="application/json")
+    # Enrichi avec l'état du circuit breaker (closed/open/half_open + retry_in_s)
+    circuit_status = _ollama_circuit.get_status()
+    return Response(json.dumps({"running": running, **circuit_status}), mimetype="application/json")
 
 @limiter.limit("30 per minute")
 @app.route("/api/vram", methods=["GET"])
