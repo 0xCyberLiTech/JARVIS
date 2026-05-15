@@ -539,6 +539,7 @@ import tts_dedup as _tts_dedup
 import tts_engines as _tts_eng
 import vision as _vision
 import voice_lab as _voice_lab
+from ollama_circuit import circuit as _ollama_circuit, OllamaUnavailable
 
 # ── Config ──────────────────────────────────────────────────
 OLLAMA_URL   = "http://127.0.0.1:11434"  # IPv4 explicite — `localhost` résout `::1` en premier sur Windows et fallback timeout ~2s avant IPv4
@@ -771,7 +772,7 @@ def _summarize_messages(messages: list) -> str:
     )
     try:
         _mode_model = {"soc": MODEL, "general": _GENERAL_MODEL, "code": _CODE_MODEL}.get(_jarvis_mode, MODEL)
-        r = req.post(f"{OLLAMA_URL}/api/generate", json={
+        r = _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/generate", json={
             "model": _mode_model,
             "prompt": prompt,
             "keep_alive": 0,
@@ -818,7 +819,7 @@ def _background_summarize(messages: list):
 def _rag_embed(text: str) -> list | None:
     """Embedding via Ollama (mxbai-embed-large). Retourne None si indisponible."""
     try:
-        r = req.post(f"{OLLAMA_URL}/api/embeddings",
+        r = _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/embeddings",
                      json={"model": RAG_EMBED_MODEL, "prompt": text[:2000], "keep_alive": -1},
                      timeout=_RAG_EMBED_TIMEOUT_S)
         if r.ok:
@@ -1730,7 +1731,7 @@ def call_llm_with_tools(messages, model_override=None):
             "num_ctx": max(LLM_PARAMS.get("num_ctx", _LLM_DEFAULTS["num_ctx"]), 8192),
         }
     }
-    resp = req.post(f"{OLLAMA_URL}/api/chat", json=payload, timeout=_OLLAMA_TOOL_DETECT_TIMEOUT_S)
+    resp = _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/chat", json=payload, timeout=_OLLAMA_TOOL_DETECT_TIMEOUT_S)
     return resp.json()
 
 def _think_filter_step(tbuf: str, in_think: bool):
@@ -1784,8 +1785,6 @@ def stream_llm(messages, model_override=None, options_override=None):
     _in_think = False
     _tbuf     = ""
     # Circuit breaker : si Ollama est down (3 erreurs récentes), refus immédiat (1ms au lieu de 30s timeout)
-    from ollama_circuit import OllamaUnavailable
-    from ollama_circuit import circuit as _ollama_circuit
     try:
         resp = _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/chat", json=payload, stream=True, timeout=_OLLAMA_STREAM_TIMEOUT_S)
     except OllamaUnavailable as e:
@@ -2363,8 +2362,6 @@ def api_save_code():
 @app.route("/api/ollama-status", methods=["GET"])
 def api_ollama_status():
     import urllib.request as _ur
-
-    from ollama_circuit import circuit as _ollama_circuit
     try:
         with _ur.urlopen("http://127.0.0.1:11434/api/tags", timeout=_OLLAMA_STATUS_TIMEOUT_S) as r:
             running = r.status == 200
@@ -2516,7 +2513,7 @@ def api_welcome_evolve():
         f"Max 15 lignes. Réponds UNIQUEMENT avec le JSON."
     )
     try:
-        resp = req.post(f"{OLLAMA_URL}/api/generate",
+        resp = _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/generate",
                         json={"model": MODEL, "prompt": prompt, "stream": False, "keep_alive": 0},
                         timeout=60)
         text = resp.json().get("response", "")
@@ -4295,7 +4292,7 @@ def api_model_test():
         return Response(json.dumps({"ok": False, "error": "Modèle inconnu"}), status=400, mimetype="application/json")
     try:
         t0 = time.time()
-        r = req.post(
+        r = _ollama_circuit.call(req.post,
             f"{OLLAMA_URL}/api/chat",
             json={"model": model, "messages": [{"role": "user", "content": "Réponds uniquement: OK"}],
                   "stream": False, "options": {"num_predict": 5, "temperature": 0}},
@@ -4562,7 +4559,7 @@ threading.Thread(target=_rag_live_prewarm, daemon=True, name="rag-live-prewarm")
 def _rag_embed_prewarm():
     time.sleep(20)  # laisser Ollama démarrer
     try:
-        req.post(f"{OLLAMA_URL}/api/embeddings",
+        _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/embeddings",
                  json={"model": RAG_EMBED_MODEL, "prompt": "warm", "keep_alive": -1},
                  timeout=30)
         _log.info(f"[RAG] {RAG_EMBED_MODEL} préchargé en VRAM (keep_alive=-1)")
@@ -4598,7 +4595,7 @@ def _soc_model_prewarm():
     """Précharge le modèle SOC (phi4:14b) en VRAM 30s après le boot, une fois le cleanup terminé."""
     time.sleep(30)
     try:
-        req.post(f"{OLLAMA_URL}/api/generate",
+        _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/generate",
                  json={"model": MODEL, "prompt": "", "stream": False, "keep_alive": "30m"},
                  timeout=180)
         _log.info(f"[BOOT-VRAM] {MODEL} préchargé (SOC default)")
