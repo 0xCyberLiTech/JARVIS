@@ -1,11 +1,16 @@
 # .pre-commit-config.yaml — JARVIS · 0xCyberLiTech
 # Créé 2026-05-14 (chantier dette technique · Action #2)
+# Étendu 2026-05-15 (hook pre-push pytest · chantier dette).
 #
-# Hooks 100% LOCAUX : utilisent ruff + eslint déjà installés sur la machine.
+# Hooks 100% LOCAUX : utilisent ruff + eslint + pytest déjà installés sur la machine.
 # Aucun téléchargement réseau (pas de repo distant pre-commit).
-# Comportement BLOQUANT : un commit est refusé si ruff ou eslint trouve une erreur.
+# Comportement BLOQUANT : un commit/push est refusé si une vérif échoue.
 #
-# Bypass exceptionnel (commit urgent) : git commit --no-verify
+# Installation des hooks (à faire 1 fois après clone) :
+#   pre-commit install                   # → installe le hook pre-commit
+#   pre-commit install --hook-type pre-push   # → installe le hook pre-push
+#
+# Bypass exceptionnel : git commit --no-verify · git push --no-verify
 
 repos:
   - repo: local
@@ -17,6 +22,7 @@ repos:
         language: system
         types: [python]
         require_serial: true
+        stages: [pre-commit]
 
       # ── ESLint — lint JS (utilise eslint.config.js du repo) ─────
       # Limité aux fichiers applicatifs déclarés dans eslint.config.js
@@ -26,3 +32,15 @@ repos:
         language: system
         files: ^scripts/static/(jarvis_main|jarvis_mixing|recorder|voice_print)\.js$
         require_serial: true
+        stages: [pre-commit]
+
+      # ── Pytest — suite tests Python (stage pre-push uniquement) ─
+      # Lance les 436+ tests unitaires avant chaque push.
+      # Bloque si tests rouges. Pas en pre-commit (trop lent à chaque commit).
+      - id: pytest
+        name: pytest (suite tests Python)
+        entry: python -m pytest -q --tb=short
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
