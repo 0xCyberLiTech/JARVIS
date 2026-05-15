@@ -38,7 +38,7 @@ Le serveur MCP (Model Context Protocol) expose JARVIS comme un set d'**outils** 
 | **HTTP framework** | Starlette + uvicorn |
 | **Mode** | StreamableHTTPSessionManager · stateless |
 | **Endpoints HTTP** | `/health`, `/sse`, `/mcp` (GET/POST/DELETE) |
-| **JARVIS_BASE** | `http://localhost:5000` (hardcodé · loopback only) |
+| **JARVIS_BASE** | `http://127.0.0.1:5000` (IPv4 explicite · loopback only — évite timeout IPv6 ~2s sur Windows) |
 | **Timeouts** | 120s pour `/api/chat` (LLM lourd) · 10s pour status/stats/health |
 
 ---

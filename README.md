@@ -75,7 +75,7 @@ JARVIS/
 │   ├── DEPLOIEMENT.md                 ← exploitation, API, dépannage
 │   ├── REINSTALLATION.md              ← réinstallation Windows complète
 │   ├── AUDIT_JARVIS.md                ← audit sécurité (10/10)
-│   └── REFERENCE-TECHNIQUE.md         ← référence complète (NDT 100/100 script auto · score honnête global 78/100)
+│   └── REFERENCE-TECHNIQUE.md         ← référence complète (NDT 100/100 script auto · score honnête global ~93/100)
 ├── README.md
 └── MEMORY.md
 ```
@@ -172,13 +172,13 @@ python jarvis.py
 | [`docs/MCP-SERVER.md`](docs/MCP-SERVER.md) | **MCP server** : pont Claude ↔ JARVIS · 10 outils détaillés · config Claude Desktop · watchdog |
 | [`docs/AUDIO-DSP.md`](docs/AUDIO-DSP.md) | **Audio DSP** : Web Audio graph (EQ+Comp+Limiter+FX) · 4 engines TTS · STT large-v3-turbo · DeepFilterNet CUDA · Voice Lab |
 | [`docs/AUDIT_JARVIS.md`](docs/AUDIT_JARVIS.md) | Audit sécurité — 10/10 — v2.6 — 0 gap |
-| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence v1.5 — NDT 100/100 (script auto) · **score honnête global 78/100** (recalibré depuis 62 réel · +16 via chantier dette 2026-05-14 : git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py) |
+| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence v1.5 — NDT 100/100 (script auto) · **score honnête global ~93/100** (recalibré depuis 62 réel · +30 via chantier dette 2026-05-14/15 : git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS −85% + 436 tests pytest sur 70% modules + fix perf IPv6) |
 | [`docs/ROADMAP-V33.md`](docs/ROADMAP-V33.md) | Fonctionnalités v3.3 planifiées |
 | [`MEMORY.md`](MEMORY.md) | État projet, stack, historique corrections |
 
-## Qualité — chantier dette technique 2026-05-14
+## Qualité — chantier dette technique 2026-05-14/15
 
-Audit honnête et chantier de dette : **score recalibré 62 → 78/100** (l'ancien
+Audit honnête et chantier de dette : **score recalibré 62 → ~93/100** (l'ancien
 « 91/100 » / « 100/100 » étaient optimistes — le NDT script auto mesure le style,
 pas l'architecture/tests/CI). Travaux du chantier :
 - **Dépôt git LOCAL** initialisé (100% local, aucun remote — règle « rien sur le web ») · commits atomiques

@@ -15,15 +15,16 @@
 
 ---
 
-## Chantier dette technique — 2026-05-14/15 — score 62→92/100 (+30)
+## Chantier dette technique — 2026-05-14/15 — score 62→93/100 (+31)
 
-⚠ **Recalibration honnête** : le score 91/100 affiché le 2026-05-13 était **encore optimiste**. Audit strict (Ruff 98 erreurs réelles, 0 tests unitaires, 0 CI, 0 hooks, perf jamais profilée) → **point de départ réel 62/100**. Le chantier a fait **62 → 92/100** :
+⚠ **Recalibration honnête** : le score 91/100 affiché le 2026-05-13 était **encore optimiste**. Audit strict (Ruff 98 erreurs réelles, 0 tests unitaires, 0 CI, 0 hooks, perf jamais profilée) → **point de départ réel 62/100**. Le chantier a fait **62 → 93/100** :
 - 62→75 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py
 - 75→76 : 2 smoke tests LLM
 - 76→78 : refactor JS partiel (3 sous-systèmes extraits de jarvis_main.js)
 - 78→82 : refactor JS reprise du soir — `jarvis_main.js` 7828→3235 L (−59%), 9 modules
 - 82→85 : refactor JS continuation 2026-05-15 — `jarvis_main.js` 3235→1181 L (−85% cumul), 13 modules extraits de jarvis_main.js (16 modules dans static/js/ + 3 modules en static/)
 - 85→92 : **suite tests unitaires Python — 0→436 tests sur 23 modules / 33 = 70% couvert** (+1 vrai bug détecté+fixé en prod : ordre regex images/liens dans `tts_cleaner.py`)
+- 92→93 : **Phase 3 — fix perf systémique IPv6** (`OLLAMA_URL` + `JARVIS_BASE` → `127.0.0.1` explicite) · −97% latence sur tout endpoint mesuré · outil `tools/profile_perf.py` réutilisable · gain pour clients internes (MCP, soc.py auto-engine, chat→Ollama)
 
 **Refactor JS — reprise 2026-05-14 (soir) + continuation 2026-05-15** : `jarvis_main.js` **7828 → 1181 L (−6647, −85%)** · **13 modules extraits** dans `static/js/`. Méthode : cartographie des appels top-level → extraction de sections sans dépendance d'ordre · bodies **byte-identiques** vérifiés · `node --check` + eslint 0 erreur à chaque étape · `eslint.config.js` globals cross-file déclarés. ⚠ **Procédure renforcée après régression #4 ET #9** : vérifier aussi les `const/let/var` partagés utilisés au top-level par les scripts chargés AVANT le module (NE PAS exclure const/let/var du grep load-order — leçon des fix `_LS_PROMPT_PROFILE` et `_origAddMessage`).
 - **#1** `a118772` — `tasks_tab.js` (129 L) + `welcome.js` (244 L) — **validé prod**.
@@ -54,7 +55,14 @@
 
 **Modules Python restants non testés (10/33)** : wrappers I/O réseau lourds (`bypass_backup`, `proxmox_api`, `ssh_terminal`, `tts_engines`, `stt`, `deepfilter`, `rag_live`, `voice_lab`) ou intégrations Flask (`jarvis.py`, `jarvis_mcp_server.py`, `blueprints/soc.py`) — rendement décroissant pour tests unitaires (E2E Playwright déjà existants pour l'intégration).
 
-**Pour atteindre 95+** : profiling perf TTS/RAG/Ollama swap (+2 pts) · finir refactor JS sous 500 L (+1 pt) · CI cloud incompatible « rien sur le web » (alternative : hook `pre-push` local).
+**Phase 3 — Profiling perf 2026-05-15 (+1 pt : 92→93/100)** : `tools/profile_perf.py` (script standalone, 200 L, mesure TTS/RAG/Ollama swap/endpoints UI sans modifier prod). **Bug systémique identifié** : timeout résolution IPv6 `::1` sur Windows → tout client tapant `localhost` perdait ~2s par requête (Flask écoute sur 127.0.0.1 IPv4 only, le resolver Windows tente `::1` en premier, timeout, fallback IPv4). **Fix** (3 fichiers, single-source no-hardcode) :
+- `scripts/jarvis.py:544` — `OLLAMA_URL = http://127.0.0.1:11434`
+- `scripts/blueprints/soc.py` — `from jarvis import OLLAMA_URL` au lieu de hardcode
+- `scripts/jarvis_mcp_server.py:36` — `JARVIS_BASE = http://127.0.0.1:5000`
+
+**Résultats mesurés (clients utilisant 127.0.0.1)** : `/api/health` 2047→16ms (−99%) · `/api/sysdiag` 4604→557ms (−88%) · Ollama `/api/ps` 2078→<1ms (−100%) · embedding mxbai 2062→47ms (−98%) · TTS edge-tts TTFB 3063→656ms (−79%) · phi4 WARM first token 2422→78ms (−97%). **Bénéficiaires** : MCP server (Claude Desktop), soc.py auto-engine, chat→Ollama interne. Le navigateur user garde un overhead Happy Eyeballs ~50ms négligeable.
+
+**Pour atteindre 95+** : finir refactor JS sous 500 L (+1 pt) · profiling perf des modules I/O lourds (TTS engines complets / RAG indexation) · CI cloud incompatible « rien sur le web » (alternative : hook `pre-push` local).
 
 **5 commits git atomiques** (dépôt initialisé, 100% local, aucun remote) :
 

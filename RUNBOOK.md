@@ -93,4 +93,6 @@ Le redémarrage est requis pour : `jarvis.py`, les modules Python, `jarvis_promp
 - ⚠ **Architecture coût LLM** : JARVIS filtre/agrège/détecte en local ; jamais de raw data vers un LLM cloud.
 - ⚠ Les 4 modes : SOC = cybersécurité (défaut), GENERAL = conversation, CODE = code+infogérance (srv-dev-1 uniquement), CR = code+reasoning. Auto-engine SOC actif **uniquement en mode SOC**.
 - ⚠ Injection contexte SOC = **100 % serveur** (system prompt, jamais l'historique) — ne pas réintroduire d'incrustation client-side.
+- ⚠ **Clients internes = 127.0.0.1, pas localhost** : `OLLAMA_URL`, `JARVIS_BASE` (MCP) et tout client interne JARVIS doivent utiliser `http://127.0.0.1:PORT` explicite. `localhost` résout `::1` (IPv6) en premier sur Windows et Flask n'écoute pas IPv6 → timeout ~2s par requête. Source unique : `OLLAMA_URL` dans `jarvis.py:544`. Outil de profiling : `tools/profile_perf.py`.
+- ⚠ **Tests Python** : `python -m pytest` (436 tests sur 23/33 modules · pyproject.toml `[tool.pytest.ini_options]` · `tests/python/conftest.py` ajoute `scripts/` au sys.path). Doit être vert avant tout commit Python.
 - `JARVIS/MEMORY.md` est tracké (≠ SOC où il est gitignored).
