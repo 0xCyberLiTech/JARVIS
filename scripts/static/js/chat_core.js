@@ -306,14 +306,17 @@ function _pollOllamaStatus() {
     if (lbl) lbl.innerHTML = `<span class="ollama-dot ${cls}"></span>${txt}`;
     // Indicateur circuit breaker dans le header (vert = closed, orange = half_open, rouge = open)
     const cb = document.getElementById('ollama-circuit');
+    const cbLabel = document.getElementById('ollama-label');
     if (cb && d.state) {
       cb.className = 'ollama-circuit cb-' + d.state;
+      if (cbLabel) cbLabel.className = 'ollama-label cb-' + d.state;
       const titles = {
         closed:    'Circuit Ollama fermé — fonctionnement normal',
         half_open: 'Circuit Ollama semi-ouvert — test recovery',
         open:     `Circuit Ollama OUVERT — Ollama indisponible (retry dans ${d.retry_in_s||0}s)`,
       };
       cb.title = titles[d.state] || 'État circuit breaker Ollama';
+      if (cbLabel) cbLabel.title = cb.title;
     }
   }).catch(e => _jwarn('[jarvis] _pollOllamaStatus:', e));
 }
