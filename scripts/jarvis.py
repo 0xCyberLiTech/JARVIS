@@ -4603,6 +4603,22 @@ def _soc_model_prewarm():
         _log.warning(f"[BOOT-VRAM] preload SOC: {e}")
 threading.Thread(target=_soc_model_prewarm, daemon=True, name="soc-model-prewarm").start()
 
+# ── BOOT TTS KOKORO PREWARM — élimine cold start 42.8s mesuré (profile_tts) ─
+def _kokoro_prewarm():
+    """Précharge Kokoro CUDA en VRAM 60s après le boot.
+    Profiling 2026-05-15 : 1er appel Kokoro = 42.8s (chargement modèle CUDA),
+    appels suivants = 200ms TTFB. Préchauffage = TTS instantané dès la 1re alerte."""
+    time.sleep(60)  # après _soc_model_prewarm (30s + marge GPU)
+    try:
+        _tts_eng._get_kokoro("f")
+        if _tts_eng.is_kokoro_available():
+            _log.info("[BOOT-TTS] Kokoro préchargé en VRAM (cold start évité)")
+        else:
+            _log.info("[BOOT-TTS] Kokoro indisponible — pas de préchauffage")
+    except Exception as e:
+        _log.warning(f"[BOOT-TTS] Kokoro prewarm échoué : {e}")
+threading.Thread(target=_kokoro_prewarm, daemon=True, name="kokoro-prewarm").start()
+
 # ── RAG AUTO-REFRESH — Re-indexe les MEMORY.md toutes les 6h ────────────────
 _rag_refresh_stop_evt = threading.Event()  # set() pour arrêt propre
 
