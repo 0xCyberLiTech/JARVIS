@@ -15,9 +15,9 @@
 
 ---
 
-## Chantier dette technique — 2026-05-14/15 — score 62→93/100 (+31)
+## Chantier dette technique — 2026-05-14/15 — score 62→94/100 (+32)
 
-⚠ **Recalibration honnête** : le score 91/100 affiché le 2026-05-13 était **encore optimiste**. Audit strict (Ruff 98 erreurs réelles, 0 tests unitaires, 0 CI, 0 hooks, perf jamais profilée) → **point de départ réel 62/100**. Le chantier a fait **62 → 93/100** :
+⚠ **Recalibration honnête** : le score 91/100 affiché le 2026-05-13 était **encore optimiste**. Audit strict (Ruff 98 erreurs réelles, 0 tests unitaires, 0 CI, 0 hooks, perf jamais profilée) → **point de départ réel 62/100**. Le chantier a fait **62 → 94/100** :
 - 62→75 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py
 - 75→76 : 2 smoke tests LLM
 - 76→78 : refactor JS partiel (3 sous-systèmes extraits de jarvis_main.js)
@@ -25,6 +25,7 @@
 - 82→85 : refactor JS continuation 2026-05-15 — `jarvis_main.js` 3235→1181 L (−85% cumul), 13 modules extraits de jarvis_main.js (16 modules dans static/js/ + 3 modules en static/)
 - 85→92 : **suite tests unitaires Python — 0→436 tests sur 23 modules / 33 = 70% couvert** (+1 vrai bug détecté+fixé en prod : ordre regex images/liens dans `tts_cleaner.py`)
 - 92→93 : **Phase 3 — fix perf systémique IPv6** (`OLLAMA_URL` + `JARVIS_BASE` → `127.0.0.1` explicite) · −97% latence sur tout endpoint mesuré · outil `tools/profile_perf.py` réutilisable · gain pour clients internes (MCP, soc.py auto-engine, chat→Ollama)
+- 93→94 : **refactor JS FINAL** — extractions #12 (`soc_tab.js` 594 L) et #13 (`settings_ui.js` 482 L) · `jarvis_main.js` **1181 → 148 L (−98,1% cumul depuis 7828 L initial)** · 15 modules JS extraits dans `static/js/` (+ 3 modules historiques en `static/`) · refactor JS officiellement terminé (le résiduel = header + TABS + HORLOGE + GRAPHIQUES + pointeurs ≈ 150 L, rendement décroissant total)
 
 **Refactor JS — reprise 2026-05-14 (soir) + continuation 2026-05-15** : `jarvis_main.js` **7828 → 1181 L (−6647, −85%)** · **13 modules extraits** dans `static/js/`. Méthode : cartographie des appels top-level → extraction de sections sans dépendance d'ordre · bodies **byte-identiques** vérifiés · `node --check` + eslint 0 erreur à chaque étape · `eslint.config.js` globals cross-file déclarés. ⚠ **Procédure renforcée après régression #4 ET #9** : vérifier aussi les `const/let/var` partagés utilisés au top-level par les scripts chargés AVANT le module (NE PAS exclure const/let/var du grep load-order — leçon des fix `_LS_PROMPT_PROFILE` et `_origAddMessage`).
 - **#1** `a118772` — `tasks_tab.js` (129 L) + `welcome.js` (244 L) — **validé prod**.
@@ -38,7 +39,9 @@
 - **#9** `b1c8188` + fix `f8725b5` — `chat_core.js` (512 L, mal banni « DIAGNOSTIC SYSTÈME » mais contient `sendMessage` + SSE chat streaming + 4 modes (`setModeSoc/General/Code/CodeReasoning`) + vision + polling Ollama + diagnostic + listeners top-level paste/keydown/input sur `user-input`) — **régression load-order #2** : `_LS_PROMPT_PROFILE` (défini chat_core.js) utilisé au top-level par settings_llm.js chargé avant → fix : déplacer chat_core.js avant settings_llm.js dans jarvis.html — **validé prod après fix**.
 - **#10** `ef7a8de` + fix `c255fab` — `chat_ui.js` (573 L, état + UI du chat : `const history = []` + `busy` + abort SSE, `addMessage`/`_esc`/`addToolEvent`, mémoire long-terme `loadMemory`/`saveMemory`/`clearMemory`, STOP TTS button, markdown rendering + Monaco code editor modal complet, web search toggle, bloc `patchAddMessage` MutationObserver) — **régression #3** : `const history = []` perdu par sed off-by-one (j'ai démarré à 1051 au lieu de 1050) → `history.push is not a function` (resolved vers `window.history`) → fix `c255fab` réintroduit la déclaration — **validé prod après fix**.
 - **#11** `da17642` — `gpu_monitor.js` (347 L, anneaux SVG CPU/RAM/GPU/VRAM du chat HUD : constantes graphiques `CIRC`/`_RTX_BLUE`/`_RTX_GREEN`/`_VRAM_GRADIENT_*`, fetch `/api/stats`, anim hexagone, polling périodique, `pollVramLlm()` au top-level) — **validé prod (F12=0, tous onglets)**.
-⚠ Restart JARVIS requis après chaque extraction (`debug=False` → templates en cache). Reste dans `jarvis_main.js` (1181 L) : ONGLET ◈ SOC ~210 L, SOC GRAPHIQUES ~362 L, MODELE SWITCHER ~142 L, VOICE SWITCHER ~130 L, SETTINGS GPU HEALTH ~103 L, CHAT HUD EXTRAS ~119 L, header/TABS/HORLOGE/pointeurs ~115 L. Possibilité d'extraire encore 4-5 modules pour passer sous 200 L, mais **rendement décroissant**.
+- **#12** `00a3edc` — `soc_tab.js` (594 L, ONGLET ◈ SOC + SOC GRAPHIQUES regroupés : initSocTab/refreshSocTab/checkThreatLevel/_buildChatPayload/socNarrativeAnalysis/clearSocActions/socForceAutoban + sparkline 30j/Canvas modal détail/_socDrawCharts/socMonthNav) — chargé AVANT chat_ui/chat_core (chat_core utilise _buildChatPayload) — **off-by-one détecté+fixé** (`var _socAutoRefresh = null` ligne 78 perdue par sed, réinsérée) — **validé prod (F12=0)**.
+- **#13** `9a09923` — `settings_ui.js` (482 L, FUSION 5 sous-systèmes UI contigus : SETTINGS GPU HEALTH polling + MODELE SWITCHER icônes + VOICE SWITCHER preview + LLM HEADER `_updateHeaderLLM` + CHAT HUD EXTRAS) — **MILESTONE FINAL** : `jarvis_main.js` 609→148 L (−76%) — **validé prod (F12=0)**.
+⚠ Restart JARVIS requis après chaque extraction (`debug=False` → templates en cache). **Refactor JS terminé** : `jarvis_main.js` final = **148 L** = header consts (56 L) + TABS (17 L) + HORLOGE (8 L) + GRAPHIQUES (50 L) + pointeurs (~17 L). Plus rien d'extractible avec valeur (rendement décroissant total).
 
 **Suite tests unitaires Python — 2026-05-15 (cumul +7 pts dette : 85→92/100)** : passage de **0 à 436 tests** sur **23 modules / 33 = 70% couvert** en 7 batchs, pytest 9.0.2, setup `[tool.pytest.ini_options]` + `tests/python/` + `conftest.py` (sys.path injection). Méthode : focus sur les modules logique pure (0 I/O direct), DI via stubs, mock `requests.post` pour les modules HTTP, pytest fixtures `tmp_path` pour les helpers fichier.
 

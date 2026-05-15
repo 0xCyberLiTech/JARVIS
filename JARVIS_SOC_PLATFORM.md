@@ -66,7 +66,7 @@ Le système repose sur deux niveaux d'intelligence complémentaires :
 
 | Projet | Hébergement | État |
 |--------|-------------|------|
-| JARVIS | localhost:5000 | ✅ Production · v3.3 · score dette honnête ~93/100 (chantier 2026-05-14/15 : refactor JS −85% + 436 tests pytest 70% modules + fix perf IPv6) |
+| JARVIS | localhost:5000 | ✅ Production · v3.3 · score dette honnête ~94/100 (chantier 2026-05-14/15 : refactor JS −98,1% + 436 tests pytest 70% modules + fix perf IPv6) |
 | SOC Dashboard | 192.168.1.50:8080 | ✅ v3.97.157 · 35 tuiles · LAN uniquement |
 | srv-ngix | 192.168.1.50 | ✅ nginx · CrowdSec · WAF · audit 10/10 |
 | CLT | 192.168.1.12 | ✅ Apache · SEO validé GSC |

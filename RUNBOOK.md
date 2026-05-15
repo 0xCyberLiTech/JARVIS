@@ -15,7 +15,7 @@ Assistant IA personnel (type Iron Man) — serveur Flask **localhost:5000**, tou
 | Serveur Flask | `JARVIS/scripts/jarvis.py` (~4633 L + 31 modules Python) |
 | Blueprint SOC | `JARVIS/scripts/blueprints/soc.py` |
 | Serveur MCP | `JARVIS/scripts/jarvis_mcp_server.py` (port 5010, streamable-HTTP) |
-| UI | `JARVIS/scripts/templates/` + `JARVIS/scripts/static/` (`jarvis_main.js` 1181 L + 19 modules JS dont 16 dans `static/js/` + 8 CSS) |
+| UI | `JARVIS/scripts/templates/` + `JARVIS/scripts/static/` (`jarvis_main.js` 148 L + 21 modules JS dont 18 dans `static/js/` + 8 CSS) |
 | Lancement | `cd JARVIS\scripts && python jarvis.py` → http://localhost:5000 |
 | Arrêt | `JARVIS\stop_jarvis.bat` ou raccourci bureau `JARVIS - Arrêt.lnk` |
 
