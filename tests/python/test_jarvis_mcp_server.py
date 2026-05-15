@@ -1,4 +1,4 @@
-"""Tests jarvis_mcp_server — 10 outils MCP + helpers + sanitize.
+"""Tests jarvis_mcp_server — 11 outils MCP + helpers + sanitize.
 
 Sans dépendance pytest-asyncio : on utilise asyncio.run() directement.
 httpx est mocké via classes async context manager fakes.
@@ -159,8 +159,8 @@ def test_sanitize_max_chars_default_3000():
 # ── _TOOLS_DEFS ─────────────────────────────────────────────────────────
 
 
-def test_tools_defs_compte_10_outils():
-    assert len(mcp._TOOLS_DEFS) == 10
+def test_tools_defs_compte_11_outils():
+    assert len(mcp._TOOLS_DEFS) == 11
 
 
 def test_tools_defs_noms_uniques():
@@ -180,10 +180,11 @@ def test_tools_defs_contient_jarvis_chat():
     assert "jarvis_model_switch" in names
     assert "jarvis_last_response" in names
     assert "jarvis_code_exec" in names
+    assert "jarvis_defense_24h" in names
 
 
-def test_tool_handlers_compte_10_handlers():
-    assert len(mcp._TOOL_HANDLERS) == 10
+def test_tool_handlers_compte_11_handlers():
+    assert len(mcp._TOOL_HANDLERS) == 11
 
 
 def test_tool_handlers_correspondent_aux_defs():
@@ -458,6 +459,46 @@ def test_handle_jarvis_model_switch_echec(monkeypatch):
     assert "Échec" in result[0].text
 
 
+# ── _handle_jarvis_defense_24h ─────────────────────────────────────────
+
+
+def test_handle_defense_24h_succes(monkeypatch):
+    _reset_fake()
+    _FakeClient.routes_get[f"{mcp.JARVIS_BASE}/api/soc/defense"] = _FakeResp(
+        200, json_data={
+            "ok": True,
+            "generated_at": "2026-05-15T22:00:00",
+            "kpi": {"total_actions": 53, "bans_24h": 17, "waf_clt_24h": 13,
+                    "waf_pa85_24h": 40, "ids_sev1": 0, "ids_sev2": 5,
+                    "geo_24h": 253, "fail2ban_active": 7, "ufw_24h": 0,
+                    "cs_active": 83},
+            "heatmap_24h":  [0]*22 + [310, 5],
+            "top_country":  [{"value": "SG", "count": 9}],
+            "top_as":       [{"value": "Tencent", "count": 5}],
+            "top_scenario": [{"value": "http-conn-refused-444", "count": 25}],
+        }
+    )
+    monkeypatch.setattr(mcp.httpx, "AsyncClient", _FakeClient)
+    result = _run(mcp._handle_jarvis_defense_24h({}))
+    text = result[0].text
+    assert "DÉFENSE 24H" in text
+    assert "53" in text          # total_actions
+    assert "17" in text          # bans
+    assert "SG" in text          # top country
+    assert "Tencent" in text     # top AS
+    assert "h-1" in text         # peak hour (avant-dernier bucket = 310 pour h-1)
+
+
+def test_handle_defense_24h_erreur(monkeypatch):
+    _reset_fake()
+    _FakeClient.routes_get[f"{mcp.JARVIS_BASE}/api/soc/defense"] = _FakeResp(
+        200, json_data={"ok": False, "error": "defense inaccessible"}
+    )
+    monkeypatch.setattr(mcp.httpx, "AsyncClient", _FakeClient)
+    result = _run(mcp._handle_jarvis_defense_24h({}))
+    assert "inaccessible" in result[0].text
+
+
 # ── _handle_jarvis_last_response ───────────────────────────────────────
 
 
@@ -616,7 +657,7 @@ def test_call_tool_exception_generique(monkeypatch):
 
 def test_list_tools_renvoie_les_10():
     result = _run(mcp.list_tools())
-    assert len(result) == 10
+    assert len(result) == 11
 
 
 # ── _build_starlette_app ───────────────────────────────────────────────

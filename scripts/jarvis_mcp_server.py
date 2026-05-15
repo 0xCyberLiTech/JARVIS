@@ -207,6 +207,15 @@ _TOOLS_DEFS: list[Tool] = [
                           "filename": {"type": "string", "description": "Nom du fichier à créer (ex: script.py, test.sh)"},
                           "code":     {"type": "string", "description": "Contenu complet du fichier à écrire et exécuter"}},
                       "required": ["filename", "code"]}),
+    Tool(name="jarvis_defense_24h",
+         description=("Résumé compact des actions défensives 24h sur srv-ngix : KPI agrégés "
+                      "(bans CrowdSec, blocks WAF CLT/PA85, alertes Suricata sev1/sev2, GeoBlock, "
+                      "fail2ban actifs, UFW), heatmap horaire 24h, top pays/AS/scénarios, timeline "
+                      "rétrochrono des derniers événements. Source pré-calculée par "
+                      "defense_aggregator.py (cron 60s). 13× plus compact que monitoring.json — "
+                      "à privilégier pour 'combien de bans ?', 'quel pays attaque le plus ?', "
+                      "'quelle heure de pointe ?' sans avoir à parser le brut."),
+         inputSchema={"type": "object", "properties": {}}),
 ]
 
 
@@ -352,6 +361,46 @@ async def _handle_jarvis_code_exec(a: dict) -> list[TextContent]:
     return [TextContent(type="text", text=_sanitize(result or "Aucune sortie."))]
 
 
+async def _handle_jarvis_defense_24h(a: dict) -> list[TextContent]:
+    """Récupère defense_24h.json via JARVIS et le sérialise en bloc texte compact
+    optimisé pour la lecture LLM (KPI + pic horaire + top 5 pays/AS/scénarios)."""
+    async with httpx.AsyncClient(timeout=TIMEOUT_FAST) as client:
+        resp = await client.get(f"{JARVIS_BASE}/api/soc/defense")
+        resp.raise_for_status()
+        data = resp.json()
+    if not data.get("ok"):
+        return [TextContent(type="text", text=f"[JARVIS DEFENSE] {data.get('error', 'inaccessible')}")]
+    k    = data.get("kpi", {}) or {}
+    heat = data.get("heatmap_24h", []) or []
+    peak_h, peak_v = (-1, 0)
+    for i, v in enumerate(heat):
+        if v > peak_v:
+            peak_h, peak_v = i, v
+    peak_lbl = f"h-{len(heat) - 1 - peak_h}" if peak_h >= 0 else "n/a"
+    def _top(lst, n=5):
+        return " · ".join(f"{(x.get('value') or '?')[:14]}({x.get('count', 0)})"
+                          for x in (lst or [])[:n])
+    text = (
+        JARVIS_HEADER
+        + f"DÉFENSE 24H — généré {data.get('generated_at', '?')}\n"
+        + "─" * 60 + "\n"
+        + f"  Actions totales       : {k.get('total_actions', 0)}\n"
+        + f"  Bans CrowdSec 24h     : {k.get('bans_24h', 0)}\n"
+        + f"  Décisions CS actives  : {k.get('cs_active', 0)}\n"
+        + f"  WAF CLT / PA85        : {k.get('waf_clt_24h', 0)} / {k.get('waf_pa85_24h', 0)}\n"
+        + f"  Suricata sev1 / sev2  : {k.get('ids_sev1', 0)} / {k.get('ids_sev2', 0)}\n"
+        + f"  GeoBlock 24h          : {k.get('geo_24h', 0)}\n"
+        + f"  Fail2ban actifs       : {k.get('fail2ban_active', 0)}\n"
+        + f"  UFW DROP 24h          : {k.get('ufw_24h', 0)}\n"
+        + f"  Pic horaire           : {peak_lbl} ({peak_v} actions)\n"
+        + "─" * 60 + "\n"
+        + f"  Top pays      : {_top(data.get('top_country'))}\n"
+        + f"  Top AS        : {_top(data.get('top_as'))}\n"
+        + f"  Top scénarios : {_top(data.get('top_scenario'))}\n"
+    )
+    return [TextContent(type="text", text=_sanitize(text))]
+
+
 _TOOL_HANDLERS = {
     "jarvis_chat":           _handle_jarvis_chat,
     "jarvis_soc_status":     _handle_jarvis_soc_status,
@@ -363,6 +412,7 @@ _TOOL_HANDLERS = {
     "jarvis_model_switch":   _handle_jarvis_model_switch,
     "jarvis_last_response":  _handle_jarvis_last_response,
     "jarvis_code_exec":      _handle_jarvis_code_exec,
+    "jarvis_defense_24h":    _handle_jarvis_defense_24h,
 }
 
 

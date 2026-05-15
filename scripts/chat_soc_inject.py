@@ -68,6 +68,36 @@ SOC_VOCAL_KW = [
 ]
 
 
+# ── Format compact defense_24h ────────────────────────────────
+
+def _format_defense_block(d: dict) -> str:
+    """Sérialise defense_24h.json en bloc texte compact (~400 chars) pour injection
+    dans le system prompt phi4. Donne KPI + pic horaire + top 5 pays/AS/scénarios."""
+    k = d.get("kpi", {}) or {}
+    heat = d.get("heatmap_24h", []) or []
+    peak_h, peak_v = (-1, 0)
+    for i, v in enumerate(heat):
+        if v > peak_v:
+            peak_h, peak_v = i, v
+    peak_lbl = f"h-{len(heat) - 1 - peak_h}" if peak_h >= 0 else "n/a"
+    top = lambda lst, n=5: " ".join(  # noqa: E731 — formatage local court
+        f"{(x.get('value') or '?')[:14]}({x.get('count', 0)})" for x in (lst or [])[:n]
+    )
+    return (
+        f"[DÉFENSE 24H AGRÉGÉE — {d.get('generated_at', '?')}]\n"
+        f"Actions totales: {k.get('total_actions', 0)} · "
+        f"Bans CrowdSec: {k.get('bans_24h', 0)} · "
+        f"WAF CLT: {k.get('waf_clt_24h', 0)} · WAF PA85: {k.get('waf_pa85_24h', 0)} · "
+        f"Suricata: {k.get('ids_sev1', 0)} sev1/{k.get('ids_sev2', 0)} sev2 · "
+        f"GeoBlock: {k.get('geo_24h', 0)} · F2B actifs: {k.get('fail2ban_active', 0)} · "
+        f"UFW: {k.get('ufw_24h', 0)}\n"
+        f"Pic horaire: {peak_lbl} ({peak_v} actions)\n"
+        f"Top pays: {top(d.get('top_country'))}\n"
+        f"Top AS: {top(d.get('top_as'))}\n"
+        f"Top scénarios: {top(d.get('top_scenario'))}"
+    )
+
+
 # ── API publique ──────────────────────────────────────────────
 
 def inject(
@@ -79,6 +109,7 @@ def inject(
     *,
     fetch_monitoring_fn,
     build_monitoring_context_fn,
+    fetch_defense_fn=None,
 ) -> tuple[str, bool]:
     """Enrichit le prompt système avec les données SOC si la question l'exige.
 
@@ -89,6 +120,9 @@ def inject(
     chat du dashboard SOC où chaque message est une question SOC par nature).
     `fetch_monitoring_fn(force: bool) -> (ok, raw_json)` : récupère monitoring.json
     `build_monitoring_context_fn(data: dict) -> str` : formate pour injection LLM
+    `fetch_defense_fn(force: bool) -> (ok, raw_json)` : optionnel — récupère
+       defense_24h.json (résumé KPI + top + heatmap). Si fourni et SOC déclenché,
+       ajoute un bloc compact `[DÉFENSE 24H AGRÉGÉE]` au system prompt.
     """
     kw_list = SOC_VOCAL_KW if is_vocal else SOC_KW
     soc_trigger = force_soc or any(kw in last_user.lower() for kw in kw_list)
@@ -115,4 +149,13 @@ def inject(
                 "un état SOC. Répondre uniquement : « Données temps réel SOC non "
                 "disponibles — connexion srv-ngix requise. »]"
             )
+        # Bloc compact agrégé 24h (chiffres pré-calculés — répond aux questions
+        # « combien de bans ? quel est le pic horaire ? top pays ? » sans calcul)
+        if fetch_defense_fn is not None:
+            ok_d, raw_d = fetch_defense_fn(force=False)
+            if ok_d and raw_d:
+                try:
+                    system += "\n\n" + _format_defense_block(json.loads(raw_d))
+                except Exception:
+                    pass  # bloc défense est optionnel — pas bloquant
     return system, soc_trigger

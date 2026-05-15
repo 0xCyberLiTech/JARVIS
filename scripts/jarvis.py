@@ -483,6 +483,7 @@ except ImportError:
 from blueprints.soc import (
     _SOC_CFG,
     _SSH_PROXMOX,
+    _fetch_defense,
     _fetch_monitoring,
     _ssh_clt,
     _ssh_dev1,
@@ -2959,11 +2960,13 @@ _chat_inject_pve     = _pve_api.chat_inject
 
 
 def _chat_inject_soc(system, last_user, is_vocal, soc_ctx_injected, force_soc=False):
-    """Wrapper DI — délègue à chat_soc_inject.inject() avec les helpers monitoring."""
+    """Wrapper DI — délègue à chat_soc_inject.inject() avec les helpers monitoring
+    + l'agrégat defense_24h.json (bloc compact KPI/top/heatmap pré-calculé)."""
     return _chat_soc.inject(
         system, last_user, is_vocal, soc_ctx_injected, force_soc,
         fetch_monitoring_fn=_fetch_monitoring,
         build_monitoring_context_fn=_build_monitoring_context,
+        fetch_defense_fn=_fetch_defense,
     )
 
 # _chat_build_messages déplacé dans chat_messages.py — alias backward-compat

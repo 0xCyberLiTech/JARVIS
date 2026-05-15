@@ -332,6 +332,11 @@ _monitoring_cache: dict = {"raw": None, "ts": 0.0}
 _MONITORING_TTL = 30
 _MONITORING_URL  = _SOC_CFG["monitoring_url"]
 
+# Cache defense_24h.json — TTL 30s · URL dérivée du monitoring_url (même host)
+_defense_cache: dict = {"raw": None, "ts": 0.0}
+_DEFENSE_TTL = 30
+_DEFENSE_URL = _MONITORING_URL.rsplit("/", 1)[0] + "/defense_24h.json"
+
 
 def _fetch_monitoring(timeout=12, force=False):
     """Récupère monitoring.json depuis srv-ngix via HTTP (plus léger que SSH).
@@ -359,6 +364,26 @@ def _fetch_monitoring(timeout=12, force=False):
             _monitoring_cache["raw"] = raw
             _monitoring_cache["ts"] = now
         return ok, raw
+
+
+def _fetch_defense(timeout=8, force=False):
+    """Récupère defense_24h.json depuis srv-ngix via HTTP. Cache TTL 30s.
+    Pas de fallback SSH — si HTTP échoue on retourne None (la page web est la
+    source de vérité, JARVIS s'adapte si elle est temporairement indispo)."""
+    now = time.time()
+    if not force and _defense_cache["raw"] is not None and (now - _defense_cache["ts"]) < _DEFENSE_TTL:
+        return True, _defense_cache["raw"]
+    try:
+        import requests as _req
+        r = _req.get(_DEFENSE_URL, timeout=timeout)
+        r.raise_for_status()
+        raw = r.text
+        _defense_cache["raw"] = raw
+        _defense_cache["ts"] = now
+        return True, raw
+    except Exception as e:
+        _log.warning(f"[fetch_defense] HTTP échoué : {e}")
+        return False, None
 
 
 def _ssh_host(ssh_arr, remote_cmd, timeout=20, retries=1):
@@ -735,6 +760,24 @@ def api_soc_threat_score():
                         status=500, mimetype="application/json")
     ts = _threat_score_from_json(d, set())
     return Response(json.dumps({"ok": True, **ts}, ensure_ascii=False), mimetype="application/json")
+
+
+@soc_bp.route("/api/soc/defense", methods=["GET"])
+def api_soc_defense():
+    """Expose defense_24h.json (résumé compact 24h des actions défensives —
+    bans, WAF, GeoBlock, IDS, fail2ban, UFW). Source : defense_aggregator.py
+    sur srv-ngix (cron 60s). Sortie 13× plus compacte que monitoring.json."""
+    ok, raw = _fetch_defense(timeout=6)
+    if not ok or not raw:
+        return Response(json.dumps({"ok": False, "error": "defense_24h.json inaccessible"}),
+                        status=503, mimetype="application/json")
+    try:
+        d = json.loads(raw)
+    except Exception as e:
+        return Response(json.dumps({"ok": False, "error": str(e)}),
+                        status=500, mimetype="application/json")
+    return Response(json.dumps({"ok": True, **d}, ensure_ascii=False),
+                    mimetype="application/json")
 
 
 @soc_bp.route("/api/soc/recently-banned", methods=["GET"])
