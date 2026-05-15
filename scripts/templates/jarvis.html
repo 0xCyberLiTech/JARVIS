@@ -87,10 +87,11 @@
 <script src="/static/js/eq_parametric.js?v={{ boot_id }}"></script>
 <script src="/static/js/eq_music.js?v={{ boot_id }}"></script>
 <script src="/static/js/audio_mire.js?v={{ boot_id }}"></script>
+<!-- chat_core.js : doit charger AVANT settings_llm.js (qui utilise _LS_PROMPT_PROFILE au top-level) -->
+<script src="/static/js/chat_core.js?v={{ boot_id }}"></script>
 <script src="/static/js/settings_llm.js?v={{ boot_id }}"></script>
 <script src="/static/js/dsp_audio.js?v={{ boot_id }}"></script>
 <script src="/static/js/audio_rack.js?v={{ boot_id }}"></script>
-<script src="/static/js/chat_core.js?v={{ boot_id }}"></script>
 <!-- boot_init.js : chargé EN DERNIER — point d'entrée DOMContentLoaded (_jarvisInit) + rack FX -->
 <script src="/static/js/boot_init.js?v={{ boot_id }}"></script>
 <script>
