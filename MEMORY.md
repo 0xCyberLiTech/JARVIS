@@ -15,17 +15,20 @@
 
 ---
 
-## Chantier dette technique — 2026-05-14/15 — score 62→94/100 (+32)
+## Chantier dette technique — 2026-05-14/15 — score 62→89/100 honnête (+27)
 
-⚠ **Recalibration honnête** : le score 91/100 affiché le 2026-05-13 était **encore optimiste**. Audit strict (Ruff 98 erreurs réelles, 0 tests unitaires, 0 CI, 0 hooks, perf jamais profilée) → **point de départ réel 62/100**. Le chantier a fait **62 → 94/100** :
+⚠ **2e recalibration honnête (post-audit pytest --cov)** : les annonces récentes 92-94 étaient optimistes — basées sur "70% des modules testés" qui ≠ "70% lignes couvertes". L'audit pytest --cov rigoureux a révélé une coverage RÉELLE de 12% (les 11 modules non testés représentaient 66% du code total : jarvis.py 2891 stmts à 0%, blueprints/soc.py 963 stmts à 0%). Phase 4 a corrigé cela.
+
+Le chantier a fait **62 → 89/100** (recalibré honnêtement) :
 - 62→75 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py
 - 75→76 : 2 smoke tests LLM
 - 76→78 : refactor JS partiel (3 sous-systèmes extraits de jarvis_main.js)
 - 78→82 : refactor JS reprise du soir — `jarvis_main.js` 7828→3235 L (−59%), 9 modules
-- 82→85 : refactor JS continuation 2026-05-15 — `jarvis_main.js` 3235→1181 L (−85% cumul), 13 modules extraits de jarvis_main.js (16 modules dans static/js/ + 3 modules en static/)
-- 85→92 : **suite tests unitaires Python — 0→436 tests sur 23 modules / 33 = 70% couvert** (+1 vrai bug détecté+fixé en prod : ordre regex images/liens dans `tts_cleaner.py`)
-- 92→93 : **Phase 3 — fix perf systémique IPv6** (`OLLAMA_URL` + `JARVIS_BASE` → `127.0.0.1` explicite) · −97% latence sur tout endpoint mesuré · outil `tools/profile_perf.py` réutilisable · gain pour clients internes (MCP, soc.py auto-engine, chat→Ollama)
-- 93→94 : **refactor JS FINAL** — extractions #12 (`soc_tab.js` 594 L) et #13 (`settings_ui.js` 482 L) · `jarvis_main.js` **1181 → 148 L (−98,1% cumul depuis 7828 L initial)** · 15 modules JS extraits dans `static/js/` (+ 3 modules historiques en `static/`) · refactor JS officiellement terminé (le résiduel = header + TABS + HORLOGE + GRAPHIQUES + pointeurs ≈ 150 L, rendement décroissant total)
+- 82→85 : refactor JS continuation 2026-05-15 — `jarvis_main.js` 3235→1181 L (−85% cumul), 13 modules
+- 85→87 : **Phase 2 tests Python initial** — 436 tests sur 23/34 modules (mais coverage réelle = 12% lignes) +1 bug prod fixé (tts_cleaner)
+- 87→88 : **Phase 3 fix perf IPv6** — `OLLAMA_URL`/`JARVIS_BASE` → `127.0.0.1` explicite · −97% latence clients internes · outil `tools/profile_perf.py`
+- 88→88 : refactor JS FINAL #12-#13 — `jarvis_main.js` 1181→148 L (−98,1% cumul) · refactor officiellement terminé
+- 88→89 : **Phase 4 — coverage massivement augmentée** — hook pre-push pytest installé · 66 tests supplémentaires (38 sur soc.py + 28 sur jarvis.py via Flask test_client) · **coverage TOTAL 12% → 32% (+20 pts)** · jarvis.py 0%→26% · soc.py 0%→33% · 502 tests pytest au total · 25/34 modules touchés (74%)
 
 **Refactor JS — reprise 2026-05-14 (soir) + continuation 2026-05-15** : `jarvis_main.js` **7828 → 1181 L (−6647, −85%)** · **13 modules extraits** dans `static/js/`. Méthode : cartographie des appels top-level → extraction de sections sans dépendance d'ordre · bodies **byte-identiques** vérifiés · `node --check` + eslint 0 erreur à chaque étape · `eslint.config.js` globals cross-file déclarés. ⚠ **Procédure renforcée après régression #4 ET #9** : vérifier aussi les `const/let/var` partagés utilisés au top-level par les scripts chargés AVANT le module (NE PAS exclure const/let/var du grep load-order — leçon des fix `_LS_PROMPT_PROFILE` et `_origAddMessage`).
 - **#1** `a118772` — `tasks_tab.js` (129 L) + `welcome.js` (244 L) — **validé prod**.
@@ -65,7 +68,19 @@
 
 **Résultats mesurés (clients utilisant 127.0.0.1)** : `/api/health` 2047→16ms (−99%) · `/api/sysdiag` 4604→557ms (−88%) · Ollama `/api/ps` 2078→<1ms (−100%) · embedding mxbai 2062→47ms (−98%) · TTS edge-tts TTFB 3063→656ms (−79%) · phi4 WARM first token 2422→78ms (−97%). **Bénéficiaires** : MCP server (Claude Desktop), soc.py auto-engine, chat→Ollama interne. Le navigateur user garde un overhead Happy Eyeballs ~50ms négligeable.
 
-**Pour atteindre 95+** : finir refactor JS sous 500 L (+1 pt) · profiling perf des modules I/O lourds (TTS engines complets / RAG indexation) · CI cloud incompatible « rien sur le web » (alternative : hook `pre-push` local).
+**Phase 4 — Audit honnête + actions correctives 2026-05-15 (88→89/100)** :
+
+Audit `pytest --cov` rigoureux a révélé que les annonces "70% modules testés = 70% coverage" étaient FAUSSES. Coverage réelle initiale : 12% lignes (les 11 modules non testés représentent 66% du code total).
+
+Actions correctives :
+1. **Hook pre-push pytest** (commit `a7619a0`) : `.pre-commit-config.yaml` étendu avec `stages: [pre-push]` pour pytest. Bloque les push sur tests rouges. Alternative locale à la CI cloud impossible avec « rien sur le web ».
+2. **Tests blueprint soc.py** (commit `9ef68e3`) : 38 tests via Flask test_client + helpers purs. **soc.py 0%→33%** (317 stmts couverts).
+3. **Tests jarvis.py** (commit `f236001`) : 28 tests via Flask test_client (l'import jarvis = boot complet en 1.7s, OK pour suite pytest). **jarvis.py 0%→26%** (743 stmts couverts).
+4. **`.coverage` ajouté à `.gitignore`** (commit `dc7fbfd`) — cache binaire pytest-cov, ne doit pas être tracké.
+
+**Coverage TOTAL : 12% → 32% (+20 pts en une session).** 502 tests pytest. 25/34 modules touchés (74%).
+
+**Pour atteindre 95+** : continuer coverage sur tts_engines / proxmox_api / voice_lab / bypass_backup (+5 pts possibles) · profiling détaillé TTS engines / RAG indexation (+1-2 pts) · circuit breaker formel Ollama (+1 pt). Plafond réaliste sans CI cloud : ~95-96/100.
 
 **5 commits git atomiques** (dépôt initialisé, 100% local, aucun remote) :
 

@@ -1,5 +1,5 @@
 # JARVIS — Architecture & Zones fonctionnelles
-<!-- v2.2 — 2026-05-15 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · NDT 100/100 (script auto) · score honnête global ~94/100 (départ réel 62, +32 chantier dette : refactor JS −98,1% cumul + 436 tests pytest sur 70% modules + fix perf IPv6 -97% latence interne) · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · jarvis_main.js 7828→148L (−98,1%), 21 modules JS · git local + pre-commit hooks bloquants + ruff.toml -->
+<!-- v2.3 — 2026-05-15 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · NDT 100/100 (script auto) · score honnête global ~89/100 RECALIBRÉ post-audit pytest --cov (départ réel 62, +27 chantier dette) · refactor JS jarvis_main.js 7828→148L (−98,1%) 21 modules · 502 tests pytest sur 25/34 modules avec coverage 32% lignes · fix perf IPv6 -97% latence interne · hook pre-push pytest · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git local + pre-commit hooks bloquants + ruff.toml -->
 
 ---
 
@@ -362,7 +362,7 @@ terminal_code, voice_lab, stt, tasks_tab, welcome, eq_parametric, eq_music,
 audio_mire, audio_viz, settings_llm, dsp_audio. L'ex-`jarvis.css` monolithique
 est éclaté en **8 fichiers** `static/css/`. Dépôt **git local** (aucun remote)
 + **pre-commit hooks bloquants** (ruff + eslint) + `ruff.toml`.
-Refactor JS **terminé** 2026-05-14/15 : `jarvis_main.js` 7828→148 L (−98,1% cumul), 15 modules extraits dans `static/js/` (18 modules total). 436 tests pytest ajoutés sur 23/33 modules Python (70%). Fix perf IPv6 (`OLLAMA_URL` + `JARVIS_BASE` → `127.0.0.1` explicite) : −97% latence sur clients internes (MCP, soc.py auto-engine). Score honnête global ~94/100.
+Refactor JS **terminé** 2026-05-14/15 : `jarvis_main.js` 7828→148 L (−98,1% cumul), 15 modules extraits dans `static/js/` (18 modules total). **502 tests pytest** sur 25/34 modules Python (74%) avec coverage **32% lignes** (audit pytest --cov rigoureux). Fix perf IPv6 (`OLLAMA_URL` + `JARVIS_BASE` → `127.0.0.1` explicite) : −97% latence sur clients internes (MCP, soc.py auto-engine). Hook pre-push pytest installé. Score honnête global ~89/100 (recalibré post-audit honnête).
 
 ## Modules centralisés — synthèse
 
