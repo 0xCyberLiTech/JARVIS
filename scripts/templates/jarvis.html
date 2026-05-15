@@ -87,6 +87,8 @@
 <script src="/static/js/eq_parametric.js?v={{ boot_id }}"></script>
 <script src="/static/js/eq_music.js?v={{ boot_id }}"></script>
 <script src="/static/js/audio_mire.js?v={{ boot_id }}"></script>
+<!-- chat_ui.js : doit charger AVANT chat_core.js (chat_core utilise addMessage, history, _esc, _codeStore) -->
+<script src="/static/js/chat_ui.js?v={{ boot_id }}"></script>
 <!-- chat_core.js : doit charger AVANT settings_llm.js (qui utilise _LS_PROMPT_PROFILE au top-level) -->
 <script src="/static/js/chat_core.js?v={{ boot_id }}"></script>
 <script src="/static/js/settings_llm.js?v={{ boot_id }}"></script>
