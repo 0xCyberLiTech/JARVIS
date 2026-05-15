@@ -21,6 +21,7 @@
 // Fichier .js classique (scope global). Chargé AVANT chat_core.js
 // (chat_core utilise addMessage, history, _esc, _codeStore).
 
+const history = [];
 let busy = false;
 let _chatAbortController = null;
 
