@@ -15,14 +15,15 @@
 
 ---
 
-## Chantier dette technique — 2026-05-14 — score 62→78/100 (+16)
+## Chantier dette technique — 2026-05-14/15 — score 62→92/100 (+30)
 
-⚠ **Recalibration honnête** : le score 91/100 affiché le 2026-05-13 était **encore optimiste**. Audit strict (Ruff 98 erreurs réelles, 0 tests unitaires, 0 CI, 0 hooks, perf jamais profilée) → **point de départ réel 62/100**. Le chantier a fait **62 → 78/100** :
+⚠ **Recalibration honnête** : le score 91/100 affiché le 2026-05-13 était **encore optimiste**. Audit strict (Ruff 98 erreurs réelles, 0 tests unitaires, 0 CI, 0 hooks, perf jamais profilée) → **point de départ réel 62/100**. Le chantier a fait **62 → 92/100** :
 - 62→75 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py
 - 75→76 : 2 smoke tests LLM
 - 76→78 : refactor JS partiel (3 sous-systèmes extraits de jarvis_main.js)
 - 78→82 : refactor JS reprise du soir — `jarvis_main.js` 7828→3235 L (−59%), 9 modules
 - 82→85 : refactor JS continuation 2026-05-15 — `jarvis_main.js` 3235→1181 L (−85% cumul), 13 modules extraits de jarvis_main.js (16 modules dans static/js/ + 3 modules en static/)
+- 85→92 : **suite tests unitaires Python — 0→436 tests sur 23 modules / 33 = 70% couvert** (+1 vrai bug détecté+fixé en prod : ordre regex images/liens dans `tts_cleaner.py`)
 
 **Refactor JS — reprise 2026-05-14 (soir) + continuation 2026-05-15** : `jarvis_main.js` **7828 → 1181 L (−6647, −85%)** · **13 modules extraits** dans `static/js/`. Méthode : cartographie des appels top-level → extraction de sections sans dépendance d'ordre · bodies **byte-identiques** vérifiés · `node --check` + eslint 0 erreur à chaque étape · `eslint.config.js` globals cross-file déclarés. ⚠ **Procédure renforcée après régression #4 ET #9** : vérifier aussi les `const/let/var` partagés utilisés au top-level par les scripts chargés AVANT le module (NE PAS exclure const/let/var du grep load-order — leçon des fix `_LS_PROMPT_PROFILE` et `_origAddMessage`).
 - **#1** `a118772` — `tasks_tab.js` (129 L) + `welcome.js` (244 L) — **validé prod**.
@@ -36,7 +37,24 @@
 - **#9** `b1c8188` + fix `f8725b5` — `chat_core.js` (512 L, mal banni « DIAGNOSTIC SYSTÈME » mais contient `sendMessage` + SSE chat streaming + 4 modes (`setModeSoc/General/Code/CodeReasoning`) + vision + polling Ollama + diagnostic + listeners top-level paste/keydown/input sur `user-input`) — **régression load-order #2** : `_LS_PROMPT_PROFILE` (défini chat_core.js) utilisé au top-level par settings_llm.js chargé avant → fix : déplacer chat_core.js avant settings_llm.js dans jarvis.html — **validé prod après fix**.
 - **#10** `ef7a8de` + fix `c255fab` — `chat_ui.js` (573 L, état + UI du chat : `const history = []` + `busy` + abort SSE, `addMessage`/`_esc`/`addToolEvent`, mémoire long-terme `loadMemory`/`saveMemory`/`clearMemory`, STOP TTS button, markdown rendering + Monaco code editor modal complet, web search toggle, bloc `patchAddMessage` MutationObserver) — **régression #3** : `const history = []` perdu par sed off-by-one (j'ai démarré à 1051 au lieu de 1050) → `history.push is not a function` (resolved vers `window.history`) → fix `c255fab` réintroduit la déclaration — **validé prod après fix**.
 - **#11** `da17642` — `gpu_monitor.js` (347 L, anneaux SVG CPU/RAM/GPU/VRAM du chat HUD : constantes graphiques `CIRC`/`_RTX_BLUE`/`_RTX_GREEN`/`_VRAM_GRADIENT_*`, fetch `/api/stats`, anim hexagone, polling périodique, `pollVramLlm()` au top-level) — **validé prod (F12=0, tous onglets)**.
-⚠ Restart JARVIS requis après chaque extraction (`debug=False` → templates en cache). Reste dans `jarvis_main.js` (1181 L) : ONGLET ◈ SOC ~210 L, SOC GRAPHIQUES ~362 L, MODELE SWITCHER ~142 L, VOICE SWITCHER ~130 L, SETTINGS GPU HEALTH ~103 L, CHAT HUD EXTRAS ~119 L, header/TABS/HORLOGE/pointeurs ~115 L. Possibilité d'extraire encore 4-5 modules pour passer sous 200 L, mais **rendement décroissant** — privilégier maintenant tests unitaires Python (+4-5 pts dette) et profiling perf (+2 pts).
+⚠ Restart JARVIS requis après chaque extraction (`debug=False` → templates en cache). Reste dans `jarvis_main.js` (1181 L) : ONGLET ◈ SOC ~210 L, SOC GRAPHIQUES ~362 L, MODELE SWITCHER ~142 L, VOICE SWITCHER ~130 L, SETTINGS GPU HEALTH ~103 L, CHAT HUD EXTRAS ~119 L, header/TABS/HORLOGE/pointeurs ~115 L. Possibilité d'extraire encore 4-5 modules pour passer sous 200 L, mais **rendement décroissant**.
+
+**Suite tests unitaires Python — 2026-05-15 (cumul +7 pts dette : 85→92/100)** : passage de **0 à 436 tests** sur **23 modules / 33 = 70% couvert** en 7 batchs, pytest 9.0.2, setup `[tool.pytest.ini_options]` + `tests/python/` + `conftest.py` (sys.path injection). Méthode : focus sur les modules logique pure (0 I/O direct), DI via stubs, mock `requests.post` pour les modules HTTP, pytest fixtures `tmp_path` pour les helpers fichier.
+
+| Batch | Commit | Modules testés | Tests |
+|---|---|---|---|
+| #1 | `efa68e3` | tts_dedup · chat_messages · chat_routing | 27 |
+| #2 | `efa68e3` | chat_system_prompt · llm_opts · tts_cleaner (+1 bug fixé) · security_whitelists · chat_soc_inject | 117 |
+| #4 | `dcc1879` | chat_capture · chat_stream · chat_generate · chat_pending_bypass · chat_tool_calls · sse_helpers · stream_tokens · deferred_speak | 86 |
+| #5 | `57ee82e` | audio_dsp (508 L, le plus gros — _db2lin, _pcm_to_wav, _mono_to_stereo Haas, court-circuits, bypass apply_dsp_to_mp3) | 31 |
+| #6 | `c819507` | bypass_simple · bypass_filesystem · vision (mock requests streaming) | 80 |
+| #7 | `0d216cb` | bypass_proxmox · bypass_code · code_reasoning | 84 |
+
+**Bug prod détecté+fixé par les tests** : `tts_cleaner.py` ordre regex images/liens — `![alt](img.png)` matchait d'abord `[texte](url)→texte`, laissant `!alt` que le TTS prononçait "exclamation alt". Inversion de l'ordre : images supprimées AVANT liens.
+
+**Modules Python restants non testés (10/33)** : wrappers I/O réseau lourds (`bypass_backup`, `proxmox_api`, `ssh_terminal`, `tts_engines`, `stt`, `deepfilter`, `rag_live`, `voice_lab`) ou intégrations Flask (`jarvis.py`, `jarvis_mcp_server.py`, `blueprints/soc.py`) — rendement décroissant pour tests unitaires (E2E Playwright déjà existants pour l'intégration).
+
+**Pour atteindre 95+** : profiling perf TTS/RAG/Ollama swap (+2 pts) · finir refactor JS sous 500 L (+1 pt) · CI cloud incompatible « rien sur le web » (alternative : hook `pre-push` local).
 
 **5 commits git atomiques** (dépôt initialisé, 100% local, aucun remote) :
 
