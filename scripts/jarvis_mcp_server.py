@@ -33,7 +33,7 @@ from mcp.server.sse import SseServerTransport
 from mcp.server.streamable_http_manager import StreamableHTTPSessionManager
 from mcp.types import TextContent, Tool
 
-JARVIS_BASE  = "http://localhost:5000"
+JARVIS_BASE  = "http://127.0.0.1:5000"  # IPv4 explicite — `localhost` résout `::1` en premier sur Windows et fallback timeout ~2s avant IPv4
 TIMEOUT_CHAT = 120.0   # génération LLM
 TIMEOUT_FAST = 10.0    # endpoints status/stats/health
 

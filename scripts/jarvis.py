@@ -541,7 +541,7 @@ import vision as _vision
 import voice_lab as _voice_lab
 
 # ── Config ──────────────────────────────────────────────────
-OLLAMA_URL   = "http://localhost:11434"
+OLLAMA_URL   = "http://127.0.0.1:11434"  # IPv4 explicite — `localhost` résout `::1` en premier sur Windows et fallback timeout ~2s avant IPv4
 JARVIS_PORT  = 5000
 _MCP_PORT    = 5010                # port MCP server (jarvis_mcp_server.py)
 _GB_BYTES    = 1 << 30             # 1 GB en bytes (1024^3) — conversions RAM/VRAM/disk

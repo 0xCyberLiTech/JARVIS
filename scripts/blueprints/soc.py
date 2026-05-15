@@ -1265,6 +1265,9 @@ def _soc_ollama_query(prompt: str, max_tokens: int = 400) -> str:
             _log.info("[SOC-LLM] Bypass — CODE REASONING actif (protection VRAM)")
             return ""
         from jarvis import MODEL as _SOC_MODEL
+        from jarvis import (
+            OLLAMA_URL as _SOC_OLLAMA_URL,  # source unique : évite duplication du hostname
+        )
         payload = json.dumps({
             "model":  _SOC_MODEL,
             "messages": [{"role": "user", "content": prompt}],
@@ -1274,7 +1277,7 @@ def _soc_ollama_query(prompt: str, max_tokens: int = 400) -> str:
         }).encode()
 
         req_http = urllib.request.Request(
-            "http://localhost:11434/api/chat",
+            f"{_SOC_OLLAMA_URL}/api/chat",
             data=payload,
             headers={"Content-Type": "application/json"},
             method="POST",
