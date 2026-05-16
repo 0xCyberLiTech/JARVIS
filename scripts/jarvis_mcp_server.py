@@ -373,11 +373,20 @@ async def _handle_jarvis_defense_24h(a: dict) -> list[TextContent]:
     k    = data.get("kpi", {}) or {}
     dlt  = data.get("kpi_delta", {}) or {}
     heat = data.get("heatmap_24h", []) or []
+    bucket_min = data.get("heatmap_bucket_min") or (60 if len(heat) <= 24 else 15)
     peak_h, peak_v = (-1, 0)
     for i, v in enumerate(heat):
         if v > peak_v:
             peak_h, peak_v = i, v
-    peak_lbl = f"h-{len(heat) - 1 - peak_h}" if peak_h >= 0 else "n/a"
+    if peak_h < 0:
+        peak_lbl = "n/a"
+    elif peak_h == len(heat) - 1:
+        peak_lbl = "tranche courante"
+    else:
+        m_ago = (len(heat) - 1 - peak_h) * bucket_min
+        peak_lbl = (f"il y a {m_ago}min" if m_ago < 60
+                    else (f"h-{m_ago // 60}" if m_ago % 60 == 0
+                          else f"h-{m_ago // 60} {m_ago % 60}min"))
     def _top(lst, n=5):
         return " · ".join(f"{(x.get('value') or '?')[:14]}({x.get('count', 0)})"
                           for x in (lst or [])[:n])
@@ -402,7 +411,7 @@ async def _handle_jarvis_defense_24h(a: dict) -> list[TextContent]:
         + f"  GeoBlock 24h          : {_kvd('geo_24h')}\n"
         + f"  Fail2ban actifs       : {_kvd('fail2ban_active')}\n"
         + f"  UFW DROP 24h          : {_kvd('ufw_24h')}\n"
-        + f"  Pic horaire           : {peak_lbl} ({peak_v} actions)\n"
+        + f"  Pic {bucket_min}min            : {peak_lbl} ({peak_v} actions)\n"
         + "─" * 60 + "\n"
         + f"  Top pays      : {_top(data.get('top_country'))}\n"
         + f"  Top AS        : {_top(data.get('top_as'))}\n"

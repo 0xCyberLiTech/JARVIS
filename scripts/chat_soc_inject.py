@@ -83,15 +83,30 @@ def _kpi_with_delta(kpi: dict, deltas: dict, key: str) -> str:
 
 def _format_defense_block(d: dict) -> str:
     """Sérialise defense_24h.json en bloc texte compact (~500 chars) pour injection
-    dans le system prompt phi4. KPI + delta vs hier + pic horaire + top 5 pays/AS/scénarios."""
+    dans le system prompt phi4. KPI + delta vs hier + pic + top 5 pays/AS/scénarios.
+
+    Le pic est calculé sur la granularité réelle du backend (15 min en v1.2,
+    déductible de `heatmap_bucket_min` ou de `len(heatmap_24h)`)."""
     k    = d.get("kpi", {}) or {}
     dlt  = d.get("kpi_delta", {}) or {}
     heat = d.get("heatmap_24h", []) or []
+    bucket_min = d.get("heatmap_bucket_min") or (60 if len(heat) <= 24 else 15)
     peak_h, peak_v = (-1, 0)
     for i, v in enumerate(heat):
         if v > peak_v:
             peak_h, peak_v = i, v
-    peak_lbl = f"h-{len(heat) - 1 - peak_h}" if peak_h >= 0 else "n/a"
+    if peak_h < 0:
+        peak_lbl = "n/a"
+    elif peak_h == len(heat) - 1:
+        peak_lbl = "tranche courante"
+    else:
+        minutes_ago = (len(heat) - 1 - peak_h) * bucket_min
+        if minutes_ago < 60:
+            peak_lbl = f"il y a {minutes_ago}min"
+        else:
+            h_ago = minutes_ago // 60
+            m_ago = minutes_ago % 60
+            peak_lbl = f"h-{h_ago}" if m_ago == 0 else f"h-{h_ago} {m_ago}min"
     top = lambda lst, n=5: " ".join(  # noqa: E731 — formatage local court
         f"{(x.get('value') or '?')[:14]}({x.get('count', 0)})" for x in (lst or [])[:n]
     )
@@ -105,7 +120,7 @@ def _format_defense_block(d: dict) -> str:
         f"GeoBlock: {kvd('geo_24h')} · F2B actifs: {kvd('fail2ban_active')} · "
         f"UFW: {kvd('ufw_24h')}\n"
         f"(deltas = évolution vs 24h en arrière, '+' = hausse, '-' = baisse)\n"
-        f"Pic horaire: {peak_lbl} ({peak_v} actions)\n"
+        f"Pic {bucket_min}min: {peak_lbl} ({peak_v} actions sur la tranche)\n"
         f"Top pays: {top(d.get('top_country'))}\n"
         f"Top AS: {top(d.get('top_as'))}\n"
         f"Top scénarios: {top(d.get('top_scenario'))}"
