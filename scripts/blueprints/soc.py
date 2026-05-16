@@ -780,6 +780,30 @@ def api_soc_defense():
                     mimetype="application/json")
 
 
+@soc_bp.route("/api/soc/ioc", methods=["GET"])
+def api_soc_ioc():
+    """Expose le bloc `ioc` de monitoring.json (Indicateurs de Compromission
+    POST-COMPROMISSION). Source : ioc_collect.py sur srv-ngix (cron 60s).
+    Lecture seule — pure extraction d'une sous-clé pré-calculée.
+
+    Sprint 18d 2026-05-16 : alimente le MCP tool jarvis_ioc_status."""
+    ok, raw = _fetch_monitoring(timeout=8)
+    if not ok or not raw:
+        return Response(json.dumps({"ok": False, "error": "monitoring.json inaccessible"}),
+                        status=503, mimetype="application/json")
+    try:
+        d = json.loads(raw)
+    except Exception as e:
+        return Response(json.dumps({"ok": False, "error": str(e)}),
+                        status=500, mimetype="application/json")
+    ioc = d.get("ioc") or {}
+    if not ioc:
+        return Response(json.dumps({"ok": False, "error": "bloc 'ioc' absent (déploiement SOC partiel ?)"}),
+                        status=503, mimetype="application/json")
+    return Response(json.dumps({"ok": True, "ioc": ioc}, ensure_ascii=False),
+                    mimetype="application/json")
+
+
 @soc_bp.route("/api/soc/recently-banned", methods=["GET"])
 def api_soc_recently_banned():
     """Retourne les IPs bannies par Python dans les 15 dernières minutes.

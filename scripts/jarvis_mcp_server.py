@@ -216,6 +216,16 @@ _TOOLS_DEFS: list[Tool] = [
                       "à privilégier pour 'combien de bans ?', 'quel pays attaque le plus ?', "
                       "'quelle heure de pointe ?' sans avoir à parser le brut."),
          inputSchema={"type": "object", "properties": {}}),
+    Tool(name="jarvis_ioc_status",
+         description=("Score IoC POST-COMPROMISSION (0-100) + 6 signaux : AIDE drift (modifs "
+                      "fichiers système), C2 alerts (Suricata ET-TROJAN/MALWARE/CNC), SSH anomaly "
+                      "(connexions hors heures), webshells (POST PHP suspects nginx), AppArmor "
+                      "denials (tentatives escalade), sudo events. Détecte si un attaquant est "
+                      "DÉJÀ ENTRÉ dans le SOC homelab — vs détecter les tentatives. Niveau "
+                      "OK / WARN / CRIT. Source pré-calculée par ioc_collect.py sur srv-ngix "
+                      "(cron 60s). À utiliser pour 'quel est le score IoC ?', 'y a-t-il une "
+                      "compromission ?', 'JARVIS surveille quoi en post-compro ?'."),
+         inputSchema={"type": "object", "properties": {}}),
 ]
 
 
@@ -420,6 +430,49 @@ async def _handle_jarvis_defense_24h(a: dict) -> list[TextContent]:
     return [TextContent(type="text", text=_sanitize(text))]
 
 
+async def _handle_jarvis_ioc_status(a: dict) -> list[TextContent]:
+    """Récupère le bloc `ioc` de monitoring.json via JARVIS et le sérialise en
+    bloc texte compact LLM-friendly (score 0-100 + 6 signaux + détails si WARN/CRIT)."""
+    async with httpx.AsyncClient(timeout=TIMEOUT_FAST) as client:
+        resp = await client.get(f"{JARVIS_BASE}/api/soc/ioc")
+        resp.raise_for_status()
+        data = resp.json()
+    if not data.get("ok"):
+        return [TextContent(type="text", text=f"[JARVIS IoC] {data.get('error', 'inaccessible')}")]
+    ioc   = data.get("ioc") or {}
+    score = ioc.get("score", 0)
+    level = ioc.get("level", "OK")
+    sigs  = ioc.get("signals", {}) or {}
+    def _c(k: str) -> int:
+        return int((sigs.get(k) or {}).get("count", 0))
+    text = (
+        JARVIS_HEADER
+        + f"IoC POST-COMPROMISSION — généré {ioc.get('generated_at', '?')}\n"
+        + "─" * 60 + "\n"
+        + f"  Score global   : {score}/100 — niveau {level}\n"
+        + f"  AIDE drift     : {_c('aide_drift')}\n"
+        + f"  C2 alerts      : {_c('c2_alerts')}\n"
+        + f"  SSH anomaly    : {_c('ssh_anomaly')}\n"
+        + f"  Webshells      : {_c('webshells')}\n"
+        + f"  AppArmor deny  : {_c('apparmor_denials')}\n"
+        + f"  Sudo events    : {_c('sudo_events')}\n"
+        + "─" * 60 + "\n"
+    )
+    if level != "OK":
+        details = []
+        for k, lbl in (("aide_drift", "AIDE"), ("c2_alerts", "C2"),
+                       ("ssh_anomaly", "SSH"), ("webshells", "Webshells"),
+                       ("apparmor_denials", "AppArmor"), ("sudo_events", "Sudo")):
+            s = sigs.get(k) or {}
+            if s.get("score", 0) > 0:
+                d_list = s.get("detail") or []
+                sample = (str(d_list[0])[:80]) if d_list else ""
+                details.append(f"  ⚠ {lbl} ({s.get('count', 0)}) — {sample}")
+        if details:
+            text += "\n".join(details) + "\n"
+    return [TextContent(type="text", text=_sanitize(text))]
+
+
 _TOOL_HANDLERS = {
     "jarvis_chat":           _handle_jarvis_chat,
     "jarvis_soc_status":     _handle_jarvis_soc_status,
@@ -432,6 +485,7 @@ _TOOL_HANDLERS = {
     "jarvis_last_response":  _handle_jarvis_last_response,
     "jarvis_code_exec":      _handle_jarvis_code_exec,
     "jarvis_defense_24h":    _handle_jarvis_defense_24h,
+    "jarvis_ioc_status":     _handle_jarvis_ioc_status,
 }
 
 
