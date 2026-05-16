@@ -363,7 +363,7 @@ async def _handle_jarvis_code_exec(a: dict) -> list[TextContent]:
 
 async def _handle_jarvis_defense_24h(a: dict) -> list[TextContent]:
     """Récupère defense_24h.json via JARVIS et le sérialise en bloc texte compact
-    optimisé pour la lecture LLM (KPI + pic horaire + top 5 pays/AS/scénarios)."""
+    optimisé pour la lecture LLM (KPI + delta vs hier + pic horaire + top 5 pays/AS/scénarios)."""
     async with httpx.AsyncClient(timeout=TIMEOUT_FAST) as client:
         resp = await client.get(f"{JARVIS_BASE}/api/soc/defense")
         resp.raise_for_status()
@@ -371,6 +371,7 @@ async def _handle_jarvis_defense_24h(a: dict) -> list[TextContent]:
     if not data.get("ok"):
         return [TextContent(type="text", text=f"[JARVIS DEFENSE] {data.get('error', 'inaccessible')}")]
     k    = data.get("kpi", {}) or {}
+    dlt  = data.get("kpi_delta", {}) or {}
     heat = data.get("heatmap_24h", []) or []
     peak_h, peak_v = (-1, 0)
     for i, v in enumerate(heat):
@@ -380,18 +381,27 @@ async def _handle_jarvis_defense_24h(a: dict) -> list[TextContent]:
     def _top(lst, n=5):
         return " · ".join(f"{(x.get('value') or '?')[:14]}({x.get('count', 0)})"
                           for x in (lst or [])[:n])
+    def _kvd(key):
+        """KPI courant + delta vs hier formaté '50 (+15%)' ou '50' si pas de baseline."""
+        val = k.get(key, 0)
+        d = (dlt.get(key) or {})
+        pct = d.get("pct")
+        if pct is None:
+            return f"{val}"
+        sign = "+" if pct >= 0 else ""
+        return f"{val} ({sign}{pct}% vs hier)"
     text = (
         JARVIS_HEADER
         + f"DÉFENSE 24H — généré {data.get('generated_at', '?')}\n"
         + "─" * 60 + "\n"
-        + f"  Actions totales       : {k.get('total_actions', 0)}\n"
-        + f"  Bans CrowdSec 24h     : {k.get('bans_24h', 0)}\n"
-        + f"  Décisions CS actives  : {k.get('cs_active', 0)}\n"
-        + f"  WAF CLT / PA85        : {k.get('waf_clt_24h', 0)} / {k.get('waf_pa85_24h', 0)}\n"
-        + f"  Suricata sev1 / sev2  : {k.get('ids_sev1', 0)} / {k.get('ids_sev2', 0)}\n"
-        + f"  GeoBlock 24h          : {k.get('geo_24h', 0)}\n"
-        + f"  Fail2ban actifs       : {k.get('fail2ban_active', 0)}\n"
-        + f"  UFW DROP 24h          : {k.get('ufw_24h', 0)}\n"
+        + f"  Actions totales       : {_kvd('total_actions')}\n"
+        + f"  Bans CrowdSec 24h     : {_kvd('bans_24h')}\n"
+        + f"  Décisions CS actives  : {_kvd('cs_active')}\n"
+        + f"  WAF CLT / PA85        : {_kvd('waf_clt_24h')} / {_kvd('waf_pa85_24h')}\n"
+        + f"  Suricata sev1 / sev2  : {_kvd('ids_sev1')} / {_kvd('ids_sev2')}\n"
+        + f"  GeoBlock 24h          : {_kvd('geo_24h')}\n"
+        + f"  Fail2ban actifs       : {_kvd('fail2ban_active')}\n"
+        + f"  UFW DROP 24h          : {_kvd('ufw_24h')}\n"
         + f"  Pic horaire           : {peak_lbl} ({peak_v} actions)\n"
         + "─" * 60 + "\n"
         + f"  Top pays      : {_top(data.get('top_country'))}\n"

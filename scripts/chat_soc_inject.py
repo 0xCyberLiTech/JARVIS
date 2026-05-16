@@ -70,10 +70,22 @@ SOC_VOCAL_KW = [
 
 # ── Format compact defense_24h ────────────────────────────────
 
+def _kpi_with_delta(kpi: dict, deltas: dict, key: str) -> str:
+    """'50 (+15%)' si delta connu, '50' sinon. Utilisé par _format_defense_block."""
+    val = kpi.get(key, 0)
+    d = (deltas or {}).get(key) or {}
+    pct = d.get("pct")
+    if pct is None:
+        return str(val)
+    sign = "+" if pct >= 0 else ""
+    return f"{val} ({sign}{pct}%)"
+
+
 def _format_defense_block(d: dict) -> str:
-    """Sérialise defense_24h.json en bloc texte compact (~400 chars) pour injection
-    dans le system prompt phi4. Donne KPI + pic horaire + top 5 pays/AS/scénarios."""
-    k = d.get("kpi", {}) or {}
+    """Sérialise defense_24h.json en bloc texte compact (~500 chars) pour injection
+    dans le system prompt phi4. KPI + delta vs hier + pic horaire + top 5 pays/AS/scénarios."""
+    k    = d.get("kpi", {}) or {}
+    dlt  = d.get("kpi_delta", {}) or {}
     heat = d.get("heatmap_24h", []) or []
     peak_h, peak_v = (-1, 0)
     for i, v in enumerate(heat):
@@ -83,14 +95,16 @@ def _format_defense_block(d: dict) -> str:
     top = lambda lst, n=5: " ".join(  # noqa: E731 — formatage local court
         f"{(x.get('value') or '?')[:14]}({x.get('count', 0)})" for x in (lst or [])[:n]
     )
+    kvd = lambda key: _kpi_with_delta(k, dlt, key)  # noqa: E731 — alias court
     return (
         f"[DÉFENSE 24H AGRÉGÉE — {d.get('generated_at', '?')}]\n"
-        f"Actions totales: {k.get('total_actions', 0)} · "
-        f"Bans CrowdSec: {k.get('bans_24h', 0)} · "
-        f"WAF CLT: {k.get('waf_clt_24h', 0)} · WAF PA85: {k.get('waf_pa85_24h', 0)} · "
-        f"Suricata: {k.get('ids_sev1', 0)} sev1/{k.get('ids_sev2', 0)} sev2 · "
-        f"GeoBlock: {k.get('geo_24h', 0)} · F2B actifs: {k.get('fail2ban_active', 0)} · "
-        f"UFW: {k.get('ufw_24h', 0)}\n"
+        f"Actions totales: {kvd('total_actions')} · "
+        f"Bans CrowdSec: {kvd('bans_24h')} · "
+        f"WAF CLT: {kvd('waf_clt_24h')} · WAF PA85: {kvd('waf_pa85_24h')} · "
+        f"Suricata: {kvd('ids_sev1')} sev1/{kvd('ids_sev2')} sev2 · "
+        f"GeoBlock: {kvd('geo_24h')} · F2B actifs: {kvd('fail2ban_active')} · "
+        f"UFW: {kvd('ufw_24h')}\n"
+        f"(deltas = évolution vs 24h en arrière, '+' = hausse, '-' = baisse)\n"
         f"Pic horaire: {peak_lbl} ({peak_v} actions)\n"
         f"Top pays: {top(d.get('top_country'))}\n"
         f"Top AS: {top(d.get('top_as'))}\n"
