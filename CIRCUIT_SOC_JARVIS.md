@@ -1,5 +1,107 @@
 ﻿# Circuit logique SOC + JARVIS — 0xCyberLiTech
-**Date : 2026-05-14 — v2.4** · routing 4 branches (soc/general/code/code_reasoning) · MCP 10 outils · 31 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git initialisé + pre-commit hooks · score honnête 78/100 (chantier dette 2026-05-14 : 62→78)
+**Date : 2026-05-16 — v2.5** · routing 4 branches (soc/general/code/code_reasoning) · MCP **11 outils** (+`jarvis_defense_24h` 2026-05-16) · 32 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git local + pre-commit + pre-push pytest · score honnête 93/100 (chantier dette 2026-05-14/16)
+
+> **À lire en premier** : la nouvelle section [Hiérarchie des appels et autonomie](#hi%C3%A9rarchie-des-appels-et-autonomie) clarifie qui appelle qui (Claude / MCP / JARVIS / srv-ngix) et ce qui tombe si X est éteint. Les autres schémas du document montrent des flux de **données** (ce qui circule), pas des dépendances d'**exécution** (qui a besoin de qui pour vivre).
+
+---
+
+## Hiérarchie des appels et autonomie
+
+Cette section répond à la question : **« qui appelle qui, et qui tombe si tel composant est éteint ? »** — distinction critique pour comprendre l'autonomie de JARVIS vis-à-vis du MCP et de Claude.
+
+### Schéma de la chaîne d'appels (sens des flèches = sens des appels)
+
+```
+                    Claude Desktop / Claude Code               Navigateur (toi)
+                    (consommateur externe optionnel)           (consommateur web)
+                              │                                       │
+                              │ JSON-RPC over HTTP                    │ HTTP direct
+                              │ (transport streamable)                │
+                              ▼                                       │
+                    ┌───────────────────────┐                         │
+                    │  MCP server :5010     │                         │
+                    │  jarvis_mcp_server.py │   ← PROXY / BUS         │
+                    │  11 outils exposés    │     d'OUTILS            │
+                    │  autonome de Claude   │                         │
+                    └─────────┬─────────────┘                         │
+                              │ HTTP REST                             │
+                              │ (localhost:5000)                      │
+                              ▼                                       │
+                    ┌───────────────────────┐                         │
+                    │  JARVIS :5000         │                         │
+                    │  jarvis.py + soc.py   │   ← ORCHESTRATEUR       │
+                    │  ~73 routes Flask     │     (autorité locale)   │
+                    │  + auto-engine 60s    │                         │
+                    │  + 5 modèles Ollama   │                         │
+                    │  + 4 TTS · STT · RAG  │                         │
+                    │  + SSH 5 hôtes        │                         │
+                    └─────────┬─────────────┘                         │
+                              │ HTTP GET (cache 30s)                  │
+                              │ /api/soc/defense                      │
+                              │ /api/soc/context                      │
+                              ▼                                       ▼
+                    ┌─────────────────────────────────────────────────┐
+                    │  srv-ngix :8080                                 │
+                    │  • defense_24h.json (cron 60s)                  │
+                    │  • monitoring.json (cron 60s)                   │
+                    │  • router.json / xdr_events / ...               │
+                    └─────────┬───────────────────────────────────────┘
+                              ▲
+                              │ écrit (cron + scripts)
+                              │
+                    ┌───────────────────────┐
+                    │  defense_aggregator.py│
+                    │  monitoring_gen.py    │   ← PRODUCTEURS
+                    │  (Python sur srv-ngix)│
+                    └───────────────────────┘
+```
+
+### Règle de lecture
+
+- **Une flèche pointe dans le sens de l'appel** : `A ──▶ B` signifie « A appelle B » (donc A consomme un service de B).
+- **Aucune flèche ne remonte** dans le schéma : JARVIS n'appelle jamais MCP, MCP n'appelle jamais Claude. Le sens des appels est strictement descendant.
+- **Une exception au flux principal** : le navigateur dashboard SOC court-circuite JARVIS et appelle srv-ngix directement.
+
+### Tableau des dépendances réelles
+
+| Composant | Niveau | Appelle | Est appelé par | Effet si éteint |
+|---|---|---|---|---|
+| **Claude** (Desktop/Code) | 5 (sommet) | MCP server | *(rien — sommet humain/IA)* | JARVIS continue à 100 % · MCP continue · tout est intact |
+| **MCP server** :5010 | 4 | JARVIS :5000 | Claude (+ tout client MCP) | Claude perd les 11 outils JARVIS · JARVIS continue à 100 % |
+| **JARVIS** :5000 | 3 | srv-ngix :8080, Ollama, SSH 5 hôtes | MCP, UI JARVIS, dashboard SOC (heartbeat) | MCP perd ses outils SOC · UI HS · auto-engine HS · dashboard SOC continue (lit srv-ngix direct) |
+| **srv-ngix** :8080 | 2 | (sert des fichiers) | JARVIS, navigateur dashboard | JARVIS répond 503 sur `/api/soc/*` · pas de bloc défense injecté · auto-engine SOC silencieux · dashboard SOC vide |
+| **defense_aggregator.py** | 1 (base) | rien (cron) | *(produit les JSON)* | `defense_24h.json` se fige · les chiffres deviennent obsolètes mais restent lisibles |
+| **Navigateur** dashboard | alt. | srv-ngix direct | utilisateur | court-circuit total : tu vois les chiffres sans dépendre de JARVIS ni MCP |
+
+### Scénarios extrêmes — qui tombe vraiment
+
+| Tu éteins… | JARVIS | MCP | Dashboard SOC | Page DÉFENSE | Claude |
+|---|---|---|---|---|---|
+| Claude (déconnecte) | ✅ | ✅ | ✅ | ✅ | — |
+| MCP server | ✅ | — | ✅ | ✅ | perd les 11 outils |
+| JARVIS | — | partiel (perd les outils) | ✅ | ✅ | perd accès local |
+| srv-ngix | partiel (perd SOC) | partiel | ❌ | ❌ | — |
+| Producteur (defense_aggregator) | ✅ (chiffres figés) | ✅ | ✅ (stale) | ✅ (stale) | ✅ |
+
+### Pourquoi JARVIS est l'**orchestrateur** et pas le **consommateur** du MCP
+
+**JARVIS ne consomme pas le MCP.** JARVIS **expose ses capacités à travers** le MCP. Le bénéfice circule dans ce sens :
+
+- **Claude profite du MCP** pour accéder aux 11 fonctions JARVIS (chat, soc_ask, defense_24h, infra, code_exec…)
+- **MCP** est un pont neutre (un bus de capacités)
+- **JARVIS profite de Claude** : via le MCP, Claude devient un *bras d'analyse externe* qui peut interroger, raisonner et exécuter du code sur l'infra sans intervention manuelle de l'utilisateur
+
+JARVIS reste l'autorité locale : c'est lui qui héberge les LLM Ollama, le routing 4 modes, l'auto-engine SOC, les 5 connexions SSH, les 4 TTS, le STT, le RAG, et qui pilote (subprocess.Popen + watchdog psutil) le process MCP enfant lui-même. **MCP est un produit de JARVIS, pas un fournisseur.**
+
+### Effet de l'étape 6 (intégration `defense_24h.json`)
+
+L'étape 6 ajoute **3 canaux de consommation** d'une même source (`defense_24h.json` produit côté SOC) :
+
+1. **Page web `/defense.html`** : le navigateur lit directement `srv-ngix:8080/defense_24h.json` — court-circuit total, aucun composant intermédiaire
+2. **JARVIS phi4 (mode SOC)** : `chat_soc_inject.py:_format_defense_block()` ajoute un bloc compact (~400 chars) au system prompt phi4, fetché via la route locale `/api/soc/defense` (cache 30 s, fetch HTTP direct vers srv-ngix)
+3. **Outil MCP `jarvis_defense_24h`** : 11e outil exposé via MCP, qui appelle `/api/soc/defense` sur JARVIS pour servir Claude
+
+**Aucun de ces 3 canaux ne crée une nouvelle dépendance montante**. La règle « MCP autonome de Claude » et « JARVIS autonome du MCP » est intacte.
 
 ---
 
