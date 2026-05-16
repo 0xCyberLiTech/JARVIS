@@ -1,4 +1,4 @@
-"""Tests jarvis_mcp_server — 11 outils MCP + helpers + sanitize.
+"""Tests jarvis_mcp_server — 12 outils MCP + helpers + sanitize.
 
 Sans dépendance pytest-asyncio : on utilise asyncio.run() directement.
 httpx est mocké via classes async context manager fakes.
@@ -159,8 +159,8 @@ def test_sanitize_max_chars_default_3000():
 # ── _TOOLS_DEFS ─────────────────────────────────────────────────────────
 
 
-def test_tools_defs_compte_11_outils():
-    assert len(mcp._TOOLS_DEFS) == 11
+def test_tools_defs_compte_12_outils():
+    assert len(mcp._TOOLS_DEFS) == 12
 
 
 def test_tools_defs_noms_uniques():
@@ -181,10 +181,11 @@ def test_tools_defs_contient_jarvis_chat():
     assert "jarvis_last_response" in names
     assert "jarvis_code_exec" in names
     assert "jarvis_defense_24h" in names
+    assert "jarvis_ioc_status" in names
 
 
-def test_tool_handlers_compte_11_handlers():
-    assert len(mcp._TOOL_HANDLERS) == 11
+def test_tool_handlers_compte_12_handlers():
+    assert len(mcp._TOOL_HANDLERS) == 12
 
 
 def test_tool_handlers_correspondent_aux_defs():
@@ -655,9 +656,9 @@ def test_call_tool_exception_generique(monkeypatch):
 # ── list_tools ─────────────────────────────────────────────────────────
 
 
-def test_list_tools_renvoie_les_10():
+def test_list_tools_renvoie_les_12():
     result = _run(mcp.list_tools())
-    assert len(result) == 11
+    assert len(result) == 12
 
 
 # ── _build_starlette_app ───────────────────────────────────────────────

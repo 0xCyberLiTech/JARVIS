@@ -116,10 +116,30 @@ _SOC_AUTO_BANNED_PATH = _SCRIPTS_DIR / "jarvis_soc_autobanned.json"
 # ── Constantes SOC (ban, seuils, cooldowns) ───────────────────
 _SOC_COOLDOWN_IP      = 15 * 60   # cooldown ban par IP (15 min)
 _SOC_REQ_HOUR_SEUIL   = 500       # seuil req/h → alerte trafic
-_SOC_BAN_MIN_COUNT    = 10        # hits BRUTE minimum → ban auto
-_SOC_BAN_MIN_EXPLOIT  = 1         # hits EXPLOIT minimum → ban immédiat
-_SOC_BAN_MIN_HONEYPOT = 1         # hits honeypot minimum → ban immédiat
-_SOC_BAN_MIN_SCAN     = 20        # hits SCAN minimum → ban auto (évite bruit internet normal)
+
+# ── Configuration ban auto SOC — source unique stages KC v3.97.195 ────
+# Kill Chain 7 maillons (SOC v3.97.195) :
+#   PROBE → RECON → SCAN → EXPLOIT → WAF → BRUTE → NEUTRALISÉ
+#
+# DÉFENSES (jamais bannies — règle absolue) : PROBE (UFW), WAF (ModSec), NEUTRALISÉ (CrowdSec+f2b)
+# OFFENSIVES (candidats ban auto, priorité décroissante 0=plus prioritaire) :
+#
+#   stage      (min_hits, source_label,   duration, priority)
+_SOC_BAN_CONFIG = {
+    "EXPLOIT": (1,        "exploit-cve",  "24h",    0),   # ban immédiat
+    "BRUTE":   (10,       "nginx-logs",   "24h",    1),
+    "SCAN":    (20,       "nginx-logs",   "24h",    2),   # seuil élevé : évite bruit internet normal
+    "RECON":   (None,     None,           None,     3),   # tracé KC, pas de ban auto direct
+}
+# Profils transverses (hors stage KC pur)
+_SOC_BAN_HONEYPOT = (1, "honeypot",     "24h")   # IP touche uniquement honeypot
+_SOC_BAN_SURICATA = (1, "suricata-ids", "48h")   # alerte IDS = ban prolongé
+
+# Alias backwards-compat — dérivés depuis _SOC_BAN_CONFIG (source unique)
+_SOC_BAN_MIN_COUNT    = _SOC_BAN_CONFIG["BRUTE"][0]
+_SOC_BAN_MIN_EXPLOIT  = _SOC_BAN_CONFIG["EXPLOIT"][0]
+_SOC_BAN_MIN_HONEYPOT = _SOC_BAN_HONEYPOT[0]
+_SOC_BAN_MIN_SCAN     = _SOC_BAN_CONFIG["SCAN"][0]
 # ── Seuils Suricata sév.2 (baseline ~1400/j — recalibrés 2026-03-31) ──
 _SUR_SEV2_SURGE       = 3000      # surge C2 — alerte CRITIQUE
 _SUR_SEV2_HIGH        = 1500      # activité élevée — alerte WARN
@@ -1061,7 +1081,8 @@ def api_soc_ip_deep():
 # AUTO-BAN ET SURVEILLANCE BACKGROUND
 # ════════════════════════════════════════════════════════════════
 
-_STAGE_PRIORITY = {"EXPLOIT": 0, "BRUTE": 1, "SCAN": 2, "RECON": 3}
+# Priorité ban dérivée de _SOC_BAN_CONFIG (source unique — section haut du module)
+_STAGE_PRIORITY = {k: v[3] for k, v in _SOC_BAN_CONFIG.items()}
 
 
 def _autoban_classify(ip_obj):
