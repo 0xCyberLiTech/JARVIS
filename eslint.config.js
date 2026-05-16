@@ -262,9 +262,12 @@ export default [
     },
     rules: {
       'no-undef': 'error',
+      // Convention identique au repo SOC : variables partagées cross-fichier
+      // suivent _camelCase / _SCREAMING / SCREAMING_SNAKE → exclues du signal
+      // no-unused-vars (sans bundler, ESLint ne voit pas les usages cross-files).
       'no-unused-vars': ['warn', {
         argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
+        varsIgnorePattern: '^(_|[A-Z][A-Z0-9_])',
         caughtErrors: 'none',
       }],
       'no-redeclare': 'off',
