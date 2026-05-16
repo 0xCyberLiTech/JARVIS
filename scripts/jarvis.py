@@ -1416,13 +1416,15 @@ def _build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS 
         lines.append(f"Service {s:12s}: {status}")
     cs_banned = cs.get("decisions_detail", {})
     if cs_banned:
-        shown = sorted(cs_banned.items())[:25]
+        # Limite portée à 100 (était 25 — provoquait des faux "pas dans la liste"
+        # quand la liste prod dépassait 25 IPs et que phi4 oubliait la mention "N autres").
+        shown = sorted(cs_banned.items())[:100]
         lines.append("")
-        lines.append(f"IPs DÉJÀ BANNIES par CrowdSec ({len(cs_banned)} au total — déjà neutralisées, NE PAS recommander de les bannir) :")
+        lines.append(f"IPs DÉJÀ BANNIES par CrowdSec ({len(cs_banned)} au total — déjà neutralisées, NE PAS recommander de les bannir, NE PAS proposer cscli decisions add pour ces IPs) :")
         for ip, meta in shown:
             lines.append(f"  {ip} — scénario={meta.get('scenario','?')} stage={meta.get('stage','?')}")
         if len(cs_banned) > len(shown):
-            lines.append(f"  … et {len(cs_banned) - len(shown)} autre(s) IP(s) déjà bannie(s) non listée(s)")
+            lines.append(f"  … et {len(cs_banned) - len(shown)} autre(s) IP(s) déjà bannie(s) non listée(s) — TOUTE IP non listée ci-dessus PEUT être déjà bannie, vérifier le total ({len(cs_banned)}) avant d'en recommander une.")
     active_ips = kc.get("active_ips", [])
     if active_ips:
         exploit_unblocked = sum(1 for ip in active_ips if ip.get("stage") == "EXPLOIT" and not ip.get("cs_decision"))
@@ -1451,6 +1453,7 @@ def _build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS 
         lines.append(f"Campagnes lentes /24 (14j) : {len(slow)} subnet(s) | top {top['subnet']} — {top['count']} IPs distinctes ({top['last_seen'][:10]})")
     lines.append("")
     lines.append("⚠ RÈGLE ABSOLUE — FIDÉLITÉ SOC : utilise UNIQUEMENT les IPs, scores, niveaux et services listés ci-dessus. Interdiction formelle d'inventer ou d'extrapoler toute donnée absente de ce contexte. Si une information est manquante, indiquer 'non disponible'.")
+    lines.append("🚨 RÈGLE ANTI-DOUBLE-BAN : AVANT de recommander une commande 'cscli decisions add' ou 'fail2ban-client set ... banip' pour une IP, tu DOIS scanner la section 'IPs DÉJÀ BANNIES par CrowdSec' ci-dessus. Si l'IP s'y trouve, répondre 'IP déjà neutralisée par CrowdSec (expire dans Xh) — aucune action requise' au lieu de proposer un ban. Si la liste contient une mention 'et N autres', l'IP peut aussi y être : indiquer la vérification cscli decisions list -i <IP> au lieu d'ajouter un ban à l'aveugle.")
     return "\n".join(lines)
 
 
