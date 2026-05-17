@@ -192,7 +192,7 @@ Nouveau document `JARVIS/BILAN-TECHNIQUE.md` (~800 lignes) calqué sur la struct
 ### Création CLAUDE.md (briefing JARVIS-spécifique)
 
 Nouveau document `JARVIS/CLAUDE.md` (~120 lignes) — **complémentaire** au `0xCyberLiTech/CLAUDE.md` racine (ne duplique pas). Sert quand on ouvre VSCode dans `JARVIS/` seul :
-- Identité (v3.3 · 91/100 · 801 tests · refactor JS terminé)
+- Identité (v3.3 · ~94/100 · 936 tests · refactor JS terminé)
 - Sources de vérité (priorité : MEMORY → BILAN → RUNBOOK → docs/)
 - Stack technique compacte
 - Lancement (start/stop/MCP)

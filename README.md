@@ -42,7 +42,7 @@ JARVIS/
 │   ├── 31 modules dédiés/             ← Phase 3 : audio (5) + bypass (8) + infra (2) + chat/LLM (15) + audio_dsp.py (chantier 2026-05-14) — voir docs/ROUTING-JARVIS.md
 │   ├── blueprints/
 │   │   └── soc.py                     ← Blueprint SOC (1689 lignes · auto-engine · SSH 4 hôtes)
-│   ├── jarvis_mcp_server.py           ← MCP bridge Claude Code ↔ JARVIS (11 outils)
+│   ├── jarvis_mcp_server.py           ← MCP bridge Claude Code ↔ JARVIS (12 outils (+jarvis_ioc_status Sprint 18d 2026-05-16))
 │   ├── templates/
 │   │   ├── jarvis.html                ← UI shell Jinja2 (204 lignes · 0 handler inline)
 │   │   ├── tabs/                      ← 8 onglets inclus
@@ -75,7 +75,7 @@ JARVIS/
 │   ├── DEPLOIEMENT.md                 ← exploitation, API, dépannage
 │   ├── REINSTALLATION.md              ← réinstallation Windows complète
 │   ├── AUDIT_JARVIS.md                ← audit sécurité (10/10)
-│   └── REFERENCE-TECHNIQUE.md         ← référence complète (NDT 100/100 script auto · score honnête global ~93/100 (799 tests, 34/34 modules, circuit breaker Ollama 8 call-sites, pré-warm Kokoro))
+│   └── REFERENCE-TECHNIQUE.md         ← référence complète (NDT 100/100 script auto · score honnête global ~94/100 (936 tests, 32 modules · 25 à 100% cov, circuit breaker Ollama 8 call-sites, pré-warm Kokoro))
 ├── README.md
 └── MEMORY.md
 ```
@@ -169,16 +169,16 @@ python jarvis.py
 | [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md) | Exploitation, routes API, dépannage |
 | [`docs/REINSTALLATION.md`](docs/REINSTALLATION.md) | Réinstallation Windows complète |
 | [`docs/ROUTING-JARVIS.md`](docs/ROUTING-JARVIS.md) | **Routing automatique** : 4 modes · 9 bypass Python · sécurité (RFC1918, _BLOCKED_SSH, whitelists) |
-| [`docs/MCP-SERVER.md`](docs/MCP-SERVER.md) | **MCP server** : pont Claude ↔ JARVIS · **11 outils** détaillés (+`jarvis_defense_24h` 2026-05-16) · config Claude Desktop · watchdog |
+| [`docs/MCP-SERVER.md`](docs/MCP-SERVER.md) | **MCP server** : pont Claude ↔ JARVIS · **12 outils (+jarvis_ioc_status Sprint 18d 2026-05-16)** détaillés (+`jarvis_defense_24h` 2026-05-16) · config Claude Desktop · watchdog |
 | [`docs/AUDIO-DSP.md`](docs/AUDIO-DSP.md) | **Audio DSP** : Web Audio graph (EQ+Comp+Limiter+FX) · 4 engines TTS · STT large-v3-turbo · DeepFilterNet CUDA · Voice Lab |
 | [`docs/AUDIT_JARVIS.md`](docs/AUDIT_JARVIS.md) | Audit sécurité — 10/10 — v2.6 — 0 gap |
-| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence v1.5 — NDT 100/100 (script auto) · **score honnête global ~93/100** (recalibré depuis 62 réel · +31 via chantier dette 2026-05-14/15 : git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS −98,1% + 799 tests pytest sur 34/34 modules (100%) avec coverage 39% lignes + fix perf IPv6 + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro + hook pre-push) |
+| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence v1.5 — NDT 100/100 (script auto) · **score honnête global ~94/100** (recalibré depuis 62 réel · +31 via chantier dette 2026-05-14/15 : git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS −98,1% + 936 tests pytest sur 32 modules · 25 à 100% cov (100%) avec coverage 51% lignes + fix perf IPv6 + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro + hook pre-push) |
 | [`docs/ROADMAP-V33.md`](docs/ROADMAP-V33.md) | Fonctionnalités v3.3 planifiées |
 | [`MEMORY.md`](MEMORY.md) | État projet, stack, historique corrections |
 
 ## Qualité — chantier dette technique 2026-05-14/15
 
-Audit honnête et chantier de dette : **score recalibré 62 → ~93/100 honnête (39% coverage lignes, 799 tests, 34/34 modules, circuit breaker Ollama étendu 8 call-sites, pré-warm Kokoro CUDA)** (l'ancien
+Audit honnête et chantier de dette : **score recalibré 62 → ~94/100 honnête (39% coverage lignes, 936 tests, 32 modules · 25 à 100% cov, circuit breaker Ollama étendu 8 call-sites, pré-warm Kokoro CUDA)** (l'ancien
 « 91/100 » / « 100/100 » étaient optimistes — le NDT script auto mesure le style,
 pas l'architecture/tests/CI). Travaux du chantier :
 - **Dépôt git LOCAL** initialisé (100% local, aucun remote — règle « rien sur le web ») · commits atomiques

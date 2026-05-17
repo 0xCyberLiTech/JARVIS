@@ -5,12 +5,12 @@
 
 ## 0. État actuel (audit dette honnête 2026-05-17)
 
-**Score honnête : 91/100** — Décomposition :
+**Score honnête : ~94/100** (post-coverage +7 pts session 2026-05-17 soir incl. option B) — Décomposition :
 
 | Critère | Score | Justification |
 |---|---|---|
 | Architecture | 23/25 | **Modularisation faite des 2 côtés** : Python `jarvis.py` 4633L est un **orchestrateur Flask** (~150 endpoints + routing 4 modes + auto-engine SOC) — la logique métier est déjà extraite dans **31 modules satellites** (dont 21 à 100% cov). JS : refactor officiellement TERMINÉ (`jarvis_main.js` 7828→148L · −98,1% · 13 modules extraits). Coverage 26% de `jarvis.py` = normale pour orchestrateur HTTP, couvert indirectement par 25 tests E2E Playwright. −2 : `blueprints/soc.py` 1007 stmts encore dense (cache + fallback SSH + endpoints SOC), pourrait gagner en éclatement mais ROI faible. |
-| Tests | 23/25 | **801 tests pytest pass · 0 fail** · coverage RÉELLE **44%** · **34/34 modules touchés** · 478 mocks légitimes (Ollama/SSH/TTS). −2 : pas de tests E2E Playwright étendus (25 E2E vs ~50 attendus pour parité fonctionnelle complète). |
+| Tests | 23/25 | **936 tests pytest pass · 0 fail** · coverage RÉELLE **51%** · **32 modules · 25 à 100% cov** · 478 mocks légitimes (Ollama/SSH/TTS). −2 : pas de tests E2E Playwright étendus (25 E2E vs ~50 attendus pour parité fonctionnelle complète). |
 | Documentation | 13/15 | MEMORY.md 2355L à jour 2026-05-16 nuit + docs/ 7 fichiers (AUDIO-DSP, MCP-SERVER, REFERENCE-TECHNIQUE, ROUTING-JARVIS, DEPLOIEMENT, REINSTALLATION, SUPPORT-INFOGERANCE) + RUNBOOK.md + **BILAN-TECHNIQUE.md (ce document, 2026-05-17)** + CLAUDE.md (2026-05-17). −2 : refactor 2026-05-15 détaillé dans MEMORY.md mais pas extrait en doc dédiée. |
 | Lisibilité/Conventions | 14/15 | ESLint **155 warnings · 0 erreur** (camelCase exports inter-modules, acceptés sans bundler) · 2 TODO/FIXME Python · ruff 0 · style guides appliqués. −1 : 135 inline styles `style.display=`/`style.color=` côté JS (acceptés pour SPA temps réel avec HUD dynamique). |
 | Performance | 10/10 | Circuit breaker Ollama 8 call-sites (refus 1ms vs timeout 30s si Ollama down) · cache SOC 30s · debounce DSP audio · fix IPv6 systémique (`127.0.0.1` partout, −97% latence) · pré-warm Kokoro CUDA au boot (0 cold start 42.8s sur 1re alerte) · pré-warm phi4 SOC. |
@@ -37,7 +37,7 @@
 | **TTS moteurs** | 4 (edge-tts · Kokoro CUDA · Piper · SAPI5) avec fallback chain |
 | **ESLint warnings** | 155 · 0 erreur |
 | **ruff** | 0 erreur |
-| **Pre-commit hooks** | ruff + eslint (commit) · pytest 801 tests (pre-push) |
+| **Pre-commit hooks** | ruff + eslint (commit) · pytest 936 tests (pre-push) |
 
 ---
 
@@ -91,7 +91,7 @@ JARVIS est un **assistant IA local** (type Iron Man) tournant sur la **station W
 - RAG : **599 chunks** · mxbai-embed-large · seuil 0.35 · TTL 300s · auto-refresh 6h
 - MCP server : **12 outils** exposés à Claude Desktop / Cursor sur port 5010 streamable-HTTP
 - Routing automatique : 3 branches + bypass Python (VM/service/backup → sans LLM)
-- Tests : **801 pytest pass** · coverage 44% · 21 modules à 100% cov
+- Tests : **936 pytest pass** · coverage 51% · 25 modules à 100% cov
 - Sécurité : whitelist SSH 29 patterns bloqués · profil SOC anti-double-ban · injection 100% serveur
 
 **Architecture moteur IA local** :
@@ -478,7 +478,7 @@ Push backend params DSP → debouncé 100ms (évite spam HTTP sur drag slider EQ
 ### Pre-commit hooks
 
 - **Commit** : ruff + eslint bloquants (0 erreur required)
-- **Pre-push** : pytest 801 tests bloquants (CI cloud impossible « rien sur le web »)
+- **Pre-push** : pytest 936 tests bloquants (CI cloud impossible « rien sur le web »)
 
 ### ESLint config (`eslint.config.js`)
 
@@ -542,13 +542,13 @@ Le projet JARVIS est **post-modularisation** des 2 côtés :
 | Indicateur | Valeur |
 |---|---|
 | Version JARVIS | **v3.3** (interface holographique) |
-| Score dette honnête | **91/100** (post-audit 2026-05-17) |
+| Score dette honnête | **~94/100** (post-coverage chantier 5 modules + option B 2026-05-17 soir) |
 | Tests pytest | **801 pass · 0 fail** |
 | Coverage globale | **44%** (6059 stmts) |
 | Modules ≥100% cov | **21 modules** |
 | ESLint | **155 warnings · 0 erreur** |
 | ruff | **0 erreur** |
-| Pre-push hook | **pytest 801 tests** bloquants |
+| Pre-push hook | **pytest 936 tests** bloquants |
 | Refactor JS | **terminé** (`jarvis_main.js` 148 L) |
 | MCP outils | **12** |
 | Circuit breaker | **8 call-sites Ollama** wrappés |
@@ -563,4 +563,4 @@ Le projet JARVIS est **post-modularisation** des 2 côtés :
 
 ---
 
-*Document généré le 2026-05-17 (post-audit dette honnête + Sprints 1-4 + circuit breaker + TTS pré-warm + MCP 12 outils + intégrations SOC) — JARVIS 0xCyberLiTech v3.3 — 801 tests pass · coverage 44% · dette 91/100 honnête*
+*Document généré le 2026-05-17 (post-audit dette honnête + Sprints 1-4 + circuit breaker + TTS pré-warm + MCP 12 outils + intégrations SOC) — JARVIS 0xCyberLiTech v3.3 — 936 tests pass · coverage 51% · dette ~94/100 honnête*

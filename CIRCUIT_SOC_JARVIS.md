@@ -1,5 +1,5 @@
 ﻿# Circuit logique SOC + JARVIS — 0xCyberLiTech
-**Date : 2026-05-16 — v2.5** · routing 4 branches (soc/general/code/code_reasoning) · MCP **11 outils** (+`jarvis_defense_24h` 2026-05-16) · 32 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git local + pre-commit + pre-push pytest · score honnête 93/100 (chantier dette 2026-05-14/16)
+**Date : 2026-05-16 — v2.6 (2026-05-17)** · routing 4 branches (soc/general/code/code_reasoning) · MCP **12 outils** (+`jarvis_defense_24h` 2026-05-16) · 32 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git local + pre-commit + pre-push pytest · score honnête 94/100 (chantier dette 2026-05-14/16)
 
 > **À lire en premier** : la nouvelle section [Hiérarchie des appels et autonomie](#hi%C3%A9rarchie-des-appels-et-autonomie) clarifie qui appelle qui (Claude / MCP / JARVIS / srv-ngix) et ce qui tombe si X est éteint. Les autres schémas du document montrent des flux de **données** (ce qui circule), pas des dépendances d'**exécution** (qui a besoin de qui pour vivre).
 
@@ -21,7 +21,7 @@ Cette section répond à la question : **« qui appelle qui, et qui tombe si tel
                     ┌───────────────────────┐                         │
                     │  MCP server :5010     │                         │
                     │  jarvis_mcp_server.py │   ← PROXY / BUS         │
-                    │  11 outils exposés    │     d'OUTILS            │
+                    │  12 outils exposés    │     d'OUTILS            │
                     │  autonome de Claude   │                         │
                     └─────────┬─────────────┘                         │
                               │ HTTP REST                             │
@@ -67,7 +67,7 @@ Cette section répond à la question : **« qui appelle qui, et qui tombe si tel
 | Composant | Niveau | Appelle | Est appelé par | Effet si éteint |
 |---|---|---|---|---|
 | **Claude** (Desktop/Code) | 5 (sommet) | MCP server | *(rien — sommet humain/IA)* | JARVIS continue à 100 % · MCP continue · tout est intact |
-| **MCP server** :5010 | 4 | JARVIS :5000 | Claude (+ tout client MCP) | Claude perd les 11 outils JARVIS · JARVIS continue à 100 % |
+| **MCP server** :5010 | 4 | JARVIS :5000 | Claude (+ tout client MCP) | Claude perd les 12 outils JARVIS · JARVIS continue à 100 % |
 | **JARVIS** :5000 | 3 | srv-ngix :8080, Ollama, SSH 5 hôtes | MCP, UI JARVIS, dashboard SOC (heartbeat) | MCP perd ses outils SOC · UI HS · auto-engine HS · dashboard SOC continue (lit srv-ngix direct) |
 | **srv-ngix** :8080 | 2 | (sert des fichiers) | JARVIS, navigateur dashboard | JARVIS répond 503 sur `/api/soc/*` · pas de bloc défense injecté · auto-engine SOC silencieux · dashboard SOC vide |
 | **defense_aggregator.py** | 1 (base) | rien (cron) | *(produit les JSON)* | `defense_24h.json` se fige · les chiffres deviennent obsolètes mais restent lisibles |
@@ -78,7 +78,7 @@ Cette section répond à la question : **« qui appelle qui, et qui tombe si tel
 | Tu éteins… | JARVIS | MCP | Dashboard SOC | Page DÉFENSE | Claude |
 |---|---|---|---|---|---|
 | Claude (déconnecte) | ✅ | ✅ | ✅ | ✅ | — |
-| MCP server | ✅ | — | ✅ | ✅ | perd les 11 outils |
+| MCP server | ✅ | — | ✅ | ✅ | perd les 12 outils |
 | JARVIS | — | partiel (perd les outils) | ✅ | ✅ | perd accès local |
 | srv-ngix | partiel (perd SOC) | partiel | ❌ | ❌ | — |
 | Producteur (defense_aggregator) | ✅ (chiffres figés) | ✅ | ✅ (stale) | ✅ (stale) | ✅ |

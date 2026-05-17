@@ -1,5 +1,5 @@
 # JARVIS — Référence Technique
-<!-- 2026-05-15 — v1.9 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed-large · NDT script auto 100/100 · score honnête global 93/100 (recalibré depuis 62 réel · +31 via chantier dette 2026-05-14/15 : Ruff 98→0 + git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS jarvis_main.js 7828→148L (-98,1%) + 799 tests pytest sur 34/34 modules (100%) coverage 39% lignes + fix perf IPv6 + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro + hook pre-push) -->
+<!-- 2026-05-15 — v1.9 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed-large · NDT script auto 100/100 · score honnête global 94/100 (recalibré depuis 62 réel · +31 via chantier dette 2026-05-14/15 : Ruff 98→0 + git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS jarvis_main.js 7828→148L (-98,1%) + 936 tests pytest sur 32 modules · 25 à 100% cov · coverage 51% lignes + fix perf IPv6 + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro + hook pre-push) -->
 
 Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · Python 3.11
 
@@ -12,7 +12,7 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 | Version | 3.3 (production) · chantier dette technique 2026-05-14/15 |
 | Audit sécurité | **8/10** honnête (v2.7 — 2026-05-13 · audit ciblé + 1 fix race condition) |
 | Dette technique (NDT script auto) | **100/100** · D1/D2/D6/D13 zéro violation (session 17 — 2026-05-08) |
-| **Score honnête global** | **93/100** (recalibré post-audit pytest --cov : départ réel 62/100, +31 via chantier dette 2026-05-14/15 — git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS jarvis_main.js 7828→148L (−98,1%) + 799 tests pytest sur **34/34 modules (100%)** avec coverage 39% lignes + fix perf IPv6 −97% latence interne + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro CUDA · MAIS pas de CI cloud — alternative locale pre-push · plafond pratique sans cloud atteint) |
+| **Score honnête global** | **94/100** (recalibré post-audit pytest --cov : départ réel 62/100, +31 via chantier dette 2026-05-14/15 — git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS jarvis_main.js 7828→148L (−98,1%) + 936 tests pytest sur **32 modules · 25 à 100% cov** · coverage 51% lignes + fix perf IPv6 −97% latence interne + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro CUDA · MAIS pas de CI cloud — alternative locale pre-push · plafond pratique sans cloud atteint) |
 | Machine | Windows 11 Pro · RTX 5080 16 GB GDDR7 · CUDA 12 · Python 3.11 |
 | LLM | Ollama local uniquement — zéro cloud |
 
@@ -35,7 +35,7 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 | TTS défaut | edge-tts fr-CA-AntoineNeural (HTTPS) |
 | TTS fallback | Kokoro ff_siwis (CUDA) → XTTS v2 58 voix → Piper (onnx) → SAPI5 |
 | DSP | numpy · scipy · DeepFilterNet GPU sm_120 Blackwell |
-| MCP | jarvis_mcp_server.py · **11 outils** (+`jarvis_defense_24h` 2026-05-16) · stdio pythonw |
+| MCP | jarvis_mcp_server.py · **12 outils** (+`jarvis_defense_24h` 2026-05-16) · stdio pythonw |
 
 ### 2.2 Métriques fichiers (2026-05-14 · post-chantier dette technique)
 
@@ -43,7 +43,7 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 |---|---|---|
 | `scripts/jarvis.py` | **4 633** | 75 routes · NDT 100/100 · routing **4 branches** SOC/GÉNÉRAL/CODE/CR · réduit via Phase 3 (30 modules) + audio_dsp.py (chantier 2026-05-14) |
 | `scripts/blueprints/soc.py` | 1 689 | Blueprint SOC · auto-engine · SSH 4 hôtes · `/api/soc/ip-history` · fix race condition `_soc_actions_save` (2026-05-13) |
-| `scripts/jarvis_mcp_server.py` | ~430 | **11 outils** · `_TOOLS_DEFS` · streamable-HTTP port 5010 · 0 fonction >80L |
+| `scripts/jarvis_mcp_server.py` | ~430 | **12 outils** · `_TOOLS_DEFS` · streamable-HTTP port 5010 · 0 fonction >80L |
 | `scripts/static/jarvis_main.js` | **4 013** | 🟡 refactor JS 2026-05-14 soir : 7828→4013 (−49%) · 11 modules extraits · reste à finir |
 | `scripts/static/js/` (11 modules) | ~5 000 | terminal_code·voice_lab·stt + tasks_tab·welcome·eq_parametric·eq_music·audio_mire·audio_viz·settings_llm·dsp_audio (refactor JS 2026-05-14) |
 | **31 modules Python extraits** | **~3 540** | Phase 3 : Audio/Voice 5 + Bypass 8 + Infra/RAG 2 + Chat/LLM core 15 + `audio_dsp.py` 508L (chantier 2026-05-14) — voir [`ROUTING-JARVIS.md`](ROUTING-JARVIS.md) |
@@ -163,7 +163,7 @@ Déplacement            : mv · cp
 | 2026-05-13 s33c | **92/100** (valeur d'époque) | Split JS partiel : `recorder.js` + `voice_print.js` extraits · `jarvis_main.js` 10507→8994L (-14.4%) |
 | 2026-05-14       | **78/100 honnête** (recalibré) | ⚠ Audit strict : le 91 était optimiste, départ réel **62/100**. Chantier dette 2026-05-14 (**62→78, +16**) : Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (100% local) · **pre-commit hooks bloquants** · `jarvis.css` → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** (3 modules : terminal_code/voice_lab/stt) |
 | 2026-05-14 soir  | **~82/100 honnête** | **Refactor JS massif** : `jarvis_main.js` 7828→**4013 L** (−49%) · **11 modules** extraits dans `static/js/` · méthode byte-identique vérifiée (node --check · eslint 0 · validation E2E prod) · 1 régression d'ordre détectée+corrigée |
-| 2026-05-15       | **~93/100 honnête** | **Refactor JS terminé** + **Phase 4 tests massifs étendus** + **Phase 4 finale** : `jarvis_main.js` 4013→**148 L** (−98,1% cumul depuis 7828) · 21 modules JS · **799 tests pytest** sur **34/34 modules (100%)** avec coverage **39% lignes** (tts_engines 83% · 42 tests, jarvis_mcp_server 91% · 52 tests, ollama_circuit 100% · 23 tests, proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26%, audio_dsp 25%) · **fix perf systémique IPv6** (-97% latence interne via `OLLAMA_URL`/`JARVIS_BASE` → `127.0.0.1`) · **circuit breaker Ollama étendu 8 call-sites** + bouton SOC PING JARVIS enrichi état Ollama · **pré-warm Kokoro CUDA au boot** (élimine cold start 42.8 s mesuré) · **profiling TTS détaillé** (`tools/profile_tts.py` : médianes chaud edge 1453ms / kokoro 203ms / piper 219ms / sapi 563ms) · **hook pre-push pytest** · 3 bugs prod détectés+fixés · outils `tools/profile_perf.py` + `tools/profile_tts.py` |
+| 2026-05-15       | **~94/100 honnête** | **Refactor JS terminé** + **Phase 4 tests massifs étendus** + **Phase 4 finale** : `jarvis_main.js` 4013→**148 L** (−98,1% cumul depuis 7828) · 21 modules JS · **936 tests pytest** sur **32 modules · 25 à 100% cov** avec coverage **39% lignes** (tts_engines 83% · 42 tests, jarvis_mcp_server 91% · 52 tests, ollama_circuit 100% · 23 tests, proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26%, audio_dsp 25%) · **fix perf systémique IPv6** (-97% latence interne via `OLLAMA_URL`/`JARVIS_BASE` → `127.0.0.1`) · **circuit breaker Ollama étendu 8 call-sites** + bouton SOC PING JARVIS enrichi état Ollama · **pré-warm Kokoro CUDA au boot** (élimine cold start 42.8 s mesuré) · **profiling TTS détaillé** (`tools/profile_tts.py` : médianes chaud edge 1453ms / kokoro 203ms / piper 219ms / sapi 563ms) · **hook pre-push pytest** · 3 bugs prod détectés+fixés · outils `tools/profile_perf.py` + `tools/profile_tts.py` |
 
 ---
 
@@ -171,7 +171,7 @@ Déplacement            : mv · cp
 
 ⚠ **Distinction critique** :
 - **NDT 100/100** = score script automatisé maison (D1/D2/D6/D13 dans le code Python). Mesure fonction longue, silent pass, magic numbers, params >6. Reste vrai au 2026-05-15.
-- **Score honnête global ~93/100** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf). Recalibré honnêtement le 2026-05-15 post-audit pytest --cov : le 92/100 affiché en session 33c était optimiste (départ réel 62), chantier 2026-05-14/15 a fait +31 (→93) via : git+hooks+CSS, refactor JS jarvis_main.js sous 150 L (−98,1%), 799 tests pytest sur **34/34 modules (100%)** avec coverage 39% lignes, fix perf IPv6, circuit breaker Ollama étendu 8 call-sites, pré-warm Kokoro CUDA, hook pre-push. Plafond pratique sans CI cloud atteint. Pour 95+ : couverture jarvis.py / soc.py Flask routes (faible ROI) ou CI cloud (impossible « rien sur le web »).
+- **Score honnête global ~94/100** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf). Recalibré honnêtement le 2026-05-15 post-audit pytest --cov : le 92/100 affiché en session 33c était optimiste (départ réel 62), chantier 2026-05-14/15 a fait +31 (→93) · +1 session 2026-05-17 (→94) via : git+hooks+CSS, refactor JS jarvis_main.js sous 150 L (−98,1%), 936 tests pytest sur **32 modules · 25 à 100% cov** · coverage 51% lignes, fix perf IPv6, circuit breaker Ollama étendu 8 call-sites, pré-warm Kokoro CUDA, hook pre-push. Plafond pratique sans CI cloud atteint. Pour 95+ : couverture jarvis.py / soc.py Flask routes (faible ROI) ou CI cloud (impossible « rien sur le web »).
 
 ### NDT (script automatisé) — 100/100
 
@@ -248,7 +248,7 @@ Périmètre : `jarvis.py` · `soc.py` · `jarvis_mcp_server.py` · `audio_dsp.py
 
 `pythonw` : supprime la fenêtre console Windows, maintient les pipes stdio MCP.
 
-### 7.2 Les 11 outils MCP
+### 7.2 Les 12 outils MCP
 
 | Outil | Endpoint | Rôle |
 |---|---|---|
@@ -263,7 +263,7 @@ Périmètre : `jarvis.py` · `soc.py` · `jarvis_mcp_server.py` · `audio_dsp.py
 | `jarvis_last_response` | GET `/api/conversation/last` | Derniers échanges de la conversation JARVIS |
 | `jarvis_code_exec` | bypass `_code_scp_exec_sse` | Écrit + SCP + exécute un fichier sur srv-dev-1 |
 
-> Détail complet des 11 outils : voir [`docs/MCP-SERVER.md`](MCP-SERVER.md).
+> Détail complet des 12 outils : voir [`docs/MCP-SERVER.md`](MCP-SERVER.md).
 
 ### 7.3 Injection historique IP dans jarvis_soc_ask
 
@@ -287,7 +287,7 @@ Sans ce cadre = réponse Claude directe.
 
 ```
 jarvis_mcp_server.py (NDT-LONG refactorisé — 0 fonction >80L)
-├── _TOOLS_DEFS        ← 11 outils définis en constante
+├── _TOOLS_DEFS        ← 12 outils définis en constante
 ├── _TOOL_HANDLERS     ← dict nom → handler (dispatch)
 ├── _RE_IPV4           ← regex détection IPv4
 ├── _collect_sse_tokens()  ← consomme le stream SSE JARVIS

@@ -1,5 +1,5 @@
 # JARVIS — Guide de référence
-<!-- 2026-05-15 — v2.8 — Chantier dette technique 2026-05-14/15 : git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS terminé (jarvis_main.js 148L, 21 modules) + 799 tests pytest sur 34/34 modules (100%) coverage 39% lignes + fix perf IPv6 (-97% latence) + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro CUDA · 32 modules Python · jarvis.py 4633L · score honnête 93/100 -->
+<!-- 2026-05-15 — v2.8 — Chantier dette technique 2026-05-14/15 : git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS terminé (jarvis_main.js 148L, 21 modules) + 936 tests pytest sur 32 modules · 25 à 100% cov · coverage 51% lignes + fix perf IPv6 (-97% latence) + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro CUDA · 32 modules Python · jarvis.py 4633L · score honnête 94/100 -->
 
 Assistant IA personnel 0xCyberLiTech — infogérance réseau + assistant quotidien.  
 ⚡ = bypass Python direct (sans LLM, instantané) · 🤖 = via LLM (raisonnement)
