@@ -20,7 +20,7 @@
 
 | Métrique | Valeur |
 |---|---|
-| **Tests pytest** | **808 pass · 0 fail** (+7 audit_writeop 2026-05-17) |
+| **Tests pytest** | **814 pass · 0 fail** (+7 audit_writeop + 6 is_known_write_op/apt-BLOCKED 2026-05-17) |
 | **Coverage globale** | 44% (6059 stmts · 3368 miss) |
 | **Modules Python ≥100% cov** | 21 modules (`ollama_circuit`, `chat_tool_calls`, `tts_cleaner`, `stream_tokens`, `security_whitelists`, `chat_pending_bypass`, `llm_opts`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_routing`, `chat_stream`, `chat_system_prompt`, `deferred_speak`, `bypass_filesystem`, `stt`, `ssh_terminal`, `tts_dedup`, `vision`, `bypass_proxmox`, `deepfilter`) |
 | **Modules Python <50% cov** | `jarvis.py` 26% · `audio_dsp.py` 25% · `blueprints/soc.py` 33% · `chat_soc_inject.py` 38% · `code_reasoning.py` 44% |
@@ -353,17 +353,24 @@ JARVIS consomme `monitoring.json` (cron srv-ngix 1min) via 3 patterns :
 
 ## 8. Sécurité & règles absolues
 
-### 8.1. Whitelist SSH stricte (`security_whitelists.py` 100% cov · 35 tests)
+### 8.1. Whitelist SSH stricte (`security_whitelists.py` 100% cov · 41 tests)
 
-**`BLOCKED_SSH_PATTERNS`** : 29 patterns regex bloqués (rm/dd/mkfs/shutdown/qm destroy/sed -i/chmod/etc.)
+**`BLOCKED_SSH_PATTERNS`** : **33 patterns** regex bloqués (rm/dd/mkfs/shutdown/qm destroy/sed -i/chmod/`apt install`/`apt upgrade`/`apt-get install`/`apt-get upgrade`/etc.) — ajout 2026-05-17 des 4 patterns apt pour fermer faille défense-en-profondeur.
 **`ALLOWED_RESTART_SVCS`** : 8 services restartables whitelistés (`nginx`, `fail2ban`, `crowdsec`, `crowdsec-firewall-bouncer`, `suricata`, `apache2`, `php7.4-fpm`, `php8.2-fpm`)
 **`ALLOWED_APT_PKGS`** : 12 paquets `apt install/upgrade` whitelistés (5 services ci-dessus + `suricata-update`, `libssl3`, `openssl`, `python3`, `python3-pip`, `certbot`, `python3-certbot-nginx`)
-**`check_write_op()`** : valide ops write sur whitelist stricte. Retourne `None` si OK, message d'erreur sinon.
+**`is_known_write_op(cmd)`** (ajout 2026-05-17) : gardien sécurité — retourne `True` ssi la commande est de forme reconnue par `check_write_op` (systemctl restart `<svc>` OU apt[-get] install/upgrade `<pkg>`). Source unique regex `_RE_SYSTEMCTL_RESTART` + `_RE_APT_WRITE` extraites en constantes module.
+**`check_write_op()`** : valide ops write sur whitelist stricte. Retourne `None` si OK ou hors scope, message d'erreur sinon. ⚠ Doit toujours être précédé de `is_known_write_op` dans le caller — sinon `None` pour `rm -rf /` autoriserait à tort.
 
-**Logique 3 couches dans `_tool_commande_ssh_run`** ([jarvis.py:1652](scripts/jarvis.py#L1652)) :
-1. Aucun pattern bloqué matche → exécution directe
-2. Pattern bloqué matche **et** write op whitelistée → exécution (audit log `allowed=true`)
-3. Pattern bloqué matche **et** non whitelistée → REFUS (audit log `allowed=false`)
+**Logique 4 couches corrigée 2026-05-17** dans `_tool_commande_ssh_run` ([jarvis.py:1652](scripts/jarvis.py#L1652)) :
+
+| Couche | Condition | Décision | Audit |
+|---|---|---|---|
+| 1 | Aucun pattern BLOCKED matche | Exec direct (lecture/diagnostic) | Pas d'audit (hors scope write) |
+| 2 | Pattern BLOCKED matche + `is_known_write_op=True` + `check_write_op=None` (whitelistée) | Exec | `allowed=true` |
+| 3 | Pattern BLOCKED matche + `is_known_write_op=False` (rm/mkfs/dd/shutdown/qm destroy/...) | **REFUS PAR DÉFAUT** | `allowed=false` |
+| 4 | Pattern BLOCKED matche + `is_known_write_op=True` + `check_write_op` retourne str (svc/pkg non whitelisté) | REFUS explicite | `allowed=false` |
+
+**⚠ Fix critique 2026-05-17** : avant la correction, la couche 3 n'existait pas. `rm -rf /` matchait pattern `"rm "`, `check_write_op` retournait `None` (pas son rôle), `err is not None` était False → **commande exécutée**. Faille colmatée par ajout `is_known_write_op` comme gardien préalable.
 
 ### 8.2. Audit log write ops (ajouté 2026-05-17)
 

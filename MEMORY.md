@@ -48,13 +48,52 @@ Le module a été testé en direct et fonctionne. Le test bout-en-bout via JARVI
 3. Vérifier `JARVIS/logs/audit_writeops.jsonl` contient 1 ligne `allowed=true`
 4. Lancer commande non whitelistée (`systemctl restart cron`) → vérif `allowed=false`
 
-### Bug latent identifié (NON corrigé — hors scope)
+### ⚠ Bug CRITIQUE de défense-en-profondeur colmaté (correction immédiate)
 
-`apt install <pkg>` n'est PAS dans `BLOCKED_SSH_PATTERNS` → la logique `for pattern in BLOCKED... if match → check_write_op` ne déclenche jamais `check_write_op` pour `apt install evilpkg`. Donc cette commande passe SANS vérification whitelist (alors que `check_write_op` la traite si appelée).
+**Découverte** : en creusant le "bug latent" `apt install <pkg>` non bloqué, j'ai trouvé un trou bien plus grave dans la logique `_tool_commande_ssh_run` :
 
-**Risque réel faible** : phi4 local, prompt restreint, pas d'accès externe. Mais asymétrie défense en profondeur.
+```python
+for pattern in BLOCKED_SSH_PATTERNS:
+    if pattern.lower() in cmd_lower:
+        is_writeop = True
+        err = check_write_op(cmd)
+        if err is not None:
+            return refus
+        break   # ← FAILLE : si check_write_op retourne None, on EXÉCUTE !
+```
 
-**Action différée** : à valider avec Marc dans une session ultérieure — soit ajouter `"apt install"` et `"apt upgrade"` à `BLOCKED_SSH_PATTERNS` (déclenche check systématique), soit refactoriser pour TOUJOURS appeler `check_write_op` peu importe le match BLOCKED. Non corrigé ce jour — hors scope.
+`check_write_op` ne traite QUE 2 cas (systemctl restart + apt install/upgrade). Pour TOUT le reste (`rm`, `mkfs`, `dd`, `shutdown`, `qm destroy`, ...), elle retourne `None`. Le test ligne 123 le documente même explicitement.
+
+**Conséquence** : `rm -rf /` matchait pattern `"rm "`, `check_write_op("rm -rf /")` retournait `None`, `err is not None` était False, `break` → **commande EXÉCUTÉE sur srv-ngix/proxmox/clt/pa85**.
+
+**Risque réel** : faible en pratique (phi4 local, prompt restreint, pas d'accès externe) mais **inacceptable** comme défense-en-profondeur.
+
+**Fix appliqué 2026-05-17** (commit à venir) :
+
+1. **`BLOCKED_SSH_PATTERNS`** : ajout `"apt install"`, `"apt upgrade"`, `"apt-get install"`, `"apt-get upgrade"` (avant, ces patterns absents → `apt install evilpkg` passait sans entrer dans la boucle).
+2. **`security_whitelists.py`** : extraction des regex `_RE_SYSTEMCTL_RESTART` + `_RE_APT_WRITE` en constantes module + ajout `is_known_write_op(cmd) -> bool` (gardien sécurité, retourne True ssi commande est de forme reconnue par `check_write_op`).
+3. **`_tool_commande_ssh_run`** ([jarvis.py:1652](scripts/jarvis.py#L1652)) : logique étendue à **4 couches** :
+   - **Couche 1** : aucun pattern BLOCKED matche → exec direct (lecture/diagnostic)
+   - **Couche 2** : pattern BLOCKED + commande reconnue (`is_known_write_op` True) + whitelistée (`check_write_op` None) → exec + audit `allowed=true`
+   - **Couche 3 (NOUVEAU)** : pattern BLOCKED + commande NON reconnue (rm/mkfs/dd/shutdown/...) → **REFUS PAR DÉFAUT** + audit `allowed=false`
+   - **Couche 4** : pattern BLOCKED + commande reconnue + refusée explicitement (svc/pkg non whitelisté) → REFUS + audit `allowed=false`
+4. **Tests** : +6 nouveaux (1 test patterns apt + 5 tests `is_known_write_op` couvrant 14 commandes destructives). Total **808 → 814 pass**.
+
+**Validation simulation** (script de smoke test) :
+```
+'rm -rf /'                  → REFUSE par defaut (pattern: 'rm ')        ✓
+'mkfs.ext4 /dev/sda'        → REFUSE par defaut (pattern: 'mkfs')       ✓
+'shutdown now'              → REFUSE par defaut (pattern: 'shutdown')   ✓
+'apt install evilpkg'       → REFUSE explicite (whitelist apt)          ✓
+'systemctl restart nginx'   → AUTORISE                                  ✓
+'apt install nginx'         → AUTORISE                                  ✓
+'ls -la'                    → EXEC direct (lecture)                     ✓
+'cat /etc/hosts'            → REFUSE par defaut (pattern: '/etc/hosts') ✓
+```
+
+**Smoke test live à faire au prochain restart JARVIS** :
+1. Demander à JARVIS : "Sur srv-ngix, lance : rm -rf /tmp/test" → doit refuser
+2. Vérifier `JARVIS/logs/audit_writeops.jsonl` : 1 ligne `allowed=false` avec pattern `rm `
 
 ---
 

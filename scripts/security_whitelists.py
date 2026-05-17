@@ -34,6 +34,10 @@ BLOCKED_SSH_PATTERNS = [
     "iptables -F",
     # systemctl restart bloqué — passe par whitelist ALLOWED_RESTART_SVCS
     "systemctl restart",
+    # apt install/upgrade bloqués — passent par whitelist ALLOWED_APT_PKGS
+    # (ajout 2026-05-17 : avant, ces patterns absents → check_write_op jamais
+    # appelée → apt install <evilpkg> s'exécutait sans vérification.)
+    "apt install", "apt upgrade", "apt-get install", "apt-get upgrade",
     # Redirections shell
     "> /", "| sh", "| bash", "curl.*sh |", "wget.*sh |",
     # Proxmox destructif
@@ -71,7 +75,31 @@ ALLOWED_APT_PKGS = {
 }
 
 
+# ── Regex partagees (source unique check_write_op + is_known_write_op) ────────
+_RE_SYSTEMCTL_RESTART = re.compile(r'^systemctl\s+restart\s+(\S+)$', re.I)
+_RE_APT_WRITE = re.compile(
+    r'^(?:DEBIAN_FRONTEND=\S+\s+)?apt(?:-get)?\s+(?:install|upgrade)\s+(?:-[yq\s]+)?(\S+)$',
+    re.I,
+)
+
+
 # ── Validation ────────────────────────────────────────────────
+
+def is_known_write_op(cmd: str) -> bool:
+    """Retourne True si la commande est une write op de forme reconnue.
+
+    Sert de gardien dans `_tool_commande_ssh_run` (jarvis.py) : si un pattern
+    BLOCKED_SSH_PATTERNS matche MAIS que la commande n'est PAS une write op
+    reconnue (ex: 'rm -rf /'), elle doit etre refusee par defaut (et non
+    autorisee parce que check_write_op renvoie None).
+
+    Ajoute 2026-05-17 — corrige une faille critique de defense-en-profondeur
+    ou rm/mkfs/dd/shutdown etc. matchaient BLOCKED mais s'executaient car
+    check_write_op retournait None (pas son role).
+    """
+    c = cmd.strip()
+    return bool(_RE_SYSTEMCTL_RESTART.match(c) or _RE_APT_WRITE.match(c))
+
 
 def check_write_op(cmd: str) -> str | None:
     """Autorise ops write sur whitelist stricte. Retourne message d'erreur ou None si OK.
@@ -79,17 +107,22 @@ def check_write_op(cmd: str) -> str | None:
     Cas gérés :
     - `systemctl restart <svc>` → autorisé si svc ∈ ALLOWED_RESTART_SVCS
     - `apt[-get] install/upgrade <pkg>` → autorisé si pkg ∈ ALLOWED_APT_PKGS
+
+    ⚠ Retourne `None` aussi pour les commandes HORS scope (ex: 'rm -rf /').
+    Le caller doit utiliser `is_known_write_op()` AVANT pour distinguer
+    'write op autorisee' de 'commande pas reconnue' — sinon faille critique
+    de defense-en-profondeur.
     """
     c = cmd.strip()
     # systemctl restart <svc>
-    m = re.match(r'^systemctl\s+restart\s+(\S+)$', c, re.I)
+    m = _RE_SYSTEMCTL_RESTART.match(c)
     if m:
         svc = m.group(1).lower()
         if svc in ALLOWED_RESTART_SVCS:
             return None  # autorisé
         return f"Refusé : systemctl restart '{svc}' non whitelisté — services autorisés : {', '.join(sorted(ALLOWED_RESTART_SVCS))}"
     # apt/apt-get install/upgrade <pkg>
-    m2 = re.match(r'^(?:DEBIAN_FRONTEND=\S+\s+)?apt(?:-get)?\s+(?:install|upgrade)\s+(?:-[yq\s]+)?(\S+)$', c, re.I)
+    m2 = _RE_APT_WRITE.match(c)
     if m2:
         pkg = m2.group(1).lower()
         if pkg in ALLOWED_APT_PKGS:

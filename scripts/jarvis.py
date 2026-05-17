@@ -1652,6 +1652,15 @@ _SVC_BOUNCER = "crowdsec-firewall-bouncer"  # constante encore utilisée localem
 def _tool_commande_ssh_run(ssh_fn, label, args):
     """Exécute une commande SSH après validation sécurité — mutualisé pour tous les hôtes.
 
+    Logique 3 couches (corrigee 2026-05-17 — fix faille defense-en-profondeur) :
+    1. Aucun pattern BLOCKED matche → exec direct (lecture/diagnostic standard)
+    2. Pattern BLOCKED matche ET commande est une write op reconnue
+       (is_known_write_op) ET whitelistee (check_write_op None) → exec + audit
+    3. Pattern BLOCKED matche ET commande PAS une write op reconnue
+       (ex: rm/mkfs/dd/shutdown/qm destroy) → REFUS par defaut + audit
+    4. Pattern BLOCKED matche ET write op reconnue MAIS refusee
+       (ex: systemctl restart docker, apt install evilpkg) → REFUS + audit
+
     Audit log : write ops (autorisees OU refusees) tracees dans logs/audit_writeops.jsonl
     via _sec.audit_writeop() — best-effort, ne bloque jamais l'execution.
     """
@@ -1663,6 +1672,13 @@ def _tool_commande_ssh_run(ssh_fn, label, args):
     for pattern in _sec.BLOCKED_SSH_PATTERNS:
         if pattern.lower() in cmd_lower:
             is_writeop = True
+            # Gardien : si pattern destructif matche MAIS commande pas reconnue
+            # comme write op whitelistable (rm/mkfs/dd/shutdown/...) → REFUS strict.
+            # Ne JAMAIS se fier au seul check_write_op qui retourne None pour ces cas.
+            if not _sec.is_known_write_op(cmd):
+                msg = f"commande destructive non whitelistée (pattern: {pattern})"
+                _sec.audit_writeop(label, cmd, allowed=False, output=msg)
+                return f"Erreur : commande refusée par sécurité ({pattern}) — {msg}"
             err = _sec.check_write_op(cmd)
             if err is not None:
                 _sec.audit_writeop(label, cmd, allowed=False, output=err)

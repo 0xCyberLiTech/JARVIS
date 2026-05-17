@@ -8,6 +8,7 @@ from security_whitelists import (
     BLOCKED_SSH_PATTERNS,
     audit_writeop,
     check_write_op,
+    is_known_write_op,
     parse_upgradable_packages,
 )
 
@@ -113,14 +114,86 @@ def test_apt_install_normalise_le_nom_du_paquet_en_minuscules():
     assert check_write_op("apt install NGINX") is None
 
 
+# ── BLOCKED_SSH_PATTERNS — apt install/upgrade systematiquement filtres ──
+# (ajout 2026-05-17 : avant, ces patterns absents permettaient apt install
+# <evilpkg> de s'executer sans verification car la boucle d'audit dans
+# _tool_commande_ssh_run ne matchait jamais.)
+
+
+def test_blocked_contient_apt_install_et_upgrade():
+    """Les patterns apt install/upgrade DOIVENT etre dans BLOCKED pour
+    declencher systematiquement check_write_op."""
+    for pat in ["apt install", "apt upgrade", "apt-get install", "apt-get upgrade"]:
+        assert pat in BLOCKED_SSH_PATTERNS, f"manque {pat!r}"
+
+
+# ── is_known_write_op : gardien defense-en-profondeur ────────────────────
+# (ajout 2026-05-17 — corrige faille critique : rm/mkfs/dd/shutdown matchaient
+# BLOCKED mais s'executaient car check_write_op retournait None hors scope.)
+
+
+def test_is_known_write_op_systemctl_restart_oui():
+    assert is_known_write_op("systemctl restart nginx") is True
+    assert is_known_write_op("systemctl restart evilsvc") is True  # forme reconnue
+    assert is_known_write_op("SystemCtl Restart nginx") is True  # case insensitive
+
+
+def test_is_known_write_op_apt_install_oui():
+    assert is_known_write_op("apt install nginx") is True
+    assert is_known_write_op("apt install evilpkg") is True
+    assert is_known_write_op("apt-get install -y crowdsec") is True
+    assert is_known_write_op("DEBIAN_FRONTEND=noninteractive apt install -y nginx") is True
+    assert is_known_write_op("apt upgrade openssl") is True
+
+
+def test_is_known_write_op_destructif_non():
+    """CRITIQUE : rm/mkfs/dd/shutdown/etc. NE SONT PAS des write ops reconnues."""
+    for cmd in [
+        "rm -rf /",
+        "rm -rf /etc/nginx",
+        "mkfs.ext4 /dev/sda",
+        "dd if=/dev/zero of=/dev/sda",
+        "shutdown now",
+        "shutdown -h 0",
+        "reboot",
+        "qm destroy 100",
+        "qm migrate 100 node2",
+        "iptables -F",
+        "systemctl stop nginx",
+        "systemctl disable nginx",
+        "chmod 777 /etc/passwd",
+        "chown root:root /etc/shadow",
+    ]:
+        assert is_known_write_op(cmd) is False, f"FAILLE : {cmd!r} accepte comme write op !"
+
+
+def test_is_known_write_op_commandes_normales_non():
+    """Commandes de lecture/diagnostic standard : pas une write op."""
+    assert is_known_write_op("ls -la") is False
+    assert is_known_write_op("uptime") is False
+    assert is_known_write_op("cat /var/log/nginx/access.log") is False
+    assert is_known_write_op("") is False
+
+
+def test_is_known_write_op_pattern_strict_apres_pkg():
+    """`systemctl restart nginx --now` n'est PAS forme reconnue (arg supplementaire)
+    → is_known_write_op False → refus par defaut (correct)."""
+    assert is_known_write_op("systemctl restart nginx --now") is False
+
+
 # ── check_write_op : commandes hors scope ─────────────────────────────────
 
 
 def test_commande_quelconque_renvoie_none():
-    """`check_write_op` ne se prononce pas hors restart/apt → None."""
+    """`check_write_op` ne se prononce pas hors restart/apt → None.
+
+    ⚠ C'est pourquoi `is_known_write_op` est obligatoire AVANT dans le caller —
+    sinon `rm -rf /` matche BLOCKED, check_write_op retourne None, et la
+    commande s'execute (faille corrigee 2026-05-17 dans _tool_commande_ssh_run).
+    """
     assert check_write_op("ls -la") is None
     assert check_write_op("uptime") is None
-    assert check_write_op("rm -rf /") is None  # pas son rôle, c'est BLOCKED_SSH_PATTERNS
+    assert check_write_op("rm -rf /") is None  # pas son rôle, c'est is_known_write_op + BLOCKED
 
 
 def test_commande_vide_renvoie_none():
