@@ -1624,6 +1624,58 @@ def _soc_subnet_campaign_check(d: dict) -> None:
         _log.info(f"[JARVIS-SOC-CAMPAIGN] Alerte vocale — {sn} {n} IPs")
 
 
+def _check_hourly_report(d: dict, ts: dict) -> None:
+    """Rapport vocal SOC à l'heure pleine — déclenché 1× entre HH:00 et HH:04.
+
+    Force un récap court même en l'absence de nouveauté (silence trompeur).
+    Cooldown : 50 min par heure pour éviter double trigger dans le même créneau.
+    Diffère du quotidien (8h) : ton plus bref, pas de salutation, focus sur la
+    photo instantanée (niveau + score + KC active + bans CrowdSec).
+
+    Plage jour 8h-22h uniquement (silence garanti 23h-7h pour ne pas réveiller).
+    Le rapport est SAUTÉ si le niveau est FAIBLE ET aucune IP KC active
+    (silence légitime quand tout est calme — évite la nuisance auditive).
+    """
+    now = datetime.datetime.now()
+    if now.minute >= 5:
+        return
+    # Plage jour : 8h-22h. Nuit silencieuse (23h-7h inclus).
+    if now.hour < 8 or now.hour > 22:
+        return
+    # Pas le même créneau que le quotidien (8h) qui prend priorité
+    if now.hour == 8:
+        return
+    key = f"hourly_report_{now.strftime('%Y-%m-%d_%H')}"
+    if not _soc_cooldown_ok(key, minutes=50):
+        return
+    level = (ts.get("threat") or "FAIBLE").upper()
+    score = ts.get("score", 0)
+    kc_n  = ts.get("kc_active_count", 0)
+    # Silence si rien à signaler (FAIBLE + 0 IP KC)
+    if level == "FAIBLE" and kc_n == 0:
+        return
+    parts = [f"Rapport heure pleine. Niveau {level}. Score {score} sur 100."]
+    if kc_n > 0:
+        stages = ts.get("kc_stages") or {}
+        order = ["EXPLOIT", "BRUTE", "SCAN", "RECON", "WAF", "PROBE"]
+        stage_parts = [f"{stages[s]} {s.lower()}" for s in order if stages.get(s)]
+        for s, n in stages.items():
+            if s not in order and n > 0:
+                stage_parts.append(f"{n} {s.lower()}")
+        stages_tts = " : " + ", ".join(stage_parts) if stage_parts else ""
+        countries = ts.get("kc_countries") or []
+        countries_tts = f" ({', '.join(countries)})" if countries else ""
+        parts.append(
+            f"{kc_n} IP{'s' if kc_n>1 else ''} en kill chain"
+            f"{stages_tts}{countries_tts}."
+        )
+    cs_bans = ts.get("cs_bans", 0)
+    if cs_bans > 0:
+        parts.append(f"{cs_bans} décisions CrowdSec actives.")
+    _speak(" ".join(parts))
+    _log.info(f"[JARVIS-SOC-HOURLY] Rapport {now.strftime('%H')}h envoyé — {level} score={score} kc={kc_n}")
+
+
 def _check_daily_report(d: dict, ts: dict) -> None:
     """Rapport vocal SOC quotidien — déclenché une seule fois entre 08h00 et 08h09."""
     now = datetime.datetime.now()
@@ -1719,6 +1771,7 @@ def _soc_monitor_loop():
             _soc_rsyslog_check(d)
             _check_net_spikes(d)
             _soc_subnet_campaign_check(d)
+            _check_hourly_report(d, ts)
             _check_daily_report(d, ts)
 
         except Exception as e:
