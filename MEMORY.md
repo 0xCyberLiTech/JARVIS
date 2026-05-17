@@ -1,4 +1,74 @@
-# JARVIS — Mémoire projet (2026-05-16)
+# JARVIS — Mémoire projet (2026-05-17 — audit dette honnête + création BILAN-TECHNIQUE.md + CLAUDE.md)
+
+## Session 2026-05-17 — audit dette honnête + parité documentaire avec SOC
+
+**Contexte** : audit complet et honnête de la dette JARVIS (post-session SOC où SOC a atteint 96/100 avec docs exhaustives). Score JARVIS recalibré : **93 → 91/100** (audit révèle 2 documents manquants par rapport à SOC).
+
+### Audit dette honnête — chiffres recalibrés
+
+| Indicateur | Mémoire (avant audit) | Audit réel 2026-05-17 | Écart |
+|---|---|---|---|
+| Tests pytest | 801 pass | **801 pass · 0 fail** | ✓ |
+| Coverage globale | 39% | **44%** | **+5 pts** (mémoire pessimiste, pytest-cov réel plus haut) |
+| Modules à 100% cov | n/a | **21 modules** | (nouvelle info) |
+| `jarvis.py` cov | 26% | **26%** (2909 stmts) | ✓ |
+| `blueprints/soc.py` cov | 33% | **33%** (1007 stmts) | ✓ |
+| ESLint warnings | 155 | **155** | ✓ |
+| Score honnête | 93/100 | **91/100** | **−2** (CLAUDE.md absent · BILAN-TECHNIQUE.md absent vs SOC) |
+
+**Décomposition 91/100 honnête** : Archi 22/25 (monolithe Flask accepté) · Tests 23/25 (cov 44% RÉELLE > mémoire) · **Doc 13/15** (−2 CLAUDE.md + BILAN absents avant cette session) · Lisibilité 14/15 (155 warnings ESLint acceptés) · Perf 10/10 · Sécu 10/10.
+
+### Création BILAN-TECHNIQUE.md (parité avec SOC)
+
+Nouveau document `JARVIS/BILAN-TECHNIQUE.md` (~800 lignes) calqué sur la structure de `SOC/BILAN-TECHNIQUE.md` :
+- **0. État actuel** (audit honnête avec décomposition score + chiffres clés)
+- **0bis. Session 2026-05-16 nuit** (Sprint 18d MCP IoC + refactor `_SOC_BAN_CONFIG` + defense_24h + heatmap 15min + QW4 ESLint)
+- **1. Vue d'ensemble** (architecture moteur IA local)
+- **2. Architecture Python** (32 modules détaillés avec coverage : cœur Flask + chat/LLM + audio/TTS/STT + infra/sécu + MCP)
+- **3. Architecture Frontend** (refactor JS terminé · 13 extractions · 21 modules JS · 8 CSS · 10 templates)
+- **4. Circuit breaker Ollama** (state machine 3 états · 8 call-sites · indicateur HUD)
+- **5. TTS chain & profiling** (4 moteurs · pré-warm Kokoro CUDA · médianes TTFB)
+- **6. MCP server** (12 outils détaillés)
+- **7. Intégrations SOC** (cache + fallback SSH + injection 100% serveur + 6 outils MCP)
+- **8. Sécurité & règles absolues** (whitelist SSH 29 patterns · SSH read-only · anti-double-ban · anti-hallucination · RFC1918)
+- **9. Performance** (fix IPv6 systémique · cache SOC · pré-warm · debounce DSP)
+- **10. Tests & qualité** (coverage par catégorie · 25 E2E · pre-commit/pre-push hooks · ESLint config)
+- **11. Roadmap résiduelle** (1 seule tâche ouverte : SSH write ops)
+- **12. Bilan santé** (tableau récap final)
+
+### Création CLAUDE.md (briefing JARVIS-spécifique)
+
+Nouveau document `JARVIS/CLAUDE.md` (~120 lignes) — **complémentaire** au `0xCyberLiTech/CLAUDE.md` racine (ne duplique pas). Sert quand on ouvre VSCode dans `JARVIS/` seul :
+- Identité (v3.3 · 91/100 · 801 tests · refactor JS terminé)
+- Sources de vérité (priorité : MEMORY → BILAN → RUNBOOK → docs/)
+- Stack technique compacte
+- Lancement (start/stop/MCP)
+- **4 modes (règle absolue)** : SOC/GENERAL/CODE/CR avec modèles + auto-engine SOC marker
+- Conventions (127.0.0.1 vs localhost · Edit vs Write >200Ko · pre-commit/pre-push)
+- **7 règles ABSOLUES zéro régression** : RFC1918 · `_BLOCKED_SSH` · `_ALLOWED_SERVICES` · injection 100% serveur · architecture coût LLM · auto-engine mode soc · SSH read-only
+- Fichiers clés (paths + rôles)
+- Fichiers gitignored à recréer en DR
+- Workflow + conventions commit
+
+### Résultat parité doc JARVIS/SOC
+
+| Doc | SOC | JARVIS (avant 2026-05-17) | JARVIS (après) |
+|---|---|---|---|
+| `MEMORY.md` | ✓ (gitignored) | ✓ (tracké) | ✓ |
+| `RUNBOOK.md` | ✓ | ✓ | ✓ |
+| `BILAN-TECHNIQUE.md` | ✓ (768L) | ❌ | ✓ **(nouveau ~800L)** |
+| `CLAUDE.md` projet-spécifique | — | ❌ | ✓ **(nouveau ~120L)** |
+| `docs/` détaillés | 11 fichiers PROJET-SOC + 5 DEPLOY + 2 Archives | 7 fichiers (AUDIO-DSP, MCP-SERVER, REFERENCE-TECHNIQUE, ROUTING-JARVIS, DEPLOIEMENT, REINSTALLATION, SUPPORT-INFOGERANCE) | ✓ inchangé |
+
+**Score post-création** : passage 91 → **93/100 estimé** (récupération des 2 points Doc avec création BILAN + CLAUDE) — à valider au prochain audit.
+
+### Top 3 dettes résiduelles (NE PAS toucher préventivement — `feedback_no_big_refactor`)
+
+1. **`jarvis.py` 26% cov (2909 stmts)** — endpoints Flask massifs, refactor 40h+, ROI faible (tourne depuis 18 mois). **MONITORER**.
+2. **`blueprints/soc.py` 33% cov (1007 stmts)** — logique chat système, stable. **MONITORER**.
+3. **155 warnings ESLint** — camelCase exports inter-modules, impossible sans bundler. **IGNORER**.
+
+---
 
 ## Intégration SOC defense_24h — 2026-05-16 (commit `ed8f3a8`)
 
@@ -9,6 +79,22 @@ Nouveau résumé compact des actions défensives 24h alimente JARVIS via 3 canau
 - **Outil MCP `jarvis_defense_24h`** (11e outil, était 10) — `jarvis_mcp_server.py:_handle_jarvis_defense_24h()` formate le JSON en bloc texte JARVIS_HEADER. Permet à Claude Code (MCP client) d'interroger ce résumé en 1 call au lieu de parser monitoring.json. **+2 tests pytest** (799 → 801) + tests `compte_10` renommés `compte_11`.
 
 Pattern « Single Source of Truth » : 1 fichier JSON côté SOC → 3 consommateurs (humain navigateur / phi4 chat / Claude MCP). 0 régression, ruff/eslint 0, tests existants intacts.
+
+### Adaptation granularité heatmap 15 min (commit `0d7de9c`)
+
+Suite au passage côté SOC à 96 buckets de 15 min (au lieu de 24 buckets horaires), les 2 consommateurs JARVIS du JSON ont été adaptés :
+- `chat_soc_inject._format_defense_block()` : lit `heatmap_bucket_min` du JSON (15 en v1.2, fallback 60 si len(heat) ≤ 24). Calcule peak_lbl en min/h selon la granularité : « tranche courante » / « il y a Xmin » / « h-X » / « h-X Ymin ». Format string : « Pic 15min: il y a 30min (310 actions sur la tranche) ».
+- `jarvis_mcp_server._handle_jarvis_defense_24h()` : même logique de déduction + label adaptable. Bloc texte LLM affiche « Pic 15min : ... ».
+- Rétro-compat : fallback bucket_min=60 si heatmap_bucket_min absent.
+
+### Quick wins dette technique 2026-05-16 (commit `9c904c2`)
+
+QW4 — ESLint pre-commit JARVIS aligné cohérence cross-projet :
+- Hook `files:` élargi de 4 fichiers (jarvis_main, jarvis_mixing, recorder, voice_print) à tous les modules JS (4 historiques + 18 extraits dans `scripts/static/js/`).
+- `varsIgnorePattern: '^_'` → `'^(_|[A-Z][A-Z0-9_])'` (capture aussi les SCREAMING_SNAKE_CASE comme `BS`, `DSP_PROFILES`).
+- Aligné avec SOC pour cohérence cross-projet (audit dette 2026-05-16).
+- Résultat : 161 → 155 warnings (80% restants sont des fonctions camelCase partagées impossibles à détecter sans bundler — acceptable). 0 erreur.
+- Tests : 801/801 PASS, aucune régression.
 
 
 

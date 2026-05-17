@@ -114,6 +114,13 @@ Tous les outils retournent du `TextContent` préfixé par `JARVIS_HEADER` (carto
 **Endpoint :** `GET /api/soc/defense` (cache 30s côté JARVIS · proxy vers `http://192.168.1.50:8080/defense_24h.json`)
 **Pattern :** Single Source of Truth — même fichier consommé par la page web `/defense.html`, le bloc d'injection phi4 mode SOC, et cet outil MCP.
 
+### 12. `jarvis_ioc_status` *(Sprint 18d — 2026-05-16)*
+**Description :** Score IoC POST-COMPROMISSION 0-100 + 6 signaux pré-calculés (AIDE drift, C2 outbound Suricata, SSH anomaly, webshells nginx, AppArmor denials, sudo events). Détecte si un attaquant est **DÉJÀ ENTRÉ** dans le SOC homelab (vs détecter les tentatives — couvert par KC). Niveau **OK / WARN / CRIT**. Source pré-calculée par `ioc_collect.py` sur srv-ngix (cron 60s, 95% cov).
+**Params :** aucun
+**Usage :** « quel est le score IoC ? », « y a-t-il une compromission ? », « JARVIS surveille quoi en post-compro ? »
+**Endpoint :** `GET /api/soc/ioc` (cache 30s côté JARVIS · extraction clé `ioc` de `monitoring.json`)
+**Format réponse :** bloc texte compact LLM-friendly — header JARVIS + score + 6 compteurs (AIDE/C2/SSH/Webshells/AppArmor/Sudo) + détails ⚠ si level≠OK avec exemple par signal.
+
 ---
 
 ## Configuration Claude Desktop
