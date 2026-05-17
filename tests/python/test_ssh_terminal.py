@@ -7,7 +7,7 @@ import ssh_terminal
 
 
 def test_terminal_map_couvre_4_hotes():
-    """router GT-BE98 retiré 2026-05-17 — migration ASUS BE98 → Freebox directe."""
+    """retiré 2026-05-17"""
     assert set(ssh_terminal.TERMINAL_MAP.keys()) == {"dev1", "ngix", "clt", "pa85"}
 
 
@@ -34,7 +34,7 @@ def test_terminal_map_pa85_ip_192_168_1_13():
     assert ssh_terminal.TERMINAL_MAP["pa85"]["ip"] == "192.168.1.13"
 
 
-# test_terminal_map_router_user_admin_clt retiré 2026-05-17 — migration ASUS → Freebox
+# test_terminal_map_router_user_admin_clt retiré 2026-05-17 — 
 
 
 def test_terminal_map_chaque_hote_a_les_5_champs():
@@ -76,8 +76,7 @@ def test_re_pa85_match():
     assert ssh_terminal.TERMINAL_RE["pa85"].search("ssh pa85")
 
 
-# test_re_router_match_be98 + test_re_router_match_routeur_francais retirés
-# 2026-05-17 — migration ASUS BE98 → Freebox directe (regex router supprimée)
+# Tests regex router retirés 2026-05-17 (architecture LAN unique — regex router supprimée)
 
 
 def test_re_case_insensitive():

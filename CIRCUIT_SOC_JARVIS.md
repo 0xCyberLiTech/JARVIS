@@ -46,7 +46,7 @@ Cette section répond à la question : **« qui appelle qui, et qui tombe si tel
                     │  • monitoring.json (cron 60s)                   │
                     │  • xdr_events.json / ...                        │
                     │    (router.json retiré 2026-05-17 — migration   │
-                    │     ASUS BE98 → Freebox directe)                │
+                    │     vers Freebox directe)                       │
                     └─────────┬───────────────────────────────────────┘
                               ▲
                               │ écrit (cron + scripts)

@@ -163,7 +163,7 @@ D:\BACKUP-WINDOWS\                         ← racine sauvegarde
 │   ├── id_dev   / id_dev.pub             ← srv-dev-1 (192.168.1.21)
 │   ├── id_pi-1  / id_pi-1.pub            ← Raspberry Pi 1
 │   ├── id_pi-2  / id_pi-2.pub            ← Raspberry Pi 2
-│   │   (id_router retiré 2026-05-17 — routeur ASUS BE98 débranché, migration Freebox directe)
+│   │   (id_router retiré 2026-05-17 — routeur débranché, migration Freebox directe)
 │   ├── known_hosts                        ← hôtes connus
 │   └── config                             ← aliases SSH
 │   ⚠ Vérification dynamique — backup-jarvis.ps1 compare source vs backup

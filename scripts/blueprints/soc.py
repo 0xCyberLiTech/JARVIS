@@ -1378,7 +1378,7 @@ def _soc_ollama_query(prompt: str, max_tokens: int = 400) -> str:
         return ""
 
 
-# _gap_prompt_c2 retiré 2026-05-17 — migration ASUS BE98 → Freebox directe.
+# _gap_prompt_c2 retiré 2026-05-17
 # (Plus de C2 outbound côté routeur — Suricata ET-TROJAN/CNC remplace.)
 
 
@@ -1404,7 +1404,7 @@ def _gap_prompt_recon(gap_ips, cs, xh):
 def _soc_rsyslog_gap_analyze(gap_ips: list, gap_type: str, xh: dict, data: dict) -> None:
     """Thread : analyse LLM du gap défensif détecté.
     Appelé APRÈS le ban immédiat — enrichit le journal et le TTS vocal.
-    gap_type=='recon' uniquement depuis 2026-05-17 (C2 routeur retiré, migration ASUS → Freebox)."""
+    gap_type=='recon' uniquement depuis 2026-05-17 (C2 routeur retiré, )."""
     try:
         cs = data.get("crowdsec", {})
         prompt = _gap_prompt_recon(gap_ips, cs, xh)
@@ -1452,7 +1452,7 @@ def _soc_rsyslog_check(data: dict) -> None:
 
     cs_detail = data.get("crowdsec", {}).get("decisions_detail", {})
 
-    # Bloc C2 outbound (router_seen) retiré 2026-05-17 — migration ASUS BE98 → Freebox directe.
+    # Bloc C2 outbound (router_seen) retiré 2026-05-17
     # Détection C2 désormais portée par Suricata ET-TROJAN/CNC/MALWARE signatures.
 
     # ── Multi-recon : IPs vues sur plusieurs Apache en même temps ──
@@ -1480,7 +1480,7 @@ def _threat_score_from_json(d: dict, gap_banned: set) -> dict:
     gap_banned : IPs bannies ce cycle → soustraites d'exploit_unblocked pour éviter double TTS."""
     exploit_unblocked = max(
         0, d.get("threat_exploit_unblocked", 0) - len(gap_banned))
-    # c2_count retiré 2026-05-17 — migration ASUS BE98 → Freebox directe
+    # c2_count retiré 2026-05-17
     # (couverture C2 désormais portée par Suricata ET-TROJAN/CNC via sur_sev1)
     return {
         "score":             d.get("threat_score", 0),
@@ -1509,7 +1509,7 @@ def _check_threat_level(ts: dict) -> list:
     if ts["sur_sev1"] > 0:
         n = ts["sur_sev1"]
         detail.append(f"Suricata {n} alerte{'s' if n>1 else ''} critique{'s' if n>1 else ''}")
-    # Branche c2_count retirée 2026-05-17 — migration ASUS BE98 → Freebox directe
+    # Branche c2_count retirée 2026-05-17
     if ts.get("multi_count", 0) > 0:
         detail.append(f"Recon multi-cible {ts['multi_count']} hôtes")
     if ts["cs_bans"] > 0:

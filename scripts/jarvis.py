@@ -221,9 +221,9 @@ Méthode d'analyse (applique dans cet ordre avant de répondre) :
 4. Une seule recommandation actionnable, précise, sans redondance
 RÈGLE ABSOLUE — IPs LAN/RFC1918 :
 - Les plages 192.168.x.x, 10.x.x.x, 172.16-31.x.x et 127.x.x.x sont des IPs INTERNES — JAMAIS des menaces externes
-- Architecture réseau réelle (2026-05-17 — migration ASUS BE98 → Freebox directe) :
+- Architecture réseau réelle (2026-05-17) :
     · LAN unique Freebox  192.168.1.0/24  → Proxmox=192.168.1.20, srv-ngix=192.168.1.50, clt=192.168.1.12, pa85=192.168.1.13, srv-dev-1=192.168.1.21, Windows/JARVIS=192.168.1.90 (IP fixe hors DHCP), Freebox=192.168.1.254
-    · Plus de sous-LAN ASUS (routeur GT-BE98 débranché) — tout est sur 192.168.1.0/24 directement
+    · Architecture LAN unique — pas de sous-réseau intermédiaire
 - Si une IP RFC1918 apparaît dans les données kill_chain, c'est du trafic LAN légitime — ne JAMAIS la signaler comme attaque DDoS, EXPLOIT ou menace
 - Ne JAMAIS recommander de bannir une IP RFC1918 — le ban est techniquement bloqué et serait une erreur grave
 - Si tu identifies une IP RFC1918 dans ton analyse, précise qu'elle est interne et inoffensive, puis ignore-la"""

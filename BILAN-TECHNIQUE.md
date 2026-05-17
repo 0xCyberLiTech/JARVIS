@@ -346,7 +346,7 @@ JARVIS consomme `monitoring.json` (cron srv-ngix 1min) via 3 patterns :
 
 - **`monitoring.json`** v3.7.0 (cron 1min srv-ngix) — 59 clés validées jsonschema
 - **`defense_24h.json`** (cron 60s `defense_aggregator.py`) — KPI + heatmap 96 buckets + delta + top + timeline
-- ~~`router.json`~~ retiré 2026-05-17 (migration ASUS BE98 → Freebox directe — routeur débranché)
+- ~~`router.json`~~ retiré 2026-05-17 ( — routeur débranché)
 - **clé `ioc`** dans monitoring.json (Sprint 18a `ioc_collect.py`) — 6 signaux POST-COMPROMISSION
 
 ---
@@ -392,7 +392,7 @@ JARVIS consomme `monitoring.json` (cron srv-ngix 1min) via 3 patterns :
 
 ### 8.3. SSH read-only par défaut (`ssh_terminal.py` 100% cov)
 
-5 hôtes terminal interactif xterm.js : srv-dev-1 · srv-ngix · clt · pa85 · routeur BE98. Mode interactif WebSocket PTY (paramiko).
+4 hôtes terminal interactif xterm.js : srv-dev-1 · srv-ngix · clt · pa85. Mode interactif WebSocket PTY (paramiko).
 
 **Hôtes write ops via `_tool_commande_ssh_*`** : 4 wrappers (ngix · proxmox · clt · pa85). Toute commande qui matche un `BLOCKED_SSH_PATTERN` doit passer `check_write_op` → si whitelistée, exécution + audit log.
 

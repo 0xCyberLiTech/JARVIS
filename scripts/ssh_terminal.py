@@ -4,7 +4,7 @@ Extrait de jarvis.py session 33 (2026-05-13) — Phase 3 module 11.
 
 Couvre :
 - Mapping des 4 hôtes SSH terminal (dev1/ngix/clt/pa85) — IP/port/user/key/label
-  (router GT-BE98 retiré 2026-05-17 — migration ASUS BE98 → Freebox directe)
+  (retiré 2026-05-17)
 - Regex de détection ("ouvre terminal srv-dev-1", "connecte-moi à ngix", etc.)
 - Générateur SSE qui émet `open_ssh_terminal` pour déclencher le PTY xterm.js côté navigateur
 
@@ -18,7 +18,7 @@ from pathlib import Path
 
 import bypass_code
 
-# ── Mapping SSH terminal (4 hôtes — router GT-BE98 retiré 2026-05-17, migration ASUS → Freebox directe)
+# ── Mapping SSH terminal (4 hôtes — retiré 2026-05-17)
 TERMINAL_MAP = {
     "dev1":   {"ip": bypass_code.CODE_DEV_IP,   "port": bypass_code.CODE_DEV_PORT, "user": "root",      "key": bypass_code.CODE_DEV_KEY,                "label": "srv-dev-1"},
     "ngix":   {"ip": "192.168.1.50",            "port": 2272,                       "user": "root",      "key": str(Path.home() / ".ssh" / "id_nginx"),  "label": "srv-ngix"},
@@ -49,7 +49,7 @@ TERMINAL_RE = {
         r'|\b(pa85|srv[-\s]?pa85)\b.{0,30}\b(connect[e|é][-\s]?moi|ouvre?|terminal|ssh)\b',
         re.I,
     ),
-    # router regex retirée 2026-05-17 — migration ASUS BE98 → Freebox directe
+    # router regex retirée 2026-05-17
 }
 
 
