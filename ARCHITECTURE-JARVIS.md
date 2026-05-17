@@ -407,9 +407,9 @@ monitoring_gen.py ── cron 60s ──→ monitoring.json
   JARVIS engine    ── 10s ──────────────┘  (/api/stats GPU live)
   Heartbeat        ── 15s →  JARVIS ping
   Proto live       ── 15s →  proto-live.py
-  Router GT-BE98   ── 30s →  router.json
+  (Router GT-BE98 30s → router.json — retiré 2026-05-17, migration ASUS → Freebox directe)
 
-LCM(10,15,30,60) = 60s → alignement théorique — négligeable LAN
+LCM(15,30,60) = 60s → alignement théorique — négligeable LAN
 ```
 
 ---

@@ -346,7 +346,7 @@ JARVIS consomme `monitoring.json` (cron srv-ngix 1min) via 3 patterns :
 
 - **`monitoring.json`** v3.7.0 (cron 1min srv-ngix) — 59 clés validées jsonschema
 - **`defense_24h.json`** (cron 60s `defense_aggregator.py`) — KPI + heatmap 96 buckets + delta + top + timeline
-- **`router.json`** (cron 30s) — état routeur GT-BE98
+- ~~`router.json`~~ retiré 2026-05-17 (migration ASUS BE98 → Freebox directe — routeur débranché)
 - **clé `ioc`** dans monitoring.json (Sprint 18a `ioc_collect.py`) — 6 signaux POST-COMPROMISSION
 
 ---

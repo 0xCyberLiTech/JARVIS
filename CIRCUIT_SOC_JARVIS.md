@@ -44,7 +44,9 @@ Cette section répond à la question : **« qui appelle qui, et qui tombe si tel
                     │  srv-ngix :8080                                 │
                     │  • defense_24h.json (cron 60s)                  │
                     │  • monitoring.json (cron 60s)                   │
-                    │  • router.json / xdr_events / ...               │
+                    │  • xdr_events.json / ...                        │
+                    │    (router.json retiré 2026-05-17 — migration   │
+                    │     ASUS BE98 → Freebox directe)                │
                     └─────────┬───────────────────────────────────────┘
                               ▲
                               │ écrit (cron + scripts)
