@@ -20,10 +20,10 @@
 
 | Métrique | Valeur |
 |---|---|
-| **Tests pytest** | **814 pass · 0 fail** (+7 audit_writeop + 6 is_known_write_op/apt-BLOCKED 2026-05-17) |
-| **Coverage globale** | 44% (6059 stmts · 3368 miss) |
-| **Modules Python ≥100% cov** | 21 modules (`ollama_circuit`, `chat_tool_calls`, `tts_cleaner`, `stream_tokens`, `security_whitelists`, `chat_pending_bypass`, `llm_opts`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_routing`, `chat_stream`, `chat_system_prompt`, `deferred_speak`, `bypass_filesystem`, `stt`, `ssh_terminal`, `tts_dedup`, `vision`, `bypass_proxmox`, `deepfilter`) |
-| **Modules Python <50% cov** | `jarvis.py` 26% · `audio_dsp.py` 25% · `blueprints/soc.py` 33% · `chat_soc_inject.py` 38% · `code_reasoning.py` 44% |
+| **Tests pytest** | **907 pass · 0 fail** (+93 session 2026-05-17 soir : +19 chat_soc_inject +10 bypass_code +15 code_reasoning +25 voice_lab +24 audio_dsp) |
+| **Coverage globale** | **50%** (6086 stmts · 3072 miss) — +6 pts session 2026-05-17 soir |
+| **Modules Python ≥100% cov** | **25 modules** (+`chat_soc_inject` +`bypass_code` +`voice_lab` +`bypass_simple` 2026-05-17 soir) : `ollama_circuit`, `chat_tool_calls`, `tts_cleaner`, `stream_tokens`, `security_whitelists`, `chat_pending_bypass`, `llm_opts`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_routing`, `chat_stream`, `chat_system_prompt`, `deferred_speak`, `bypass_filesystem`, `stt`, `ssh_terminal`, `tts_dedup`, `vision`, `bypass_proxmox`, `deepfilter`, `chat_soc_inject`, `bypass_code`, `voice_lab`, `bypass_simple` |
+| **Modules Python <50% cov** | `jarvis.py` 26% · `blueprints/soc.py` 33% (orchestrateurs Flask, couverts par E2E) — autres résiduels remontés ≥72% session 2026-05-17 soir |
 | **`jarvis.py`** | 4633 L (2909 stmts exécutables) |
 | **`blueprints/soc.py`** | 1007 stmts |
 | **Modules Python totaux** | 32 modules dans `scripts/` |

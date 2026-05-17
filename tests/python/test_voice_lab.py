@@ -303,3 +303,166 @@ def test_load_audio_signature_acceptee(monkeypatch):
     assert sr == 22050
     assert captured["mono"] is True
     assert captured["duration"] == 30.0
+
+
+# ── is_librosa_available ─────────────────────────────────────────────────
+
+
+def test_is_librosa_available_true_quand_installe():
+    """Sur cette machine de dev, librosa est installé → True."""
+    assert voice_lab.is_librosa_available() is True
+
+
+def test_is_librosa_available_false_si_import_echoue(monkeypatch):
+    """Si import librosa lève ImportError → False (branche ligne 59-60)."""
+    import builtins as _builtins
+    real_import = _builtins.__import__
+
+    def fake_import(name, *a, **kw):
+        if name == "librosa":
+            raise ImportError("simulé")
+        return real_import(name, *a, **kw)
+
+    monkeypatch.setattr(_builtins, "__import__", fake_import)
+    assert voice_lab.is_librosa_available() is False
+
+
+# ── analyse_features : analyse acoustique réelle (signal sinus) ──────────
+# Tests live avec librosa+numpy installés. Signal sinusoïdal simple → pitch
+# détectable, features cohérentes.
+
+
+def _generate_sine(freq_hz: float, sr: int = 22050, duration_s: float = 1.0):
+    """Génère un signal mono float32 d'une sinusoïde à freq_hz."""
+    import numpy as np
+    t = np.linspace(0, duration_s, int(sr * duration_s), endpoint=False, dtype=np.float32)
+    return 0.3 * np.sin(2 * np.pi * freq_hz * t).astype(np.float32)
+
+
+def test_analyse_features_sine_220hz_detecte_tenor():
+    """220Hz → pitch_median dans la zone TÉNOR (160-200) ou MEZZO (200-250)."""
+    sr = 22050
+    y = _generate_sine(220.0, sr=sr, duration_s=1.5)
+    result = voice_lab.analyse_features(y, sr, fmin=50.0, fmax=2000.0, n_mels=64)
+    # Pitch médian doit être proche de 220Hz (tolérance ±15Hz)
+    assert 200 < result["pitch_median"] < 240
+    assert result["voice_type"] in ("TÉNOR", "MEZZO / ALTO")
+
+
+def test_analyse_features_renvoie_tous_les_champs_attendus():
+    """Vérifie le contrat de la fonction : 18 champs présents dans le dict de sortie."""
+    sr = 22050
+    y = _generate_sine(150.0, sr=sr, duration_s=1.0)
+    r = voice_lab.analyse_features(y, sr, fmin=50.0, fmax=2000.0, n_mels=32)
+    for key in ["dur", "sr", "waveform", "pitch_curve", "spectrum",
+                "pitch_median", "pitch_min", "pitch_max",
+                "centroid_mean", "rolloff_mean", "flatness_mean", "zcr_mean",
+                "dynamic_range_db", "mfcc_means",
+                "voice_type", "brightness", "breathiness", "voicing",
+                "eq_preset"]:
+        assert key in r, f"champ manquant : {key}"
+
+
+def test_analyse_features_waveform_limite_a_200_points():
+    sr = 22050
+    y = _generate_sine(200.0, sr=sr, duration_s=2.0)   # 44100 samples
+    r = voice_lab.analyse_features(y, sr, fmin=50.0, fmax=2000.0, n_mels=32)
+    assert len(r["waveform"]) <= 200
+
+
+def test_analyse_features_silence_pitch_zero_et_non_detecte():
+    """Signal silence (zeros) → pas de pitch détecté → voice_type = NON DÉTECTÉ."""
+    import numpy as np
+    sr = 22050
+    y = np.zeros(sr, dtype=np.float32)
+    r = voice_lab.analyse_features(y, sr, fmin=50.0, fmax=2000.0, n_mels=32)
+    assert r["pitch_median"] == 0.0
+    assert r["voice_type"] == "NON DÉTECTÉ"
+
+
+def test_analyse_features_eq_preset_a_5_bandes():
+    """eq_preset doit contenir low / lomid / mid / himid / air."""
+    sr = 22050
+    y = _generate_sine(180.0, sr=sr, duration_s=1.0)
+    r = voice_lab.analyse_features(y, sr, fmin=50.0, fmax=2000.0, n_mels=32)
+    assert set(r["eq_preset"].keys()) == {"low", "lomid", "mid", "himid", "air"}
+    # Toutes les valeurs sont des floats arrondis à 1 décimale
+    for v in r["eq_preset"].values():
+        assert isinstance(v, float)
+
+
+def test_analyse_features_brightness_categorise():
+    """brightness ∈ {SOMBRE, NEUTRE, BRILLANT} selon centroid_mean."""
+    sr = 22050
+    y = _generate_sine(150.0, sr=sr, duration_s=1.0)
+    r = voice_lab.analyse_features(y, sr, fmin=50.0, fmax=2000.0, n_mels=32)
+    assert r["brightness"] in ("SOMBRE", "NEUTRE", "BRILLANT")
+
+
+def test_analyse_features_spectrum_taille_egale_n_mels():
+    sr = 22050
+    y = _generate_sine(200.0, sr=sr, duration_s=1.0)
+    r = voice_lab.analyse_features(y, sr, fmin=50.0, fmax=2000.0, n_mels=24)
+    assert len(r["spectrum"]) == 24
+
+
+# ── _classify_type : seuils par fréquence pitch ──────────────────────────
+
+
+def test_classify_type_soprano_haut():
+    assert voice_lab._classify_type(300.0) == "SOPRANO"
+
+
+def test_classify_type_mezzo_alto():
+    assert voice_lab._classify_type(220.0) == "MEZZO / ALTO"
+
+
+def test_classify_type_tenor():
+    assert voice_lab._classify_type(180.0) == "TÉNOR"
+
+
+def test_classify_type_baryton():
+    assert voice_lab._classify_type(140.0) == "BARYTON"
+
+
+def test_classify_type_basse():
+    assert voice_lab._classify_type(100.0) == "BASSE"
+
+
+def test_classify_type_basse_profonde():
+    assert voice_lab._classify_type(60.0) == "BASSE PROFONDE"
+
+
+def test_classify_type_sub_bass():
+    assert voice_lab._classify_type(30.0) == "SUB-BASS / INST."
+
+
+def test_classify_type_zero_non_detecte():
+    assert voice_lab._classify_type(0.0) == "NON DÉTECTÉ"
+
+
+def test_classify_type_negative_non_detecte():
+    """Pitch négatif (cas dégénéré numpy) → NON DÉTECTÉ."""
+    assert voice_lab._classify_type(-1.0) == "NON DÉTECTÉ"
+
+
+# ── _eq_preset : presets EQ dérivés des features ─────────────────────────
+
+
+def test_eq_preset_renvoie_5_bandes_avec_floats():
+    out = voice_lab._eq_preset(pitch_median=150.0, centroid_mean=2500.0, rolloff_mean=4000.0)
+    assert set(out.keys()) == {"low", "lomid", "mid", "himid", "air"}
+    for v in out.values():
+        assert isinstance(v, float)
+
+
+def test_eq_preset_pitch_eleve_low_proche_zero():
+    """Pitch élevé (≥150) → low ≈ 0 (pas de boost basses)."""
+    out = voice_lab._eq_preset(pitch_median=200.0, centroid_mean=2000.0, rolloff_mean=4000.0)
+    assert abs(out["low"]) <= 0.1
+
+
+def test_eq_preset_pitch_bas_low_negatif():
+    """Pitch très bas (<50) → low très négatif (cut basses)."""
+    out = voice_lab._eq_preset(pitch_median=20.0, centroid_mean=1000.0, rolloff_mean=2000.0)
+    assert out["low"] < -1.0

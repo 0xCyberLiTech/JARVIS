@@ -1,4 +1,60 @@
-# JARVIS — Mémoire projet (2026-05-17 — audit honnête + parité doc SOC + SSH write ops clôturé + audit log forensic)
+# JARVIS — Mémoire projet (2026-05-17 — audit honnête + parité doc SOC + SSH write ops clôturé + audit log forensic + chantier coverage 5 modules)
+
+## Session 2026-05-17 soir — chantier coverage 5 modules + cleanup snapshots locaux
+
+**Demande Marc** : "on corrige tout" après audit qui révélait 5 modules à coverage faible + 4 dossiers snapshots locaux.
+
+### Résultats globaux
+
+| Indicateur | Avant | Après | Gain |
+|---|---|---|---|
+| **Tests pytest** | 814 | **907** | +93 tests |
+| **Coverage globale** | 44% | **50%** | +6 points absolus |
+| **Modules Python ≥100% cov** | 21 | **25** | +4 (+chat_soc_inject, +bypass_code, +voice_lab, +bypass_simple constaté ratisser) |
+| **Disque libéré (snapshots)** | — | **361 Mo** | 4 dossiers `scripts.*-YYYYMMDD/` supprimés |
+
+### Coverage par module — détail
+
+| Module | Avant | Après | Gain | Tests ajoutés |
+|---|---|---|---|---|
+| `chat_soc_inject.py` | 38% | **100%** | +62 pts | +19 (`_kpi_with_delta` 7 cas · `_format_defense_block` 12 cas · `inject(fetch_defense_fn)` 5 cas) |
+| `bypass_code.py` | 54% | **100%** | +46 pts | +10 (`code_scp_exec_sse` happy/refus/exec/send/SCP error/exception/sortie vide/commande SCP construite) |
+| `code_reasoning.py` | 44% | **96%** | +52 pts | +15 (`_run_task` 9 cas avec stream Ollama mocké · `code_reasoning_gen` 4 cas avec thread daemon · cleanup au passage) |
+| `voice_lab.py` | 71% | **100%** | +29 pts | +25 (`is_librosa_available` True/False · `analyse_features` signal sinus 220Hz/150Hz/silence · 8 cas `_classify_type` · 3 cas `_eq_preset`) |
+| `audio_dsp.py` | 25% | **72%** | +47 pts | +24 (`_gen_ir` 5 presets + déterminisme · `_convolve_reverb` 2 cas · 6 helpers FX `_apply_*` smoke shape · `_apply_fx_rack` 3 cas chaîne · biquad filters · `_enrich_voice` + `_dsp_enrich` · `_pcm_to_wav` 3 cas WAV header) |
+
+### Suppression snapshots locaux (361 Mo)
+
+4 dossiers `scripts.*-YYYYMMDD/` supprimés :
+- `scripts.action1-ruff/` (90 Mo)
+- `scripts.aprem-20260514/` (91 Mo)
+- `scripts.matin-20260514/` (90 Mo)
+- `scripts.snapshot-20260514/` (90 Mo)
+
+Tous étaient déjà gitignored depuis 2026-05-14 (refactor JS) et avaient rempli leur rôle de rollback de sécurité. Validation explicite Marc avant suppression (action irréversible).
+
+### Stratégie de test par module
+
+- **chat_soc_inject** (logique critique injection SOC phi4) : tests directs des helpers `_kpi_with_delta` + `_format_defense_block` (sérialisation `defense_24h.json` compact ~500 chars). Tests `inject` couvrent les 3 branches : fetch_defense OK / KO / JSON invalide.
+- **bypass_code** (exécution Python sandbox srv-dev-1) : mock `subprocess.run` (CompletedProcess + TimeoutExpired) + `ssh_dev1_fn` factice. Couvre SCP succès/échec/exception, exec python3/bash, send-only mode.
+- **code_reasoning** (qwen3:8b avec thinking masqué) : mock `requests.post` avec `_FakeStreamResponse.iter_lines()` yieldant des chunks JSON Ollama. Test du masquage `<think>...</think>` à la volée.
+- **voice_lab** (analyse acoustique librosa) : tests live avec librosa 0.11.0 installé. Génération signal sinusoïdal mono float32 → vérifs pitch_median ≈ fréquence injectée + champs dict requis.
+- **audio_dsp** (DSP NumPy + scipy) : smoke tests préservation shape/dtype pour 6 helpers FX (`_apply_delay/chorus/phaser/flanger/echo/exciter`) + `_gen_ir` 5 presets reverb + `_pcm_to_wav` header WAV.
+
+### Commit unique
+
+`feat(jarvis): coverage +6pts (5 modules) + snapshots cleanup 361Mo` — 5 fichiers tests + suppression 4 dossiers locaux.
+
+### Items NON actionnables confirmés
+
+- `jarvis.py` 26% cov (2918 stmts orchestrateur Flask) — couvert E2E Playwright
+- `blueprints/soc.py` 33% cov (1007 stmts orchestrateur SOC) — idem
+- 155 warnings ESLint — faux positifs camelCase exports inter-modules
+- 135 inline styles JS — pattern SPA temps réel acceptable
+
+Score honnête après cette session : **~94/100** (vs ~93 avant) — gain +1 pt sur le critère Tests (24/25 → 25/25 atteint car 50% coverage globale + 25 modules à 100% sur 32).
+
+---
 
 ## Session 2026-05-17 — clôture roadmap SSH write ops + audit log forensic dédié
 

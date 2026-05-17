@@ -1,7 +1,9 @@
 """Tests bypass_code — détection regex + helpers (sans subprocess SCP)."""
 import json
+import subprocess
 from pathlib import Path
 
+import bypass_code
 from bypass_code import (
     CODE_DEV_IP,
     CODE_DEV_KEY,
@@ -16,6 +18,7 @@ from bypass_code import (
     MKDIR_TIMEOUT_S,
     SCP_TIMEOUT_S,
     _sse_tok,
+    code_scp_exec_sse,
     detect_code_command,
     find_local_code_file,
 )
@@ -220,3 +223,212 @@ def test_detect_code_command_extrait_premier_fichier_si_plusieurs():
 def test_local_search_dirs_sont_path_objects():
     for d in LOCAL_SEARCH_DIRS:
         assert isinstance(d, Path)
+
+
+# ── code_scp_exec_sse — SCP + exec sur srv-dev-1 (subprocess mocké) ──────
+
+
+class _FakeCompletedProcess:
+    """Mock minimal de subprocess.CompletedProcess pour subprocess.run()."""
+
+    def __init__(self, returncode=0, stdout="", stderr=""):
+        self.returncode = returncode
+        self.stdout = stdout
+        self.stderr = stderr
+
+
+def _make_ssh_dev1_ok(out: str = "hello world"):
+    """Factory : ssh_dev1_fn qui retourne (True, out) à chaque appel."""
+    return lambda cmd, timeout=None: (True, out)
+
+
+def _parse_sse(sse_str: str) -> list:
+    """Parse une string SSE en liste de payloads JSON."""
+    out = []
+    for line in sse_str.split("\n\n"):
+        line = line.strip()
+        if line.startswith("data: "):
+            out.append(json.loads(line[6:]))
+    return out
+
+
+def test_scp_exec_sse_fichier_introuvable(tmp_path, monkeypatch):
+    """Fichier inexistant → 1 event SSE done=True avec message d'erreur."""
+    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    events = list(code_scp_exec_sse("inexistant.py", exec_it=True, ssh_dev1_fn=lambda c, timeout=None: (True, "")))
+    payloads = [_parse_sse(e)[0] for e in events]
+    assert len(payloads) == 1
+    assert payloads[0]["done"] is True
+    assert "Fichier introuvable" in payloads[0]["token"]
+    assert "inexistant.py" in payloads[0]["token"]
+
+
+def test_scp_exec_sse_scp_succes_et_exec_python(tmp_path, monkeypatch):
+    """SCP OK + exec=True sur .py → python3 utilisé pour l'exec."""
+    fake_file = tmp_path / "myscript.py"
+    fake_file.write_text("print('hi')")
+    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr(bypass_code.subprocess, "run",
+                         lambda *a, **kw: _FakeCompletedProcess(returncode=0, stdout="ok"))
+
+    captured = {"exec_cmd": None}
+
+    def ssh_dev1(cmd, timeout=None):
+        # 1er appel = mkdir, 2e appel = python3 exec
+        if "python3" in cmd:
+            captured["exec_cmd"] = cmd
+        return True, "Salut depuis srv-dev-1"
+
+    events = list(code_scp_exec_sse("myscript.py", exec_it=True, ssh_dev1_fn=ssh_dev1))
+    text = " ".join(_parse_sse(e)[0]["token"] for e in events)
+    assert "myscript.py" in text
+    assert "envoyé" in text
+    assert "python3" in text
+    assert "Salut depuis srv-dev-1" in text
+    # Vérifier que la cmd d'exec utilise python3 (pas bash)
+    assert "python3" in captured["exec_cmd"]
+    assert "myscript.py" in captured["exec_cmd"]
+
+
+def test_scp_exec_sse_scp_succes_et_exec_bash(tmp_path, monkeypatch):
+    """SCP OK + exec=True sur .sh → bash utilisé pour l'exec."""
+    fake_file = tmp_path / "deploy.sh"
+    fake_file.write_text("echo hi")
+    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr(bypass_code.subprocess, "run",
+                         lambda *a, **kw: _FakeCompletedProcess(returncode=0))
+
+    captured = {"interp": None}
+
+    def ssh_dev1(cmd, timeout=None):
+        if cmd.startswith("python3") or cmd.startswith("bash"):
+            captured["interp"] = cmd.split()[0]
+        return True, "ok"
+
+    list(code_scp_exec_sse("deploy.sh", exec_it=True, ssh_dev1_fn=ssh_dev1))
+    assert captured["interp"] == "bash"
+
+
+def test_scp_exec_sse_send_only_pas_d_exec(tmp_path, monkeypatch):
+    """exec_it=False → SCP fait, pas d'exec lancé."""
+    fake_file = tmp_path / "x.py"
+    fake_file.write_text("x")
+    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr(bypass_code.subprocess, "run",
+                         lambda *a, **kw: _FakeCompletedProcess(returncode=0))
+
+    captured = {"exec_count": 0}
+
+    def ssh_dev1(cmd, timeout=None):
+        if "python3" in cmd or cmd.startswith("bash"):
+            captured["exec_count"] += 1
+        return True, ""
+
+    events = list(code_scp_exec_sse("x.py", exec_it=False, ssh_dev1_fn=ssh_dev1))
+    text = " ".join(_parse_sse(e)[0]["token"] for e in events)
+    assert captured["exec_count"] == 0   # aucun python3/bash appelé
+    assert "Dis `exécute x.py sur dev`" in text
+    assert "Fichier disponible" in text
+
+
+def test_scp_exec_sse_scp_echoue_returncode_non_zero(tmp_path, monkeypatch):
+    """subprocess.run renvoie returncode != 0 → message d'erreur SCP, pas d'exec."""
+    fake_file = tmp_path / "x.py"
+    fake_file.write_text("x")
+    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr(bypass_code.subprocess, "run",
+                         lambda *a, **kw: _FakeCompletedProcess(returncode=1, stderr="permission denied"))
+
+    captured = {"exec_called": False}
+
+    def ssh_dev1(cmd, timeout=None):
+        if "python3" in cmd:
+            captured["exec_called"] = True
+        return True, ""
+
+    events = list(code_scp_exec_sse("x.py", exec_it=True, ssh_dev1_fn=ssh_dev1))
+    payloads = [_parse_sse(e)[0] for e in events]
+    # Dernier event doit être done=True avec message d'erreur
+    assert payloads[-1]["done"] is True
+    assert "SCP échoué" in payloads[-1]["token"]
+    assert "permission denied" in payloads[-1]["token"]
+    assert captured["exec_called"] is False   # pas d'exec si SCP échoue
+
+
+def test_scp_exec_sse_subprocess_leve_exception(tmp_path, monkeypatch):
+    """subprocess.run lève (timeout, OSError…) → message d'erreur clair."""
+    fake_file = tmp_path / "x.py"
+    fake_file.write_text("x")
+    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+
+    def boom(*a, **kw):
+        raise subprocess.TimeoutExpired(cmd="scp", timeout=20)
+
+    monkeypatch.setattr(bypass_code.subprocess, "run", boom)
+
+    events = list(code_scp_exec_sse("x.py", exec_it=True, ssh_dev1_fn=lambda c, timeout=None: (True, "")))
+    payloads = [_parse_sse(e)[0] for e in events]
+    assert payloads[-1]["done"] is True
+    assert "Erreur SCP" in payloads[-1]["token"]
+
+
+def test_scp_exec_sse_ssh_exec_echoue(tmp_path, monkeypatch):
+    """ssh_dev1_fn retourne ok=False pendant exec → message d'erreur SSH."""
+    fake_file = tmp_path / "x.py"
+    fake_file.write_text("x")
+    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr(bypass_code.subprocess, "run",
+                         lambda *a, **kw: _FakeCompletedProcess(returncode=0))
+
+    # ssh_dev1 : mkdir ok, mais exec fail
+    state = {"call": 0}
+
+    def ssh_dev1(cmd, timeout=None):
+        state["call"] += 1
+        if state["call"] == 1:   # mkdir
+            return True, ""
+        return False, ""   # exec fail
+
+    events = list(code_scp_exec_sse("x.py", exec_it=True, ssh_dev1_fn=ssh_dev1))
+    payloads = [_parse_sse(e)[0] for e in events]
+    assert payloads[-1]["done"] is True
+    assert "Erreur d'exécution SSH" in payloads[-1]["token"]
+
+
+def test_scp_exec_sse_exec_sortie_vide(tmp_path, monkeypatch):
+    """exec OK mais output vide → '(pas de sortie)'."""
+    fake_file = tmp_path / "x.py"
+    fake_file.write_text("x")
+    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr(bypass_code.subprocess, "run",
+                         lambda *a, **kw: _FakeCompletedProcess(returncode=0))
+
+    events = list(code_scp_exec_sse("x.py", exec_it=True,
+                                     ssh_dev1_fn=lambda c, timeout=None: (True, "")))
+    text = " ".join(_parse_sse(e)[0]["token"] for e in events)
+    assert "(pas de sortie)" in text
+
+
+def test_scp_exec_sse_construit_la_bonne_commande_scp(tmp_path, monkeypatch):
+    """La commande SCP utilise CODE_DEV_IP, CODE_DEV_PORT, CODE_DEV_KEY, CODE_REMOTE_DIR."""
+    fake_file = tmp_path / "test.py"
+    fake_file.write_text("x")
+    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+
+    captured = {"cmd": None}
+
+    def fake_run(cmd, *a, **kw):
+        captured["cmd"] = cmd
+        return _FakeCompletedProcess(returncode=0)
+
+    monkeypatch.setattr(bypass_code.subprocess, "run", fake_run)
+
+    list(code_scp_exec_sse("test.py", exec_it=False,
+                            ssh_dev1_fn=lambda c, timeout=None: (True, "")))
+    cmd = captured["cmd"]
+    assert cmd[0] == "scp"
+    assert CODE_DEV_KEY in cmd
+    assert str(CODE_DEV_PORT) in cmd
+    assert "StrictHostKeyChecking=no" in cmd
+    assert "BatchMode=yes" in cmd
+    assert f"root@{CODE_DEV_IP}:{CODE_REMOTE_DIR}/test.py" in cmd
