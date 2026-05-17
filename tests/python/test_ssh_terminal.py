@@ -1,4 +1,4 @@
-"""Tests ssh_terminal — détection regex + générateur SSE PTY (5 hôtes)."""
+"""Tests ssh_terminal — détection regex + générateur SSE PTY (4 hôtes — router retiré 2026-05-17)."""
 import json
 
 import ssh_terminal
@@ -6,8 +6,9 @@ import ssh_terminal
 # ── TERMINAL_MAP ────────────────────────────────────────────────────────
 
 
-def test_terminal_map_couvre_5_hotes():
-    assert set(ssh_terminal.TERMINAL_MAP.keys()) == {"dev1", "ngix", "clt", "pa85", "router"}
+def test_terminal_map_couvre_4_hotes():
+    """router GT-BE98 retiré 2026-05-17 — migration ASUS BE98 → Freebox directe."""
+    assert set(ssh_terminal.TERMINAL_MAP.keys()) == {"dev1", "ngix", "clt", "pa85"}
 
 
 def test_terminal_map_dev1_pointe_sur_srv_dev_1():
@@ -33,9 +34,7 @@ def test_terminal_map_pa85_ip_192_168_1_13():
     assert ssh_terminal.TERMINAL_MAP["pa85"]["ip"] == "192.168.1.13"
 
 
-def test_terminal_map_router_user_admin_clt():
-    """Routeur a un user spécifique 'admin-clt' (pas root)."""
-    assert ssh_terminal.TERMINAL_MAP["router"]["user"] == "admin-clt"
+# test_terminal_map_router_user_admin_clt retiré 2026-05-17 — migration ASUS → Freebox
 
 
 def test_terminal_map_chaque_hote_a_les_5_champs():
@@ -45,7 +44,7 @@ def test_terminal_map_chaque_hote_a_les_5_champs():
         assert set(entry.keys()) == expected_keys, f"Hôte {host_key} mal formé"
 
 
-# ── TERMINAL_RE — détection regex (5 hôtes) ────────────────────────────
+# ── TERMINAL_RE — détection regex (4 hôtes — router retiré 2026-05-17) ──
 
 
 def test_re_dev1_match_ouvre_terminal_srv_dev_1():
@@ -77,13 +76,8 @@ def test_re_pa85_match():
     assert ssh_terminal.TERMINAL_RE["pa85"].search("ssh pa85")
 
 
-def test_re_router_match_be98():
-    """Alias 'be98' (label routeur) reconnu."""
-    assert ssh_terminal.TERMINAL_RE["router"].search("ouvre terminal be98")
-
-
-def test_re_router_match_routeur_francais():
-    assert ssh_terminal.TERMINAL_RE["router"].search("connecte-moi au routeur")
+# test_re_router_match_be98 + test_re_router_match_routeur_francais retirés
+# 2026-05-17 — migration ASUS BE98 → Freebox directe (regex router supprimée)
 
 
 def test_re_case_insensitive():
@@ -143,7 +137,7 @@ def test_terminal_sse_user_default_root():
 
 
 def test_terminal_sse_user_custom():
-    """Routeur passe user='admin-clt'."""
-    events = list(ssh_terminal.terminal_sse("router", "be98", user="admin-clt"))
+    """Sanity : user explicite passé tel quel dans le payload SSE (user='admin-clt' arbitraire)."""
+    events = list(ssh_terminal.terminal_sse("dev1", "srv-dev-1", user="admin-clt"))
     payload = json.loads(events[0].replace("data: ", "").strip())
     assert payload["user"] == "admin-clt"

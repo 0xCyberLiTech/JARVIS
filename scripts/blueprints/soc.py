@@ -1378,24 +1378,8 @@ def _soc_ollama_query(prompt: str, max_tokens: int = 400) -> str:
         return ""
 
 
-def _gap_prompt_c2(gap_ips, kc, cs, xh):
-    ips_ctx = [
-        f"  - {e['ip']} : {e.get('country','?')} · étapes KC {e.get('stages',[])} "
-        f"· router_seen={e.get('router_seen',False)} · hits={e.get('hits',0)}"
-        for e in kc.get("active_ips", []) if e.get("ip") in gap_ips
-    ]
-    ip_block = "\n".join(ips_ctx) or "  (aucun détail disponible)"
-    return (
-        "Tu es l'IA défensive JARVIS. Une corrélation rsyslog cross-hôtes vient de détecter "
-        f"{len(gap_ips)} IP(s) C2 outbound NON bloquée(s) par CrowdSec ni fail2ban.\n\n"
-        f"IPs détectées :\n{ip_block}\n\n"
-        f"Corrélations cross-hôtes : {xh.get('corr_count',0)} événements · "
-        f"multi-apache : {xh.get('multi_count',0)} IPs\n"
-        f"Score CrowdSec actif : {cs.get('active_decisions',0)} décisions\n\n"
-        "En 3 phrases maximum : (1) pourquoi CrowdSec/fail2ban ont probablement raté ces IPs, "
-        "(2) le vecteur d'attaque probable, (3) une recommandation défensive additionnelle. "
-        "Sois concis, technique, sans préambule."
-    )
+# _gap_prompt_c2 retiré 2026-05-17 — migration ASUS BE98 → Freebox directe.
+# (Plus de C2 outbound côté routeur — Suricata ET-TROJAN/CNC remplace.)
 
 
 def _gap_prompt_recon(gap_ips, cs, xh):
@@ -1419,19 +1403,18 @@ def _gap_prompt_recon(gap_ips, cs, xh):
 
 def _soc_rsyslog_gap_analyze(gap_ips: list, gap_type: str, xh: dict, data: dict) -> None:
     """Thread : analyse LLM du gap défensif détecté.
-    Appelé APRÈS le ban immédiat — enrichit le journal et le TTS vocal."""
+    Appelé APRÈS le ban immédiat — enrichit le journal et le TTS vocal.
+    gap_type=='recon' uniquement depuis 2026-05-17 (C2 routeur retiré, migration ASUS → Freebox)."""
     try:
-        kc = data.get("kill_chain", {})
         cs = data.get("crowdsec", {})
-        prompt = _gap_prompt_c2(gap_ips, kc, cs, xh) if gap_type == "c2" else _gap_prompt_recon(gap_ips, cs, xh)
+        prompt = _gap_prompt_recon(gap_ips, cs, xh)
         analysis = _soc_ollama_query(prompt, max_tokens=350)
         if not analysis:
             return
 
         # Résumé TTS : première phrase de l'analyse (jusqu'au premier point)
         first_sent = re.split(r'(?<=[.!?])\s', analysis)[0][:200]
-        label = "C2 outbound" if gap_type == "c2" else "reconnaissance multi-cible"
-        _speak(f"Analyse JARVIS sur le gap {label} : {first_sent}")
+        _speak(f"Analyse JARVIS sur le gap reconnaissance multi-cible : {first_sent}")
 
         # Journal SOC complet
         _soc_log(
@@ -1469,28 +1452,8 @@ def _soc_rsyslog_check(data: dict) -> None:
 
     cs_detail = data.get("crowdsec", {}).get("decisions_detail", {})
 
-    # ── C2 outbound : IPs kill chain vues côté routeur ──
-    kc_ips    = data.get("kill_chain", {}).get("active_ips", [])
-    c2_ips    = [e.get("ip", "") for e in kc_ips if e.get("router_seen")]
-    c2_banned = []
-    if xh.get("corr_count", 0) > 0 and _soc_cooldown_ok("rsyslog_c2", minutes=30):
-        c2_banned = _rsyslog_ban_loop(
-            c2_ips, "jarvis-rsyslog-c2-outbound", "48h",
-            "rsyslog C2 outbound cross-hôtes", cs_detail
-        )
-
-        if c2_banned:
-            ips_tts = ", ".join(_ip_to_tts(b) for b in c2_banned[:2])
-            more_tts = f" et {len(c2_banned)-2} autres" if len(c2_banned) > 2 else ""
-            _speak(f"Gap défensif rsyslog. {len(c2_banned)} IP Command and Control bannie{'s' if len(c2_banned)>1 else ''} pour {_dur_to_tts('48h')} : {ips_tts}{more_tts}. Analyse en cours.")
-            # Analyse LLM asynchrone — ne bloque pas le thread monitor
-            threading.Thread(
-                target=_soc_rsyslog_gap_analyze,
-                args=(c2_banned, "c2", xh, data),
-                daemon=True, name="soc-gap-c2-analysis"
-            ).start()
-        elif xh.get("corr_count", 0) > 0 and _soc_cooldown_ok("rsyslog_c2_noban", minutes=60):
-            _speak(f"Corrélations rsyslog détectées : {xh['corr_count']} événements cross-hôtes. IPs déjà sous contrôle CrowdSec.")
+    # Bloc C2 outbound (router_seen) retiré 2026-05-17 — migration ASUS BE98 → Freebox directe.
+    # Détection C2 désormais portée par Suricata ET-TROJAN/CNC/MALWARE signatures.
 
     # ── Multi-recon : IPs vues sur plusieurs Apache en même temps ──
     recon_ips = list(xh.get("multi_apache", {}).keys())
