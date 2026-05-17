@@ -12,10 +12,15 @@ Couvre :
 - ALLOWED_APT_PKGS : paquets autorisés via `apt install/upgrade`
 - check_write_op() : validation stricte des ops write
 - parse_upgradable_packages() : parsing sortie `apt list --upgradable`
+- audit_writeop() : append JSON ligne à logs/audit_writeops.jsonl (best-effort,
+  ne bloque jamais l'exécution si IO échoue) — ajouté 2026-05-17.
 
-Couplage zéro — pure validation, aucun IO.
+Couplage : zéro pour validation pure, write fichier I/O pour audit_writeop().
 """
+import json
 import re
+from datetime import datetime, timezone
+from pathlib import Path
 
 # ── Patterns SSH bloqués ──────────────────────────────────────
 # Toute commande contenant un de ces patterns est REFUSÉE par défaut.
@@ -101,3 +106,41 @@ def parse_upgradable_packages(text: str) -> list:
         if m:
             pkgs.append(m.group(1))
     return pkgs
+
+
+# ── Audit log write ops SSH ───────────────────────────────────
+# Ajouté 2026-05-17 : tracabilite forensic des ops write (allowed=true) ET
+# refusees (allowed=false). Permet une revue post-mortem ciblee en cas
+# d'action douteuse de l'auto-engine SOC ou hallucination LLM.
+
+AUDIT_WRITEOP_PATH = Path(__file__).resolve().parent.parent / "logs" / "audit_writeops.jsonl"
+
+
+def audit_writeop(host: str, cmd: str, allowed: bool, output: str = "",
+                  *, log_path: Path | None = None, ts: str | None = None) -> None:
+    """Append une ligne JSON a l'audit log des write ops SSH.
+
+    Best-effort : un echec d'I/O n'interrompt JAMAIS l'execution de la commande.
+
+    Args:
+        host: hote SSH cible (ngix/proxmox/clt/pa85/...)
+        cmd: commande SSH (tronquee a 500 chars dans le log pour limiter taille)
+        allowed: True si check_write_op a autorise · False si refusee
+        output: sortie commande (uniquement sa longueur est loggee, pas le contenu)
+        log_path: override path pour tests
+        ts: override timestamp pour tests (sinon UTC maintenant)
+    """
+    path = log_path or AUDIT_WRITEOP_PATH
+    record = {
+        "ts": ts or datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "host": host,
+        "cmd": cmd[:500],
+        "allowed": bool(allowed),
+        "out_len": len(output) if output else 0,
+    }
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    except Exception:
+        pass

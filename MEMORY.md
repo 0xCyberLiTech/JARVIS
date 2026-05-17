@@ -1,6 +1,64 @@
-# JARVIS — Mémoire projet (2026-05-17 — audit dette honnête + création BILAN-TECHNIQUE.md + CLAUDE.md)
+# JARVIS — Mémoire projet (2026-05-17 — audit honnête + parité doc SOC + SSH write ops clôturé + audit log forensic)
 
-## Session 2026-05-17 — audit dette honnête + parité documentaire avec SOC
+## Session 2026-05-17 — clôture roadmap SSH write ops + audit log forensic dédié
+
+**Découverte audit** : la "seule tâche TODO formelle" de la roadmap CLAUDE.md (`SSH write ops — levée partielle apt upgrade / restart`) était en fait **DÉJÀ LIVRÉE depuis Phase 3 module 6b** :
+- `security_whitelists.py` : `BLOCKED_SSH_PATTERNS` (29) + `ALLOWED_RESTART_SVCS` (8 services) + `ALLOWED_APT_PKGS` (12 paquets) + `check_write_op()` validation stricte + `parse_upgradable_packages()`
+- Consommé dans `_tool_commande_ssh_run` ([jarvis.py:1652](scripts/jarvis.py#L1652)) — logique 3 couches : pas-bloqué / bloqué-whitelisté / bloqué-refusé
+- 28 tests pytest pass dans `test_security_whitelists.py`
+
+La roadmap était simplement **obsolète** (TODO non actualisé après livraison). Cochée 2026-05-17.
+
+### Audit log write ops forensic dédié — vraie valeur ajoutée
+
+**Asymétrie identifiée** : tout l'écosystème SOC+JARVIS trace ses actions (kill_chain, bans cscli, xdr_events) — sauf les write ops SSH, qui sortaient noyées dans le log Flask générique. Forensic post-mortem coûteux.
+
+**Implémentation** (commits à venir) :
+1. **`security_whitelists.py`** : ajout `audit_writeop(host, cmd, allowed, output, *, log_path, ts)` (best-effort, ne JAMAIS bloquer la commande SSH si I/O échoue · JSON ligne · path absolu `JARVIS/logs/audit_writeops.jsonl`).
+2. **`jarvis.py:1652` `_tool_commande_ssh_run`** : appel `audit_writeop` à 2 endroits :
+   - Sur refus (`check_write_op` retourne err) — `allowed=False, output=err`
+   - Sur exécution write op (`is_writeop=True` après break) — `allowed=True, output=output`
+   - Sur non-write-op (pattern jamais matché) : pas d'audit (pas concerné)
+3. **`.gitignore`** : ajout `logs/` et `*.jsonl` (séparé des `*.log` runtime existants).
+4. **Tests pytest** : 7 nouveaux dans `test_security_whitelists.py` :
+   - `test_audit_writeop_allowed_appends_jsonl`
+   - `test_audit_writeop_refused_appends_jsonl`
+   - `test_audit_writeop_append_mode_multiple_lignes`
+   - `test_audit_writeop_tronque_cmd_longue` (limite 500 chars)
+   - `test_audit_writeop_cree_repertoire_parent`
+   - `test_audit_writeop_silently_ignores_io_errors`
+   - `test_audit_writeop_default_timestamp_utc_format` (ISO8601 + Z)
+5. **Smoke test live** module en direct : path absolu OK · format JSONL OK · dossier auto-créé. Test fichier supprimé après validation (recréé à la 1re vraie write op).
+
+**Total tests pytest** : 801 → **808 pass** (+7 audit_writeop · zéro régression).
+
+**Format JSONL** (1 ligne par appel · forensic ciblé) :
+```json
+{"ts":"2026-05-17T07:13:27Z","host":"ngix","cmd":"systemctl restart nginx","allowed":true,"out_len":27}
+{"ts":"2026-05-17T07:13:28Z","host":"clt","cmd":"systemctl restart evilsvc","allowed":false,"out_len":51}
+```
+
+**Note confidentialité** : la sortie commande N'EST PAS loggée (seule sa longueur `out_len` est tracée). La commande est tronquée à 500 chars. Suffisant pour forensic, pas de leak de données sensibles.
+
+### À tester live (après prochain redémarrage JARVIS)
+
+Le module a été testé en direct et fonctionne. Le test bout-en-bout via JARVIS web requiert redémarrage (`jarvis.py` modifié). À faire au prochain restart :
+1. Démarrer JARVIS
+2. Lancer commande SSH `systemctl restart nginx` sur srv-ngix via JARVIS
+3. Vérifier `JARVIS/logs/audit_writeops.jsonl` contient 1 ligne `allowed=true`
+4. Lancer commande non whitelistée (`systemctl restart cron`) → vérif `allowed=false`
+
+### Bug latent identifié (NON corrigé — hors scope)
+
+`apt install <pkg>` n'est PAS dans `BLOCKED_SSH_PATTERNS` → la logique `for pattern in BLOCKED... if match → check_write_op` ne déclenche jamais `check_write_op` pour `apt install evilpkg`. Donc cette commande passe SANS vérification whitelist (alors que `check_write_op` la traite si appelée).
+
+**Risque réel faible** : phi4 local, prompt restreint, pas d'accès externe. Mais asymétrie défense en profondeur.
+
+**Action différée** : à valider avec Marc dans une session ultérieure — soit ajouter `"apt install"` et `"apt upgrade"` à `BLOCKED_SSH_PATTERNS` (déclenche check systématique), soit refactoriser pour TOUJOURS appeler `check_write_op` peu importe le match BLOCKED. Non corrigé ce jour — hors scope.
+
+---
+
+## Session 2026-05-17 (matin) — audit dette honnête + parité documentaire avec SOC
 
 **Contexte** : audit complet et honnête de la dette JARVIS (post-session SOC où SOC a atteint 96/100 avec docs exhaustives). Score JARVIS recalibré : **93 → 91/100** (audit révèle 2 documents manquants par rapport à SOC).
 

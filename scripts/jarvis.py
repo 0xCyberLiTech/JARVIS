@@ -1650,18 +1650,27 @@ _SVC_BOUNCER = "crowdsec-firewall-bouncer"  # constante encore utilisée localem
 
 
 def _tool_commande_ssh_run(ssh_fn, label, args):
-    """Exécute une commande SSH après validation sécurité — mutualisé pour tous les hôtes."""
+    """Exécute une commande SSH après validation sécurité — mutualisé pour tous les hôtes.
+
+    Audit log : write ops (autorisees OU refusees) tracees dans logs/audit_writeops.jsonl
+    via _sec.audit_writeop() — best-effort, ne bloque jamais l'execution.
+    """
     cmd = args.get("commande", "").strip()
     if not cmd:
         return "Erreur : commande vide"
     cmd_lower = cmd.lower()
+    is_writeop = False
     for pattern in _sec.BLOCKED_SSH_PATTERNS:
         if pattern.lower() in cmd_lower:
+            is_writeop = True
             err = _sec.check_write_op(cmd)
             if err is not None:
+                _sec.audit_writeop(label, cmd, allowed=False, output=err)
                 return f"Erreur : commande refusée par sécurité ({pattern}) — {err}"
             break
     ok, output = ssh_fn(cmd, timeout=_ssh_timeout(cmd))
+    if is_writeop:
+        _sec.audit_writeop(label, cmd, allowed=True, output=output or "")
     if not ok and not output:
         return f"Erreur SSH {label} : pas de réponse"
     return output[:4000] if output else "(aucune sortie)"

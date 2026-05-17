@@ -1,8 +1,12 @@
 """Tests security_whitelists — validation stricte ops SSH (couche sécurité ultime)."""
+import json
+import re as _re
+
 from security_whitelists import (
     ALLOWED_APT_PKGS,
     ALLOWED_RESTART_SVCS,
     BLOCKED_SSH_PATTERNS,
+    audit_writeop,
     check_write_op,
     parse_upgradable_packages,
 )
@@ -165,3 +169,85 @@ def test_parse_ignore_paquet_commencant_par_chiffre_ou_majuscule():
     """Pattern exige `[a-z]` au début → 7zip, Nginx ne matchent pas."""
     text = "7zip/jammy 1.0\nNginx/jammy 1.0\nokpkg/jammy 1.0\n"
     assert parse_upgradable_packages(text) == ["okpkg"]
+
+
+# ── Audit log write ops SSH (ajout 2026-05-17) ────────────────
+
+
+def test_audit_writeop_allowed_appends_jsonl(tmp_path):
+    """Une write op autorisee est append en JSON ligne."""
+    log = tmp_path / "audit.jsonl"
+    audit_writeop("ngix", "systemctl restart nginx", allowed=True,
+                  output="Job for nginx.service done.", log_path=log,
+                  ts="2026-05-17T18:30:00Z")
+    lines = log.read_text(encoding="utf-8").strip().split("\n")
+    assert len(lines) == 1
+    rec = json.loads(lines[0])
+    assert rec == {
+        "ts": "2026-05-17T18:30:00Z",
+        "host": "ngix",
+        "cmd": "systemctl restart nginx",
+        "allowed": True,
+        "out_len": 27,
+    }
+
+
+def test_audit_writeop_refused_appends_jsonl(tmp_path):
+    """Une write op refusee est aussi tracee (forensic)."""
+    log = tmp_path / "audit.jsonl"
+    audit_writeop("clt", "systemctl restart evilsvc", allowed=False,
+                  output="Refusé : systemctl restart 'evilsvc' non whitelisté",
+                  log_path=log, ts="2026-05-17T18:31:00Z")
+    rec = json.loads(log.read_text(encoding="utf-8").strip())
+    assert rec["allowed"] is False
+    assert rec["host"] == "clt"
+    assert rec["cmd"] == "systemctl restart evilsvc"
+    assert rec["out_len"] > 0
+
+
+def test_audit_writeop_append_mode_multiple_lignes(tmp_path):
+    """Append (pas overwrite) — chaque appel ajoute une ligne."""
+    log = tmp_path / "audit.jsonl"
+    audit_writeop("ngix", "apt upgrade nginx", allowed=True, log_path=log)
+    audit_writeop("clt", "systemctl restart fail2ban", allowed=True, log_path=log)
+    audit_writeop("pa85", "rm -rf /", allowed=False, output="Refusé", log_path=log)
+    lines = log.read_text(encoding="utf-8").strip().split("\n")
+    assert len(lines) == 3
+    hosts = [json.loads(line)["host"] for line in lines]
+    assert hosts == ["ngix", "clt", "pa85"]
+
+
+def test_audit_writeop_tronque_cmd_longue(tmp_path):
+    """Une commande > 500 chars est tronquee dans le log (limite taille)."""
+    log = tmp_path / "audit.jsonl"
+    long_cmd = "apt install " + "x" * 600
+    audit_writeop("ngix", long_cmd, allowed=False, log_path=log)
+    rec = json.loads(log.read_text(encoding="utf-8").strip())
+    assert len(rec["cmd"]) == 500
+
+
+def test_audit_writeop_cree_repertoire_parent(tmp_path):
+    """Si logs/ n'existe pas, il est cree automatiquement."""
+    log = tmp_path / "subdir" / "nested" / "audit.jsonl"
+    audit_writeop("ngix", "systemctl restart nginx", allowed=True, log_path=log)
+    assert log.exists()
+    assert log.parent.is_dir()
+
+
+def test_audit_writeop_silently_ignores_io_errors(tmp_path):
+    """Si I/O echoue, la fonction ne leve pas — best-effort, ne bloque jamais SSH."""
+    # Tente d'ecrire dans un chemin invalide (un fichier au lieu d'un dossier parent)
+    blocker = tmp_path / "blocker"
+    blocker.write_text("not a dir")
+    log = blocker / "audit.jsonl"   # blocker n'est pas un dir → mkdir + open echouent
+    # Ne doit pas lever
+    audit_writeop("ngix", "systemctl restart nginx", allowed=True, log_path=log)
+
+
+def test_audit_writeop_default_timestamp_utc_format(tmp_path):
+    """Sans ts override, le timestamp est UTC ISO8601 termine par Z."""
+    log = tmp_path / "audit.jsonl"
+    audit_writeop("ngix", "systemctl restart nginx", allowed=True, log_path=log)
+    rec = json.loads(log.read_text(encoding="utf-8").strip())
+    # Format attendu : 2026-05-17T18:30:00Z (sans microsecondes, sans +00:00)
+    assert _re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$", rec["ts"])

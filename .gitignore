@@ -36,6 +36,9 @@ scripts/voice_prints/
 scripts/generated_code/
 *.log
 *.log.*
+# Logs structures JSONL (audit write ops SSH, ajoute 2026-05-17)
+logs/
+*.jsonl
 
 # ── Artefacts / caches ─────────────────────────────────────────
 __pycache__/

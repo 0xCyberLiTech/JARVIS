@@ -20,7 +20,7 @@
 
 | Métrique | Valeur |
 |---|---|
-| **Tests pytest** | 801 pass · 0 fail |
+| **Tests pytest** | **808 pass · 0 fail** (+7 audit_writeop 2026-05-17) |
 | **Coverage globale** | 44% (6059 stmts · 3368 miss) |
 | **Modules Python ≥100% cov** | 21 modules (`ollama_circuit`, `chat_tool_calls`, `tts_cleaner`, `stream_tokens`, `security_whitelists`, `chat_pending_bypass`, `llm_opts`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_routing`, `chat_stream`, `chat_system_prompt`, `deferred_speak`, `bypass_filesystem`, `stt`, `ssh_terminal`, `tts_dedup`, `vision`, `bypass_proxmox`, `deepfilter`) |
 | **Modules Python <50% cov** | `jarvis.py` 26% · `audio_dsp.py` 25% · `blueprints/soc.py` 33% · `chat_soc_inject.py` 38% · `code_reasoning.py` 44% |
@@ -353,14 +353,41 @@ JARVIS consomme `monitoring.json` (cron srv-ngix 1min) via 3 patterns :
 
 ## 8. Sécurité & règles absolues
 
-### 8.1. Whitelist SSH stricte (`security_whitelists.py` 100% cov)
+### 8.1. Whitelist SSH stricte (`security_whitelists.py` 100% cov · 35 tests)
 
-**`_BLOCKED_SSH`** : 29 patterns regex bloqués (rm/dd/format/mkfs/iptables -F/etc.)
-**`_ALLOWED_SERVICES`** : liste blanche de services restartables (immuable sans validation explicite — cf. `feedback_jarvis_no_regression`)
+**`BLOCKED_SSH_PATTERNS`** : 29 patterns regex bloqués (rm/dd/mkfs/shutdown/qm destroy/sed -i/chmod/etc.)
+**`ALLOWED_RESTART_SVCS`** : 8 services restartables whitelistés (`nginx`, `fail2ban`, `crowdsec`, `crowdsec-firewall-bouncer`, `suricata`, `apache2`, `php7.4-fpm`, `php8.2-fpm`)
+**`ALLOWED_APT_PKGS`** : 12 paquets `apt install/upgrade` whitelistés (5 services ci-dessus + `suricata-update`, `libssl3`, `openssl`, `python3`, `python3-pip`, `certbot`, `python3-certbot-nginx`)
+**`check_write_op()`** : valide ops write sur whitelist stricte. Retourne `None` si OK, message d'erreur sinon.
 
-### 8.2. SSH read-only seulement (`ssh_terminal.py` 100% cov)
+**Logique 3 couches dans `_tool_commande_ssh_run`** ([jarvis.py:1652](scripts/jarvis.py#L1652)) :
+1. Aucun pattern bloqué matche → exécution directe
+2. Pattern bloqué matche **et** write op whitelistée → exécution (audit log `allowed=true`)
+3. Pattern bloqué matche **et** non whitelistée → REFUS (audit log `allowed=false`)
 
-4 hôtes : srv-ngix · clt · pa85 · proxmox. Lecture seule (head/tail/cat/ls/grep). **Roadmap ouverte** : levée partielle write-ops (apt upgrade / restart) après stabilisation routing.
+### 8.2. Audit log write ops (ajouté 2026-05-17)
+
+**Fichier** : `JARVIS/logs/audit_writeops.jsonl` (gitignored — `logs/` exclu)
+
+**Fonction** : `audit_writeop(host, cmd, allowed, output, *, log_path, ts)` dans `security_whitelists.py` — best-effort (un échec d'I/O ne bloque JAMAIS l'exécution de la commande SSH).
+
+**Format JSONL** (1 ligne par appel) :
+```json
+{"ts":"2026-05-17T07:13:27Z","host":"ngix","cmd":"systemctl restart nginx","allowed":true,"out_len":27}
+{"ts":"2026-05-17T07:13:28Z","host":"clt","cmd":"systemctl restart evilsvc","allowed":false,"out_len":51}
+```
+
+**Trace TOUTES les write ops détectées** : autorisations ET refus (forensic). Commande tronquée à 500 chars (limite taille log). Sortie commande non loggée (seulement sa longueur, pour confidentialité).
+
+**Tests pytest** : 7 nouveaux tests (`test_audit_writeop_*`) — append JSONL · refus tracé · multiple append · troncature 500 chars · création répertoire parent · best-effort I/O errors · format timestamp UTC ISO8601.
+
+**Total tests pytest** : 801 → **808 pass** (+7 audit_writeop).
+
+### 8.3. SSH read-only par défaut (`ssh_terminal.py` 100% cov)
+
+5 hôtes terminal interactif xterm.js : srv-dev-1 · srv-ngix · clt · pa85 · routeur BE98. Mode interactif WebSocket PTY (paramiko).
+
+**Hôtes write ops via `_tool_commande_ssh_*`** : 4 wrappers (ngix · proxmox · clt · pa85). Toute commande qui matche un `BLOCKED_SSH_PATTERN` doit passer `check_write_op` → si whitelistée, exécution + audit log.
 
 ### 8.3. Profil SOC anti-double-ban (`_SOC_BAN_CONFIG`)
 
@@ -497,9 +524,9 @@ Le projet JARVIS est **post-modularisation** des 2 côtés :
 | 155 warnings ESLint | Exports camelCase inter-modules sans bundler → **faux positifs lint**, pas une dette | IGNORER |
 | 135 inline styles JS | Pattern HUD temps réel acceptable · refactor CSS-in-JS = anti-ROI | IGNORER |
 
-### Seule tâche TODO formelle dans la roadmap
+### Roadmap clôturée 2026-05-17
 
-- [ ] **SSH write ops** — levée partielle (`apt upgrade` / `restart`) sur les 4 hôtes whitelistés, après stabilisation routing. Demande validation explicite Marc avant implémentation (cf. `feedback_jarvis_no_regression` règle absolue).
+- [x] **SSH write ops** — la levée partielle (apt upgrade / restart) était DÉJÀ livrée via `security_whitelists.py` Phase 3 module 6b (BLOCKED_SSH_PATTERNS + check_write_op + 8 services + 12 paquets · 28 tests). La roadmap était obsolète (TODO non actualisé). **Cochée 2026-05-17 + audit log forensic ajouté** (`logs/audit_writeops.jsonl` · best-effort · 7 tests → 808 pass).
 
 ---
 
