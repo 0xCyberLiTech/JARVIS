@@ -1480,6 +1480,8 @@ def _threat_score_from_json(d: dict, gap_banned: set) -> dict:
     gap_banned : IPs bannies ce cycle → soustraites d'exploit_unblocked pour éviter double TTS."""
     exploit_unblocked = max(
         0, d.get("threat_exploit_unblocked", 0) - len(gap_banned))
+    # c2_count retiré 2026-05-17 — migration ASUS BE98 → Freebox directe
+    # (couverture C2 désormais portée par Suricata ET-TROJAN/CNC via sur_sev1)
     return {
         "score":             d.get("threat_score", 0),
         "threat":            d.get("threat_level"),
@@ -1488,7 +1490,6 @@ def _threat_score_from_json(d: dict, gap_banned: set) -> dict:
         "cs_bans":           d.get("threat_cs_bans", 0),
         "f2b_sat_bans":      d.get("threat_f2b_sat_bans", 0),
         "err_rate":          d.get("threat_err_rate", 0),
-        "c2_count":          d.get("threat_c2_count", 0),
         "multi_count":       d.get("threat_multi_count", 0),
     }
 
@@ -1508,9 +1509,7 @@ def _check_threat_level(ts: dict) -> list:
     if ts["sur_sev1"] > 0:
         n = ts["sur_sev1"]
         detail.append(f"Suricata {n} alerte{'s' if n>1 else ''} critique{'s' if n>1 else ''}")
-    if ts.get("c2_count", 0) > 0:
-        n = ts["c2_count"]
-        detail.append(f"{n} IP C2 sortant détectée{'s' if n>1 else ''} au routeur")
+    # Branche c2_count retirée 2026-05-17 — migration ASUS BE98 → Freebox directe
     if ts.get("multi_count", 0) > 0:
         detail.append(f"Recon multi-cible {ts['multi_count']} hôtes")
     if ts["cs_bans"] > 0:
