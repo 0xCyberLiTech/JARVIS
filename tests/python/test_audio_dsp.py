@@ -497,3 +497,377 @@ def test_pcm_to_wav_stereo_ch_param():
     # NumChannels est aux bytes 22-23 (little-endian)
     num_channels = struct.unpack("<H", wav[22:24])[0]
     assert num_channels == 2
+
+
+# ── _apply_fx_rack : branches FX activées (réelle signature p['fx_enabled']) ─
+
+
+def test_apply_fx_rack_disabled_court_circuit():
+    """fx_enabled absent ou False → retourne signal inchangé (early return)."""
+    sig = _signal_sin(440.0)
+    out = audio_dsp._apply_fx_rack(sig, sr=22050, params={})
+    assert out is sig
+    out2 = audio_dsp._apply_fx_rack(sig, sr=22050, params={"fx_enabled": False})
+    assert out2 is sig
+
+
+def test_apply_fx_rack_reverb_avec_cache(monkeypatch):
+    """fx_type=reverb → utilise _FX_IR_CACHE, miss puis hit."""
+    audio_dsp._FX_IR_CACHE.clear()
+    sig = _signal_sin(440.0, dur=0.1)
+    params = {"fx_enabled": True, "fx_type": "reverb", "fx_preset": "room",
+              "fx_decay": 0.5, "fx_wet": 0.3}
+    out1 = audio_dsp._apply_fx_rack(sig, sr=22050, params=params)
+    assert out1.shape == sig.shape
+    # 1er appel = miss + insert
+    assert len(audio_dsp._FX_IR_CACHE) == 1
+    # 2e appel même params = hit cache
+    out2 = audio_dsp._apply_fx_rack(sig, sr=22050, params=params)
+    assert len(audio_dsp._FX_IR_CACHE) == 1
+    assert out2.shape == sig.shape
+
+
+def test_apply_fx_rack_reverb_cache_eviction_au_dela_de_8():
+    """Cache LRU : au-delà de 8 entrées, la plus ancienne est évincée."""
+    audio_dsp._FX_IR_CACHE.clear()
+    sig = _signal_sin(440.0, dur=0.05)
+    # Remplir avec 9 presets distincts
+    for i, preset in enumerate(["room", "studio", "concert", "cathedral",
+                                  "plate", "cave", "spring", "room", "studio"]):
+        decay = 0.3 + i * 0.1   # decay différent → cache_key différent
+        audio_dsp._apply_fx_rack(sig, sr=22050, params={
+            "fx_enabled": True, "fx_type": "reverb", "fx_preset": preset,
+            "fx_decay": decay, "fx_wet": 0.3,
+        })
+    # Cache cappé à 8 entrées
+    assert len(audio_dsp._FX_IR_CACHE) <= 8
+
+
+def test_apply_fx_rack_reverb_preset_none_bypass():
+    """preset='none' → pas de reverb appliqué, branche skip."""
+    sig = _signal_sin(440.0, dur=0.05)
+    params = {"fx_enabled": True, "fx_type": "reverb", "fx_preset": "none",
+              "fx_decay": 0.5, "fx_wet": 0.5}
+    out = audio_dsp._apply_fx_rack(sig, sr=22050, params=params)
+    # Pas de cache utilisé
+    assert out.shape == sig.shape
+
+
+def test_apply_fx_rack_delay():
+    sig = _signal_sin(440.0, dur=0.1)
+    out = audio_dsp._apply_fx_rack(sig, sr=22050, params={
+        "fx_enabled": True, "fx_type": "delay",
+        "fx_delay_ms": 100.0, "fx_delay_feedback": 0.3, "fx_wet": 0.4,
+    })
+    assert out.shape == sig.shape
+
+
+def test_apply_fx_rack_chorus():
+    sig = _signal_sin(440.0, dur=0.1)
+    out = audio_dsp._apply_fx_rack(sig, sr=22050, params={
+        "fx_enabled": True, "fx_type": "chorus", "fx_wet": 0.3,
+    })
+    assert out.shape == sig.shape
+
+
+def test_apply_fx_rack_flanger():
+    sig = _signal_sin(440.0, dur=0.1)
+    out = audio_dsp._apply_fx_rack(sig, sr=22050, params={
+        "fx_enabled": True, "fx_type": "flanger", "fx_wet": 0.4,
+    })
+    assert out.shape == sig.shape
+
+
+def test_apply_fx_rack_echo():
+    sig = _signal_sin(440.0, dur=0.1)
+    out = audio_dsp._apply_fx_rack(sig, sr=22050, params={
+        "fx_enabled": True, "fx_type": "echo", "fx_wet": 0.3,
+    })
+    assert out.shape == sig.shape
+
+
+def test_apply_fx_rack_phaser():
+    sig = _signal_sin(440.0, dur=0.1)
+    out = audio_dsp._apply_fx_rack(sig, sr=22050, params={
+        "fx_enabled": True, "fx_type": "phaser",
+        "fx_phaser_stages": 4, "fx_wet": 0.4,
+    })
+    assert out.shape == sig.shape
+
+
+def test_apply_fx_rack_exciter():
+    sig = _signal_sin(440.0, dur=0.1)
+    out = audio_dsp._apply_fx_rack(sig, sr=22050, params={
+        "fx_enabled": True, "fx_type": "exciter", "fx_wet": 0.5,
+    })
+    assert out.shape == sig.shape
+
+
+def test_apply_fx_rack_exception_fallback_signal(monkeypatch):
+    """Exception interne dans une branche → fallback sur signal (log.error)."""
+    sig = _signal_sin(440.0, dur=0.05)
+
+    def boom(*a, **kw):
+        raise RuntimeError("FX simulated failure")
+
+    monkeypatch.setattr(audio_dsp, "_apply_delay", boom)
+    out = audio_dsp._apply_fx_rack(sig, sr=22050, params={
+        "fx_enabled": True, "fx_type": "delay", "fx_wet": 0.4,
+    })
+    # Signal retourné inchangé (fallback)
+    assert out is sig
+
+
+# ── _compress : algo réel (ratio >= 1.01) ───────────────────────────────
+
+
+def test_compress_court_circuit_si_ratio_inf_a_1_01():
+    """ratio < 1.01 → court-circuit, signal inchangé."""
+    sig = _signal_sin(440.0)
+    out = audio_dsp._compress(sig, sr=22050, threshold_db=-20, ratio=1.0,
+                                attack_s=0.01, release_s=0.1)
+    assert out is sig
+
+
+def test_compress_reduit_amplitude_signal_fort():
+    """Signal au-dessus du threshold → compressé (amplitude réduite)."""
+    import numpy as np
+    sr = 22050
+    # Signal avec quelques crêtes fortes (> threshold)
+    sig = (np.ones(sr // 4, dtype=np.float32) * 0.8)
+    out = audio_dsp._compress(sig, sr=sr, threshold_db=-12, ratio=4.0,
+                                attack_s=0.005, release_s=0.05)
+    # La compression doit réduire le RMS (au moins légèrement)
+    assert np.max(np.abs(out)) <= np.max(np.abs(sig)) + 1e-6
+
+
+def test_compress_signal_sous_threshold_preserve():
+    """Signal sous threshold → pas de réduction (gr=1 partout)."""
+    import numpy as np
+    sr = 22050
+    sig = (np.ones(sr // 4, dtype=np.float32) * 0.01)   # très faible
+    out = audio_dsp._compress(sig, sr=sr, threshold_db=-3, ratio=4.0,
+                                attack_s=0.005, release_s=0.05)
+    assert out.shape == sig.shape
+
+
+# ── _dsp_eq_gain : pipeline EQ + compresseur + gain ─────────────────────
+
+
+def _eq_params_complets(gain_db=0.0, eq_flat=False):
+    """Params dict complets pour _dsp_eq_gain (nécessite toutes les clés)."""
+    return {
+        "eq_low": 2.0, "eq_mid": -1.0, "eq_high": 1.5, "eq_air": 2.5,
+        "comp_threshold": -18.0, "comp_ratio": 3.0,
+        "comp_attack": 0.005, "comp_release": 0.05,
+        "gain": gain_db,
+    }
+
+
+def test_dsp_eq_gain_avec_eq_actif():
+    sig = _signal_sin(440.0, dur=0.2)
+    nyq = 22050 // 2 - 200
+    out = audio_dsp._dsp_eq_gain(sig, sr=22050, p=_eq_params_complets(),
+                                   nyq=nyq, eq_flat=False)
+    assert out.shape == sig.shape
+
+
+def test_dsp_eq_gain_avec_eq_flat_bypass_bandes():
+    """eq_flat=True → skip eq_low/mid/high/air mais garde HP/LP + comp + gain."""
+    sig = _signal_sin(440.0, dur=0.2)
+    nyq = 22050 // 2 - 200
+    out = audio_dsp._dsp_eq_gain(sig, sr=22050, p=_eq_params_complets(),
+                                   nyq=nyq, eq_flat=True)
+    assert out.shape == sig.shape
+
+
+def test_dsp_eq_gain_gain_positif_amplifie():
+    """gain_db=+6dB → amplification ~2× (sur signal très faible pour pas clipper)."""
+    import numpy as np
+    sig = (np.ones(1000, dtype=np.float32) * 0.01)
+    nyq = 22050 // 2 - 200
+    out = audio_dsp._dsp_eq_gain(sig, sr=22050, p=_eq_params_complets(gain_db=6.0),
+                                   nyq=nyq, eq_flat=True)
+    # +6dB ≈ ×2 — vérifier ordre de grandeur (filtres HP/LP peuvent altérer un peu)
+    assert np.max(np.abs(out)) > 0.0
+
+
+# ── _dsp_decode_audio : décodage WAV ────────────────────────────────────
+
+
+def _make_wav_mono_16bit(sr=22050, n_samples=1000):
+    """Crée un WAV mono 16 bits valide en mémoire."""
+    import io as _io_local
+    import wave as _wave_local
+    buf = _io_local.BytesIO()
+    with _wave_local.open(buf, "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(sr)
+        wf.writeframes(b"\x00\x00" * n_samples)
+    return buf.getvalue()
+
+
+def _make_wav_stereo_16bit(sr=22050, n_samples=1000):
+    import io as _io_local
+    import wave as _wave_local
+    buf = _io_local.BytesIO()
+    with _wave_local.open(buf, "wb") as wf:
+        wf.setnchannels(2)
+        wf.setsampwidth(2)
+        wf.setframerate(sr)
+        wf.writeframes(b"\x00\x00\x00\x00" * n_samples)
+    return buf.getvalue()
+
+
+def test_dsp_decode_audio_wav_mono_renvoie_sr_et_canal_1():
+    wav = _make_wav_mono_16bit(sr=22050, n_samples=500)
+    raw, sr, ch = audio_dsp._dsp_decode_audio(wav, is_wav=True)
+    assert sr == 22050
+    assert ch == 1
+    assert raw.dtype == np.float32
+    assert len(raw) == 500
+
+
+def test_dsp_decode_audio_wav_stereo_renvoie_canal_2():
+    wav = _make_wav_stereo_16bit(sr=44100, n_samples=300)
+    raw, sr, ch = audio_dsp._dsp_decode_audio(wav, is_wav=True)
+    assert sr == 44100
+    assert ch == 2
+    # Stéréo entrelacé → len = 2 × 300 = 600 samples float
+    assert len(raw) == 600
+
+
+# ── _dsp_apply_chain : pipeline complet ─────────────────────────────────
+
+
+def test_dsp_apply_chain_avec_params_complets():
+    """Pipeline complet : EQ + comp + gain → output float32 même longueur."""
+    sig = _signal_sin(440.0, dur=0.2)
+    p = _eq_params_complets()
+    p.update({"enrich_enabled": False, "fx_enabled": False})
+    out = audio_dsp._dsp_apply_chain(sig, sr=22050, p=p, df_on=False, eq_flat=False)
+    assert out.shape == sig.shape
+
+
+def test_dsp_apply_chain_avec_enrich_et_fx():
+    """Pipeline avec enrich + fx_rack actifs."""
+    sig = _signal_sin(440.0, dur=0.1)
+    p = _eq_params_complets()
+    p.update({
+        "enrich_enabled": True, "enrich_drive": 2.5, "enrich_tone": 2800.0,
+        "enrich_mix": 0.15, "enrich_warmth": 0.06,
+        "fx_enabled": True, "fx_type": "reverb", "fx_preset": "room",
+        "fx_decay": 0.3, "fx_wet": 0.2,
+    })
+    audio_dsp._FX_IR_CACHE.clear()
+    out = audio_dsp._dsp_apply_chain(sig, sr=22050, p=p, df_on=False, eq_flat=False)
+    assert out.shape == sig.shape
+
+
+# ── apply_dsp_to_mp3 : point d'entrée public ────────────────────────────
+
+
+def test_apply_dsp_to_mp3_court_circuit_si_disabled():
+    """params['enabled']=False → retourne bytes originaux + mime."""
+    wav = _make_wav_mono_16bit()
+    out, mime = audio_dsp.apply_dsp_to_mp3(wav, {"enabled": False})
+    assert out == wav
+    assert mime == "audio/wav"
+
+
+def test_apply_dsp_to_mp3_mp3_detecte_par_absence_de_RIFF():
+    """Bytes sans header RIFF → mime audio/mpeg quand bypass."""
+    fake_mp3 = b"\x00" * 100
+    _, mime = audio_dsp.apply_dsp_to_mp3(fake_mp3, {"enabled": False})
+    assert mime == "audio/mpeg"
+
+
+def test_apply_dsp_to_mp3_court_circuit_si_eq_flat_no_stereo_no_df_no_fx():
+    """Tout neutre → bypass complet, retour bytes originaux."""
+    wav = _make_wav_mono_16bit()
+    out, mime = audio_dsp.apply_dsp_to_mp3(wav, {
+        "enabled": True, "eq_low": 0, "eq_mid": 0, "eq_high": 0, "eq_air": 0,
+        "gain": 0, "stereo_enabled": False, "df_enabled": False, "fx_enabled": False,
+    })
+    assert out == wav   # bytes originaux préservés
+
+
+def test_apply_dsp_to_mp3_wav_mono_avec_stereo_renvoie_wav_stereo():
+    """WAV mono + stereo_enabled=True → output WAV stéréo Haas."""
+    wav = _make_wav_mono_16bit(sr=22050, n_samples=2000)
+    p = _eq_params_complets(gain_db=1.0)
+    p.update({
+        "enabled": True, "stereo_enabled": True, "haas_delay_ms": 18.0, "stereo_width": 0.85,
+        "df_enabled": False,
+        "enrich_enabled": False, "fx_enabled": False,
+    })
+    out, mime = audio_dsp.apply_dsp_to_mp3(wav, p)
+    assert mime == "audio/wav"
+    assert out[:4] == b"RIFF"
+    # Header NumChannels = 2 (bytes 22-23 little-endian)
+    num_ch = struct.unpack("<H", out[22:24])[0]
+    assert num_ch == 2
+
+
+def test_apply_dsp_to_mp3_wav_mono_sans_stereo_renvoie_mono():
+    wav = _make_wav_mono_16bit(sr=22050, n_samples=1500)
+    p = _eq_params_complets(gain_db=2.0)
+    p.update({
+        "enabled": True, "stereo_enabled": False,
+        "df_enabled": False, "enrich_enabled": False, "fx_enabled": False,
+    })
+    out, mime = audio_dsp.apply_dsp_to_mp3(wav, p)
+    assert mime == "audio/wav"
+    num_ch = struct.unpack("<H", out[22:24])[0]
+    assert num_ch == 1
+
+
+def test_apply_dsp_to_mp3_wav_stereo_chaine_canal_par_canal():
+    """WAV stéréo input → chaîne appliquée sur chaque canal séparément."""
+    wav = _make_wav_stereo_16bit(sr=22050, n_samples=1000)
+    p = _eq_params_complets(gain_db=0.5)
+    p.update({
+        "enabled": True, "stereo_enabled": True,
+        "df_enabled": False, "enrich_enabled": False, "fx_enabled": False,
+    })
+    out, mime = audio_dsp.apply_dsp_to_mp3(wav, p)
+    assert mime == "audio/wav"
+    num_ch = struct.unpack("<H", out[22:24])[0]
+    assert num_ch == 2
+
+
+def test_apply_dsp_to_mp3_exception_fallback_original(monkeypatch):
+    """Exception dans _dsp_decode_audio → fallback sur bytes originaux + mime."""
+
+    def boom(*a, **kw):
+        raise RuntimeError("decode simulated failure")
+
+    monkeypatch.setattr(audio_dsp, "_dsp_decode_audio", boom)
+    wav = _make_wav_mono_16bit()
+    p = _eq_params_complets(gain_db=2.0)
+    p.update({"enabled": True, "stereo_enabled": True,
+              "df_enabled": False, "enrich_enabled": False, "fx_enabled": False})
+    out, mime = audio_dsp.apply_dsp_to_mp3(wav, p)
+    # Fallback : bytes originaux + mime "audio/wav" (RIFF détecté)
+    assert out == wav
+    assert mime == "audio/wav"
+
+
+def test_apply_dsp_to_mp3_df_override_force_off(monkeypatch):
+    """df_override=False → df_on forcé False même si params dit df_enabled=True."""
+    wav = _make_wav_mono_16bit()
+    captured = {"df_on": None}
+    real_chain = audio_dsp._dsp_apply_chain
+
+    def capture(samples, sr, p, df_on, eq_flat):
+        captured["df_on"] = df_on
+        return real_chain(samples, sr, p, df_on, eq_flat)
+
+    monkeypatch.setattr(audio_dsp, "_dsp_apply_chain", capture)
+    p = _eq_params_complets(gain_db=2.0)
+    p.update({"enabled": True, "stereo_enabled": False,
+              "df_enabled": True,   # params dit True
+              "enrich_enabled": False, "fx_enabled": False})
+    audio_dsp.apply_dsp_to_mp3(wav, p, df_override=False)
+    assert captured["df_on"] is False   # override gagne

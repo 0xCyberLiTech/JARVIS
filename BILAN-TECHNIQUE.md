@@ -20,8 +20,8 @@
 
 | Métrique | Valeur |
 |---|---|
-| **Tests pytest** | **907 pass · 0 fail** (+93 session 2026-05-17 soir : +19 chat_soc_inject +10 bypass_code +15 code_reasoning +25 voice_lab +24 audio_dsp) |
-| **Coverage globale** | **50%** (6086 stmts · 3072 miss) — +6 pts session 2026-05-17 soir |
+| **Tests pytest** | **936 pass · 0 fail** (+122 session 2026-05-17 soir : +19 chat_soc_inject +10 bypass_code +15 code_reasoning +25 voice_lab +24 audio_dsp smoke +29 audio_dsp option B) |
+| **Coverage globale** | **51%** (6086 stmts · 2996 miss) — +7 pts session 2026-05-17 soir (option B inclus) |
 | **Modules Python ≥100% cov** | **25 modules** (+`chat_soc_inject` +`bypass_code` +`voice_lab` +`bypass_simple` 2026-05-17 soir) : `ollama_circuit`, `chat_tool_calls`, `tts_cleaner`, `stream_tokens`, `security_whitelists`, `chat_pending_bypass`, `llm_opts`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_routing`, `chat_stream`, `chat_system_prompt`, `deferred_speak`, `bypass_filesystem`, `stt`, `ssh_terminal`, `tts_dedup`, `vision`, `bypass_proxmox`, `deepfilter`, `chat_soc_inject`, `bypass_code`, `voice_lab`, `bypass_simple` |
 | **Modules Python <50% cov** | `jarvis.py` 26% · `blueprints/soc.py` 33% (orchestrateurs Flask, couverts par E2E) — autres résiduels remontés ≥72% session 2026-05-17 soir |
 | **`jarvis.py`** | 4633 L (2909 stmts exécutables) |

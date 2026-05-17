@@ -8,8 +8,8 @@
 
 | Indicateur | Avant | Après | Gain |
 |---|---|---|---|
-| **Tests pytest** | 814 | **907** | +93 tests |
-| **Coverage globale** | 44% | **50%** | +6 points absolus |
+| **Tests pytest** | 814 | **936** | +122 tests (+93 chantier 5 modules · +29 option B audio_dsp 72→93%) |
+| **Coverage globale** | 44% | **51%** | +7 points absolus |
 | **Modules Python ≥100% cov** | 21 | **25** | +4 (+chat_soc_inject, +bypass_code, +voice_lab, +bypass_simple constaté ratisser) |
 | **Disque libéré (snapshots)** | — | **361 Mo** | 4 dossiers `scripts.*-YYYYMMDD/` supprimés |
 
@@ -21,7 +21,7 @@
 | `bypass_code.py` | 54% | **100%** | +46 pts | +10 (`code_scp_exec_sse` happy/refus/exec/send/SCP error/exception/sortie vide/commande SCP construite) |
 | `code_reasoning.py` | 44% | **96%** | +52 pts | +15 (`_run_task` 9 cas avec stream Ollama mocké · `code_reasoning_gen` 4 cas avec thread daemon · cleanup au passage) |
 | `voice_lab.py` | 71% | **100%** | +29 pts | +25 (`is_librosa_available` True/False · `analyse_features` signal sinus 220Hz/150Hz/silence · 8 cas `_classify_type` · 3 cas `_eq_preset`) |
-| `audio_dsp.py` | 25% | **72%** | +47 pts | +24 (`_gen_ir` 5 presets + déterminisme · `_convolve_reverb` 2 cas · 6 helpers FX `_apply_*` smoke shape · `_apply_fx_rack` 3 cas chaîne · biquad filters · `_enrich_voice` + `_dsp_enrich` · `_pcm_to_wav` 3 cas WAV header) |
+| `audio_dsp.py` | 25% | **93%** | +68 pts | +53 (24 smoke + 29 option B : 9 branches `_apply_fx_rack` reverb/delay/chorus/flanger/echo/phaser/exciter + cache LRU 8 éviction · 3 `_compress` algo réel · 3 `_dsp_eq_gain` complet · 2 `_dsp_decode_audio` WAV mono/stéréo · 2 `_dsp_apply_chain` pipeline · 7 `apply_dsp_to_mp3` chaîne entière + df_override + fallback exception) |
 
 ### Suppression snapshots locaux (361 Mo)
 
