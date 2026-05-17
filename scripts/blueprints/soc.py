@@ -1477,11 +1477,23 @@ def _soc_rsyslog_check(data: dict) -> None:
 
 def _threat_score_from_json(d: dict, gap_banned: set) -> dict:
     """Lit le score de menace pré-calculé par monitoring_gen.py depuis monitoring.json.
-    gap_banned : IPs bannies ce cycle → soustraites d'exploit_unblocked pour éviter double TTS."""
+    gap_banned : IPs bannies ce cycle → soustraites d'exploit_unblocked pour éviter double TTS.
+
+    Enrichit avec un récap des IPs Kill Chain actives (compte total + détail par stage
+    + top 3 pays) pour permettre à _check_threat_level d'annoncer vocalement la KC,
+    même quand exploit_unblocked=0 (cas IPs en RECON/SCAN seulement)."""
     exploit_unblocked = max(
         0, d.get("threat_exploit_unblocked", 0) - len(gap_banned))
-    # c2_count retiré 2026-05-17
-    # (couverture C2 désormais portée par Suricata ET-TROJAN/CNC via sur_sev1)
+    # Récap Kill Chain par stage (2026-05-17 : annonce vocale KC active enrichie)
+    kc_active = (d.get("kill_chain") or {}).get("active_ips") or []
+    kc_stages: dict = {}
+    kc_countries: list = []
+    for ip_obj in kc_active:
+        stage = ip_obj.get("stage") or "?"
+        kc_stages[stage] = kc_stages.get(stage, 0) + 1
+        c = ip_obj.get("country")
+        if c and c not in ("-", "?", "") and c not in kc_countries:
+            kc_countries.append(c)
     return {
         "score":             d.get("threat_score", 0),
         "threat":            d.get("threat_level"),
@@ -1491,6 +1503,9 @@ def _threat_score_from_json(d: dict, gap_banned: set) -> dict:
         "f2b_sat_bans":      d.get("threat_f2b_sat_bans", 0),
         "err_rate":          d.get("threat_err_rate", 0),
         "multi_count":       d.get("threat_multi_count", 0),
+        "kc_active_count":   len(kc_active),
+        "kc_stages":         kc_stages,
+        "kc_countries":      kc_countries[:3],
     }
 
 
@@ -1512,6 +1527,25 @@ def _check_threat_level(ts: dict) -> list:
     # Branche c2_count retirée 2026-05-17
     if ts.get("multi_count", 0) > 0:
         detail.append(f"Recon multi-cible {ts['multi_count']} hôtes")
+    # Récap KC active (2026-05-17) — annonce les IPs en cours d'observation
+    # même hors EXPLOIT (RECON/SCAN/WAF/BRUTE), pour combler le silence
+    # quand exploit_unblocked=0 mais que des IPs sont vues.
+    kc_count = ts.get("kc_active_count", 0)
+    if kc_count > 0:
+        stages = ts.get("kc_stages") or {}
+        order = ["EXPLOIT", "BRUTE", "SCAN", "RECON", "WAF", "PROBE"]
+        stage_parts = [f"{stages[s]} {s}" for s in order if stages.get(s)]
+        # Stages non standards (BLOCKED, INCONNU, etc.) ajoutés en fin
+        for s, n in stages.items():
+            if s not in order and n > 0:
+                stage_parts.append(f"{n} {s}")
+        stages_tts = " " + ", ".join(stage_parts).lower() if stage_parts else ""
+        countries = ts.get("kc_countries") or []
+        countries_tts = f" ({', '.join(countries)})" if countries else ""
+        detail.append(
+            f"{kc_count} IP{'s' if kc_count>1 else ''} en kill chain"
+            f"{stages_tts}{countries_tts}"
+        )
     if ts["cs_bans"] > 0:
         detail.append(f"{ts['cs_bans']} IPs bannies CrowdSec")
     suffix = (", ".join(detail) + ".") if detail else f"{ts['cs_bans']} décisions actives."
