@@ -1,5 +1,5 @@
 # SCHÉMA — ARCHITECTURE IA LOCALE 0xCyberLiTech
-<!-- Mise à jour : 2026-05-14 — v8 — routing 4 branches SOC/GÉNÉRAL/CODE/CR · phi4:14b + qwen3:8b · mxbai-embed · NDT 100/100 (script auto) · score honnête global 78/100 (recalibré depuis 62 réel · +16 via chantier dette 2026-05-14 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py) · 31 modules Python (jarvis.py 4633L) · JS reste majoritairement monolithique -->
+<!-- Mise à jour : 2026-05-14 — v8 — routing 4 branches SOC/GÉNÉRAL/CODE/CR · phi4:14b + qwen3:8b · mxbai-embed · NDT 100/100 (script auto) · score honnête global 78/100 (recalibré depuis 62 réel · +16 via chantier dette 2026-05-14 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py) · 31 modules Python (jarvis.py 4739L) · JS reste majoritairement monolithique -->
 
 ---
 

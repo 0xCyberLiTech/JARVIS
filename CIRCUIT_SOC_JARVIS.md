@@ -1,5 +1,5 @@
 ﻿# Circuit logique SOC + JARVIS — 0xCyberLiTech
-**Date : 2026-05-16 — v2.6 (2026-05-17)** · routing 4 branches (soc/general/code/code_reasoning) · MCP **12 outils** (+`jarvis_defense_24h` 2026-05-16) · 32 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · git local + pre-commit + pre-push pytest · score honnête 94/100 (chantier dette 2026-05-14/16)
+**Date : 2026-05-16 — v2.6 (2026-05-17)** · routing 4 branches (soc/general/code/code_reasoning) · MCP **12 outils** (+`jarvis_defense_24h` 2026-05-16) · 32 modules Python (jarvis.py 4739L) · jarvis.css → 8 fichiers · git local + pre-commit + pre-push pytest · score honnête 92/100 (chantier dette 2026-05-14/16)
 
 > **À lire en premier** : la nouvelle section [Hiérarchie des appels et autonomie](#hi%C3%A9rarchie-des-appels-et-autonomie) clarifie qui appelle qui (Claude / MCP / JARVIS / srv-ngix) et ce qui tombe si X est éteint. Les autres schémas du document montrent des flux de **données** (ce qui circule), pas des dépendances d'**exécution** (qui a besoin de qui pour vivre).
 

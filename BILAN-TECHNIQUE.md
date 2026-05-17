@@ -10,7 +10,7 @@
 | Critère | Score | Justification |
 |---|---|---|
 | Architecture | 23/25 | **Modularisation faite des 2 côtés** : Python `jarvis.py` 4739L est un **orchestrateur Flask** (~150 endpoints + routing 4 modes + auto-engine SOC) — la logique métier est déjà extraite dans **31 modules satellites** (dont 21 à 100% cov). JS : refactor officiellement TERMINÉ (`jarvis_main.js` 7828→148L · −98,1% · 13 modules extraits). Coverage 26% de `jarvis.py` = normale pour orchestrateur HTTP, couvert indirectement par 25 tests E2E Playwright. −2 : `blueprints/soc.py` 1007 stmts encore dense (cache + fallback SSH + endpoints SOC), pourrait gagner en éclatement mais ROI faible. |
-| Tests | 23/25 | **936 tests pytest pass · 0 fail** · coverage RÉELLE **51%** · **32 modules · 25 à 100% cov** · 478 mocks légitimes (Ollama/SSH/TTS). −2 : pas de tests E2E Playwright étendus (25 E2E vs ~50 attendus pour parité fonctionnelle complète). |
+| Tests | 23/25 | **933 tests pytest pass · 3 skip · 0 fail** · coverage RÉELLE **51%** · **35 modules · 22 à 100% cov** · 478 mocks légitimes (Ollama/SSH/TTS). −2 : pas de tests E2E Playwright étendus (25 E2E vs ~50 attendus pour parité fonctionnelle complète). |
 | Documentation | 13/15 | MEMORY.md 2355L à jour 2026-05-16 nuit + docs/ 7 fichiers (AUDIO-DSP, MCP-SERVER, REFERENCE-TECHNIQUE, ROUTING-JARVIS, DEPLOIEMENT, REINSTALLATION, SUPPORT-INFOGERANCE) + RUNBOOK.md + **BILAN-TECHNIQUE.md (ce document, 2026-05-17)** + CLAUDE.md (2026-05-17). −2 : refactor 2026-05-15 détaillé dans MEMORY.md mais pas extrait en doc dédiée. |
 | Lisibilité/Conventions | 14/15 | ESLint **155 warnings · 0 erreur** (camelCase exports inter-modules, acceptés sans bundler) · 2 TODO/FIXME Python · ruff 0 · style guides appliqués. −1 : 135 inline styles `style.display=`/`style.color=` côté JS (acceptés pour SPA temps réel avec HUD dynamique). |
 | Performance | 10/10 | Circuit breaker Ollama 8 call-sites (refus 1ms vs timeout 30s si Ollama down) · cache SOC 30s · debounce DSP audio · fix IPv6 systémique (`127.0.0.1` partout, −97% latence) · pré-warm Kokoro CUDA au boot (0 cold start 42.8s sur 1re alerte) · pré-warm phi4 SOC. |
@@ -37,7 +37,7 @@
 | **TTS moteurs** | 4 (edge-tts · Kokoro CUDA · Piper · SAPI5) avec fallback chain |
 | **ESLint warnings** | 155 · 0 erreur |
 | **ruff** | 0 erreur |
-| **Pre-commit hooks** | ruff + eslint (commit) · pytest 936 tests (pre-push) |
+| **Pre-commit hooks** | ruff + eslint (commit) · pytest 933 tests (pre-push) |
 
 ---
 
@@ -124,7 +124,7 @@ Windows 11 (localhost:5000)
 
 | Module | Taille | Coverage | Contenu |
 |---|---|---|---|
-| `jarvis.py` | 4633 L (2909 stmts) | 26% | Serveur Flask · ~150 endpoints · routing 4 modes · auto-engine SOC proactif · pré-warm phi4/Kokoro · circuit breaker imports · 8 call-sites Ollama wrappés |
+| `jarvis.py` | 4739 L (2918 stmts) | 26% | Serveur Flask · ~150 endpoints · routing 4 modes · auto-engine SOC proactif · pré-warm phi4/Kokoro · circuit breaker imports · 8 call-sites Ollama wrappés |
 | `blueprints/soc.py` | 1007 stmts | 33% | Endpoints SOC (`/api/soc/*`) · cache monitoring.json TTL 30s · fallback SSH · IP history 30j · ban/unban CrowdSec · defense_24h · ioc |
 
 ### Modules satellites — Chat & LLM
@@ -478,7 +478,7 @@ Push backend params DSP → debouncé 100ms (évite spam HTTP sur drag slider EQ
 ### Pre-commit hooks
 
 - **Commit** : ruff + eslint bloquants (0 erreur required)
-- **Pre-push** : pytest 936 tests bloquants (CI cloud impossible « rien sur le web »)
+- **Pre-push** : pytest 933 tests bloquants (CI cloud impossible « rien sur le web »)
 
 ### ESLint config (`eslint.config.js`)
 
@@ -519,7 +519,7 @@ Push backend params DSP → debouncé 100ms (évite spam HTTP sur drag slider EQ
 ### ⚠ Rappel : ce ne sont PAS des dettes actionnables
 
 Le projet JARVIS est **post-modularisation** des 2 côtés :
-- **Côté Python** : 31 modules satellites extraits de `jarvis.py`. Ce qui reste dans `jarvis.py` (4633L) est un **orchestrateur Flask** : endpoints HTTP + routing + auto-engine SOC + glue code. Logique métier déjà extraite.
+- **Côté Python** : 33 modules satellites extraits de `jarvis.py`. Ce qui reste dans `jarvis.py` (4739L) est un **orchestrateur Flask** : endpoints HTTP + routing + auto-engine SOC + glue code. Logique métier déjà extraite.
 - **Côté JS** : refactor officiellement TERMINÉ. `jarvis_main.js` 7828→148L (−98,1%). 13 modules extraits dans `static/js/`.
 
 **Les chiffres ci-dessous sont des observations honnêtes, pas des dettes à attaquer** :
@@ -548,7 +548,7 @@ Le projet JARVIS est **post-modularisation** des 2 côtés :
 | Modules ≥100% cov | **21 modules** |
 | ESLint | **155 warnings · 0 erreur** |
 | ruff | **0 erreur** |
-| Pre-push hook | **pytest 936 tests** bloquants |
+| Pre-push hook | **pytest 933 tests** bloquants |
 | Refactor JS | **terminé** (`jarvis_main.js` 148 L) |
 | MCP outils | **12** |
 | Circuit breaker | **8 call-sites Ollama** wrappés |

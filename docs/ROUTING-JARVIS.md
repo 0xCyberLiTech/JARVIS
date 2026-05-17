@@ -152,9 +152,9 @@ Validation automatisée (`tests/e2e/`) :
 
 ## Modules Python extraits — Phase 3 (session 33b) + chantier dette (2026-05-14)
 
-Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits → `jarvis.py` 6592 → **4633 lignes**.
+Le monolithe `jarvis.py` a été allégé : **modules dédiés** extraits → `jarvis.py` 6592 → **4739 lignes**.
 
-⚠ **Note honnête** : score dette technique global = **~94/100** (pas 100). Recalibré le 2026-05-15 post-audit pytest --cov. Chantier 2026-05-14/15 cumul **62→94** (incl. session 2026-05-17 : +93 tests coverage 5 modules + 29 audio_dsp option B + Ollama 0.24.0 + faille SSH colmatée) : Ruff 98→0 + git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + `audio_dsp.py` + **refactor JS terminé** (`jarvis_main.js` 7828→**148 L** −98,1%, 21 modules JS) + **936 tests pytest** sur **32 modules · 25 à 100% cov** avec **coverage 51% lignes** + fix perf IPv6 (-97% latence interne) + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro CUDA + profiling TTS détaillé. Plafond pratique sans CI cloud atteint. Pour 95+ : couverture jarvis.py / soc.py Flask routes (faible ROI) ou CI cloud (impossible « rien sur le web »).
+⚠ **Note honnête** : score dette technique global = **92/100** (pas 100). Audit dette complet final 2026-05-17 soir post-migration LAN unique Freebox. Chantier 2026-05-14/15 cumul **62→94** puis recalibré 92 post-audit dette complet (réconciliation drifts numériques : 936→933 pytest, 4633→4739L, 25→22 modules à 100%, 91/94→92 score unique) : Ruff 98→0 + git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + `audio_dsp.py` + **refactor JS terminé** (`jarvis_main.js` 7828→**148 L** −98,1%, 21 modules JS) + **933 tests pytest** sur **35 modules · 22 à 100% cov** avec **coverage 51% lignes** + fix perf IPv6 (-97% latence interne) + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro CUDA + profiling TTS détaillé. Plafond pratique sans CI cloud atteint. Pour 95+ : couverture jarvis.py / soc.py Flask routes (faible ROI) ou CI cloud (impossible « rien sur le web »).
 
 ### Audio/Voice (5)
 | Module | Lignes | Rôle |
@@ -202,10 +202,10 @@ Le monolithe `jarvis.py` a été allégé : **31 modules dédiés** extraits →
 | [`chat_stream.py`](../scripts/chat_stream.py) | 45 | Orchestrateur stream |
 | [`chat_generate.py`](../scripts/chat_generate.py) | 60 | Top-level wrapper avec error handling |
 
-**Total Python : 31 modules extraits** (Phase 3 : 30 modules ~3034L · session 33b) + `audio_dsp.py` 508L (chantier dette 2026-05-14) → `jarvis.py` 4633L
+**Total Python : 31 modules extraits** (Phase 3 : 30 modules ~3034L · session 33b) + `audio_dsp.py` 508L (chantier dette 2026-05-14) → `jarvis.py` 4739L
 **Session 33c — Split JS partiel** : `recorder.js` 660L + `voice_print.js` 852L extraits en IIFE
 **Chantier dette 2026-05-14** : Ruff 98→0 + `ruff.toml` · git initialisé (100% local, aucun remote) · pre-commit hooks bloquants · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · refactor JS partiel (3 modules : terminal_code/voice_lab/stt)
 **Session 2026-05-14 (soir)** : injection SOC 100 % serveur (suppression incrustation client-side `_monCtxStr`/`_buildChatPayload` → fin des hallucinations) · `force_soc` threadé en DI · règle crawlers légitimes + reco de ban proportionnée au signal · garde-fou srv-ngix injoignable
 **Refactor JS 2026-05-14/15 (TERMINÉ)** : `jarvis_main.js` **7828→148 L (−98,1% cumul)** · **21 modules JS** (15 dans `static/js/` + 6 historiques). Méthode byte-identique vérifiée (bodies identiques · `node --check` · eslint 0 · validation E2E prod à chaque étape). ⚠ `audio_viz.js` chargé juste après `jarvis_main.js` (définit `_SAMPLE_RATE`, requis au top-level par `recorder.js`). ⚠ `chat_ui.js` AVANT `chat_core.js` (chat_core utilise `addMessage`/`history`/`_esc`). ⚠ `soc_tab.js` AVANT `chat_core.js` (chat_core utilise `_buildChatPayload`).
 
-**Score dette technique HONNÊTE ~94/100** (recalibré post-audit pytest --cov · 936 tests pytest sur **32 modules · 25 à 100% cov** · coverage 51% lignes · refactor JS terminé · fix perf IPv6 · circuit breaker Ollama étendu 8 call-sites · pré-warm Kokoro CUDA · hook pre-push pytest)
+**Score dette technique HONNÊTE 92/100** (recalibré post-audit pytest --cov · 933 tests pytest sur **32 modules · 22 à 100% cov** · coverage 51% lignes · refactor JS terminé · fix perf IPv6 · circuit breaker Ollama étendu 8 call-sites · pré-warm Kokoro CUDA · hook pre-push pytest)

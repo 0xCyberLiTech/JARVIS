@@ -78,7 +78,7 @@ Cf. mémoire `jarvis_modes` — règle ABSOLUE pour Claude :
 - **Chemins Unix (Git Bash pour ssh/scp)** : `/c/Users/mmsab/...`
 - **Clients internes** : `http://127.0.0.1:PORT` (PAS `localhost` — résout IPv6 sur Windows, +97% latence) — source unique `OLLAMA_URL` dans `jarvis.py:544`
 - **Pre-commit hooks** : ruff + eslint bloquants
-- **Pre-push hook** : pytest 936 tests (alternative locale à CI cloud — impossible « rien sur le web »)
+- **Pre-push hook** : pytest 933 tests (alternative locale à CI cloud — impossible « rien sur le web »)
 - **Édition gros fichiers** : ⚠ Write tool tronque >200 Ko → toujours `Edit`, jamais `Write` pour `jarvis.py` (4739L) ou `jarvis_main.js`
 
 ## Règles ABSOLUES (zéro régression infra)
@@ -97,7 +97,7 @@ Cf. mémoires `feedback_jarvis_no_regression` · `feedback_data_security` · `fe
 
 | Fichier | Rôle |
 |---|---|
-| `scripts/jarvis.py` (4633L) | Serveur Flask · ~150 endpoints · routing 4 modes · pré-warm · circuit breaker |
+| `scripts/jarvis.py` (4739L) | Serveur Flask · ~150 endpoints · routing 4 modes · pré-warm · circuit breaker |
 | `scripts/blueprints/soc.py` (1007 stmts) | Endpoints SOC · cache 30s + fallback SSH · `_SOC_BAN_CONFIG` source unique |
 | `scripts/jarvis_mcp_server.py` (269 stmts) | MCP 12 outils · sanitize IP → `[IP]` · port 5010 |
 | `scripts/chat_soc_inject.py` | Injection bloc compact phi4 mode SOC (100% serveur) |

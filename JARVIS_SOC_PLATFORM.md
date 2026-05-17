@@ -1,6 +1,6 @@
 # JARVIS SOC PLATFORM — Architecture IA & Cybersécurité Homelab
 ### Agent autonome local · Surveillance proactive · Contrôle d'infrastructure · LLM on-premise
-<!-- 0xCyberLiTech · v3.3 · 2026-05-17 — routing 4 branches · phi4:14b + qwen3:8b CR + gemma4 + qwen2.5-coder + mxbai-embed · 25 tests E2E Playwright + 936 tests pytest sur 32 modules · 25 à 100% cov · coverage 51% lignes · ESLint 0 errors · MCP **12 outils** (+jarvis_ioc_status Sprint 18d) · 32 modules Python (jarvis.py 4633L) · jarvis.css → 8 fichiers · refactor JS terminé : jarvis_main.js 7828→148L (−98,1%), 21 modules · git local + pre-commit hooks bloquants + hook pre-push pytest + ruff.toml · fix perf IPv6 (-97% latence interne) · circuit breaker Ollama étendu 8 call-sites + bouton SOC enrichi · pré-warm Kokoro CUDA au boot · profiling TTS détaillé · SSH write ops 4 couches + audit log forensic JSONL · Ollama 0.24.0 · score dette HONNÊTE ~94/100 (recalibré post-audit pytest --cov · +31 chantier dette 2026-05-14/15 · +1 session 2026-05-17 : coverage +7 pts globaux + SSH security + Ollama upgrade) -->
+<!-- 0xCyberLiTech · v3.3 · 2026-05-17 — routing 4 branches · phi4:14b + qwen3:8b CR + gemma4 + qwen2.5-coder + mxbai-embed · 25 tests E2E Playwright + 933 tests pytest sur 32 modules · 22 à 100% cov · coverage 51% lignes · ESLint 0 errors · MCP **12 outils** (+jarvis_ioc_status Sprint 18d) · 32 modules Python (jarvis.py 4739L) · jarvis.css → 8 fichiers · refactor JS terminé : jarvis_main.js 7828→148L (−98,1%), 21 modules · git local + pre-commit hooks bloquants + hook pre-push pytest + ruff.toml · fix perf IPv6 (-97% latence interne) · circuit breaker Ollama étendu 8 call-sites + bouton SOC enrichi · pré-warm Kokoro CUDA au boot · profiling TTS détaillé · SSH write ops 4 couches + audit log forensic JSONL · Ollama 0.24.0 · score dette HONNÊTE 92/100 (recalibré post-audit pytest --cov · +31 chantier dette 2026-05-14/15 · +1 session 2026-05-17 : coverage +7 pts globaux + SSH security + Ollama upgrade) -->
 
 ---
 
@@ -81,7 +81,7 @@ Le système repose sur deux niveaux d'intelligence complémentaires :
 
 ```
 Windows 11 — localhost:5000
-├── jarvis.py              Flask · 4633 L · 75 routes · host=127.0.0.1 (31 modules extraits)
+├── jarvis.py              Flask · 4739 L · 75 routes · host=127.0.0.1 (31 modules extraits)
 ├── blueprints/soc.py      Blueprint SOC · 1689 L · rsyslog v1.6.1
 ├── audio_dsp.py           Chaîne DSP audio · 508 L (extrait chantier 2026-05-14)
 ├── 30 modules Phase 3     audio · bypass · infra/RAG · chat/LLM core
@@ -414,7 +414,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | Imports inutilisés | 0 |
 | Regex inconsistantes | 3 corrigées |
 | Code mort introduit cette session | 0 |
-| **jarvis.py final** | **4633 L · 32 modules extraits · jarvis_main.js 148 L (−98,1%) · score dette HONNÊTE 94/100** (recalibré post-audit pytest --cov · +31 via chantier 2026-05-14/15 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py + refactor JS terminé + 936 tests pytest sur 32 modules · 25 à 100% cov · coverage 51% lignes + fix perf IPv6 + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro + hook pre-push) |
+| **jarvis.py final** | **4739 L · 32 modules extraits · jarvis_main.js 148 L (−98,1%) · score dette HONNÊTE 92/100** (recalibré post-audit pytest --cov · +31 via chantier 2026-05-14/15 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py + refactor JS terminé + 933 tests pytest sur 32 modules · 22 à 100% cov · coverage 51% lignes + fix perf IPv6 + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro + hook pre-push) |
 
 ### 5.7 Validé en prod
 
@@ -466,7 +466,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | ✅ | **Phase 3 split monolithe Python complète** — **30 modules extraits** (Audio/Voice 5 + Bypass 8 + Infra/RAG 2 + Chat/LLM core 15) — `jarvis.py` 6592 → ~4520 (**-2072 lignes · -31%**) — score honnête 84 → **89/100** (+5 · pas 100 car JS toujours monolithique) | session 33b |
 | ✅ | **Split JS partiel** — extraction `recorder.js` (660L) + `voice_print.js` (852L) en IIFE depuis `jarvis_main.js` 10507→8994L (**-14.4%**) — score honnête 89 → 91 (valeur d'époque) | session 33c |
 | ✅ | **Chantier dette technique 2026-05-14** — recalibration honnête (le 91 était optimiste, départ réel **62**) → **78/100** (+16). Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (100% local) · **pre-commit hooks bloquants** · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** : 3 modules extraits de jarvis_main.js (8994→7893L) | 2026-05-14 |
-| ✅ | **Chantier dette technique 2026-05-15 (extension massive)** — score 78 → **93/100** (+15). **Refactor JS terminé** (`jarvis_main.js` 7828→**148 L** −98,1% cumul, 21 modules) · **936 tests pytest** sur **32 modules · 25 à 100% cov** avec **coverage 51% lignes** (tts_engines 83% · 42 tests, jarvis_mcp_server 91% · 52 tests, ollama_circuit 100% · 23 tests, proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26% via Flask test_client) · **Phase 3 fix perf IPv6** (-97% latence interne via `OLLAMA_URL`/`JARVIS_BASE` → 127.0.0.1) · **Circuit breaker Ollama** (`ollama_circuit.py` 3 états + indicateur HUD `● OLLAMA` · étendu à **8 call-sites** dans `jarvis.py` · bouton SOC PING JARVIS enrichi état Ollama) · **Pré-warm Kokoro CUDA au boot** (`_kokoro_prewarm` 60 s · élimine cold start 42.8 s mesuré) · **profiling TTS détaillé** (`tools/profile_tts.py` 4 moteurs × 7 textes · médianes chaud edge 1453ms / kokoro 203ms / piper 219ms / sapi 563ms) · **hook pre-push pytest** · 3 bugs prod détectés+fixés (load-order, tts_cleaner, IPv6) · outils `tools/profile_perf.py` + `tools/profile_tts.py` | 2026-05-15 |
+| ✅ | **Chantier dette technique 2026-05-15 (extension massive)** — score 78 → **93/100** (+15). **Refactor JS terminé** (`jarvis_main.js` 7828→**148 L** −98,1% cumul, 21 modules) · **933 tests pytest** sur **32 modules · 22 à 100% cov** avec **coverage 51% lignes** (tts_engines 83% · 42 tests, jarvis_mcp_server 91% · 52 tests, ollama_circuit 100% · 23 tests, proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26% via Flask test_client) · **Phase 3 fix perf IPv6** (-97% latence interne via `OLLAMA_URL`/`JARVIS_BASE` → 127.0.0.1) · **Circuit breaker Ollama** (`ollama_circuit.py` 3 états + indicateur HUD `● OLLAMA` · étendu à **8 call-sites** dans `jarvis.py` · bouton SOC PING JARVIS enrichi état Ollama) · **Pré-warm Kokoro CUDA au boot** (`_kokoro_prewarm` 60 s · élimine cold start 42.8 s mesuré) · **profiling TTS détaillé** (`tools/profile_tts.py` 4 moteurs × 7 textes · médianes chaud edge 1453ms / kokoro 203ms / piper 219ms / sapi 563ms) · **hook pre-push pytest** · 3 bugs prod détectés+fixés (load-order, tts_cleaner, IPv6) · outils `tools/profile_perf.py` + `tools/profile_tts.py` | 2026-05-15 |
 | 🟡 | SSH write ops partielles — apt upgrade · restart service (validation) | ouvert |
 | 🔵 | Pour 95+ : couverture jarvis.py / soc.py / audio_dsp Flask routes (faible ROI) ou CI cloud (incompatible « rien sur le web ») — plafond pratique sans cloud atteint | future session |
 | 🔵 | Tests unitaires Python · profiling performance | future session |
@@ -513,7 +513,7 @@ npm run test:ui       # mode UI Playwright
 
 ## 7ter. Split monolithe — Phase 3 (session 33) + chantier dette (2026-05-14)
 
-**31 modules extraits** depuis `jarvis.py` 6592L → **4633L** — Phase 3 (30 modules, session 33b) + `audio_dsp.py` (chantier dette 2026-05-14).
+**31 modules extraits** depuis `jarvis.py` 6592L → **4739L** — Phase 3 (30 modules, session 33b) + `audio_dsp.py` (chantier dette 2026-05-14).
 
 | Module | Lignes | Domaine | Couplage |
 |--------|--------|---------|----------|

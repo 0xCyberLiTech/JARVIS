@@ -1,5 +1,5 @@
 # JARVIS — Référence Technique
-<!-- 2026-05-15 — v1.9 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed-large · NDT script auto 100/100 · score honnête global 94/100 (recalibré depuis 62 réel · +31 via chantier dette 2026-05-14/15 : Ruff 98→0 + git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS jarvis_main.js 7828→148L (-98,1%) + 936 tests pytest sur 32 modules · 25 à 100% cov · coverage 51% lignes + fix perf IPv6 + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro + hook pre-push) -->
+<!-- 2026-05-17 — v2.0 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed-large · NDT script auto 100/100 · score honnête global 92/100 (audit dette complet 2026-05-17 soir post-migration LAN unique Freebox : 933 tests pytest sur 35 modules · 22 à 100% cov · coverage 51% lignes · refactor JS jarvis_main.js 7828→148L (-98,1%) · fix perf IPv6 · circuit breaker Ollama étendu 8 call-sites · pré-warm Kokoro · hook pre-push) -->
 
 Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · Python 3.11
 
@@ -12,7 +12,7 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 | Version | 3.3 (production) · chantier dette technique 2026-05-14/15 |
 | Audit sécurité | **8/10** honnête (v2.7 — 2026-05-13 · audit ciblé + 1 fix race condition) |
 | Dette technique (NDT script auto) | **100/100** · D1/D2/D6/D13 zéro violation (session 17 — 2026-05-08) |
-| **Score honnête global** | **94/100** (recalibré post-audit pytest --cov : départ réel 62/100, +31 via chantier dette 2026-05-14/15 — git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS jarvis_main.js 7828→148L (−98,1%) + 936 tests pytest sur **32 modules · 25 à 100% cov** · coverage 51% lignes + fix perf IPv6 −97% latence interne + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro CUDA · MAIS pas de CI cloud — alternative locale pre-push · plafond pratique sans cloud atteint) |
+| **Score honnête global** | **92/100** (audit dette complet 2026-05-17 soir post-migration LAN unique Freebox · 933 tests pytest sur **35 modules · 22 à 100% cov** · coverage 51% lignes · refactor JS jarvis_main.js 7828→148L (−98,1%) · fix perf IPv6 −97% latence interne · circuit breaker Ollama étendu 8 call-sites · pré-warm Kokoro CUDA · MAIS pas de CI cloud — alternative locale pre-push · plafond pratique sans cloud atteint) |
 | Machine | Windows 11 Pro · RTX 5080 16 GB GDDR7 · CUDA 12 · Python 3.11 |
 | LLM | Ollama local uniquement — zéro cloud |
 
@@ -171,7 +171,7 @@ Déplacement            : mv · cp
 
 ⚠ **Distinction critique** :
 - **NDT 100/100** = score script automatisé maison (D1/D2/D6/D13 dans le code Python). Mesure fonction longue, silent pass, magic numbers, params >6. Reste vrai au 2026-05-15.
-- **Score honnête global ~94/100** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf). Recalibré honnêtement le 2026-05-15 post-audit pytest --cov : le 92/100 affiché en session 33c était optimiste (départ réel 62), chantier 2026-05-14/15 a fait +31 (→93) · +1 session 2026-05-17 (→94) via : git+hooks+CSS, refactor JS jarvis_main.js sous 150 L (−98,1%), 936 tests pytest sur **32 modules · 25 à 100% cov** · coverage 51% lignes, fix perf IPv6, circuit breaker Ollama étendu 8 call-sites, pré-warm Kokoro CUDA, hook pre-push. Plafond pratique sans CI cloud atteint. Pour 95+ : couverture jarvis.py / soc.py Flask routes (faible ROI) ou CI cloud (impossible « rien sur le web »).
+- **Score honnête global 92/100** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf). Audit dette complet final 2026-05-17 soir post-migration LAN unique Freebox : 92/100 confirmé après réconciliation drifts numériques (936→933 pytest, 4633→4739L, 25→22 modules 100%, 91/94→92 score unique). Chantier 2026-05-14/15 a fait 62→93 puis +1 session 2026-05-17 soir (→94) → recalibré honnêtement 92/100 post-audit complet final. 933 tests pytest sur **35 modules · 22 à 100% cov** · coverage 51% lignes, fix perf IPv6, circuit breaker Ollama étendu 8 call-sites, pré-warm Kokoro CUDA, hook pre-push. Plafond pratique sans CI cloud atteint. Pour 95+ : couverture jarvis.py / soc.py Flask routes (faible ROI) ou CI cloud (impossible « rien sur le web »).
 
 ### NDT (script automatisé) — 100/100
 
