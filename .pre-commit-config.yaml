@@ -38,7 +38,7 @@ repos:
         stages: [pre-commit]
 
       # ── Pytest — suite tests Python (stage pre-push uniquement) ─
-      # Lance les 436+ tests unitaires avant chaque push.
+      # Lance les 933 tests unitaires avant chaque push.
       # Bloque si tests rouges. Pas en pre-commit (trop lent à chaque commit).
       - id: pytest
         name: pytest (suite tests Python)

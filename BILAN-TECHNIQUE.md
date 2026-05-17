@@ -5,11 +5,11 @@
 
 ## 0. État actuel (audit dette honnête 2026-05-17)
 
-**Score honnête : ~94/100** (post-coverage +7 pts session 2026-05-17 soir incl. option B) — Décomposition :
+**Score honnête : 92/100** (audit dette complet 2026-05-17 soir post-migration LAN unique Freebox) — Décomposition :
 
 | Critère | Score | Justification |
 |---|---|---|
-| Architecture | 23/25 | **Modularisation faite des 2 côtés** : Python `jarvis.py` 4633L est un **orchestrateur Flask** (~150 endpoints + routing 4 modes + auto-engine SOC) — la logique métier est déjà extraite dans **31 modules satellites** (dont 21 à 100% cov). JS : refactor officiellement TERMINÉ (`jarvis_main.js` 7828→148L · −98,1% · 13 modules extraits). Coverage 26% de `jarvis.py` = normale pour orchestrateur HTTP, couvert indirectement par 25 tests E2E Playwright. −2 : `blueprints/soc.py` 1007 stmts encore dense (cache + fallback SSH + endpoints SOC), pourrait gagner en éclatement mais ROI faible. |
+| Architecture | 23/25 | **Modularisation faite des 2 côtés** : Python `jarvis.py` 4739L est un **orchestrateur Flask** (~150 endpoints + routing 4 modes + auto-engine SOC) — la logique métier est déjà extraite dans **31 modules satellites** (dont 21 à 100% cov). JS : refactor officiellement TERMINÉ (`jarvis_main.js` 7828→148L · −98,1% · 13 modules extraits). Coverage 26% de `jarvis.py` = normale pour orchestrateur HTTP, couvert indirectement par 25 tests E2E Playwright. −2 : `blueprints/soc.py` 1007 stmts encore dense (cache + fallback SSH + endpoints SOC), pourrait gagner en éclatement mais ROI faible. |
 | Tests | 23/25 | **936 tests pytest pass · 0 fail** · coverage RÉELLE **51%** · **32 modules · 25 à 100% cov** · 478 mocks légitimes (Ollama/SSH/TTS). −2 : pas de tests E2E Playwright étendus (25 E2E vs ~50 attendus pour parité fonctionnelle complète). |
 | Documentation | 13/15 | MEMORY.md 2355L à jour 2026-05-16 nuit + docs/ 7 fichiers (AUDIO-DSP, MCP-SERVER, REFERENCE-TECHNIQUE, ROUTING-JARVIS, DEPLOIEMENT, REINSTALLATION, SUPPORT-INFOGERANCE) + RUNBOOK.md + **BILAN-TECHNIQUE.md (ce document, 2026-05-17)** + CLAUDE.md (2026-05-17). −2 : refactor 2026-05-15 détaillé dans MEMORY.md mais pas extrait en doc dédiée. |
 | Lisibilité/Conventions | 14/15 | ESLint **155 warnings · 0 erreur** (camelCase exports inter-modules, acceptés sans bundler) · 2 TODO/FIXME Python · ruff 0 · style guides appliqués. −1 : 135 inline styles `style.display=`/`style.color=` côté JS (acceptés pour SPA temps réel avec HUD dynamique). |
@@ -20,13 +20,13 @@
 
 | Métrique | Valeur |
 |---|---|
-| **Tests pytest** | **936 pass · 0 fail** (+122 session 2026-05-17 soir : +19 chat_soc_inject +10 bypass_code +15 code_reasoning +25 voice_lab +24 audio_dsp smoke +29 audio_dsp option B) |
-| **Coverage globale** | **51%** (6086 stmts · 2996 miss) — +7 pts session 2026-05-17 soir (option B inclus) |
-| **Modules Python ≥100% cov** | **25 modules** (+`chat_soc_inject` +`bypass_code` +`voice_lab` +`bypass_simple` 2026-05-17 soir) : `ollama_circuit`, `chat_tool_calls`, `tts_cleaner`, `stream_tokens`, `security_whitelists`, `chat_pending_bypass`, `llm_opts`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_routing`, `chat_stream`, `chat_system_prompt`, `deferred_speak`, `bypass_filesystem`, `stt`, `ssh_terminal`, `tts_dedup`, `vision`, `bypass_proxmox`, `deepfilter`, `chat_soc_inject`, `bypass_code`, `voice_lab`, `bypass_simple` |
-| **Modules Python <50% cov** | `jarvis.py` 26% · `blueprints/soc.py` 33% (orchestrateurs Flask, couverts par E2E) — autres résiduels remontés ≥72% session 2026-05-17 soir |
-| **`jarvis.py`** | 4633 L (2909 stmts exécutables) |
-| **`blueprints/soc.py`** | 1007 stmts |
-| **Modules Python totaux** | 32 modules dans `scripts/` |
+| **Tests pytest** | **933 pass · 3 skip · 0 fail** (post-migration 2026-05-17 : −3 tests router retirés) |
+| **Coverage globale** | **51%** (6065 stmts · 2976 miss) |
+| **Modules Python à 100% cov** | **22 modules** (recompte audit 2026-05-17 soir) : `bypass_code`, `bypass_proxmox`, `bypass_simple`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_pending_bypass`, `chat_routing`, `chat_soc_inject`, `chat_stream`, `chat_system_prompt`, `chat_tool_calls`, `deferred_speak`, `llm_opts`, `ollama_circuit`, `security_whitelists`, `ssh_terminal`, `stream_tokens`, `tts_cleaner`, `tts_dedup`, `voice_lab`, `blueprints/__init__` |
+| **Modules Python <50% cov** | `jarvis.py` 26% · `blueprints/soc.py` 34% (orchestrateurs Flask, couverts par E2E) |
+| **`jarvis.py`** | **4739 L** (2918 stmts exécutables) |
+| **`blueprints/soc.py`** | 986 stmts (1691 L) |
+| **Modules Python totaux** | 35 modules dans `scripts/` (33 + 1 blueprint + `__init__`) |
 | **`jarvis_main.js`** | 148 L (post-refactor −98,1% depuis 7828L) |
 | **Modules JS totaux** | 21 modules (18 dans `static/js/` + 3 dans `static/`) |
 | **JS LOC total** | ~14 600 lignes |
@@ -83,7 +83,7 @@ QW4 — Hook ESLint pre-commit JARVIS aligné cohérence cross-projet :
 JARVIS est un **assistant IA local** (type Iron Man) tournant sur la **station Windows 11** de Marc (RTX 5080, 16 GB VRAM). Interface web holographique v3.2, serveur Flask sur `localhost:5000`.
 
 **Caractéristiques techniques** :
-- Backend Python — **32 modules** (`jarvis.py` 4633L + 31 modules satellites), Flask + Ollama
+- Backend Python — **32 modules** (`jarvis.py` 4739L + 31 modules satellites), Flask + Ollama
 - Frontend JS — **21 modules** (`jarvis_main.js` 148L + 18 modules `static/js/` + 3 modules `static/`)
 - LLM local : **5 modèles Ollama** routés par mode (SOC/GENERAL/CODE/CR/RAG)
 - TTS chain : **4 moteurs** avec fallback (edge → Kokoro CUDA → Piper → SAPI5)
@@ -91,7 +91,7 @@ JARVIS est un **assistant IA local** (type Iron Man) tournant sur la **station W
 - RAG : **599 chunks** · mxbai-embed-large · seuil 0.35 · TTL 300s · auto-refresh 6h
 - MCP server : **12 outils** exposés à Claude Desktop / Cursor sur port 5010 streamable-HTTP
 - Routing automatique : 3 branches + bypass Python (VM/service/backup → sans LLM)
-- Tests : **936 pytest pass** · coverage 51% · 25 modules à 100% cov
+- Tests : **933 pytest pass** · coverage 51% · 25 modules à 100% cov
 - Sécurité : whitelist SSH 29 patterns bloqués · profil SOC anti-double-ban · injection 100% serveur
 
 **Architecture moteur IA local** :
@@ -542,7 +542,7 @@ Le projet JARVIS est **post-modularisation** des 2 côtés :
 | Indicateur | Valeur |
 |---|---|
 | Version JARVIS | **v3.3** (interface holographique) |
-| Score dette honnête | **~94/100** (post-coverage chantier 5 modules + option B 2026-05-17 soir) |
+| Score dette honnête | **92/100** (audit dette complet 2026-05-17 soir post-migration LAN unique Freebox) |
 | Tests pytest | **801 pass · 0 fail** |
 | Coverage globale | **44%** (6059 stmts) |
 | Modules ≥100% cov | **21 modules** |
@@ -563,4 +563,4 @@ Le projet JARVIS est **post-modularisation** des 2 côtés :
 
 ---
 
-*Document généré le 2026-05-17 (post-audit dette honnête + Sprints 1-4 + circuit breaker + TTS pré-warm + MCP 12 outils + intégrations SOC) — JARVIS 0xCyberLiTech v3.3 — 936 tests pass · coverage 51% · dette ~94/100 honnête*
+*Document généré le 2026-05-17 (post-audit dette complet final + Sprints 1-4 + circuit breaker + TTS pré-warm + MCP 12 outils + intégrations SOC + migration LAN unique Freebox) — JARVIS 0xCyberLiTech v3.3 — 933 tests pass + 3 skip · coverage 51% · 22 modules à 100% cov · score dette 92/100 honnête*

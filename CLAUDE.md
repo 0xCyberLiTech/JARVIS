@@ -10,8 +10,8 @@
 **JARVIS** = assistant IA local type Iron Man · Flask `localhost:5000` · Windows 11 (RTX 5080, 16 GB VRAM) · 100% local, zéro cloud LLM.
 
 - Version : **v3.3** (interface holographique)
-- Score dette honnête : **91/100** (audit 2026-05-17 · cf. `BILAN-TECHNIQUE.md`)
-- Tests : **936 pytest pass** · coverage 51% · 25 modules à 100% cov
+- Score dette honnête : **92/100** (audit dette complet 2026-05-17 soir · cf. `BILAN-TECHNIQUE.md`)
+- Tests : **933 pytest pass + 3 skip** · coverage 51% · 22 modules à 100% cov
 - Refactor JS : **terminé** (`jarvis_main.js` 148L · −98,1% depuis 7828L)
 
 ## Sources de vérité (ordre de priorité)
@@ -79,7 +79,7 @@ Cf. mémoire `jarvis_modes` — règle ABSOLUE pour Claude :
 - **Clients internes** : `http://127.0.0.1:PORT` (PAS `localhost` — résout IPv6 sur Windows, +97% latence) — source unique `OLLAMA_URL` dans `jarvis.py:544`
 - **Pre-commit hooks** : ruff + eslint bloquants
 - **Pre-push hook** : pytest 936 tests (alternative locale à CI cloud — impossible « rien sur le web »)
-- **Édition gros fichiers** : ⚠ Write tool tronque >200 Ko → toujours `Edit`, jamais `Write` pour `jarvis.py` (4633L) ou `jarvis_main.js`
+- **Édition gros fichiers** : ⚠ Write tool tronque >200 Ko → toujours `Edit`, jamais `Write` pour `jarvis.py` (4739L) ou `jarvis_main.js`
 
 ## Règles ABSOLUES (zéro régression infra)
 

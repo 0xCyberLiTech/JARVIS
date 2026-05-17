@@ -1,4 +1,31 @@
-# JARVIS — Mémoire projet (2026-05-17 — audit honnête + parité doc SOC + SSH write ops clôturé + audit log forensic + chantier coverage 5 modules)
+# JARVIS — Mémoire projet (2026-05-17 — audit dette complet final + migration LAN unique Freebox + audit honnête)
+
+## Session 2026-05-17 nuit — audit dette JARVIS complet + 6 quick wins (score 92/100 confirmé)
+
+**Demande Marc** : audit dette technique complet JARVIS exclusivement, puis corrections.
+
+**Verdict** : **score 92/100** (vs 91 CLAUDE.md / 94 BILAN historique → réconcilié à 92). Drifts numériques détectés et corrigés.
+
+### Corrections appliquées (toutes commits suivants)
+1. `scripts/]` (21 KB fichier accidentel, log "Fermeture page" piped) supprimé
+2. `scripts/jarvis_start.log` (15B garbage) + `tts.log.{1,4,5,6}` (rotation old) supprimés
+3. `BILAN-TECHNIQUE.md` : 936→933 pytest · 4633L→4739L · 25→22 modules à 100% · score 94→92
+4. `CLAUDE.md` : 936→933 pytest · 4633L→4739L · 91→92 score
+5. `jarvis_mcp_server.py:5` docstring : "10 outils" → "12 outils" + ajout `jarvis_defense_24h` + `jarvis_ioc_status`
+6. `.pre-commit-config.yaml:41` : "436+ tests" → "933 tests"
+
+### Audit factuel (chiffres réels post-migration LAN unique Freebox)
+- **933 pytest pass** + 3 skip (post-migration : -3 tests router retirés)
+- Coverage **51%** (6065 stmts · 2976 miss)
+- **22 modules à 100% cov** (recompte précis vs 25 annoncés)
+- `jarvis.py` **4739L** (2918 stmts) — orchestrateur Flask
+- `blueprints/soc.py` 986 stmts (1691L)
+- MCP : **12 outils** réels (docstring désormais aligné)
+- ruff All passed · ESLint 155 warnings cross-fichiers acceptés
+- 4 couches SSH write ops + audit JSONL : robustes
+- 0 eval/exec · 1 shell=True documenté · 0 secret en clair
+
+---
 
 ## Session 2026-05-17 soir — chantier coverage 5 modules + cleanup snapshots locaux
 

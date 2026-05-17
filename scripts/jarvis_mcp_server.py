@@ -2,7 +2,7 @@
 JARVIS MCP Server — pont Claude Code ↔ JARVIS local (localhost:5000)
 Transport : Streamable HTTP (/mcp) + SSE legacy (/sse) — port 5010
 
-10 outils exposés :
+12 outils exposés :
   jarvis_chat          — conversation avec JARVIS (phi4:14b via Ollama)
   jarvis_soc_status    — état SOC temps réel (menace, bans, services)
   jarvis_soc_ask       — question SOC avec contexte live injecté (monitoring.json)
@@ -13,6 +13,8 @@ Transport : Streamable HTTP (/mcp) + SSE legacy (/sse) — port 5010
   jarvis_model_switch  — change le modèle Ollama actif
   jarvis_last_response — retourne la dernière réponse JARVIS (IPs sanitizées)
   jarvis_code_exec     — écrit + SCP + exécute du code sur srv-dev-1
+  jarvis_defense_24h   — défense 24h KPI (heatmap, top attacks, timeline)
+  jarvis_ioc_status    — IoC POST-COMPROMISSION (Sprint 18d : 6 signaux)
 """
 
 import argparse
