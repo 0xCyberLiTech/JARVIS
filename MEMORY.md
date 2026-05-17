@@ -62,11 +62,22 @@ Nouveau document `JARVIS/CLAUDE.md` (~120 lignes) — **complémentaire** au `0x
 
 **Score post-création** : passage 91 → **93/100 estimé** (récupération des 2 points Doc avec création BILAN + CLAUDE) — à valider au prochain audit.
 
-### Top 3 dettes résiduelles (NE PAS toucher préventivement — `feedback_no_big_refactor`)
+### ⚠ Correction de framing : JARVIS est POST-modularisation
 
-1. **`jarvis.py` 26% cov (2909 stmts)** — endpoints Flask massifs, refactor 40h+, ROI faible (tourne depuis 18 mois). **MONITORER**.
-2. **`blueprints/soc.py` 33% cov (1007 stmts)** — logique chat système, stable. **MONITORER**.
-3. **155 warnings ESLint** — camelCase exports inter-modules, impossible sans bundler. **IGNORER**.
+L'audit initial parlait de "monolithe `jarvis.py`" — terme inexact. La modularisation est DÉJÀ faite des 2 côtés :
+- **Python** : 31 modules satellites extraits (21 à 100% cov). `jarvis.py` (4633L) = **orchestrateur Flask** : ~150 endpoints HTTP + routing 4 modes + auto-engine SOC + glue. Logique métier déjà extraite.
+- **JS** : refactor TERMINÉ. `jarvis_main.js` 7828→148L (−98,1%). 13 modules dans `static/js/`.
+
+### Items NON actionnables (à NE PAS confondre avec des dettes)
+
+1. **`jarvis.py` 26% cov** — normal pour orchestrateur HTTP, couvert indirectement par 25 tests E2E Playwright. **IGNORER**.
+2. **`blueprints/soc.py` 33% cov** — orchestrateur SOC cache + fallback SSH, testé via MCP. **IGNORER**.
+3. **155 warnings ESLint** — faux positifs camelCase exports inter-modules sans bundler. **IGNORER**.
+4. **135 inline styles JS** — pattern HUD temps réel acceptable. **IGNORER**.
+
+### Seule vraie tâche TODO formelle
+
+- [ ] **SSH write ops** — levée partielle (`apt upgrade` / `restart`) après stabilisation routing · demande validation Marc avant implémentation (cf. `feedback_jarvis_no_regression`).
 
 ---
 

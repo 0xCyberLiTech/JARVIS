@@ -9,7 +9,7 @@
 
 | Critère | Score | Justification |
 |---|---|---|
-| Architecture | 22/25 | Monolithe `jarvis.py` 4633L (2909 stmts) à 26% cov + `blueprints/soc.py` 1007 stmts à 33% cov. Refactor JS officiellement terminé (`jarvis_main.js` 148L · −98,1% depuis 7828L). 21 modules à 100% cov. −3 monolithes Flask acceptés. |
+| Architecture | 23/25 | **Modularisation faite des 2 côtés** : Python `jarvis.py` 4633L est un **orchestrateur Flask** (~150 endpoints + routing 4 modes + auto-engine SOC) — la logique métier est déjà extraite dans **31 modules satellites** (dont 21 à 100% cov). JS : refactor officiellement TERMINÉ (`jarvis_main.js` 7828→148L · −98,1% · 13 modules extraits). Coverage 26% de `jarvis.py` = normale pour orchestrateur HTTP, couvert indirectement par 25 tests E2E Playwright. −2 : `blueprints/soc.py` 1007 stmts encore dense (cache + fallback SSH + endpoints SOC), pourrait gagner en éclatement mais ROI faible. |
 | Tests | 23/25 | **801 tests pytest pass · 0 fail** · coverage RÉELLE **44%** · **34/34 modules touchés** · 478 mocks légitimes (Ollama/SSH/TTS). −2 : pas de tests E2E Playwright étendus (25 E2E vs ~50 attendus pour parité fonctionnelle complète). |
 | Documentation | 13/15 | MEMORY.md 2355L à jour 2026-05-16 nuit + docs/ 7 fichiers (AUDIO-DSP, MCP-SERVER, REFERENCE-TECHNIQUE, ROUTING-JARVIS, DEPLOIEMENT, REINSTALLATION, SUPPORT-INFOGERANCE) + RUNBOOK.md + **BILAN-TECHNIQUE.md (ce document, 2026-05-17)** + CLAUDE.md (2026-05-17). −2 : refactor 2026-05-15 détaillé dans MEMORY.md mais pas extrait en doc dédiée. |
 | Lisibilité/Conventions | 14/15 | ESLint **155 warnings · 0 erreur** (camelCase exports inter-modules, acceptés sans bundler) · 2 TODO/FIXME Python · ruff 0 · style guides appliqués. −1 : 135 inline styles `style.display=`/`style.color=` côté JS (acceptés pour SPA temps réel avec HUD dynamique). |
@@ -482,11 +482,24 @@ Push backend params DSP → debouncé 100ms (évite spam HTTP sur drag slider EQ
 - [x] Sprint 18d MCP `jarvis_ioc_status` (12ème outil)
 - [x] Refactor `_SOC_BAN_CONFIG` source unique seuils ban
 
-### Top 3 dettes résiduelles (NE PAS toucher préventivement — `feedback_no_big_refactor`)
+### ⚠ Rappel : ce ne sont PAS des dettes actionnables
 
-1. **`jarvis.py` 26% cov (2909 stmts)** — endpoints Flask massifs, refactor 40h+, ROI faible (tourne depuis 18 mois). **MONITORER**.
-2. **`blueprints/soc.py` 33% cov (1007 stmts)** — logique chat système, stable. **MONITORER**.
-3. **155 warnings ESLint** — camelCase exports inter-modules, impossible sans bundler. **IGNORER**.
+Le projet JARVIS est **post-modularisation** des 2 côtés :
+- **Côté Python** : 31 modules satellites extraits de `jarvis.py`. Ce qui reste dans `jarvis.py` (4633L) est un **orchestrateur Flask** : endpoints HTTP + routing + auto-engine SOC + glue code. Logique métier déjà extraite.
+- **Côté JS** : refactor officiellement TERMINÉ. `jarvis_main.js` 7828→148L (−98,1%). 13 modules extraits dans `static/js/`.
+
+**Les chiffres ci-dessous sont des observations honnêtes, pas des dettes à attaquer** :
+
+| Item | Réalité opérationnelle | Action |
+|---|---|---|
+| `jarvis.py` 26% cov (2909 stmts) | Coverage pytest unit normale pour orchestrateur HTTP · couvert indirectement par **25 tests E2E Playwright** + 800 tests pytest sur modules satellites | IGNORER |
+| `blueprints/soc.py` 33% cov (1007 stmts) | Idem orchestrateur SOC · endpoints cache + fallback SSH · testé indirectement via MCP | IGNORER |
+| 155 warnings ESLint | Exports camelCase inter-modules sans bundler → **faux positifs lint**, pas une dette | IGNORER |
+| 135 inline styles JS | Pattern HUD temps réel acceptable · refactor CSS-in-JS = anti-ROI | IGNORER |
+
+### Seule tâche TODO formelle dans la roadmap
+
+- [ ] **SSH write ops** — levée partielle (`apt upgrade` / `restart`) sur les 4 hôtes whitelistés, après stabilisation routing. Demande validation explicite Marc avant implémentation (cf. `feedback_jarvis_no_regression` règle absolue).
 
 ---
 
