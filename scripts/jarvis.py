@@ -1463,7 +1463,15 @@ def _build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS 
         lines.append(f"Campagnes lentes /24 (14j) : {len(slow)} subnet(s) | top {top['subnet']} — {top['count']} IPs distinctes ({top['last_seen'][:10]})")
     lines.append("")
     lines.append("⚠ RÈGLE ABSOLUE — FIDÉLITÉ SOC : utilise UNIQUEMENT les IPs, scores, niveaux et services listés ci-dessus. Interdiction formelle d'inventer ou d'extrapoler toute donnée absente de ce contexte. Si une information est manquante, indiquer 'non disponible'.")
-    lines.append("🚨 RÈGLE ANTI-DOUBLE-BAN : AVANT de recommander une commande 'cscli decisions add' ou 'fail2ban-client set ... banip' pour une IP, tu DOIS scanner la section 'IPs DÉJÀ BANNIES par CrowdSec' ci-dessus. Si l'IP s'y trouve, répondre 'IP déjà neutralisée par CrowdSec (expire dans Xh) — aucune action requise' au lieu de proposer un ban. Si la liste contient une mention 'et N autres', l'IP peut aussi y être : indiquer la vérification cscli decisions list -i <IP> au lieu d'ajouter un ban à l'aveugle.")
+    cs_total = len(cs_banned) if cs_banned else 0
+    lines.append("🚨 RÈGLE ANTI-DOUBLE-BAN (PROCÉDURE OBLIGATOIRE) : AVANT toute recommandation 'cscli decisions add' / 'fail2ban-client set … banip' / 'il est recommandé de bannir' / 'considérer un ban', tu DOIS exécuter cette procédure et l'INCLURE textuellement dans ta réponse :")
+    lines.append("  ÉTAPE 1 (obligatoire, à écrire dans la réponse) : 'Vérification ban CrowdSec pour <IP> : scan de la section IPs DÉJÀ BANNIES…'")
+    lines.append("  ÉTAPE 2 : Cherche <IP> dans la section ci-dessus. Réponds explicitement :")
+    lines.append("    - SI trouvée → 'TROUVÉE — déjà bannie par scénario X (stage Y). Aucune action requise.' STOP, ne recommande PAS de ban.")
+    lines.append(f"    - SI ABSENTE et liste complète (pas de mention 'et N autres') → 'ABSENTE de la liste complète ({cs_total} IPs scannées). Ban justifié si menace critique.'")
+    lines.append("    - SI ABSENTE mais liste tronquée ('et N autres') → 'NON TROUVÉE dans les 100 premières mais N autres non listées. Vérifier d'abord : cscli decisions list -i <IP>.'")
+    lines.append("  ÉTAPE 3 : seulement après ÉTAPE 2 réponse 'ABSENTE liste complète', tu peux recommander un ban.")
+    lines.append("  ⚠ Toute recommandation de ban SANS cette procédure visible dans ta réponse est une HALLUCINATION — phi4 tend à ignorer les listes longues, cette procédure force la vérification mécanique.")
     return "\n".join(lines)
 
 
