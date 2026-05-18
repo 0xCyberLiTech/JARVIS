@@ -1390,6 +1390,22 @@ def _kc_ban_signal(ip_e: dict) -> str:
     return "faible"
 
 
+# ── Infrastructure SOC — JAMAIS source d'attaque, JAMAIS bannissable ──
+# Liste d'IPs internes appartenant à l'infrastructure SOC elle-même. Injectée
+# textuellement dans le contexte LLM pour empêcher phi4 d'inventer ces IPs
+# comme "source d'événements suspects" par hallucination d'association
+# (incident 2026-05-18 : LLM a attribué +10 events à 192.168.1.50 = srv-ngix).
+_INFRA_IPS = (
+    ("192.168.1.20",  "Proxmox VE — hyperviseur"),
+    ("192.168.1.50",  "srv-ngix — hôte du SOC lui-même (nginx + CrowdSec + monitoring_gen)"),
+    ("192.168.1.12",  "clt — VM Apache site CLT"),
+    ("192.168.1.13",  "pa85 — VM Apache site PA85"),
+    ("192.168.1.21",  "srv-dev-1 — VM Debian dev/test"),
+    ("192.168.1.90",  "Windows/JARVIS — poste de travail (cette IA elle-même)"),
+    ("192.168.1.254", "Freebox — gateway LAN"),
+)
+
+
 def _build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS RÉEL (srv-ngix) ===") -> str:
     """Construit le contexte textuel SOC depuis un dict monitoring.json parsé.
     Utilisé par execute_tool('soc_status') et api_chat() pour injection LLM."""
@@ -1462,7 +1478,13 @@ def _build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS 
         top = slow[0]
         lines.append(f"Campagnes lentes /24 (14j) : {len(slow)} subnet(s) | top {top['subnet']} — {top['count']} IPs distinctes ({top['last_seen'][:10]})")
     lines.append("")
-    lines.append("⚠ RÈGLE ABSOLUE — FIDÉLITÉ SOC : utilise UNIQUEMENT les IPs, scores, niveaux et services listés ci-dessus. Interdiction formelle d'inventer ou d'extrapoler toute donnée absente de ce contexte. Si une information est manquante, indiquer 'non disponible'.")
+    lines.append("=== INFRASTRUCTURE SOC — JAMAIS source d'attaque, JAMAIS à bannir ===")
+    lines.append("Les IPs suivantes appartiennent à l'infrastructure du SOC lui-même. Elles ne sont JAMAIS sources d'attaques externes, JAMAIS suspectes, JAMAIS bannissables. Si tu vois un événement avec une de ces IPs, c'est de l'activité interne légitime (SSH d'administration, scripts cron, surveillance, déploiement) — JAMAIS une menace.")
+    for ip, role in _INFRA_IPS:
+        lines.append(f"  {ip:14s} — {role}")
+    lines.append("Plage RFC1918 globale (10.x, 172.16-31.x, 192.168.x, 127.x) : INTERDICTION ABSOLUE de proposer un ban — toute commande 'cscli decisions add' / 'fail2ban-client banip' sur ces plages est refusée 403 par le backend.")
+    lines.append("")
+    lines.append("⚠ RÈGLE ABSOLUE — FIDÉLITÉ SOC : utilise UNIQUEMENT les IPs, scores, niveaux et services listés ci-dessus. Interdiction formelle d'inventer ou d'extrapoler toute donnée absente de ce contexte. Si une information est manquante, indiquer 'non disponible'. NE JAMAIS attribuer une activité suspecte à une IP d'infrastructure SOC (ci-dessus) ou RFC1918 — toute IP listée ci-dessus comme infra n'est PAS une source d'attaque.")
     cs_total = len(cs_banned) if cs_banned else 0
     lines.append("🚨 RÈGLE ANTI-DOUBLE-BAN (PROCÉDURE OBLIGATOIRE) : AVANT toute recommandation 'cscli decisions add' / 'fail2ban-client set … banip' / 'il est recommandé de bannir' / 'considérer un ban', tu DOIS exécuter cette procédure et l'INCLURE textuellement dans ta réponse :")
     lines.append("  ÉTAPE 1 (obligatoire, à écrire dans la réponse) : 'Vérification ban CrowdSec pour <IP> : scan de la section IPs DÉJÀ BANNIES…'")
