@@ -13,6 +13,7 @@ Si DeepFilterNet indispo (lib non installée), retourne le signal original sans 
 """
 import logging
 import threading
+import time
 
 import numpy as np
 
@@ -34,6 +35,7 @@ def _load():
         if _DF_LOAD_DONE:
             return
         _DF_LOAD_DONE = True
+        _df_load_t0 = time.monotonic()
         # Silence les loggers verbeux de DeepFilterNet / torchaudio
         for _noisy in ("df", "df.enhance", "df.model", "torchaudio", "torch"):
             logging.getLogger(_noisy).setLevel(logging.ERROR)
@@ -84,9 +86,9 @@ def _load():
             _df_model = (model, df_state, enhance)
             _df_sr    = df_state.sr()
             _DF_AVAILABLE = True
-            _log.info(f"[DeepFilterNet] Chargé — sr={_df_sr}")
+            _log.info(f"[TTS-PERF] DeepFilterNet chargé en {time.monotonic() - _df_load_t0:.2f}s — sr={_df_sr}")
         except Exception as e:
-            _log.warning(f"[DeepFilterNet] Non disponible: {type(e).__name__}")
+            _log.warning(f"[TTS-PERF] DeepFilterNet indisponible après {time.monotonic() - _df_load_t0:.2f}s: {type(e).__name__}")
 
 
 # ── API publique ──────────────────────────────────────────────

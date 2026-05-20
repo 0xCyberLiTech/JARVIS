@@ -338,7 +338,7 @@ function Invoke-ParamsLLM {
         Write-Host "  VERBEUX      voiceMinScore=30  cooldown=5min   tokens=2048  ctx=4096" -ForegroundColor DarkGray
         Write-Host "  FULL ALERTE  voiceMinScore=5   cooldown=1min   tokens=4096  ctx=8192" -ForegroundColor DarkGray
         Write-Host ""
-        Write-INFO "Mode SOC actif : temp=0.2 / num_ctx=16384 (adaptatif runtime)"
+        Write-INFO "Mode SOC actif : temp=0.2 / num_ctx=8192 (adaptatif runtime)"
         Write-WARN "Modifier via l'interface JARVIS (onglet Settings)"
     } catch { Write-FAIL "Impossible de lire $file" }
     Wait-Key

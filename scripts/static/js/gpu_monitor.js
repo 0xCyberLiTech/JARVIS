@@ -277,7 +277,13 @@ function updateVramLlm(d) {
   var alert  = document.getElementById('vram-llm-alert');
   if (!bar) return;
 
-  var models    = d.models || [];
+  var models    = (d.models || []).slice();
+  // Ordre d'affichage STABLE : modèles d'embedding (RAG) toujours en dernier,
+  // les autres dans leur ordre d'arrivée. Ollama réordonne sa liste quand un
+  // modèle se charge → sans ce tri, le segment RAG « saute » de gauche à droite
+  // dès que phi4 charge (faux ressenti de RAG déplacé en VRAM). Tri stable
+  // (ES2019) → phi4/SOC toujours à gauche, RAG toujours à droite.
+  models.sort(function(a, b) { return (a.is_embed ? 1 : 0) - (b.is_embed ? 1 : 0); });
   var totalVram = d.total_vram || 0;
   var totalSwap = d.total_swap || 0;
   if (d.vram_total_bytes) _VRAM_TOTAL = d.vram_total_bytes;

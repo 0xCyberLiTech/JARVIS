@@ -6,7 +6,7 @@ Fonction pure : prend les flags runtime (np_override, soc_*, model, msg_len)
 → retourne un dict d'options Ollama optimisé.
 
 Logique :
-- Mode SOC (ctx injecté ou trigger) → température 0.2, num_ctx 16384, et plancher num_predict
+- Mode SOC (ctx injecté ou trigger) → température 0.2, num_ctx 8192, et plancher num_predict
   768 pour modèles reasoning (reasoning|deepseek-r1) pour éviter raisonnement tronqué
 - Requête courte hors SOC (<200 chars) → num_ctx 4096 (économise KV cache VRAM)
 - Sinon → defaults Ollama (retourne None si aucune option à override)
@@ -15,7 +15,7 @@ import re
 
 # ── Constantes par défaut (override possible via DI) ──────────
 DEFAULT_SOC_TEMPERATURE = 0.2     # SOC déterministe
-DEFAULT_SOC_NUM_CTX     = 16384   # contexte élargi monitoring + kill chain
+DEFAULT_SOC_NUM_CTX     = 8192    # contexte SOC — abaissé de 16384 le 2026-05-20 (KV cache -1.7 Go, anti-éviction VRAM)
 DEFAULT_NUM_CTX_SHORT   = 4096    # requête courte → économie KV cache
 DEFAULT_REASONING_NP_MIN = 768    # plancher num_predict modèles reasoning en SOC
 

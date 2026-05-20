@@ -280,15 +280,18 @@ def edge_generate_mp3(text: str, voice: str = EDGE_DEFAULT_VOICE) -> str:
     Raises Exception (last) après 3 échecs."""
     last_exc = None
     for attempt in range(3):
+        _att_t0 = time.monotonic()
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:
             result = loop.run_until_complete(_edge_tts_async(text, voice))
             loop.close()
+            _log.info(f"[TTS-PERF] edge-tts tentative {attempt + 1} OK en {time.monotonic() - _att_t0:.2f}s")
             return result
         except Exception as e:
             last_exc = e
             loop.close()
+            _log.warning(f"[TTS-PERF] edge-tts tentative {attempt + 1} ÉCHEC ({type(e).__name__}) en {time.monotonic() - _att_t0:.2f}s")
             if attempt < 2:
                 # DNS transitoire : attendre 1s avant retry (évite bascule SAPI5 pour erreur passagère)
                 delay = _EDGE_DNS_RETRY_S if ("getaddrinfo" in str(e) or "ClientConnectorDNS" in type(e).__name__) else 0.3 * (attempt + 1)

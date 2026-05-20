@@ -54,6 +54,23 @@ _tts_handler = logging.handlers.RotatingFileHandler(
 _tts_handler.setFormatter(logging.Formatter("%(asctime)s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
 _tts_logger.addHandler(_tts_handler)
 
+# ── TTS-PERF log persistant — capture les sondes [TTS-PERF] (diagnostic latence) ──
+# Handler racine filtré : capte les lignes [TTS-PERF] des 3 loggers (JARVIS,
+# jarvis.tts_engines, jarvis.deepfilter) qui propagent toutes vers root.
+# Fichier persistant → la latence intermittente est capturée sans surveiller la console.
+_TTS_PERF_LOG_PATH = Path(__file__).parent / "tts_perf.log"
+
+class _TtsPerfFilter(logging.Filter):
+    def filter(self, record):
+        return "[TTS-PERF]" in record.getMessage()
+
+_tts_perf_handler = logging.handlers.RotatingFileHandler(
+    _TTS_PERF_LOG_PATH, maxBytes=1_000_000, backupCount=3, encoding="utf-8"
+)
+_tts_perf_handler.setFormatter(logging.Formatter("%(asctime)s | %(message)s", datefmt="%Y-%m-%d %H:%M:%S"))
+_tts_perf_handler.addFilter(_TtsPerfFilter())
+logging.getLogger().addHandler(_tts_perf_handler)
+
 # ── Silence des loggers et warnings tiers — doit être fait AVANT tout import ──
 import warnings as _warnings
 
@@ -562,7 +579,7 @@ _GB_BYTES    = 1 << 30             # 1 GB en bytes (1024^3) — conversions RAM/
 _TOOL_CALL_MAX      = 5      # max appels d'outils consécutifs par tour
 _TOOL_RESULT_TRUNC  = 300    # troncature résultat outil dans SSE (lisibilité UI)
 _SOC_TEMPERATURE    = 0.2    # température SOC — réponses déterministes
-_SOC_NUM_CTX        = 16384  # contexte élargi pour données monitoring + kill chain
+_SOC_NUM_CTX        = 8192   # contexte SOC — abaissé de 16384 le 2026-05-20 (KV cache -1.7 Go, anti-éviction VRAM phi4)
 _NUM_CTX_SHORT      = 4096   # requête courte (<200 chars, hors SOC) — économise KV cache VRAM
 _REASONING_NP_MIN   = 768    # plancher num_predict pour modèles reasoning en mode SOC
 _TTS_PHRASE_MIN     = 4      # longueur min phrase pour envoi TTS
@@ -831,7 +848,7 @@ def _rag_embed(text: str) -> list | None:
     """Embedding via Ollama (mxbai-embed-large). Retourne None si indisponible."""
     try:
         r = _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/embeddings",
-                     json={"model": RAG_EMBED_MODEL, "prompt": text[:2000], "keep_alive": -1},
+                     json={"model": RAG_EMBED_MODEL, "prompt": text[:2000], "keep_alive": "10m"},
                      timeout=_RAG_EMBED_TIMEOUT_S)
         if r.ok:
             return r.json().get("embedding")
@@ -4202,6 +4219,7 @@ def _tts_edge_fallback(text, local_voice):
 @limiter.limit("20 per minute")
 @app.route("/api/tts", methods=["POST"])
 def api_tts():
+    _perf_t0 = time.monotonic()
     data = request.json or {}
     text = _clean_for_tts(data.get("text", ""))
     if not text:
@@ -4220,23 +4238,31 @@ def api_tts():
     # Moteurs locaux (hors-ligne)
     local_resp = _tts_local_response(engine, text, local_voice)
     if local_resp is not None:
+        _log.info(f"[TTS-PERF] /api/tts engine={engine} (local) total={time.monotonic() - _perf_t0:.2f}s chars={len(text)}")
         return local_resp
 
     # Moteur edge-tts (cloud) — avec retry + fallback
     try:
+        _t_edge = time.monotonic()
         tmp_path = _tts_eng.edge_generate_mp3(text, VOICE)
+        _perf_edge = time.monotonic() - _t_edge
         with open(tmp_path, "rb") as f:
             audio_data = f.read()
         try:
             os.unlink(tmp_path)
         except OSError:
             pass  # fichier temporaire déjà supprimé — non bloquant
+        _t_dsp = time.monotonic()
         audio_data, mime = apply_dsp_to_mp3(audio_data)
+        _perf_dsp = time.monotonic() - _t_dsp
+        _log.info(f"[TTS-PERF] /api/tts engine=edge edge_gen={_perf_edge:.2f}s dsp={_perf_dsp:.2f}s total={time.monotonic() - _perf_t0:.2f}s chars={len(text)}")
         return _tts_wav_response(audio_data, mime)
     except Exception as edge_err:
         _log.warning(f"[JARVIS] edge-tts indisponible ({type(edge_err).__name__}: {edge_err}) — bascule TTS local")
         _tts_logger.warning(f"[FALLBACK] edge-tts échec ({type(edge_err).__name__}) — tentative moteur local")
-        return _tts_edge_fallback(text, local_voice)
+        _fallback_resp = _tts_edge_fallback(text, local_voice)
+        _log.info(f"[TTS-PERF] /api/tts engine=edge→fallback-local total={time.monotonic() - _perf_t0:.2f}s chars={len(text)}")
+        return _fallback_resp
 
 @limiter.limit("30 per minute")
 @app.route("/api/tts/local/voices")
@@ -4628,12 +4654,15 @@ threading.Thread(target=_rag_live_prewarm, daemon=True, name="rag-live-prewarm")
 
 # ── RAG EMBED — Préchargement mxbai-embed-large en VRAM au démarrage ────────
 def _rag_embed_prewarm():
-    time.sleep(20)  # laisser Ollama démarrer
+    # RAG chargé tôt — avant le LLM (logique : la recherche RAG précède la
+    # génération). 5s suffisent ; si Ollama pas encore prêt, le circuit breaker
+    # gère et l'embed se chargera à la demande au 1er usage RAG. (2026-05-20)
+    time.sleep(5)
     try:
         _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/embeddings",
-                 json={"model": RAG_EMBED_MODEL, "prompt": "warm", "keep_alive": -1},
+                 json={"model": RAG_EMBED_MODEL, "prompt": "warm", "keep_alive": "10m"},
                  timeout=30)
-        _log.info(f"[RAG] {RAG_EMBED_MODEL} préchargé en VRAM (keep_alive=-1)")
+        _log.info(f"[RAG] {RAG_EMBED_MODEL} préchauffé (keep_alive=10m — dé-épinglé 2026-05-20, anti-éviction VRAM)")
     except Exception as e:
         _log.warning(f"[RAG] Préchargement embed échoué : {e}")
 threading.Thread(target=_rag_embed_prewarm, daemon=True, name="rag-embed-prewarm").start()
@@ -4665,11 +4694,16 @@ threading.Thread(target=_boot_vram_cleanup, daemon=True, name="boot-vram-cleanup
 def _soc_model_prewarm():
     """Précharge le modèle SOC (phi4:14b) en VRAM 30s après le boot, une fois le cleanup terminé."""
     time.sleep(30)
+    _prewarm_t0 = time.monotonic()
     try:
+        # num_ctx explicite = _SOC_NUM_CTX : phi4 se charge directement au contexte
+        # SOC (8192) → pas de reload au 1er chat SOC (sinon prewarm charge en 4096
+        # défaut Ollama puis reload en 8192 à la 1re requête SOC).
         _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/generate",
-                 json={"model": MODEL, "prompt": "", "stream": False, "keep_alive": "30m"},
+                 json={"model": MODEL, "prompt": "", "stream": False, "keep_alive": "30m",
+                       "options": {"num_ctx": _SOC_NUM_CTX}},
                  timeout=180)
-        _log.info(f"[BOOT-VRAM] {MODEL} préchargé (SOC default)")
+        _log.info(f"[TTS-PERF] [BOOT-VRAM] {MODEL} préchargé (SOC default, ctx={_SOC_NUM_CTX}) en {time.monotonic() - _prewarm_t0:.2f}s")
     except Exception as e:
         _log.warning(f"[BOOT-VRAM] preload SOC: {e}")
 threading.Thread(target=_soc_model_prewarm, daemon=True, name="soc-model-prewarm").start()
@@ -4680,12 +4714,13 @@ def _kokoro_prewarm():
     Profiling 2026-05-15 : 1er appel Kokoro = 42.8s (chargement modèle CUDA),
     appels suivants = 200ms TTFB. Préchauffage = TTS instantané dès la 1re alerte."""
     time.sleep(60)  # après _soc_model_prewarm (30s + marge GPU)
+    _prewarm_t0 = time.monotonic()
     try:
         _tts_eng._get_kokoro("f")
         if _tts_eng.is_kokoro_available():
-            _log.info("[BOOT-TTS] Kokoro préchargé en VRAM (cold start évité)")
+            _log.info(f"[TTS-PERF] [BOOT-TTS] Kokoro préchargé en VRAM en {time.monotonic() - _prewarm_t0:.2f}s (cold start évité)")
         else:
-            _log.info("[BOOT-TTS] Kokoro indisponible — pas de préchauffage")
+            _log.info("[TTS-PERF] [BOOT-TTS] Kokoro indisponible — pas de préchauffage")
     except Exception as e:
         _log.warning(f"[BOOT-TTS] Kokoro prewarm échoué : {e}")
 threading.Thread(target=_kokoro_prewarm, daemon=True, name="kokoro-prewarm").start()
