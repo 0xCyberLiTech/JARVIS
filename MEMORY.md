@@ -1,4 +1,15 @@
-# JARVIS — Mémoire projet (2026-05-20 — correctif structurel pipeline voix + optimisation VRAM + instrumentation TTS)
+# JARVIS — Mémoire projet (2026-05-20 — correctif structurel pipeline voix + optimisation VRAM + instrumentation TTS + réalignement description Kill Chain)
+
+## Session 2026-05-20 (suite) — réalignement description Kill Chain sur KC v4 (5 maillons)
+
+Les prompts JARVIS décrivaient encore la Kill Chain SOC en **7 maillons** avec PROBE et WAF — obsolète depuis la refonte KC v4 (5 maillons offensifs purs RECON→SCAN→EXPLOIT→BRUTE→NEUTRALISÉ ; PROBE = UFW et WAF = ModSec sont des couches DÉFENSIVES, sorties de la KC). Le LLM phi4 lisait cette description périmée alors que le contexte SOC live n'injecte que 5 maillons.
+
+**3 endroits réalignés** (texte de prompt / commentaire seul — zéro logique touchée) :
+- `jarvis.py` SYSTEM_PROMPT : « 7 maillons » + puces PROBE/WAF → 5 maillons + note explicite « PROBE/WAF = couches défensives, pas des maillons KC » ; règle obsolète « ignore PROBE/WAF » → règle NEUTRALISÉ (IP déjà bloquée, ne pas rebannir).
+- `blueprints/soc.py` : commentaire `_SOC_BAN_CONFIG` « KC v3.97.195 7 maillons » → KC v4 5 maillons (le code `_SOC_BAN_CONFIG` était déjà correct : EXPLOIT/BRUTE/SCAN/RECON).
+- `jarvis_prompt_profiles.json` profil Phi4 : « Kill Chain nginx : RECON→SCAN→BRUTE→EXPLOIT » (ordre faux) → 5 maillons corrects.
+
+Audit préalable : code fonctionnel JARVIS déjà aligné KC v4 (aucune lecture de champ supprimé `probe_ips`/`waf_ips`/`stage_bans_24h`, logique de ban correcte) — seul le texte descriptif était périmé. RFC1918 / logique de ban / SSH / crawlers intacts. Commit `ff0a1ee`. ⚠ Redémarrage JARVIS requis pour prise d'effet.
 
 ## Session 2026-05-20 — latence voix intermittente : diagnostic par instrumentation + correctif structurel pipeline de lecture
 
