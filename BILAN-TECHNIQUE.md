@@ -85,7 +85,7 @@ Côté JARVIS (commit `ab80df5`) :
 
 ### Refactor `_SOC_BAN_CONFIG` (commit `16469b6`)
 
-Centralisation des 4 seuils `_SOC_BAN_MIN_*` + `_STAGE_PRIORITY` dans un dict structuré `_SOC_BAN_CONFIG` documentant les 4 stages OFFENSIFS (EXPLOIT/BRUTE/SCAN/RECON) avec `(min_hits, source_lbl, duration, priority)` + 3 DÉFENSIFS (PROBE/WAF/NEUTRALISÉ) en commentaire règle absolue. Profils transverses `_SOC_BAN_HONEYPOT` / `_SOC_BAN_SURICATA` extraits. Backwards-compat : alias `_SOC_BAN_MIN_*` dérivés.
+Centralisation des 4 seuils `_SOC_BAN_MIN_*` + `_STAGE_PRIORITY` dans un dict structuré `_SOC_BAN_CONFIG` documentant les 4 stages OFFENSIFS auto-banables (EXPLOIT/BRUTE/SCAN/RECON) avec `(min_hits, source_lbl, duration, priority)` ; NEUTRALISÉ (IP déjà bloquée) jamais un candidat ban — PROBE/WAF ne sont pas des maillons KC (couches défensives séparées). Profils transverses `_SOC_BAN_HONEYPOT` / `_SOC_BAN_SURICATA` extraits. Backwards-compat : alias `_SOC_BAN_MIN_*` dérivés.
 
 ### Intégration `/api/soc/defense` (commit `ed8f3a8`)
 
@@ -430,7 +430,8 @@ JARVIS consomme `monitoring.json` (cron srv-ngix 1min) via 3 patterns :
 
 Source unique seuils ban dans `blueprints/soc.py` (refactor commit `16469b6`) :
 - **4 stages OFFENSIFS** auto-banables : EXPLOIT · BRUTE · SCAN · RECON (chacun avec min_hits, source_lbl, duration, priority)
-- **3 stages DÉFENSIFS** jamais bannis (règle absolue) : PROBE · WAF · NEUTRALISÉ
+- **NEUTRALISÉ** jamais banni (règle absolue) : IP déjà bloquée par CrowdSec/fail2ban
+- KC v4 = 5 maillons offensifs purs ; PROBE (UFW) / WAF (ModSec) ne sont PAS des maillons KC — couches défensives séparées (ligne de défense)
 
 Profils transverses : `_SOC_BAN_HONEYPOT` · `_SOC_BAN_SURICATA`.
 
@@ -438,7 +439,7 @@ Profils transverses : `_SOC_BAN_HONEYPOT` · `_SOC_BAN_SURICATA`.
 
 - `shown[:25]` → `[:100]` dans `_build_monitoring_context_soc` (+contexte)
 - Règle anti-double-ban explicite dans SYSTEM_PROMPT
-- Description KC 7 maillons : PROBE/WAF = défenses, jamais bannir
+- Description KC 5 maillons (RECON→SCAN→EXPLOIT→BRUTE→NEUTRALISÉ) — PROBE/WAF hors KC (réaligné 2026-05-20)
 - Injection 100% serveur (jamais l'historique chat)
 
 ### 8.5. RFC1918 immuable
