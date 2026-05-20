@@ -34,6 +34,7 @@ Nouvelle fonction `_splitForTts` : découpe les textes > 280 caractères aux fro
 ### 3. Optimisation VRAM (`scripts/jarvis.py`, `scripts/llm_opts.py`, `scripts/JARVIS-menu.ps1`)
 
 - `_SOC_NUM_CTX` (jarvis.py) et `DEFAULT_SOC_NUM_CTX` (llm_opts.py) : **16384 → 8192**. KV cache réduit → phi4 passe de ~12.4 Go à **~11.56 Go** en VRAM.
+- ⚠ Suivi 2026-05-20 soir : `tests/python/test_llm_opts.py` était resté à `16384` (5 tests en échec, dette de test non détectée sur le coup) — aligné sur `8192` (7 occurrences) le 2026-05-20 soir, commit `4f8d7a5`. Suite JARVIS de nouveau **933 pytest pass**.
 - Modèle d'embedding RAG `mxbai-embed-large` **dé-épinglé** : `keep_alive` `-1` → `"10m"` (dans `_rag_embed` et `_rag_embed_prewarm`). Il se décharge après 10 min d'inactivité au lieu de rester épinglé à vie.
 - `_soc_model_prewarm` : précharge phi4 directement en `num_ctx 8192` (évite un reload au 1er chat SOC).
 - `_rag_embed_prewarm` : délai de préchauffage 20 s → 5 s (le RAG se charge avant phi4).
