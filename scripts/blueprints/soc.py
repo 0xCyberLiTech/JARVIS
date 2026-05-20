@@ -117,11 +117,12 @@ _SOC_AUTO_BANNED_PATH = _SCRIPTS_DIR / "jarvis_soc_autobanned.json"
 _SOC_COOLDOWN_IP      = 15 * 60   # cooldown ban par IP (15 min)
 _SOC_REQ_HOUR_SEUIL   = 500       # seuil req/h → alerte trafic
 
-# ── Configuration ban auto SOC — source unique stages KC v3.97.195 ────
-# Kill Chain 7 maillons (SOC v3.97.195) :
-#   PROBE → RECON → SCAN → EXPLOIT → WAF → BRUTE → NEUTRALISÉ
+# ── Configuration ban auto SOC — source unique stages KC v4 ────
+# Kill Chain 5 maillons (modèle Lockheed Martin — stades offensifs purs) :
+#   RECON → SCAN → EXPLOIT → BRUTE → NEUTRALISÉ
 #
-# DÉFENSES (jamais bannies — règle absolue) : PROBE (UFW), WAF (ModSec), NEUTRALISÉ (CrowdSec+f2b)
+# PROBE (UFW) / WAF (ModSec) ne sont PAS des maillons KC — couches défensives séparées.
+# NEUTRALISÉ = IP déjà bloquée (CrowdSec + fail2ban) — jamais un candidat ban.
 # OFFENSIVES (candidats ban auto, priorité décroissante 0=plus prioritaire) :
 #
 #   stage      (min_hits, source_label,   duration, priority)
