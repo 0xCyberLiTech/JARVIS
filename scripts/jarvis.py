@@ -1458,13 +1458,21 @@ def _build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS 
         lines.append(f"Service {s:12s}: {status}")
     cs_banned = cs.get("decisions_detail", {})
     if cs_banned:
+        # Maillon KC par IP bannie = stade offensif le plus profond classé par le
+        # backend (kc.neutralized_ips[].origin_stage — source unique scenario_stage
+        # de soc_infra.yaml). Évite que phi4 re-déduise le maillon depuis le NOM du
+        # scénario (erreurs constatées : 1 IP placée dans 2 maillons, alerte
+        # "binsh in URI" prise pour du RECON au lieu d'EXPLOIT).
+        _neut_stage = {e.get("ip"): e.get("origin_stage")
+                       for e in kc.get("neutralized_ips", []) if e.get("ip")}
         # Limite portée à 100 (était 25 — provoquait des faux "pas dans la liste"
         # quand la liste prod dépassait 25 IPs et que phi4 oubliait la mention "N autres").
         shown = sorted(cs_banned.items())[:100]
         lines.append("")
         lines.append(f"IPs DÉJÀ BANNIES par CrowdSec ({len(cs_banned)} au total — déjà neutralisées, NE PAS recommander de les bannir, NE PAS proposer cscli decisions add pour ces IPs) :")
+        lines.append("  (champ « maillon-KC » = stade offensif classé par le backend — UTILISE-le tel quel pour situer l'IP dans la Kill Chain · NE déduis JAMAIS le maillon depuis le nom du scénario · 1 IP = 1 seul maillon)")
         for ip, meta in shown:
-            lines.append(f"  {ip} — scénario={meta.get('scenario','?')} stage={meta.get('stage','?')}")
+            lines.append(f"  {ip} — scénario={meta.get('scenario','?')} | maillon-KC={_neut_stage.get(ip) or '?'}")
         if len(cs_banned) > len(shown):
             lines.append(f"  … et {len(cs_banned) - len(shown)} autre(s) IP(s) déjà bannie(s) non listée(s) — TOUTE IP non listée ci-dessus PEUT être déjà bannie, vérifier le total ({len(cs_banned)}) avant d'en recommander une.")
     active_ips = kc.get("active_ips", [])
