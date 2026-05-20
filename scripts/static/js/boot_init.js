@@ -654,6 +654,31 @@ window.fetch = function(...args) {
 };
 
 let _speechPending = false;
+let _userGestured  = false;
+
+// Déverrouillage audio — politique autoplay navigateur : aucun son sans geste
+// utilisateur. Les écouteurs sont armés TÔT (dès _jarvisInit) et sur PLUSIEURS
+// types de gestes : le tout premier geste (même pendant l'écran de boot)
+// débloque l'annonce de bienvenue, quel que soit l'ordre vs /api/boot-id.
+const _GESTURE_EVENTS = ['click', 'keydown', 'pointerdown', 'touchstart'];
+
+function _onUserGesture() {
+  if (_userGestured) return;
+  _userGestured = true;
+  _GESTURE_EVENTS.forEach(ev => document.removeEventListener(ev, _onUserGesture, true));
+  if (typeof audioCtx !== 'undefined' && audioCtx && audioCtx.state === 'suspended') {
+    audioCtx.resume().catch(() => { /* refus politique navigateur — silencieux */ });
+  }
+  // _tryPlayPendingSpeech → playWelcomeSpeech → queueSpeech → processQueue : la
+  // file (y compris ce qui a été mis en attente pendant le verrou audio) est
+  // drainée ici dès le 1er geste, car queueSpeech relance processQueue si idle.
+  _tryPlayPendingSpeech();  // no-op si _speechPending pas encore vrai
+}
+
+function _armGestureUnlock() {
+  _GESTURE_EVENTS.forEach(ev =>
+    document.addEventListener(ev, _onUserGesture, { capture: true, passive: true }));
+}
 
 function _removeInitCover() {
   const c = document.getElementById('init-cover');
@@ -710,10 +735,9 @@ function _jarvisInitBootSeq() {
       _removeInitCover();
       _startPreloader();
       _speechPending = true;
-      document.addEventListener('click', function _unlockAudio() {
-        document.removeEventListener('click', _unlockAudio);
-        _tryPlayPendingSpeech();
-      }, { once: true });
+      // Si l'utilisateur a déjà interagi avant la résolution de /api/boot-id,
+      // jouer immédiatement ; sinon _onUserGesture s'en charge au 1er geste.
+      if (_userGestured) _tryPlayPendingSpeech();
       setTimeout(() => {
         const voixBtn = document.querySelector('.welcome-btn[data-action="playWelcomeSpeech"]');
         if (voixBtn && _speechPending) voixBtn.classList.add('wm-voix-pulse');
@@ -746,6 +770,7 @@ function _jarvisInitMode() {
   }).catch(() => {});
 }
 function _jarvisInit() {
+  _armGestureUnlock();
   _hudInit();
   loadMemory();
   if (typeof _updateEqCoupleBadges === 'function') _updateEqCoupleBadges();

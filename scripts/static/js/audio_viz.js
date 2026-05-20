@@ -323,7 +323,7 @@ function _logX(freq, W) {
 // Couleur d'une barre selon son niveau normalisé (0=silence, 1=clip)
 
 // Génère les labels de fréquences positionnés sur l'axe log
-function _initFreqLabels(W) {
+function _initFreqLabels() {
   const container = document.getElementById('rack-freq-labels');
   if (!container || _freqLabelsInit) return;
   _freqLabelsInit = true;
@@ -537,7 +537,7 @@ function _drawSpectrum() {
   if(!_peakHoldL||_peakHoldL.length!==_SPEC_NUM_BARS){_peakHoldL=new Float32Array(_SPEC_NUM_BARS);_peakHoldR=new Float32Array(_SPEC_NUM_BARS);}
   const _freqLblEl=document.getElementById('rack-freq-labels');
   _disp(_freqLblEl, _rackSpecMode==='mirror'||_rackSpecMode==='split');
-  if(_rackSpecMode==='mirror'||_rackSpecMode==='split') _initFreqLabels(W);
+  if(_rackSpecMode==='mirror'||_rackSpecMode==='split') _initFreqLabels();
   if(!_specColorTable){
     _specColorTable=new Array(_SPEC_NUM_BARS);
     for(let ci=0;ci<_SPEC_NUM_BARS;ci++){
@@ -684,6 +684,11 @@ async function playSentence(text) {
       _currentAudioSource = source;
       const myGen = _audioGen;
       source.start();
+      // INVARIANT : processQueue garantit un AudioContext 'running' avant tout
+      // playSentence → la source joue réellement et onended se déclenche de
+      // façon fiable. Pas de timeout filet : il résolvait la Promise alors que
+      // la source restait planifiée sur un contexte suspendu — elle ressurgissait
+      // au resume suivant et se superposait à la parole en cours (chevauchement).
       source.onended = () => {
         _currentAudioSource = null;
         if (_audioGen === myGen) resolve(); // ignoré si stopAudio() a été appelé entre-temps
@@ -694,9 +699,27 @@ async function playSentence(text) {
   });
 }
 
+// Découpe un texte long en morceaux ≤ _TTS_CHUNK_MAX aux frontières de phrase.
+// edge-tts a un temps de synthèse ∝ longueur : un pavé de 2500 car. fait attendre
+// ~24s avant le 1er son. Découpé, la voix démarre après le 1er morceau (~1s) —
+// les suivants s'enchaînent via la queue série existante (processQueue).
+const _TTS_CHUNK_MAX = 280;
+function _splitForTts(text) {
+  if (!text || text.length <= _TTS_CHUNK_MAX) return [text];
+  const sentences = text.match(/[^.!?]+[.!?]+(\s|$)|[^.!?]+$/g) || [text];
+  const chunks = [];
+  let cur = '';
+  sentences.forEach(s => {
+    if (cur && (cur.length + s.length) > _TTS_CHUNK_MAX) { chunks.push(cur.trim()); cur = ''; }
+    cur += s;
+  });
+  if (cur.trim()) chunks.push(cur.trim());
+  return chunks;
+}
+
 async function queueSpeech(text) {
   if (!ttsEnabled) return;
-  speechQueue.push(text);
+  _splitForTts(text).forEach(chunk => { if (chunk) speechQueue.push(chunk); });
   if (!isPlaying) processQueue();
 }
 
@@ -731,7 +754,27 @@ async function processQueue() {
     if (glow) glow.style.boxShadow = '';
     return;
   }
+  // Verrou pris IMMÉDIATEMENT, avant tout await → empêche une 2e exécution
+  // concurrente de processQueue. Sinon, au 1er démarrage, pendant l'await du
+  // resume audio, queueSpeech verrait isPlaying=false et relancerait un 2e
+  // processQueue → 2 prises de parole en parallèle (« Mode SOC activé » +
+  // annonce de bienvenue qui se chevauchent).
   isPlaying = true;
+  // INVARIANT STRUCTUREL : une source TTS n'est JAMAIS démarrée sur un
+  // AudioContext suspendu. _ensureAudioCtx() crée le contexte MAINTENANT s'il
+  // n'existe pas — sinon le 1er playSentence le créerait lui-même (suspendu) et
+  // y planifierait une source « gelée » qui ressurgirait au prochain resume,
+  // par-dessus la parole en cours → chevauchement.
+  _ensureAudioCtx();
+  // Déverrouillage (politique autoplay). resume() sans geste utilisateur reste
+  // en attente indéfiniment → race avec un timeout. Si toujours suspendu (aucun
+  // geste encore) : on NE joue PAS — le texte reste en file, le verrou est
+  // relâché, _onUserGesture → queueSpeech → processQueue rejouera proprement.
+  if (audioCtx && audioCtx.state === 'suspended') {
+    try { await Promise.race([audioCtx.resume(), new Promise(r => setTimeout(r, 1500))]); }
+    catch (e) { /* resume refusé par le navigateur — géré juste après */ }
+    if (audioCtx.state === 'suspended') { isPlaying = false; return; }
+  }
   speaking = true;
   document.getElementById('jarvis-state').classList.add('speaking');
   document.querySelector('.reactor-wrap')?.classList.add('reactor-speaking');
@@ -742,8 +785,6 @@ async function processQueue() {
     bar.style.animation = 'none';
   });
   const text = speechQueue.shift();
-  // Resume AudioContext if suspended (browser autoplay policy)
-  if (audioCtx && audioCtx.state === 'suspended') await audioCtx.resume();
   await playSentence(text);
   processQueue();
 }
