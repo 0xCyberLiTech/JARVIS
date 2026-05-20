@@ -36,7 +36,7 @@ def test_aucun_flag_aucune_longueur_renvoie_none():
 
 def test_constantes_sont_les_valeurs_attendues():
     assert DEFAULT_SOC_TEMPERATURE == 0.2
-    assert DEFAULT_SOC_NUM_CTX == 16384
+    assert DEFAULT_SOC_NUM_CTX == 8192
     assert DEFAULT_NUM_CTX_SHORT == 4096
     assert DEFAULT_REASONING_NP_MIN == 768
 
@@ -66,21 +66,21 @@ def test_np_override_none_explicite_est_ignore():
 # ── Mode SOC (ctx injecté ou trigger) ─────────────────────────────────────
 
 
-def test_soc_ctx_injected_force_temperature_02_et_num_ctx_16384():
+def test_soc_ctx_injected_force_temperature_02_et_num_ctx_8192():
     out = _call(soc_ctx_injected=True)
     assert out["temperature"] == 0.2
-    assert out["num_ctx"] == 16384
+    assert out["num_ctx"] == 8192
 
 
 def test_soc_trigger_seul_force_aussi_temperature_et_num_ctx():
     out = _call(soc_trigger=True)
     assert out["temperature"] == 0.2
-    assert out["num_ctx"] == 16384
+    assert out["num_ctx"] == 8192
 
 
 def test_soc_combine_avec_np_override_garde_les_deux():
     out = _call(np_override=400, soc_ctx_injected=True)
-    assert out == {"num_predict": 400, "temperature": 0.2, "num_ctx": 16384}
+    assert out == {"num_predict": 400, "temperature": 0.2, "num_ctx": 8192}
 
 
 # ── Plancher reasoning en SOC ─────────────────────────────────────────────
@@ -154,9 +154,9 @@ def test_num_ctx_short_respecte_le_minimum_avec_llm_params():
 
 
 def test_requete_courte_en_soc_le_soc_l_emporte():
-    """SOC actif → num_ctx 16384 (pas 4096), même si msg court."""
+    """SOC actif → num_ctx 8192 (pas 4096), même si msg court."""
     out = _call(msg_len=50, soc_ctx_injected=True)
-    assert out["num_ctx"] == 16384
+    assert out["num_ctx"] == 8192
 
 
 # ── Pattern reasoning ────────────────────────────────────────────────────
