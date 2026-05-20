@@ -68,7 +68,7 @@ Message utilisateur
   │
   ├─ 2. 🤖 Branche SOC — mot-clé (_CHAT_SOC_KW) → phi4:14b
   │        + contexte monitoring.json live (SSH srv-ngix)
-  │        + temp=0.2 · num_ctx=16384
+  │        + temp=0.2 · num_ctx=8192 (16384→8192 le 2026-05-20, optim VRAM)
   │
   ├─ 3. 🤖 Branche CODE — _jarvis_mode == 'code' → qwen2.5-coder:14b
   │        + _CODE_SYSTEM_SUFFIX injecté · SSH dev srv-dev-1
@@ -164,6 +164,7 @@ Déplacement            : mv · cp
 | 2026-05-14       | **78/100 honnête** (recalibré) | ⚠ Audit strict : le 91 était optimiste, départ réel **62/100**. Chantier dette 2026-05-14 (**62→78, +16**) : Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (100% local) · **pre-commit hooks bloquants** · `jarvis.css` → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** (3 modules : terminal_code/voice_lab/stt) |
 | 2026-05-14 soir  | **~82/100 honnête** | **Refactor JS massif** : `jarvis_main.js` 7828→**4013 L** (−49%) · **11 modules** extraits dans `static/js/` · méthode byte-identique vérifiée (node --check · eslint 0 · validation E2E prod) · 1 régression d'ordre détectée+corrigée |
 | 2026-05-15       | **~94/100 honnête** | **Refactor JS terminé** + **Phase 4 tests massifs étendus** + **Phase 4 finale** : `jarvis_main.js` 4013→**148 L** (−98,1% cumul depuis 7828) · 21 modules JS · **936 tests pytest** sur **32 modules · 25 à 100% cov** avec coverage **39% lignes** (tts_engines 83% · 42 tests, jarvis_mcp_server 91% · 52 tests, ollama_circuit 100% · 23 tests, proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26%, audio_dsp 25%) · **fix perf systémique IPv6** (-97% latence interne via `OLLAMA_URL`/`JARVIS_BASE` → `127.0.0.1`) · **circuit breaker Ollama étendu 8 call-sites** + bouton SOC PING JARVIS enrichi état Ollama · **pré-warm Kokoro CUDA au boot** (élimine cold start 42.8 s mesuré) · **profiling TTS détaillé** (`tools/profile_tts.py` : médianes chaud edge 1453ms / kokoro 203ms / piper 219ms / sapi 563ms) · **hook pre-push pytest** · 3 bugs prod détectés+fixés · outils `tools/profile_perf.py` + `tools/profile_tts.py` |
+| 2026-05-20       | **92/100** (inchangé) | **Correctif structurel pipeline voix** : invariant « jamais de source TTS sur AudioContext suspendu » (`processQueue`/`playSentence`) — supprime gel définitif + chevauchement · `_splitForTts` (textes > 280 car. découpés aux frontières de phrase → voix en ~1 s vs ~15-24 s) · déverrouillage audio multi-gestes armé tôt · **optimisation VRAM** : `_SOC_NUM_CTX`/`DEFAULT_SOC_NUM_CTX` 16384→8192 (phi4 ~12.4→~11.56 Go), embed `mxbai` dé-épinglé `keep_alive` -1→"10m", pré-warm phi4 en `num_ctx 8192` + délai RAG prewarm 20s→5s (VRAM libre ~1.3→~2.0-2.8 Go) · **instrumentation** `[TTS-PERF]` + log persistant `tts_perf.log` · tuile VRAM tri stable · phi4:14b conservé comme modèle SOC (décision actée) |
 
 ---
 

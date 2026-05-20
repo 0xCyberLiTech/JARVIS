@@ -104,7 +104,7 @@ Windows 11 — localhost:5000
 | gemma4:latest | GÉNÉRAL · VOCAL · vision (multimodal) · 9.6 GB | switch manuel ◎ GÉNÉRAL (`#btn-mode-general`) |
 | qwen2.5-coder:14b | CODE · dev srv-dev-1 · boucle dev complète · 9.0 GB | switch manuel ◆ CODE (`#btn-mode-code`) |
 | **qwen3:8b** | **CODE REASONING · single-pass thinking masqué `<think>` · ~5 GB** | **switch manuel ⬡ C·R (`#btn-mode-code-reasoning`)** |
-| mxbai-embed-large | RAG embeddings · 1024 dims · 0.7 GB | systématique · keep_alive 2m |
+| mxbai-embed-large | RAG embeddings · 1024 dims · 0.7 GB | systématique · keep_alive 10m (dé-épinglé 2026-05-20) |
 
 ⚠ Supprimés : phi4-reasoning:plus (remplacé par qwen3:8b en session 29) · qwen2.5:14b · deepseek-r1:14b · llava-phi3:latest · nomic-embed-text
 

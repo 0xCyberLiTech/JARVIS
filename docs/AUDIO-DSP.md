@@ -49,6 +49,15 @@ Référence technique : la chaîne audio JARVIS (TTS → DSP → output) côté 
 
 Implémentation (refactor JS 2026-05-14) : graphe Web Audio + visualiseurs dans [`scripts/static/js/audio_viz.js`](../scripts/static/js/audio_viz.js) · chaîne DSP UI (gain/comp/limiter/EQ, FX convolver) dans [`scripts/static/js/dsp_audio.js`](../scripts/static/js/dsp_audio.js) · EQ paramétrique dans `js/eq_parametric.js` · helpers mixer dans `jarvis_mixing.js`.
 
+### File de lecture voix — invariant AudioContext (correctif structurel 2026-05-20)
+
+La file de lecture (`processQueue` / `playSentence`, `audio_viz.js`) respecte un **invariant unique** : une source TTS n'est JAMAIS démarrée sur un `AudioContext` suspendu. Avant ce correctif, la file pouvait **(a) geler définitivement** (`playSentence` ne se résout que sur `source.onended`, qui ne se déclenche jamais sur un contexte suspendu) ou **(b) provoquer un chevauchement** (`source.start()` sur contexte suspendu planifie une source « gelée » qui ressurgit au `resume` suivant par-dessus la parole en cours).
+
+- `processQueue` appelle `_ensureAudioCtx()` puis resume-ou-abandonne **AVANT** `playSentence`.
+- Verrou `isPlaying` pris avant tout `await` (anti ré-entrance).
+- Ancien « timeout filet » supprimé (inutile une fois l'invariant garanti).
+- Déverrouillage audio armé tôt dans `_jarvisInit` (`boot_init.js`), multi-gestes (`click`/`keydown`/`pointerdown`/`touchstart`), flag `_userGestured` découplé du timing `/api/boot-id`.
+
 ### Voice channel (signal principal)
 
 | Étage | Type Web Audio | Paramètres |
@@ -154,6 +163,14 @@ SAPI5 (pyttsx3 Hortense FR · Windows fallback)
 
 `_TTS_LOG_PATH` · 2 MB max · 7 backups · preview 80 chars par appel (`jarvis.py:47-52`).
 
+### Découpage TTS des textes longs (`_splitForTts` · 2026-05-20)
+
+edge-tts a un temps de synthèse **proportionnel à la longueur du texte** : une longue analyse SOC pouvait mettre 15-24 s avant que la voix ne démarre. `_splitForTts` (côté navigateur) découpe les textes > 280 caractères aux frontières de phrase → les segments sont synthétisés et lus successivement, la voix démarre en **~1 s**.
+
+### Instrumentation `[TTS-PERF]` (2026-05-20)
+
+Sondes `[TTS-PERF]` ajoutées dans `jarvis.py`, `tts_engines.py` et `deepfilter.py` : décomposition du temps `/api/tts` (edge_gen / dsp / total), timing edge-tts par tentative, temps de chargement DeepFilterNet, timings des threads de préchauffage boot. Log **persistant** `scripts/tts_perf.log` (RotatingFileHandler · filtre `[TTS-PERF]` sur le logger racine) — capture la latence intermittente sans surveiller la console.
+
 ---
 
 ## 4. STT Python — faster-whisper
@@ -247,6 +264,7 @@ Suite Playwright `tests/e2e/dsp-voicelab.spec.js` + `dsp-interactive.spec.js` :
 | 33 | 2026-05-13 | **Phase 3 complète** — 30 modules extraits au total (audio + bypass + SSH + Proxmox API + RAG + chat orchestration + LLM CR). `jarvis.py` 6592→4520L (-31%). NDT script auto 100/100, score honnête global 89/100 (JS toujours monolithique, pas de CI/CD). |
 | 33c | 2026-05-13 | **Split JS partiel** — extraction `recorder.js` (660L · DAT RECORDER R-1) + `voice_print.js` (852L · Voice Print v2) en IIFE depuis `jarvis_main.js` 10507→8994L (-14.4%). Suppression artefacts obsolètes (vp_iife_new.js + vp_rebuild.py). 23 E2E pass, ESLint 0 errors. |
 | — | 2026-05-14 | **Chantier dette — extraction `audio_dsp.py`** — bloc DSP audio (25 fonctions ~470L) extrait de `jarvis.py` vers `audio_dsp.py` (508L) : reverb convolution + FX rack (delay/chorus/phaser/flanger/echo/exciter) + filtres biquad + enrichisseur voix + compresseur + `apply_dsp_to_mp3`. Découplage `DSP_PARAMS` via DI (wrapper jarvis.py préserve les 9 call sites). FIX bug F821 `_torch` (import lazy → active réellement le CUDA reverb). jarvis.py 5110→4633L. 23 E2E pass, test audio réel OK. |
+| — | 2026-05-20 | **Correctif structurel pipeline de lecture voix** — invariant « jamais de source TTS sur AudioContext suspendu » dans `processQueue`/`playSentence` (`audio_viz.js`) : supprime le gel définitif (`onended` jamais émis) et le chevauchement (source « gelée » qui ressurgit au `resume`). Verrou `isPlaying` anti ré-entrance · timeout filet supprimé · déverrouillage audio multi-gestes armé tôt dans `_jarvisInit` (`boot_init.js`). **Découpage TTS** `_splitForTts` (textes > 280 car. aux frontières de phrase) → voix démarre en ~1 s au lieu de ~15-24 s sur longues analyses SOC. **Instrumentation** `[TTS-PERF]` + log persistant `tts_perf.log`. |
 
 ---
 

@@ -414,7 +414,7 @@ v4.0  (long)    — Service Windows NSSM, Docker Compose, HTTPS mkcert, SSH writ
 | `scripts/static/css/` | 8 fichiers | ✅ ex-`jarvis.css` 5270L → core/chat/dsp/terminal-taches/hud-welcome/rack/settings-soc/voicelab (chantier 2026-05-14) |
 | `ruff.toml` · `.pre-commit-config.yaml` · `.gitignore` | — | ✅ chantier dette 2026-05-14 — git initialisé (16 commits, 100% local) |
 | `scripts/static/css/` (8 fichiers) | ex-5270 | ✅ découpé par secteur (chantier 2026-05-14) · NDT-CSS 0 |
-| `scripts/jarvis_llm_params.json` | — | ✅ phi4:14b · num_ctx:16384 · num_predict:4096 · temp:0.5 · top_k:40 |
+| `scripts/jarvis_llm_params.json` | — | ✅ phi4:14b · num_ctx:8192 (SOC 16384→8192 le 2026-05-20, optim VRAM) · num_predict:4096 · temp:0.5 · top_k:40 |
 | `scripts/jarvis_dsp_params.json` | — | ✅ tts_engine:edge · tts_default_engine:edge |
 | `scripts/jarvis_model.json` | — | ✅ phi4:14b |
 | `scripts/jarvis_prompt_profiles.json` | — | ✅ 7 profils · 3 RÈGLES ABSOLUES (Qwen2.5/DeepSeek/LLaVA/SOC-Rapide/Infra supprimés) |

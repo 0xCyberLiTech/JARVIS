@@ -38,7 +38,7 @@
 | LLM local | Ollama `:11434` · **5 modèles** (phi4:14b SOC · gemma4 GÉNÉRAL · qwen2.5-coder CODE · qwen3:8b CR · mxbai-embed-large RAG) |
 | TTS | edge-tts → Kokoro CUDA → Piper → SAPI5 · pré-warm au boot · profiling `tools/profile_tts.py` |
 | STT | faster-whisper large-v3-turbo · CUDA · initial_prompt vocabulaire SOC |
-| RAG | 599 chunks · mxbai-embed-large · seuil 0.35 · TTL 300s · auto-refresh 6h |
+| RAG | 599 chunks · mxbai-embed-large · seuil 0.35 · TTL 300s · auto-refresh 6h · embed `keep_alive "10m"` (dé-épinglé 2026-05-20) |
 | MCP | streamable-HTTP port 5010 · **12 outils** · Claude Desktop / Cursor |
 | Frontend | SPA vanilla JS · zéro NPM (sauf tests E2E) · 21 modules JS · 8 CSS · 10 templates HTML |
 | Tests | pytest (801) · ruff · eslint · pre-commit hooks · **pre-push pytest** (CI locale, pas de cloud) |
@@ -146,4 +146,4 @@ Style préfixé `type(scope):` cohérent avec SOC :
 
 ---
 
-*CLAUDE.md JARVIS · 2026-05-17 · complémentaire au racine `0xCyberLiTech/CLAUDE.md` · briefing concentré pour focus JARVIS*
+*CLAUDE.md JARVIS · 2026-05-20 · complémentaire au racine `0xCyberLiTech/CLAUDE.md` · briefing concentré pour focus JARVIS*

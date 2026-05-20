@@ -1,3 +1,45 @@
+# JARVIS — Mémoire projet (2026-05-20 — correctif structurel pipeline voix + optimisation VRAM + instrumentation TTS)
+
+## Session 2026-05-20 — latence voix intermittente : diagnostic par instrumentation + correctif structurel pipeline de lecture
+
+**Contexte** : Marc signalait une latence voix intermittente au démarrage de JARVIS (la voix mettait parfois ~15-24 s à démarrer, parfois gel total). Application de la règle `feedback_instrument_first` : instrumenter et mesurer AVANT de corriger, pas de diagnostic par inférence. L'instrumentation a révélé deux causes, l'une de pipeline (lecture audio), l'autre de synthèse (longueur du texte edge-tts).
+
+### 1. Correctif STRUCTUREL du pipeline de lecture voix (`scripts/static/js/audio_viz.js`, `scripts/static/js/boot_init.js`)
+
+**Cause racine** : la file de lecture audio (`processQueue`/`playSentence`) pouvait :
+- **(a) geler définitivement** — `playSentence` ne se résolvait que sur `source.onended`, qui ne se déclenche jamais si la source joue sur un `AudioContext` suspendu ;
+- **(b) provoquer un chevauchement** — `source.start()` appelé sur un contexte suspendu planifie une source « gelée » qui ressurgit au `resume` suivant, par-dessus la parole en cours.
+
+**Fix = invariant unique** : une source TTS n'est JAMAIS démarrée sur un AudioContext suspendu.
+- `processQueue` appelle `_ensureAudioCtx()` puis resume-ou-abandonne AVANT `playSentence`.
+- Verrou `isPlaying` pris avant tout `await` (anti ré-entrance).
+- Ancien « timeout filet » supprimé (devenu inutile une fois l'invariant garanti).
+- `boot_init.js` : déverrouillage audio armé tôt (dans `_jarvisInit`), multi-gestes (`click`/`keydown`/`pointerdown`/`touchstart`), flag `_userGestured` découplé du timing `/api/boot-id`.
+
+### 2. Découpage TTS des textes longs (`_splitForTts`)
+
+Nouvelle fonction `_splitForTts` : découpe les textes > 280 caractères aux frontières de phrase. edge-tts a un temps de synthèse proportionnel à la longueur du texte → la voix démarre désormais en **~1 s** au lieu de **~15-24 s** sur les longues analyses SOC.
+
+### 3. Optimisation VRAM (`scripts/jarvis.py`, `scripts/llm_opts.py`, `scripts/JARVIS-menu.ps1`)
+
+- `_SOC_NUM_CTX` (jarvis.py) et `DEFAULT_SOC_NUM_CTX` (llm_opts.py) : **16384 → 8192**. KV cache réduit → phi4 passe de ~12.4 Go à **~11.56 Go** en VRAM.
+- Modèle d'embedding RAG `mxbai-embed-large` **dé-épinglé** : `keep_alive` `-1` → `"10m"` (dans `_rag_embed` et `_rag_embed_prewarm`). Il se décharge après 10 min d'inactivité au lieu de rester épinglé à vie.
+- `_soc_model_prewarm` : précharge phi4 directement en `num_ctx 8192` (évite un reload au 1er chat SOC).
+- `_rag_embed_prewarm` : délai de préchauffage 20 s → 5 s (le RAG se charge avant phi4).
+- **Résultat mesuré** : VRAM libre passée de **~1.3 Go à ~2.0-2.8 Go**.
+- **DÉCISION ACTÉE** : phi4:14b est **conservé** comme modèle SOC (pas de passage à qwen3:8b). Justification : les références 2026 confirment phi4 comme meilleur raisonneur analytique par Go de VRAM, et la VRAM disponible est suffisante après optimisation. Garder phi4 = zéro re-calibration du prompt anti-hallucination.
+
+### 4. Instrumentation TTS (`scripts/jarvis.py`, `scripts/tts_engines.py`, `scripts/deepfilter.py`)
+
+- Sondes `[TTS-PERF]` : décomposition du temps `/api/tts` (edge_gen / dsp / total), timing edge-tts par tentative, temps de chargement DeepFilterNet, timings des threads de préchauffage boot.
+- Log **persistant** `scripts/tts_perf.log` (RotatingFileHandler avec filtre `[TTS-PERF]` sur le logger racine) — capture la latence intermittente sans surveiller la console.
+
+### 5. Tuile VRAM — tri d'affichage stable (`scripts/static/js/gpu_monitor.js`)
+
+Tri d'affichage stable : les modèles d'embedding (RAG) sont toujours affichés en dernier → le segment RAG ne « saute » plus de gauche à droite quand phi4 charge.
+
+---
+
 # JARVIS — Mémoire projet (2026-05-17 — audit dette complet final + migration LAN unique Freebox + audit honnête)
 
 ## Session 2026-05-17 nuit — audit dette JARVIS complet + 6 quick wins (score 92/100 confirmé)

@@ -116,7 +116,7 @@ Chaîne fallback automatique : edge → Kokoro (si internet KO) → Piper → SA
 | phi4:14b | ~9.1 GB | SOC · full VRAM · zéro swap |
 | gemma4:latest | ~9.6 GB | GÉNÉRAL + VOCAL + vision (multimodal) |
 | qwen2.5-coder:14b | ~9.0 GB | CODE · multi-fichiers · dev srv-dev-1 |
-| mxbai-embed-large | ~0.7 GB | RAG embeddings · 1024 dims · keep_alive 2m |
+| mxbai-embed-large | ~0.7 GB | RAG embeddings · 1024 dims · keep_alive 10m (dé-épinglé 2026-05-20) |
 
 ## Paramètres LLM (`jarvis_llm_params.json`)
 
@@ -125,7 +125,7 @@ Chaîne fallback automatique : edge → Kokoro (si internet KO) → Piper → SA
 | temperature | 0.5 |
 | num_predict | 4096 |
 | top_k | 40 |
-| num_ctx | 16384 (adaptatif : SOC=16384 · court=4096) |
+| num_ctx | 8192 (adaptatif : SOC=8192 · court=4096) — SOC 16384→8192 le 2026-05-20 (optimisation VRAM) |
 
 ## Provider IA
 

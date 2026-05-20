@@ -1,7 +1,7 @@
 # RUNBOOK — JARVIS (Assistant IA local)
 
 > Procédure de reconstruction / disaster recovery du projet JARVIS.
-> Dernière mise à jour : 2026-05-14.
+> Dernière mise à jour : 2026-05-20.
 > Dépôt git local : `JARVIS/` (100 % local, aucun remote). `MEMORY.md` = source de vérité de l'état.
 
 ---
@@ -99,4 +99,7 @@ Le redémarrage est requis pour : `jarvis.py`, les modules Python, `jarvis_promp
 - ⚠ **Audit log SSH write ops** (`logs/audit_writeops.jsonl` · gitignored · ajouté 2026-05-17) : toute write op SSH (autorisée OU refusée) est tracée en JSONL `{ts, host, cmd, allowed, out_len}` via `audit_writeop()` dans `security_whitelists.py`. Best-effort : un échec d'I/O ne bloque JAMAIS l'exécution de la commande. Forensic post-mortem ciblé (vs noyé dans jarvis.log générique).
 - ⚠ **Circuit breaker Ollama** (`scripts/ollama_circuit.py`, 8 call-sites wrappés dans `jarvis.py`) : si Ollama tombe (3 erreurs consécutives) → circuit OPEN, refus immédiat des requêtes Ollama (1 ms vs timeout 30 s). Auto-recovery via test HALF_OPEN après 30 s, backoff exponentiel ×2 (max 5 min). Indicateur visuel HUD `● OLLAMA` (vert/orange/rouge). Endpoint `/api/ollama-status` retourne `{running, state, retry_in_s, current_timeout_s}`. Bouton SOC dashboard PING JARVIS affiche aussi l'état Ollama (toast + badge).
 - ⚠ **Pré-warm Kokoro CUDA au boot** (`_kokoro_prewarm` dans `jarvis.py`) : thread daemon lancé 60 s après boot, charge le pipeline Kokoro CUDA en VRAM. Élimine le cold start mesuré 42.8 s (profiling `tools/profile_tts.py`). 1re alerte vocale instantanée (~200 ms TTFB) au lieu de 42 s.
+- ⚠ **Pipeline de lecture voix — invariant AudioContext** (`audio_viz.js` `processQueue`/`playSentence`, correctif 2026-05-20) : une source TTS n'est JAMAIS démarrée sur un `AudioContext` suspendu (sinon gel définitif ou chevauchement). Ne pas réintroduire de `source.start()` sans resume préalable du contexte. `_splitForTts` découpe les textes > 280 car. aux frontières de phrase (voix en ~1 s vs ~15-24 s sur les longues analyses SOC).
+- ⚠ **Optimisation VRAM 2026-05-20** : `_SOC_NUM_CTX` (jarvis.py) / `DEFAULT_SOC_NUM_CTX` (llm_opts.py) = **8192** (était 16384) · embed `mxbai-embed-large` `keep_alive "10m"` (était `-1`, épinglé à vie). VRAM libre ~2.0-2.8 Go. phi4:14b conservé comme modèle SOC (décision actée).
+- ⚠ **Log instrumentation `scripts/tts_perf.log`** (ajouté 2026-05-20) : RotatingFileHandler filtré sur `[TTS-PERF]` — capture la latence TTS intermittente (edge_gen / dsp / total, chargement DeepFilterNet, threads de préchauffage boot). Gitignored (`*.log`).
 - `JARVIS/MEMORY.md` est tracké (≠ SOC où il est gitignored).

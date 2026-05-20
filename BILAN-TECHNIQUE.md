@@ -1,5 +1,5 @@
 # BILAN TECHNIQUE — JARVIS 0xCyberLiTech
-## Assistant IA local v3.3 — 2026-05-17 (post-audit dette honnête + Sprints 1-4 + circuit breaker + TTS pré-warm + MCP 12 outils + intégrations SOC)
+## Assistant IA local v3.3 — 2026-05-20 (correctif structurel pipeline voix + optimisation VRAM + instrumentation TTS · post-audit dette honnête + circuit breaker + TTS pré-warm + MCP 12 outils + intégrations SOC)
 
 ---
 
@@ -13,7 +13,7 @@
 | Tests | 23/25 | **933 tests pytest pass · 3 skip · 0 fail** · coverage RÉELLE **51%** · **35 modules · 22 à 100% cov** · 478 mocks légitimes (Ollama/SSH/TTS). −2 : pas de tests E2E Playwright étendus (25 E2E vs ~50 attendus pour parité fonctionnelle complète). |
 | Documentation | 13/15 | MEMORY.md 2355L à jour 2026-05-16 nuit + docs/ 7 fichiers (AUDIO-DSP, MCP-SERVER, REFERENCE-TECHNIQUE, ROUTING-JARVIS, DEPLOIEMENT, REINSTALLATION, SUPPORT-INFOGERANCE) + RUNBOOK.md + **BILAN-TECHNIQUE.md (ce document, 2026-05-17)** + CLAUDE.md (2026-05-17). −2 : refactor 2026-05-15 détaillé dans MEMORY.md mais pas extrait en doc dédiée. |
 | Lisibilité/Conventions | 14/15 | ESLint **155 warnings · 0 erreur** (camelCase exports inter-modules, acceptés sans bundler) · 2 TODO/FIXME Python · ruff 0 · style guides appliqués. −1 : 135 inline styles `style.display=`/`style.color=` côté JS (acceptés pour SPA temps réel avec HUD dynamique). |
-| Performance | 10/10 | Circuit breaker Ollama 8 call-sites (refus 1ms vs timeout 30s si Ollama down) · cache SOC 30s · debounce DSP audio · fix IPv6 systémique (`127.0.0.1` partout, −97% latence) · pré-warm Kokoro CUDA au boot (0 cold start 42.8s sur 1re alerte) · pré-warm phi4 SOC. |
+| Performance | 10/10 | Circuit breaker Ollama 8 call-sites (refus 1ms vs timeout 30s si Ollama down) · cache SOC 30s · debounce DSP audio · fix IPv6 systémique (`127.0.0.1` partout, −97% latence) · pré-warm Kokoro CUDA au boot (0 cold start 42.8s sur 1re alerte) · pré-warm phi4 SOC en `num_ctx 8192` · pipeline voix : invariant AudioContext + découpage TTS `_splitForTts` (voix en ~1s vs ~15-24s) · optimisation VRAM (`_SOC_NUM_CTX` 16384→8192, embed dé-épinglé · VRAM libre ~2.0-2.8 Go). |
 | Sécurité | 10/10 | Whitelist SSH stricte 29 patterns bloqués (`_BLOCKED_SSH`) · profil SOC anti-double-ban (`_SOC_BAN_CONFIG` source unique) · règle anti-hallucination dans system prompt phi4 · injection SOC 100% serveur (jamais persisté en historique chat) · IPs hardcodées en `.gitignore` (jarvis_pve.json, jarvis_secret.key, soc_config.json). |
 
 **Chiffres clés** :
@@ -41,7 +41,37 @@
 
 ---
 
-## 0bis. Session 2026-05-16 nuit — Sprint 18d + refactor `_SOC_BAN_CONFIG` + intégrations defense_24h
+## 0bis. Session 2026-05-20 — correctif structurel pipeline voix + optimisation VRAM + instrumentation TTS
+
+Diagnostic d'une latence voix intermittente au démarrage (parfois ~15-24 s, parfois gel total). Instrumentation AVANT correction (règle `feedback_instrument_first`).
+
+### Correctif structurel du pipeline de lecture voix (`audio_viz.js`, `boot_init.js`)
+
+Cause racine : la file de lecture (`processQueue`/`playSentence`) pouvait **(a)** geler définitivement (`playSentence` ne se résolvait que sur `source.onended`, jamais émis si la source joue sur un `AudioContext` suspendu) ou **(b)** provoquer un chevauchement (`source.start()` sur contexte suspendu planifie une source « gelée » qui ressurgit au `resume` suivant). Fix = invariant unique : **jamais de source TTS démarrée sur un AudioContext suspendu** — `processQueue` resume-ou-abandonne avant `playSentence`, verrou `isPlaying` pris avant tout `await`, ancien « timeout filet » supprimé. `boot_init.js` : déverrouillage audio armé tôt dans `_jarvisInit`, multi-gestes, flag `_userGestured` découplé du timing `/api/boot-id`.
+
+### Découpage TTS des textes longs (`_splitForTts`)
+
+`_splitForTts` découpe les textes > 280 caractères aux frontières de phrase (edge-tts a un temps de synthèse proportionnel à la longueur) → la voix démarre en ~1 s au lieu de ~15-24 s sur les longues analyses SOC.
+
+### Optimisation VRAM (`jarvis.py`, `llm_opts.py`, `JARVIS-menu.ps1`)
+
+- `_SOC_NUM_CTX` / `DEFAULT_SOC_NUM_CTX` : **16384 → 8192** → phi4 passe de ~12.4 Go à ~11.56 Go en VRAM (KV cache réduit).
+- `mxbai-embed-large` dé-épinglé : `keep_alive` `-1` → `"10m"` (décharge après 10 min d'inactivité au lieu d'être épinglé à vie).
+- `_soc_model_prewarm` précharge phi4 directement en `num_ctx 8192` (évite un reload au 1er chat SOC) · `_rag_embed_prewarm` délai 20 s → 5 s.
+- Résultat mesuré : VRAM libre ~1.3 Go → **~2.0-2.8 Go**.
+- **Décision actée** : phi4:14b conservé comme modèle SOC (pas de passage à qwen3:8b) — meilleur raisonneur analytique par Go de VRAM, VRAM suffisante après optimisation, zéro re-calibration du prompt anti-hallucination.
+
+### Instrumentation TTS
+
+Sondes `[TTS-PERF]` (`jarvis.py`, `tts_engines.py`, `deepfilter.py`) : décomposition `/api/tts` (edge_gen / dsp / total), timing edge-tts par tentative, chargement DeepFilterNet, threads de préchauffage boot. Log persistant `scripts/tts_perf.log` (RotatingFileHandler · filtre `[TTS-PERF]`).
+
+### Tuile VRAM — tri d'affichage stable (`gpu_monitor.js`)
+
+Les modèles d'embedding (RAG) sont toujours affichés en dernier → le segment RAG ne « saute » plus de gauche à droite quand phi4 charge.
+
+---
+
+## 0ter. Session 2026-05-16 nuit — Sprint 18d + refactor `_SOC_BAN_CONFIG` + intégrations defense_24h
 
 ### Sprint 18d — MCP `jarvis_ioc_status` (12ème outil)
 
@@ -103,7 +133,7 @@ Windows 11 (localhost:5000)
 │   ├── qwen2.5-coder:14b    9.0 GB  ← CODE · multi-fichiers
 │   ├── gemma4:latest        9.6 GB  ← GÉNÉRAL + vision
 │   ├── qwen3:8b             5.2 GB  ← CODE REASONING
-│   └── mxbai-embed-large    0.7 GB  ← RAG embeddings · keep_alive 2m
+│   └── mxbai-embed-large    0.7 GB  ← RAG embeddings · keep_alive 10m
 ├── Routing automatique — 3 branches + bypass
 │   ├── VM/service/backup → bypass Python (sans LLM)
 │   ├── mode CODE → qwen2.5-coder:14b
@@ -168,7 +198,7 @@ Windows 11 (localhost:5000)
 | `bypass_proxmox.py` | 100% | Bypass Proxmox (API ticket + token · qm list · pct list) |
 | `bypass_backup.py` | 96% | Bypass backup Proxmox + Windows + GPU + disque |
 | `proxmox_api.py` | 93% | API Proxmox VE directe (ticket+token auth · cache 30s) · `_pve_fetch_state` + `_pve_context_summary` |
-| `rag_live.py` | 92% | RAG live · 599 chunks · auto-refresh 6h · keep_alive 2m |
+| `rag_live.py` | 92% | RAG live · 599 chunks · auto-refresh 6h · embed `keep_alive "10m"` (dé-épinglé 2026-05-20) |
 | `code_reasoning.py` | 44% | Mode CODE REASONING · qwen3:8b · contexte étendu |
 
 ### Modules satellites — MCP server
@@ -446,11 +476,23 @@ Adresses RFC1918 (10./172.16-31./192.168./127.) **JAMAIS** :
 
 ### 9.3. Pré-warm modèles au boot
 
-- **phi4:14b SOC** (`_soc_model_prewarm`) — thread daemon
+- **phi4:14b SOC** (`_soc_model_prewarm`) — thread daemon · préchauffe directement en `num_ctx 8192` (évite un reload au 1er chat SOC)
 - **Kokoro CUDA TTS** (`_kokoro_prewarm`) — thread daemon 60s après boot
-- **RAG embed prewarm** (`_rag_embed_prewarm`) — mxbai-embed-large keep_alive 2m
+- **RAG embed prewarm** (`_rag_embed_prewarm`) — mxbai-embed-large · délai 5s (le RAG se charge avant phi4) · `keep_alive "10m"` (dé-épinglé 2026-05-20 : se décharge après 10 min d'inactivité)
 
-### 9.4. Debounce DSP audio
+### 9.4. Optimisation VRAM (2026-05-20)
+
+- `_SOC_NUM_CTX` (jarvis.py) / `DEFAULT_SOC_NUM_CTX` (llm_opts.py) : **16384 → 8192** → KV cache réduit, phi4 passe de ~12.4 Go à **~11.56 Go** en VRAM.
+- `mxbai-embed-large` dé-épinglé : `keep_alive` `-1` → `"10m"` (dans `_rag_embed` et `_rag_embed_prewarm`).
+- **Résultat mesuré** : VRAM libre **~1.3 Go → ~2.0-2.8 Go**.
+- phi4:14b conservé comme modèle SOC (décision actée — pas de passage à qwen3:8b).
+
+### 9.5. Pipeline de lecture voix — invariant AudioContext (2026-05-20)
+
+- File de lecture `processQueue`/`playSentence` (`audio_viz.js`) : invariant « jamais de source TTS sur AudioContext suspendu » — supprime le gel définitif et le chevauchement.
+- `_splitForTts` découpe les textes > 280 caractères aux frontières de phrase → voix en ~1 s vs ~15-24 s sur les longues analyses SOC (edge-tts a un temps de synthèse proportionnel à la longueur).
+
+### 9.6. Debounce DSP audio
 
 Push backend params DSP → debouncé 100ms (évite spam HTTP sur drag slider EQ).
 
@@ -563,4 +605,4 @@ Le projet JARVIS est **post-modularisation** des 2 côtés :
 
 ---
 
-*Document généré le 2026-05-17 (post-audit dette complet final + Sprints 1-4 + circuit breaker + TTS pré-warm + MCP 12 outils + intégrations SOC + migration LAN unique Freebox) — JARVIS 0xCyberLiTech v3.3 — 933 tests pass + 3 skip · coverage 51% · 22 modules à 100% cov · score dette 92/100 honnête*
+*Document mis à jour le 2026-05-20 (correctif structurel pipeline voix + optimisation VRAM + instrumentation TTS) — base : audit dette complet final 2026-05-17 — JARVIS 0xCyberLiTech v3.3 — 933 tests pass + 3 skip · coverage 51% · 22 modules à 100% cov · score dette 92/100 honnête*

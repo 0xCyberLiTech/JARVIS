@@ -94,13 +94,13 @@ Dispatchers centralisés (zéro handler inline) :
 Profils LLM — 7 profils (jarvis_prompt_profiles.json)
   Profil auto-chargé selon le mode actif via _applyModeProfile()
   Tous : garde RFC1918 — IPs LAN jamais bannables
-  SOC : temperature=0.2 · num_ctx=16384 · chain-of-thought imposé
+  SOC : temperature=0.2 · num_ctx=8192 (16384→8192 le 2026-05-20, optim VRAM) · chain-of-thought imposé
 
 Modèles Ollama actifs :
   phi4:14b             ← mode SOC (défaut · 9.1 GB · full VRAM · zéro swap)
   gemma4:latest        ← mode GÉNÉRAL + VOCAL + vision (multimodal natif)
   qwen2.5-coder:14b    ← mode CODE (boucle dev srv-dev-1 · 9.0 GB)
-  mxbai-embed-large    ← RAG embeddings (1024 dims · keep_alive 2m — obligatoire)
+  mxbai-embed-large    ← RAG embeddings (1024 dims · keep_alive 10m — obligatoire)
 
 ⚠ Supprimés : phi4-reasoning:plus · qwen2.5:14b · deepseek-r1:14b · llava-phi3:latest · nomic-embed-text
 ```
@@ -540,4 +540,4 @@ Sans ce cadre = réponse Claude. Différence visuelle immédiate, important pour
 
 ---
 
-*ARCHITECTURE-JARVIS.md · 0xCyberLiTech · 2026-05-14*
+*ARCHITECTURE-JARVIS.md · 0xCyberLiTech · 2026-05-14 (maj config 2026-05-20 : num_ctx SOC 8192 · embed keep_alive 10m)*
