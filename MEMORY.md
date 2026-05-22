@@ -107,6 +107,15 @@ clusters restants (autoban, rsyslog/LLM, checks auto-engine) sont enchevêtrés
 dans le cœur ban — les extraire serait du déplacement, pas du découplage.
 Priorité remise sur la couverture de `jarvis.py`. Détail `BILAN §0bis`.
 
+**Campagne couverture `jarvis.py`** (2026-05-22) : +26 tests sur les fonctions
+pures/semi-pures non couvertes (`_cors_origin`, `_detect_service_restart`,
+`_validate_protect_directives`, `_get_model_profile`, `_load_model`/`_save_model`,
+`_load_tasks`/`_save_tasks`, `load_memory`/`save_memory`, `_load_memory_summary`/
+`_append_memory_summary`). `jarvis.py` 40→**43%**, coverage globale 63→**64%**,
+**1120 pytest pass**. Plafond pragmatique : le reste (~1700 L non couvertes) =
+handlers de routes Flask + générateurs SSE → mock lourd Ollama/SSH/TTS, ROI
+décroissant, traité au fil de l'eau. Détail `BILAN §0bis`.
+
 ## Session 2026-05-20 (suite) — réalignement description Kill Chain sur KC v4 (5 maillons)
 
 Les prompts JARVIS décrivaient encore la Kill Chain SOC en **7 maillons** avec PROBE et WAF — obsolète depuis la refonte KC v4 (5 maillons offensifs purs RECON→SCAN→EXPLOIT→BRUTE→NEUTRALISÉ ; PROBE = UFW et WAF = ModSec sont des couches DÉFENSIVES, sorties de la KC). Le LLM phi4 lisait cette description périmée alors que le contexte SOC live n'injecte que 5 maillons.

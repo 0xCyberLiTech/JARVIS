@@ -25,10 +25,10 @@
 
 | Métrique | Valeur |
 |---|---|
-| **Tests pytest** | **1094 pass · 0 skip · 0 fail** (2026-05-22 : +161, campagne couverture + tests refactor) |
-| **Coverage globale** | **63%** (6290 stmts · 2334 miss) |
+| **Tests pytest** | **1120 pass · 0 skip · 0 fail** (2026-05-22 : +187, campagne couverture + tests refactor) |
+| **Coverage globale** | **64%** (6290 stmts · 2273 miss) |
 | **Modules Python à 100% cov** | **22 modules** (recompte audit 2026-05-17 soir) : `bypass_code`, `bypass_proxmox`, `bypass_simple`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_pending_bypass`, `chat_routing`, `chat_soc_inject`, `chat_stream`, `chat_system_prompt`, `chat_tool_calls`, `deferred_speak`, `llm_opts`, `ollama_circuit`, `security_whitelists`, `ssh_terminal`, `stream_tokens`, `tts_cleaner`, `tts_dedup`, `voice_lab`, `blueprints/__init__` |
-| **Couverture orchestrateurs** | `jarvis.py` 40% · `blueprints/soc.py` 56% · `soc_ip_deep.py` 78% · `soc_suricata_ban.py` 96% · `soc_threat_score.py` 74% · `soc_reqhour.py` 97% (Flask, complétés par 25 tests E2E · campagne en cours) |
+| **Couverture orchestrateurs** | `jarvis.py` 43% · `blueprints/soc.py` 56% · `soc_ip_deep.py` 78% · `soc_suricata_ban.py` 96% · `soc_threat_score.py` 74% · `soc_reqhour.py` 97% (Flask, complétés par 25 tests E2E · campagne en cours) |
 | **`jarvis.py`** | **4814 L** (2957 stmts exécutables) |
 | **`blueprints/soc.py`** | 871 stmts (**1500 L**) — clusters `_deep_*`, `_sur_ban_*`, scoring menace et pic req/h extraits (refactor incrémental étapes 1-4) |
 | **Modules Python totaux** | 40 (38 dans `scripts/` + 2 dans `scripts/blueprints/`) — `soc_ip_deep.py` + `soc_suricata_ban.py` + `soc_threat_score.py` + `soc_reqhour.py` extraits 2026-05-22 (refactor incrémental) |
@@ -42,7 +42,7 @@
 | **TTS moteurs** | 4 (edge-tts · Kokoro CUDA · Piper · SAPI5) avec fallback chain |
 | **ESLint warnings** | 155 · 0 erreur |
 | **ruff** | 0 erreur |
-| **Pre-commit hooks** | ruff + eslint (commit) · pytest 1094 tests (pre-push) |
+| **Pre-commit hooks** | ruff + eslint (commit) · pytest 1120 tests (pre-push) |
 
 ---
 
@@ -121,6 +121,17 @@ lambdas résolues à l'appel. Les clusters restants (autoban, rsyslog/LLM, check
 auto-engine) sont enchevêtrés dans le cœur ban : les extraire relèverait du
 déplacement plus que du découplage → **refactor par extraction suspendu ici**,
 priorité remise sur la couverture de `jarvis.py`.
+
+**Campagne couverture `jarvis.py`** (2026-05-22) : +26 tests sur les fonctions
+pures et semi-pures de l'orchestrateur jusque-là non couvertes — politique CORS
+(`_cors_origin`), détection restart service (`_detect_service_restart`), garde
+des directives nginx protégées (`_validate_protect_directives`), profils de
+prompt (`_get_model_profile`), persistance modèle/tâches/mémoire/résumés
+(`_load_model`, `_load_tasks`, `load_memory`, `_load_memory_summary`, …).
+`jarvis.py` 40→**43%**, coverage globale 63→**64%**. Plafond pragmatique : le
+reste des ~1700 lignes non couvertes est constitué de handlers de routes Flask
+et de générateurs SSE qui exigent un mock lourd d'Ollama/SSH/TTS — ROI
+décroissant, traités au fil de l'eau plutôt qu'en chantier dédié.
 
 ---
 
