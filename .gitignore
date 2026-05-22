@@ -46,6 +46,7 @@ __pycache__/
 .ruff_cache/
 .pytest_cache/
 .coverage
+coverage.json
 htmlcov/
 test-results/
 playwright-report/
@@ -57,3 +58,4 @@ scripts.matin-*/
 scripts.aprem-*/
 *.bak
 *.bak[0-9]
+*.bak.*

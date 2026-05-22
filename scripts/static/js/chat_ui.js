@@ -228,6 +228,12 @@ function highlightCode(el) {
 
 
 // ── Code Modal — Monaco Editor ──────────────────────────────
+// ⚠ SEULE dépendance réseau externe de JARVIS (par ailleurs 100% local).
+// L'éditeur de code de la modale est chargé depuis le CDN jsdelivr.
+// Dégradation gracieuse assumée : hors ligne, _loadMonaco() rejette et la
+// modale affiche « éditeur indisponible hors ligne » sans casser le chat.
+// Pour un fonctionnement 100% hors ligne, vendoriser monaco-editor@0.45.0
+// sous static/vendor/ et faire pointer _MONACO_CDN dessus.
 let _modalFontSize  = 13;
 let _modalWrap      = false;
 let _monacoEditor   = null;

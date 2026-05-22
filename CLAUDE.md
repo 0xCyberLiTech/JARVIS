@@ -10,13 +10,13 @@
 **JARVIS** = assistant IA local type Iron Man · Flask `localhost:5000` · Windows 11 (RTX 5080, 16 GB VRAM) · 100% local, zéro cloud LLM.
 
 - Version : **v3.3** (interface holographique)
-- Score dette honnête : **92/100** (audit dette complet 2026-05-17 soir · cf. `BILAN-TECHNIQUE.md`)
-- Tests : **933 pytest pass + 3 skip** · coverage 51% · 22 modules à 100% cov
+- Score dette honnête : **88/100** (audit dette complet 2026-05-22 · 7 correctifs appliqués · E1 couverture cœur partiellement traité · cf. `BILAN-TECHNIQUE.md`)
+- Tests : **959 pytest pass · 0 skip** · coverage 52% · 22+ modules à 100% cov
 - Refactor JS : **terminé** (`jarvis_main.js` 148L · −98,1% depuis 7828L)
 
 ## Sources de vérité (ordre de priorité)
 
-1. **`MEMORY.md`** (2355L) — historique complet par session · décisions · commits SHA
+1. **`MEMORY.md`** (2672L) — historique complet par session · décisions · commits SHA
 2. **`BILAN-TECHNIQUE.md`** — état technique structuré · chiffres · décomposition score
 3. **`RUNBOOK.md`** — reconstruction DR · secrets · vérifs
 4. **`docs/`** — 7 fichiers de référence :
@@ -40,8 +40,8 @@
 | STT | faster-whisper large-v3-turbo · CUDA · initial_prompt vocabulaire SOC |
 | RAG | 599 chunks · mxbai-embed-large · seuil 0.35 · TTL 300s · auto-refresh 6h · embed `keep_alive "10m"` (dé-épinglé 2026-05-20) |
 | MCP | streamable-HTTP port 5010 · **12 outils** · Claude Desktop / Cursor |
-| Frontend | SPA vanilla JS · zéro NPM (sauf tests E2E) · 21 modules JS · 8 CSS · 10 templates HTML |
-| Tests | pytest (801) · ruff · eslint · pre-commit hooks · **pre-push pytest** (CI locale, pas de cloud) |
+| Frontend | SPA vanilla JS · zéro NPM (sauf tests E2E) · 21 modules JS · 8 CSS · 10 templates HTML · éditeur code modal = Monaco via CDN (seule dép. réseau externe, dégradation gracieuse hors ligne) |
+| Tests | pytest (959) · ruff · eslint · pre-commit hooks · **pre-push pytest** (CI locale, pas de cloud) |
 
 ## Lancement
 
@@ -78,8 +78,8 @@ Cf. mémoire `jarvis_modes` — règle ABSOLUE pour Claude :
 - **Chemins Unix (Git Bash pour ssh/scp)** : `/c/Users/mmsab/...`
 - **Clients internes** : `http://127.0.0.1:PORT` (PAS `localhost` — résout IPv6 sur Windows, +97% latence) — source unique `OLLAMA_URL` dans `jarvis.py:544`
 - **Pre-commit hooks** : ruff + eslint bloquants
-- **Pre-push hook** : pytest 933 tests (alternative locale à CI cloud — impossible « rien sur le web »)
-- **Édition gros fichiers** : ⚠ Write tool tronque >200 Ko → toujours `Edit`, jamais `Write` pour `jarvis.py` (4739L) ou `jarvis_main.js`
+- **Pre-push hook** : pytest 959 tests (alternative locale à CI cloud — impossible « rien sur le web »)
+- **Édition gros fichiers** : ⚠ Write tool tronque >200 Ko → toujours `Edit`, jamais `Write` pour `jarvis.py` (4814L) ou `jarvis_main.js`
 
 ## Règles ABSOLUES (zéro régression infra)
 
@@ -87,7 +87,7 @@ Cf. mémoires `feedback_jarvis_no_regression` · `feedback_data_security` · `fe
 
 1. **RFC1918 immuable** — adresses 10./172.16-31./192.168./127. JAMAIS recommandées au ban · JAMAIS traitées comme menace · sanitize MCP `[IP]`
 2. **`_BLOCKED_SSH` 29 patterns** — whitelist SSH read-only, ne JAMAIS l'élargir sans validation explicite Marc
-3. **`_ALLOWED_SERVICES`** — liste blanche services restartables, immuable sans validation
+3. **`_ALLOWED_SERVICES`** (alias de `security_whitelists.ALLOWED_SOC_RESTART_SVCS` — source unique) — liste blanche services restartables, immuable sans validation
 4. **Injection SOC = 100% serveur** — JAMAIS dans l'historique chat (sinon hallucinations multi-tours)
 5. **Architecture coût LLM** — JARVIS filtre/agrège/détecte EN LOCAL · jamais raw data vers Claude cloud · escalade uniquement
 6. **Auto-engine SOC** — UNIQUEMENT en mode soc · jamais ailleurs
@@ -97,12 +97,12 @@ Cf. mémoires `feedback_jarvis_no_regression` · `feedback_data_security` · `fe
 
 | Fichier | Rôle |
 |---|---|
-| `scripts/jarvis.py` (4739L) | Serveur Flask · ~150 endpoints · routing 4 modes · pré-warm · circuit breaker |
-| `scripts/blueprints/soc.py` (1007 stmts) | Endpoints SOC · cache 30s + fallback SSH · `_SOC_BAN_CONFIG` source unique |
-| `scripts/jarvis_mcp_server.py` (269 stmts) | MCP 12 outils · sanitize IP → `[IP]` · port 5010 |
+| `scripts/jarvis.py` (4814L) | Serveur Flask · ~150 endpoints · routing 4 modes · pré-warm · circuit breaker |
+| `scripts/blueprints/soc.py` (1872L) | Endpoints SOC · cache 30s + fallback SSH · `_SOC_BAN_CONFIG` source unique |
+| `scripts/jarvis_mcp_server.py` (554L) | MCP 12 outils · sanitize IP → `[IP]` · port 5010 |
 | `scripts/chat_soc_inject.py` | Injection bloc compact phi4 mode SOC (100% serveur) |
 | `scripts/ollama_circuit.py` | Circuit breaker state machine 3 états · 100% cov · 23 tests |
-| `scripts/security_whitelists.py` | `_BLOCKED_SSH` 29 patterns · `_ALLOWED_SERVICES` |
+| `scripts/security_whitelists.py` | `_BLOCKED_SSH` 29 patterns · whitelists services (`ALLOWED_RESTART_SVCS` + `ALLOWED_SOC_RESTART_SVCS`) — source unique |
 | `scripts/static/jarvis_main.js` (148L) | Point d'entrée JS (post-refactor) |
 | `scripts/static/js/` (18 modules) | Modules JS extraits (audio_viz, chat_core, settings_llm, boot_init, ...) |
 | `scripts/jarvis_llm_params.json` | Params LLM (temp/num_ctx/num_predict) — gitignored |
@@ -133,7 +133,7 @@ Cf. mémoires `feedback_jarvis_no_regression` · `feedback_data_security` · `fe
 
 ```
 édition locale → pre-commit (ruff + eslint) → git commit
-              → pre-push (pytest 801) → git push (local, pas de remote)
+              → pre-push (pytest 959) → git push (local, pas de remote)
               → redémarrer JARVIS (stop_jarvis.bat → python jarvis.py)
 ```
 
@@ -146,4 +146,4 @@ Style préfixé `type(scope):` cohérent avec SOC :
 
 ---
 
-*CLAUDE.md JARVIS · 2026-05-20 · complémentaire au racine `0xCyberLiTech/CLAUDE.md` · briefing concentré pour focus JARVIS*
+*CLAUDE.md JARVIS · 2026-05-22 · complémentaire au racine `0xCyberLiTech/CLAUDE.md` · briefing concentré pour focus JARVIS*

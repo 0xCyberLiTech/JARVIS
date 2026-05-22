@@ -107,7 +107,7 @@ Le modèle actif est persisté dans `jarvis_model.json`.
 ### 3.1 Démarrage standard
 
 ```bat
-cd c:\Users\mmsab\Documents\JARVIS\scripts
+cd c:\Users\mmsab\Documents\0xCyberLiTech\JARVIS\scripts
 python jarvis.py
 ```
 
@@ -141,7 +141,7 @@ Dans l'UI → onglet Monitor → toutes les jauges GPU vertes = RTX 5080 détect
 ### 4.2 Arrêt forcé (port bloqué)
 
 ```bat
-c:\Users\mmsab\Documents\JARVIS\scripts\stop_jarvis.bat
+c:\Users\mmsab\Documents\0xCyberLiTech\JARVIS\scripts\stop_jarvis.bat
 ```
 
 ---
@@ -427,7 +427,7 @@ v4.0  (long)    — Service Windows NSSM, Docker Compose, HTTPS mkcert, SSH writ
 
 ## 13. CONTACTS & RÉFÉRENCES
 
-- Projet : `c:\Users\mmsab\Documents\JARVIS\`
+- Projet : `c:\Users\mmsab\Documents\0xCyberLiTech\JARVIS\`
 - Logs : `logs\jarvis.log`
 - UI : `http://localhost:5000`
 - Ollama API : `http://localhost:11434`

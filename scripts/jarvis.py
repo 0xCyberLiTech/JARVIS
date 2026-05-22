@@ -1887,7 +1887,10 @@ def stream_llm(messages, model_override=None, options_override=None):
         for line in resp.iter_lines():
             if not line:
                 continue
-            chunk = json.loads(line)
+            try:
+                chunk = json.loads(line)
+            except (json.JSONDecodeError, ValueError):
+                continue  # ligne Ollama malformée — on saute sans casser le flux
             msg   = chunk.get("message", {})
             done  = chunk.get("done", False)
             if done:

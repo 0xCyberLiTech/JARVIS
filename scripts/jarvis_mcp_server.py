@@ -525,9 +525,6 @@ def _build_starlette_app(port: int) -> Starlette:
         async with session_manager.run():
             yield
 
-    async def handle_mcp(scope, receive, send):
-        await session_manager.handle_request(scope, receive, send)
-
     async def handle_mcp_endpoint(request: Request):
         await session_manager.handle_request(request.scope, request.receive, request._send)
 

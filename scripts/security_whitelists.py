@@ -8,7 +8,8 @@ validée — c'est la couche sécurité ultime contre les commandes destructives
 
 Couvre :
 - BLOCKED_SSH_PATTERNS : 29 patterns SSH interdits (rm, mkfs, dd, shutdown, qm destroy, etc.)
-- ALLOWED_RESTART_SVCS : services autorisés via `systemctl restart`
+- ALLOWED_RESTART_SVCS : services autorisés via `systemctl restart` (SSH, 4 hôtes)
+- ALLOWED_SOC_RESTART_SVCS : services restartables via la route HTTP SOC (srv-ngix)
 - ALLOWED_APT_PKGS : paquets autorisés via `apt install/upgrade`
 - check_write_op() : validation stricte des ops write
 - parse_upgradable_packages() : parsing sortie `apt list --upgradable`
@@ -63,9 +64,23 @@ BLOCKED_SSH_PATTERNS = [
 # ── Whitelists write ops ──────────────────────────────────────
 _SVC_BOUNCER = "crowdsec-firewall-bouncer"
 
+# Services restartables via SSH write-op (`systemctl restart`) sur les 4 hôtes.
+# Vérifié SSH 2026-05-22 : aucun hôte ne tourne php-fpm — srv-ngix n'a pas PHP,
+# clt/pa85 utilisent mod_php (libapache2-mod-php8.4) → restart PHP = restart apache2.
+# Les anciennes entrées php7.4-fpm / php8.2-fpm étaient mortes : retirées.
 ALLOWED_RESTART_SVCS = {
     "nginx", "fail2ban", "crowdsec", _SVC_BOUNCER,
-    "suricata", "apache2", "php7.4-fpm", "php8.2-fpm",
+    "suricata", "apache2",
+}
+
+# Services restartables via la route HTTP /api/soc/restart-service (soc.py) ET par
+# l'auto-engine SOC (_check_services). Portée : srv-ngix uniquement.
+# Vérifié SSH 2026-05-22 : srv-ngix fait tourner nginx + CrowdSec + fail2ban +
+# Suricata, sans aucun PHP. `suricata` ajouté 2026-05-22 : l'auto-engine est censé
+# le redémarrer s'il tombe (déclencheur #10) mais son absence de cette whitelist
+# bloquait l'action. Anciennes entrées php*-fpm mortes retirées.
+ALLOWED_SOC_RESTART_SVCS = {
+    "nginx", "crowdsec", "fail2ban", "suricata",
 }
 
 ALLOWED_APT_PKGS = {

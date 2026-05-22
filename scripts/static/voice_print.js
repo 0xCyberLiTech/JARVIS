@@ -606,24 +606,6 @@
     }
   };
 
-
-  function _vpEncodeWav(samples, sr) {
-    var bps=16, nCh=1, dataLen=samples.length*2;
-    var buf=new ArrayBuffer(44+dataLen), v=new DataView(buf);
-    function ws(o,s){ for(var i=0;i<s.length;i++) v.setUint8(o+i,s.charCodeAt(i)); }
-    ws(0,'RIFF'); v.setUint32(4,36+dataLen,true); ws(8,'WAVE'); ws(12,'fmt ');
-    v.setUint32(16,16,true); v.setUint16(20,1,true); v.setUint16(22,nCh,true);
-    v.setUint32(24,sr,true); v.setUint32(28,sr*nCh*bps/8,true);
-    v.setUint16(32,nCh*bps/8,true); v.setUint16(34,bps,true);
-    ws(36,'data'); v.setUint32(40,dataLen,true);
-    var off=44;
-    for(var i=0;i<samples.length;i++,off+=2){
-      var s=Math.max(-1,Math.min(1,samples[i]));
-      v.setInt16(off,s<0?s*0x8000:s*0x7FFF,true);
-    }
-    return new Blob([buf],{type:'audio/wav'});
-  }
-
   /* ─── Public actions ────────────────────────────────────────── */
   window.vpOpenFile = function(){ document.getElementById('vp-file-input').click(); };
 

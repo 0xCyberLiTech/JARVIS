@@ -1,4 +1,60 @@
-# JARVIS — Mémoire projet (2026-05-20 — correctif structurel pipeline voix + optimisation VRAM + instrumentation TTS + réalignement description Kill Chain)
+# JARVIS — Mémoire projet (2026-05-22 — audit dette complet honnête + 7 correctifs)
+
+## Session 2026-05-22 — audit dette complet honnête + 7 correctifs
+
+Audit dette technique complet du projet JARVIS exclusivement (demande de Marc :
+« audit complet et honnête »). 3 agents d'audit + vérification personnelle de
+chaque finding sérieux avant restitution. Score auto-affiché **92/100** reconnu
+inflaté → consolidé honnêtement **84/100**, puis **88/100** après correctifs.
+
+**9 findings, tous traités le jour même** (ordre : E2 → M2 → M1 → M4 → M3 → F1 → F4 → F3 → E1) :
+
+- **E2** (ÉLEVÉ) — deux whitelists de services divergentes : `_ALLOWED_SERVICES`
+  (soc.py, route HTTP `/restart-service`) et `ALLOWED_RESTART_SVCS`
+  (security_whitelists.py, write-ops SSH). Consolidées dans `security_whitelists.py`
+  via une nouvelle constante `ALLOWED_SOC_RESTART_SVCS` (soc.py l'importe en alias).
+  Divergence `php*-fpm` **résolue le jour même par vérification SSH** : srv-ngix n'a
+  aucun PHP installé, clt/pa85 tournent en mod_php (`libapache2-mod-php8.4`, pas de
+  php-fpm) — les entrées mortes `php7.4-fpm` / `php8.2-fpm` / `php8.3-fpm` ont été
+  retirées des deux whitelists (`ALLOWED_RESTART_SVCS` garde `apache2` = le chemin
+  de restart PHP réel sur clt/pa85). Enfin `suricata` ajouté à
+  `ALLOWED_SOC_RESTART_SVCS` : l'auto-engine SOC `_check_services` (déclencheur #10)
+  ne pouvait pas le redémarrer faute de whitelist — incohérence pré-existante avec
+  `08-JARVIS-DEFENSE.md`, corrigée le jour même.
+- **M1** (MOYEN) — `_SSH_DEV1` hardcodé `192.168.1.21` alors que ngix/clt/pa85/proxmox
+  passaient par `soc_config.json`. Ajout des clés `dev1_*` aux défauts, `_SSH_DEV1`
+  dérivé de `_SOC_CFG` comme ses 4 pairs.
+- **M2** (MOYEN) — bloc `[tool.ruff]` mort dans `pyproject.toml` : ruff lit
+  `ruff.toml` en priorité, le bloc était silencieusement ignoré (et divergent).
+  Supprimé ; `pyproject.toml` ne garde que `[tool.pytest.ini_options]`.
+- **M3** (MOYEN) — Monaco Editor chargé depuis CDN jsdelivr (`chat_ui.js`) :
+  seule dépendance réseau externe, contredisait le « 100% local ». Documenté
+  (commentaire code + `CLAUDE.md`) — dégradation gracieuse hors ligne déjà en place.
+- **M4** (MOYEN) — `json.loads(line)` non gardé dans `stream_llm` (jarvis.py) :
+  une ligne Ollama malformée levait `JSONDecodeError` en plein flux. `try/except`
+  → ligne sautée, flux SSE préservé.
+- **F1** (FAIBLE) — `.gitignore` : `*.bak` ne couvrait pas
+  `jarvis_soc_actions.bak.<timestamp>.json` → pattern `*.bak.*` ajouté.
+- **F4** (FAIBLE) — code mort retiré : `_vpEncodeWav` (voice_print.js, jamais
+  appelée), `handle_mcp` (jarvis_mcp_server.py, route utilise `handle_mcp_endpoint`).
+  Chemin obsolète `Documents\JARVIS` → `Documents\0xCyberLiTech\JARVIS` (DEPLOIEMENT.md).
+  ⚠ `tab_terminal.html` accusé d'être orphelin par l'audit — vérifié actif, conservé.
+- **F3** (FAIBLE) — doc drift : `CLAUDE.md` et `BILAN-TECHNIQUE.md` réalignés
+  (jarvis.py 4739→4814L, soc.py, tests 933+3skip→959/0skip, coverage 51→52%).
+- **E1** (ÉLEVÉ, *partiel*) — couverture du cœur sécurité. Nouveau fichier
+  `tests/python/test_jarvis_soc_context.py` : +26 tests sur `_build_monitoring_context`,
+  `_kc_ban_signal`, `_pve_context_lines` (fonctions pures de l'injection de contexte
+  SOC dans phi4 — anti-hallucination IP, signal de ban — jusque-là à 0%). Inclut les
+  tests de non-régression de M4/E2/M1. `jarvis.py` 26→30%, total 50→52%.
+  ⚠ Reste ouvert : couverture agrégée de `jarvis.py` (~150 routes Flask) — chantier
+  de tests dédié, flaggé et non forcé (`feedback_no_big_refactor`).
+
+**Note constatée durant l'audit** : `_sse_tok()` dupliqué dans 5 modules bypass —
+ce N'EST PAS de la dette : `sse_helpers.py` documente que ces modules gardent leur
+copie inline pour rester autonomes (choix délibéré). Finding écarté après vérification.
+
+Vérifications finales : **959 pytest pass · 0 skip · 0 fail**, ruff **0**, eslint
+**0 erreur**. Zéro régression. Décomposition détaillée du score → `BILAN-TECHNIQUE.md` §0ter.
 
 ## Session 2026-05-20 (suite) — réalignement description Kill Chain sur KC v4 (5 maillons)
 

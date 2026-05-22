@@ -1,16 +1,16 @@
 # BILAN TECHNIQUE — JARVIS 0xCyberLiTech
-## Assistant IA local v3.3 — 2026-05-20 (correctif structurel pipeline voix + optimisation VRAM + instrumentation TTS · post-audit dette honnête + circuit breaker + TTS pré-warm + MCP 12 outils + intégrations SOC)
+## Assistant IA local v3.3 — 2026-05-22 (audit dette complet honnête + 7 correctifs · pipeline voix + optimisation VRAM + circuit breaker + TTS pré-warm + MCP 12 outils + intégrations SOC)
 
 ---
 
-## 0. État actuel (audit dette honnête 2026-05-17)
+## 0. État actuel (audit dette honnête 2026-05-22)
 
-**Score honnête : 92/100** (audit dette complet 2026-05-17 soir post-migration LAN unique Freebox) — Décomposition :
+**Score honnête : 88/100** (audit dette complet 2026-05-22 · 7 correctifs appliqués · E1 couverture cœur partiellement traité) — Décomposition :
 
 | Critère | Score | Justification |
 |---|---|---|
-| Architecture | 23/25 | **Modularisation faite des 2 côtés** : Python `jarvis.py` 4739L est un **orchestrateur Flask** (~150 endpoints + routing 4 modes + auto-engine SOC) — la logique métier est déjà extraite dans **31 modules satellites** (dont 21 à 100% cov). JS : refactor officiellement TERMINÉ (`jarvis_main.js` 7828→148L · −98,1% · 13 modules extraits). Coverage 26% de `jarvis.py` = normale pour orchestrateur HTTP, couvert indirectement par 25 tests E2E Playwright. −2 : `blueprints/soc.py` 1007 stmts encore dense (cache + fallback SSH + endpoints SOC), pourrait gagner en éclatement mais ROI faible. |
-| Tests | 23/25 | **933 tests pytest pass · 3 skip · 0 fail** · coverage RÉELLE **51%** · **35 modules · 22 à 100% cov** · 478 mocks légitimes (Ollama/SSH/TTS). −2 : pas de tests E2E Playwright étendus (25 E2E vs ~50 attendus pour parité fonctionnelle complète). |
+| Architecture | 23/25 | **Modularisation faite des 2 côtés** : Python `jarvis.py` 4814L est un **orchestrateur Flask** (~150 endpoints + routing 4 modes + auto-engine SOC) — la logique métier est déjà extraite dans **31 modules satellites** (dont 21 à 100% cov). JS : refactor officiellement TERMINÉ (`jarvis_main.js` 7828→148L · −98,1% · 13 modules extraits). Coverage 30% de `jarvis.py` = normale pour orchestrateur HTTP, couvert indirectement par 25 tests E2E Playwright. −2 : `blueprints/soc.py` 1872L encore dense (cache + fallback SSH + endpoints SOC), pourrait gagner en éclatement mais ROI faible. |
+| Tests | 22/25 | **959 tests pytest pass · 0 skip · 0 fail** · coverage RÉELLE **52%** · **35 modules · 22 à 100% cov** · mocks légitimes (Ollama/SSH/TTS). −3 : couverture agrégée `jarvis.py` 30% (~150 routes Flask non testées unitairement) — chantier de tests routes ouvert (E1 audit 2026-05-22, partiellement traité). |
 | Documentation | 13/15 | MEMORY.md 2355L à jour 2026-05-16 nuit + docs/ 7 fichiers (AUDIO-DSP, MCP-SERVER, REFERENCE-TECHNIQUE, ROUTING-JARVIS, DEPLOIEMENT, REINSTALLATION, SUPPORT-INFOGERANCE) + RUNBOOK.md + **BILAN-TECHNIQUE.md (ce document, 2026-05-17)** + CLAUDE.md (2026-05-17). −2 : refactor 2026-05-15 détaillé dans MEMORY.md mais pas extrait en doc dédiée. |
 | Lisibilité/Conventions | 14/15 | ESLint **155 warnings · 0 erreur** (camelCase exports inter-modules, acceptés sans bundler) · 2 TODO/FIXME Python · ruff 0 · style guides appliqués. −1 : 135 inline styles `style.display=`/`style.color=` côté JS (acceptés pour SPA temps réel avec HUD dynamique). |
 | Performance | 10/10 | Circuit breaker Ollama 8 call-sites (refus 1ms vs timeout 30s si Ollama down) · cache SOC 30s · debounce DSP audio · fix IPv6 systémique (`127.0.0.1` partout, −97% latence) · pré-warm Kokoro CUDA au boot (0 cold start 42.8s sur 1re alerte) · pré-warm phi4 SOC en `num_ctx 8192` · pipeline voix : invariant AudioContext + découpage TTS `_splitForTts` (voix en ~1s vs ~15-24s) · optimisation VRAM (`_SOC_NUM_CTX` 16384→8192, embed dé-épinglé · VRAM libre ~2.0-2.8 Go). |
@@ -20,12 +20,12 @@
 
 | Métrique | Valeur |
 |---|---|
-| **Tests pytest** | **933 pass · 3 skip · 0 fail** (post-migration 2026-05-17 : −3 tests router retirés) |
-| **Coverage globale** | **51%** (6065 stmts · 2976 miss) |
+| **Tests pytest** | **959 pass · 0 skip · 0 fail** (2026-05-22 : +26 tests cœur sécurité, audit E1) |
+| **Coverage globale** | **52%** (6217 stmts · 2980 miss) |
 | **Modules Python à 100% cov** | **22 modules** (recompte audit 2026-05-17 soir) : `bypass_code`, `bypass_proxmox`, `bypass_simple`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_pending_bypass`, `chat_routing`, `chat_soc_inject`, `chat_stream`, `chat_system_prompt`, `chat_tool_calls`, `deferred_speak`, `llm_opts`, `ollama_circuit`, `security_whitelists`, `ssh_terminal`, `stream_tokens`, `tts_cleaner`, `tts_dedup`, `voice_lab`, `blueprints/__init__` |
-| **Modules Python <50% cov** | `jarvis.py` 26% · `blueprints/soc.py` 34% (orchestrateurs Flask, couverts par E2E) |
-| **`jarvis.py`** | **4739 L** (2918 stmts exécutables) |
-| **`blueprints/soc.py`** | 986 stmts (1691 L) |
+| **Modules Python <50% cov** | `jarvis.py` 30% · `blueprints/soc.py` 31% (orchestrateurs Flask, couverts par E2E) |
+| **`jarvis.py`** | **4814 L** (2957 stmts exécutables) |
+| **`blueprints/soc.py`** | 1095 stmts (1872 L) |
 | **Modules Python totaux** | 35 modules dans `scripts/` (33 + 1 blueprint + `__init__`) |
 | **`jarvis_main.js`** | 148 L (post-refactor −98,1% depuis 7828L) |
 | **Modules JS totaux** | 21 modules (18 dans `static/js/` + 3 dans `static/`) |
@@ -37,7 +37,48 @@
 | **TTS moteurs** | 4 (edge-tts · Kokoro CUDA · Piper · SAPI5) avec fallback chain |
 | **ESLint warnings** | 155 · 0 erreur |
 | **ruff** | 0 erreur |
-| **Pre-commit hooks** | ruff + eslint (commit) · pytest 933 tests (pre-push) |
+| **Pre-commit hooks** | ruff + eslint (commit) · pytest 959 tests (pre-push) |
+
+---
+
+## 0ter. Session 2026-05-22 — audit dette complet honnête + 7 correctifs
+
+Audit dette technique complet du projet JARVIS (3 agents d'audit + vérification
+personnelle de chaque finding sérieux). Score recalibré honnêtement : le
+**92/100** auto-affiché était inflaté — consolidé **84/100** avant correctifs,
+**88/100** après. Les 9 findings ont été traités le jour même :
+
+- **E2** — deux whitelists de services divergentes (`_ALLOWED_SERVICES` soc.py
+  vs `ALLOWED_RESTART_SVCS` security_whitelists.py) → consolidées dans
+  `security_whitelists.py` (nouvelle `ALLOWED_SOC_RESTART_SVCS`, source unique ;
+  `soc._ALLOWED_SERVICES` devient un alias). Divergence `php*-fpm` **résolue le
+  jour même par vérification SSH** : aucun hôte ne tourne php-fpm (srv-ngix sans
+  PHP, clt/pa85 en mod_php `libapache2-mod-php8.4`) — entrées `php*-fpm` mortes
+  retirées des deux whitelists. `suricata` ajouté à `ALLOWED_SOC_RESTART_SVCS` :
+  l'auto-engine SOC (`_check_services`, déclencheur #10) devait pouvoir le
+  redémarrer mais son absence de la whitelist bloquait l'action.
+- **M1** — `_SSH_DEV1` hardcodé alors que les 4 autres hôtes passaient par
+  `soc_config.json` → `dev1_*` ajouté aux défauts, `_SSH_DEV1` dérivé de la config.
+- **M2** — bloc `[tool.ruff]` mort dans `pyproject.toml` (ruff lit `ruff.toml`
+  en priorité) → supprimé ; `pyproject.toml` ne porte plus que la config pytest.
+- **M3** — éditeur Monaco chargé depuis CDN jsdelivr (seule dépendance réseau
+  externe) → documenté dans `chat_ui.js` + `CLAUDE.md`, dégradation gracieuse OK.
+- **M4** — `json.loads` non gardé dans `stream_llm` → `try/except` : une ligne
+  Ollama malformée est sautée sans casser le flux SSE.
+- **F1** — `.gitignore` ne couvrait pas `*.bak.<timestamp>.json` → pattern
+  `*.bak.*` ajouté.
+- **F4** — code mort retiré : `_vpEncodeWav` (voice_print.js), `handle_mcp`
+  (jarvis_mcp_server.py) ; chemin obsolète `Documents\JARVIS` corrigé (DEPLOIEMENT.md).
+- **F3** — doc drift corrigé (`CLAUDE.md`, ce document : compteurs
+  lignes/tests/coverage réalignés sur la mesure réelle).
+- **E1** *(partiel)* — couverture du cœur sécurité : +26 tests
+  (`test_jarvis_soc_context.py`) sur `_build_monitoring_context`, `_kc_ban_signal`,
+  `_pve_context_lines` — fonctions pures portant l'injection de contexte SOC dans
+  phi4, jusque-là à 0%. `jarvis.py` 26→30%. ⚠ Reste ouvert : la couverture
+  agrégée de `jarvis.py` (~150 routes Flask) demande un chantier de tests dédié —
+  flaggé, non forcé (`feedback_no_big_refactor`).
+
+Vérifications : **959 pytest pass · 0 skip · 0 fail**, ruff **0**, eslint **0 erreur**.
 
 ---
 

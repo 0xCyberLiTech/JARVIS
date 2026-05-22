@@ -19,6 +19,10 @@ from pathlib import Path
 
 from flask import Blueprint, Response, request
 
+# Whitelists de services — source unique : security_whitelists.py centralise
+# toute la politique de whitelist de sécurité (write-ops SSH + route HTTP SOC).
+from security_whitelists import ALLOWED_SOC_RESTART_SVCS
+
 soc_bp = Blueprint("soc", __name__)
 
 # ── Dépendances injectées (speak + limiter depuis jarvis.py) ──────────
@@ -229,6 +233,10 @@ _SOC_CONFIG_DEFAULTS = {
     "pa85_ssh_port":     "2272",
     "pa85_ssh_user":     "root",
     "pa85_ssh_key":      str(Path.home() / ".ssh/id_pa85"),
+    "dev1_host":         "192.168.1.21",
+    "dev1_ssh_port":     "2272",
+    "dev1_ssh_user":     "root",
+    "dev1_ssh_key":      str(Path.home() / ".ssh/id_dev"),
 }
 
 
@@ -258,14 +266,15 @@ _SSH_NGIX    = _ssh_base(_SOC_CFG["ngix_ssh_user"],    _SOC_CFG["ngix_host"],   
 _SSH_PROXMOX = _ssh_base(_SOC_CFG["proxmox_ssh_user"], _SOC_CFG["proxmox_host"], _SOC_CFG["proxmox_ssh_port"], _SOC_CFG["proxmox_ssh_key"])
 _SSH_CLT     = _ssh_base(_SOC_CFG["clt_ssh_user"],     _SOC_CFG["clt_host"],     _SOC_CFG["clt_ssh_port"],     _SOC_CFG["clt_ssh_key"])
 _SSH_PA85    = _ssh_base(_SOC_CFG["pa85_ssh_user"],     _SOC_CFG["pa85_host"],    _SOC_CFG["pa85_ssh_port"],    _SOC_CFG["pa85_ssh_key"])
-_SSH_DEV1    = _ssh_base("root", "192.168.1.21", 2272, str(Path.home() / ".ssh" / "id_dev"))
+_SSH_DEV1    = _ssh_base(_SOC_CFG["dev1_ssh_user"],   _SOC_CFG["dev1_host"],    _SOC_CFG["dev1_ssh_port"],    _SOC_CFG["dev1_ssh_key"])
 
 # Lock pour sérialiser les connexions SSH — évite les timeouts par connexions parallèles
 _SSH_LOCK  = threading.Lock()
 _SOC_BAN_LOCK = threading.Lock()  # atomicité check+set sur _SOC_AUTO_BANNED
 
 # ── Services autorisés au restart ─────────────────────────────
-_ALLOWED_SERVICES = {"nginx", "crowdsec", "fail2ban", "php8.2-fpm", "php8.3-fpm"}
+# Alias local — source unique = security_whitelists.ALLOWED_SOC_RESTART_SVCS.
+_ALLOWED_SERVICES = ALLOWED_SOC_RESTART_SVCS
 
 # ── IPs LAN — jamais bannies ──────────────────────────────────
 # Plage RFC1918 complète — alignée sur le regex JS : /^(192\.168\.|10\.|172\.(1[6-9]|2\d|3[01])\.|127\.)/
