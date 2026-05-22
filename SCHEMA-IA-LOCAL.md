@@ -1,5 +1,5 @@
 # SCHÉMA — ARCHITECTURE IA LOCALE 0xCyberLiTech
-<!-- Mise à jour : 2026-05-22 — v9 — routing 4 branches SOC/GÉNÉRAL/CODE/CR · phi4:14b + qwen3:8b · mxbai-embed · score honnête global 88/100 (audit dette complet 2026-05-22) · 31 modules Python (jarvis.py 4814L) · refactor JS terminé jarvis_main.js 7828→148L (−98,1%) -->
+<!-- Mise à jour : 2026-05-22 — v9 — routing 4 branches SOC/GÉNÉRAL/CODE/CR · phi4:14b + qwen3:8b · mxbai-embed · refactor JS terminé · métriques courantes (score, lignes, tests, coverage) → BILAN-TECHNIQUE.md §0 -->
 
 ---
 

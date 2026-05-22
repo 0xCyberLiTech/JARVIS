@@ -10,13 +10,12 @@
 **JARVIS** = assistant IA local type Iron Man · Flask `localhost:5000` · Windows 11 (RTX 5080, 16 GB VRAM) · 100% local, zéro cloud LLM.
 
 - Version : **v3.3** (interface holographique)
-- Score dette honnête : **88/100** (audit dette complet 2026-05-22 · 7 correctifs appliqués · E1 couverture cœur partiellement traité · cf. `BILAN-TECHNIQUE.md`)
-- Tests : **959 pytest pass · 0 skip** · coverage 52% · 22+ modules à 100% cov
-- Refactor JS : **terminé** (`jarvis_main.js` 148L · −98,1% depuis 7828L)
+- Refactor JS : **terminé** (`jarvis_main.js` −98,1%, 18 modules extraits)
+- 📊 Score dette, lignes, tests, coverage → **source unique : [`BILAN-TECHNIQUE.md` §0](BILAN-TECHNIQUE.md)** (ne pas recopier ces chiffres ailleurs)
 
 ## Sources de vérité (ordre de priorité)
 
-1. **`MEMORY.md`** (2672L) — historique complet par session · décisions · commits SHA
+1. **`MEMORY.md`** — historique complet par session · décisions · commits SHA
 2. **`BILAN-TECHNIQUE.md`** — état technique structuré · chiffres · décomposition score
 3. **`RUNBOOK.md`** — reconstruction DR · secrets · vérifs
 4. **`docs/`** — 7 fichiers de référence :
@@ -41,7 +40,7 @@
 | RAG | 599 chunks · mxbai-embed-large · seuil 0.35 · TTL 300s · auto-refresh 6h · embed `keep_alive "10m"` (dé-épinglé 2026-05-20) |
 | MCP | streamable-HTTP port 5010 · **12 outils** · Claude Desktop / Cursor |
 | Frontend | SPA vanilla JS · zéro NPM (sauf tests E2E) · 21 modules JS · 8 CSS · 10 templates HTML · éditeur code modal = Monaco via CDN (seule dép. réseau externe, dégradation gracieuse hors ligne) |
-| Tests | pytest (959) · ruff · eslint · pre-commit hooks · **pre-push pytest** (CI locale, pas de cloud) |
+| Tests | pytest · ruff · eslint · pre-commit hooks · **pre-push pytest** (CI locale, pas de cloud) |
 
 ## Lancement
 
@@ -78,8 +77,8 @@ Cf. mémoire `jarvis_modes` — règle ABSOLUE pour Claude :
 - **Chemins Unix (Git Bash pour ssh/scp)** : `/c/Users/mmsab/...`
 - **Clients internes** : `http://127.0.0.1:PORT` (PAS `localhost` — résout IPv6 sur Windows, +97% latence) — source unique `OLLAMA_URL` dans `jarvis.py:544`
 - **Pre-commit hooks** : ruff + eslint bloquants
-- **Pre-push hook** : pytest 959 tests (alternative locale à CI cloud — impossible « rien sur le web »)
-- **Édition gros fichiers** : ⚠ Write tool tronque >200 Ko → toujours `Edit`, jamais `Write` pour `jarvis.py` (4814L) ou `jarvis_main.js`
+- **Pre-push hook** : pytest (alternative locale à CI cloud — impossible « rien sur le web »)
+- **Édition gros fichiers** : ⚠ Write tool tronque >200 Ko → toujours `Edit`, jamais `Write` pour `jarvis.py` ou `jarvis_main.js`
 
 ## Règles ABSOLUES (zéro régression infra)
 
@@ -97,8 +96,8 @@ Cf. mémoires `feedback_jarvis_no_regression` · `feedback_data_security` · `fe
 
 | Fichier | Rôle |
 |---|---|
-| `scripts/jarvis.py` (4814L) | Serveur Flask · ~150 endpoints · routing 4 modes · pré-warm · circuit breaker |
-| `scripts/blueprints/soc.py` (1872L) | Endpoints SOC · cache 30s + fallback SSH · `_SOC_BAN_CONFIG` source unique |
+| `scripts/jarvis.py` | Serveur Flask · ~150 endpoints · routing 4 modes · pré-warm · circuit breaker |
+| `scripts/blueprints/soc.py` | Endpoints SOC · cache 30s + fallback SSH · `_SOC_BAN_CONFIG` source unique |
 | `scripts/jarvis_mcp_server.py` (554L) | MCP 12 outils · sanitize IP → `[IP]` · port 5010 |
 | `scripts/chat_soc_inject.py` | Injection bloc compact phi4 mode SOC (100% serveur) |
 | `scripts/ollama_circuit.py` | Circuit breaker state machine 3 états · 100% cov · 23 tests |
@@ -133,7 +132,7 @@ Cf. mémoires `feedback_jarvis_no_regression` · `feedback_data_security` · `fe
 
 ```
 édition locale → pre-commit (ruff + eslint) → git commit
-              → pre-push (pytest 959) → git push (local, pas de remote)
+              → pre-push (pytest) → git push (local, pas de remote)
               → redémarrer JARVIS (stop_jarvis.bat → python jarvis.py)
 ```
 

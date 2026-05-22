@@ -5,6 +5,11 @@
 
 ## 0. État actuel (audit dette honnête 2026-05-22)
 
+> 📊 **SOURCE UNIQUE des métriques courantes du projet** — score dette, lignes
+> `jarvis.py` / `soc.py` / `jarvis_main.js`, nombre de tests pytest, coverage.
+> Les autres docs JARVIS pointent ici au lieu de recopier ces chiffres : un seul
+> endroit à mettre à jour, plus de dérive entre documents.
+
 **Score honnête : 88/100** (audit dette complet 2026-05-22 · 7 correctifs appliqués · E1 couverture cœur partiellement traité) — Décomposition :
 
 | Critère | Score | Justification |

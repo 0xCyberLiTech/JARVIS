@@ -1,5 +1,5 @@
 # JARVIS — Référence Technique
-<!-- 2026-05-22 — v2.1 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed-large · score honnête global 88/100 (audit dette complet 2026-05-22 : 959 tests pytest · 0 skip · 22 à 100% cov · coverage 52% lignes · refactor JS jarvis_main.js 7828→148L (-98,1%) · fix perf IPv6 · circuit breaker Ollama 8 call-sites · pré-warm Kokoro · hook pre-push) -->
+<!-- 2026-05-22 — v2.1 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed-large · refactor JS terminé · fix perf IPv6 · circuit breaker Ollama · pré-warm Kokoro · hook pre-push · métriques courantes (score, lignes, tests, coverage) → ../BILAN-TECHNIQUE.md §0 -->
 
 Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · Python 3.11
 
@@ -12,7 +12,7 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 | Version | 3.3 (production) · chantier dette technique 2026-05-14/15 |
 | Audit sécurité | **8/10** honnête (v2.7 — 2026-05-13 · audit ciblé + 1 fix race condition) |
 | Dette technique (NDT script auto) | **100/100** · D1/D2/D6/D13 zéro violation (session 17 — 2026-05-08) |
-| **Score honnête global** | **88/100** (audit dette complet 2026-05-22 · 959 tests pytest · 0 skip · **22 modules à 100% cov** · coverage 52% lignes · refactor JS jarvis_main.js 7828→148L (−98,1%) · fix perf IPv6 −97% latence interne · circuit breaker Ollama 8 call-sites · pré-warm Kokoro CUDA · MAIS pas de CI cloud — alternative locale pre-push · plafond pratique sans cloud atteint) |
+| **Score & métriques** | Source unique → [`BILAN-TECHNIQUE.md` §0](../BILAN-TECHNIQUE.md) (score dette, lignes, tests, coverage). Plafond pratique sans CI cloud atteint — alternative locale : hook pre-push pytest. |
 | Machine | Windows 11 Pro · RTX 5080 16 GB GDDR7 · CUDA 12 · Python 3.11 |
 | LLM | Ollama local uniquement — zéro cloud |
 
@@ -37,19 +37,22 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 | DSP | numpy · scipy · DeepFilterNet GPU sm_120 Blackwell |
 | MCP | jarvis_mcp_server.py · **12 outils** (+`jarvis_defense_24h` 2026-05-16) · stdio pythonw |
 
-### 2.2 Métriques fichiers (2026-05-22)
+### 2.2 Fichiers & rôles
 
-| Fichier | Lignes | État |
-|---|---|---|
-| `scripts/jarvis.py` | **4 814** | ~150 routes · routing **4 branches** SOC/GÉNÉRAL/CODE/CR · orchestrateur Flask · 33 modules satellites extraits |
-| `scripts/blueprints/soc.py` | 1 872 | Blueprint SOC · auto-engine · SSH 4 hôtes · `/api/soc/ip-history` · cache 30s + fallback SSH |
-| `scripts/jarvis_mcp_server.py` | ~554 | **12 outils** · `_TOOLS_DEFS` · streamable-HTTP port 5010 |
-| `scripts/static/jarvis_main.js` | **148** | ✅ refactor JS terminé : 7828→148 (−98,1%) · 18 modules extraits |
-| `scripts/static/js/` (18 modules) | ~14 600 | audio_viz·chat_core·chat_ui·boot_init·settings_llm·audio_rack·gpu_monitor·… (refactor JS terminé) |
-| **31 modules Python extraits** | **~3 540** | Phase 3 : Audio/Voice 5 + Bypass 8 + Infra/RAG 2 + Chat/LLM core 15 + `audio_dsp.py` 508L (chantier 2026-05-14) — voir [`ROUTING-JARVIS.md`](ROUTING-JARVIS.md) |
-| `scripts/static/css/` | 8 fichiers | ex-`jarvis.css` 5270L → core/chat/dsp/terminal-taches/hud-welcome/rack/settings-soc/voicelab (chantier 2026-05-14) |
-| `scripts/templates/jarvis.html` | ~215 | Shell Jinja2 · 0 handler inline · charge 8 `<link>` CSS + 15 `<script>` JS |
-| RAG `jarvis_rag/meta.json` | 599 chunks | MEMORY.md×2 + CIRCUIT_SOC (49) + RUNBOOK (15) |
+> Tailles de fichiers, coverage par module et score dette → source unique
+> [`BILAN-TECHNIQUE.md` §0 et §2](../BILAN-TECHNIQUE.md).
+
+| Fichier | Rôle |
+|---|---|
+| `scripts/jarvis.py` | Orchestrateur Flask · ~150 routes · routing 4 branches SOC/GÉNÉRAL/CODE/CR · 33 modules satellites |
+| `scripts/blueprints/soc.py` | Blueprint SOC · auto-engine · SSH 4 hôtes · `/api/soc/ip-history` · cache 30s + fallback SSH |
+| `scripts/jarvis_mcp_server.py` | MCP — 12 outils · `_TOOLS_DEFS` · streamable-HTTP port 5010 |
+| `scripts/static/jarvis_main.js` | Point d'entrée JS · refactor terminé · 18 modules extraits |
+| `scripts/static/js/` | 18 modules JS (audio_viz, chat_core, chat_ui, boot_init, settings_llm, …) |
+| **31 modules Python extraits** | Phase 3 : Audio/Voice + Bypass + Infra/RAG + Chat/LLM core + `audio_dsp.py` — voir [`ROUTING-JARVIS.md`](ROUTING-JARVIS.md) |
+| `scripts/static/css/` | 8 fichiers (ex-`jarvis.css` éclaté · chantier 2026-05-14) |
+| `scripts/templates/jarvis.html` | Shell Jinja2 · 0 handler inline · 8 onglets |
+| RAG `jarvis_rag/meta.json` | 599 chunks (MEMORY.md×2 + CIRCUIT_SOC + RUNBOOK) |
 | `jarvis_prompt_profiles.json` | — | 7 profils · Généraliste Gemma4 · 3 RÈGLES ABSOLUES (Qwen2.5/DeepSeek/LLaVA supprimés) |
 
 ---
@@ -172,7 +175,7 @@ Déplacement            : mv · cp
 
 ⚠ **Distinction critique** :
 - **NDT 100/100** = score script automatisé maison (D1/D2/D6/D13 dans le code Python). Mesure fonction longue, silent pass, magic numbers, params >6. Reste vrai au 2026-05-15.
-- **Score honnête global 88/100** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf). Audit dette complet honnête 2026-05-22 : 9 findings + 1 écart code/doc corrigés, score recalibré (le 92/100 auto-affiché était inflaté → 84 réel → 88 après correctifs). 959 tests pytest · 0 skip sur **35 modules · 22 à 100% cov** · coverage 52% lignes, fix perf IPv6, circuit breaker Ollama 8 call-sites, pré-warm Kokoro CUDA, hook pre-push. Plafond pratique sans CI cloud atteint. Pour 95+ : couverture jarvis.py / soc.py Flask routes (faible ROI) ou CI cloud (impossible « rien sur le web »).
+- **Score honnête global** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf) — valeur courante : [`BILAN-TECHNIQUE.md` §0](../BILAN-TECHNIQUE.md). Audit dette complet honnête 2026-05-22 (9 findings + 1 écart code/doc corrigés ; le 92/100 auto-affiché était inflaté). Plafond pratique sans CI cloud atteint. Pour 95+ : couverture des routes Flask (faible ROI) ou CI cloud (impossible « rien sur le web »).
 
 ### NDT (script automatisé) — 100/100
 

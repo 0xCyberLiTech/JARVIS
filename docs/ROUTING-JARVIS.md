@@ -152,9 +152,9 @@ Validation automatisée (`tests/e2e/`) :
 
 ## Modules Python extraits — Phase 3 (session 33b) + chantier dette (2026-05-14)
 
-Le monolithe `jarvis.py` a été allégé : **modules dédiés** extraits → `jarvis.py` 6592 → **4814 lignes**.
+Le monolithe `jarvis.py` a été allégé : **modules dédiés** extraits (ex-monolithe 6592 lignes).
 
-⚠ **Note honnête** : score dette technique global = **88/100** (pas 100 — audit dette complet honnête 2026-05-22). Refactor JS terminé (`jarvis_main.js` 7828→**148 L** −98,1%, 18 modules JS) + **959 tests pytest** (0 skip) sur **35 modules · 22 à 100% cov** avec **coverage 52% lignes** + fix perf IPv6 (-97% latence interne) + circuit breaker Ollama 8 call-sites + pré-warm Kokoro CUDA. Plafond pratique sans CI cloud atteint. Pour 95+ : couverture jarvis.py / soc.py Flask routes (faible ROI) ou CI cloud (impossible « rien sur le web »).
+⚠ **Note honnête** : refactor JS terminé (−98,1%, 18 modules JS) · suite pytest · fix perf IPv6 (-97% latence interne) · circuit breaker Ollama 8 call-sites · pré-warm Kokoro CUDA. Score dette, lignes, tests, coverage → source unique [`BILAN-TECHNIQUE.md` §0](../BILAN-TECHNIQUE.md). Plafond pratique sans CI cloud atteint — pour 95+ : couverture des routes Flask (faible ROI) ou CI cloud (impossible « rien sur le web »).
 
 ### Audio/Voice (5)
 | Module | Lignes | Rôle |
@@ -202,10 +202,10 @@ Le monolithe `jarvis.py` a été allégé : **modules dédiés** extraits → `j
 | [`chat_stream.py`](../scripts/chat_stream.py) | 45 | Orchestrateur stream |
 | [`chat_generate.py`](../scripts/chat_generate.py) | 60 | Top-level wrapper avec error handling |
 
-**Total Python : 31 modules extraits** (Phase 3 : 30 modules ~3034L · session 33b) + `audio_dsp.py` 508L (chantier dette 2026-05-14) → `jarvis.py` 4814L
+**Total Python : 31 modules extraits** (Phase 3 : 30 modules · session 33b) + `audio_dsp.py` (chantier dette 2026-05-14) → `jarvis.py` allégé
 **Session 33c — Split JS partiel** : `recorder.js` 660L + `voice_print.js` 852L extraits en IIFE
 **Chantier dette 2026-05-14** : Ruff 98→0 + `ruff.toml` · git initialisé (100% local, aucun remote) · pre-commit hooks bloquants · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · refactor JS partiel (3 modules : terminal_code/voice_lab/stt)
 **Session 2026-05-14 (soir)** : injection SOC 100 % serveur (suppression incrustation client-side `_monCtxStr`/`_buildChatPayload` → fin des hallucinations) · `force_soc` threadé en DI · règle crawlers légitimes + reco de ban proportionnée au signal · garde-fou srv-ngix injoignable
-**Refactor JS 2026-05-14/15 (TERMINÉ)** : `jarvis_main.js` **7828→148 L (−98,1% cumul)** · **21 modules JS** (15 dans `static/js/` + 6 historiques). Méthode byte-identique vérifiée (bodies identiques · `node --check` · eslint 0 · validation E2E prod à chaque étape). ⚠ `audio_viz.js` chargé juste après `jarvis_main.js` (définit `_SAMPLE_RATE`, requis au top-level par `recorder.js`). ⚠ `chat_ui.js` AVANT `chat_core.js` (chat_core utilise `addMessage`/`history`/`_esc`). ⚠ `soc_tab.js` AVANT `chat_core.js` (chat_core utilise `_buildChatPayload`).
+**Refactor JS (TERMINÉ)** : `jarvis_main.js` réduit de **−98,1%** · **21 modules JS** (15 dans `static/js/` + 6 historiques). Méthode byte-identique vérifiée (bodies identiques · `node --check` · eslint 0 · validation E2E prod à chaque étape). ⚠ `audio_viz.js` chargé juste après `jarvis_main.js` (définit `_SAMPLE_RATE`, requis au top-level par `recorder.js`). ⚠ `chat_ui.js` AVANT `chat_core.js` (chat_core utilise `addMessage`/`history`/`_esc`). ⚠ `soc_tab.js` AVANT `chat_core.js` (chat_core utilise `_buildChatPayload`).
 
-**Score dette technique HONNÊTE 88/100** (audit dette complet 2026-05-22 · 959 tests pytest · 0 skip · 22 modules à 100% cov · coverage 52% lignes · refactor JS terminé · fix perf IPv6 · circuit breaker Ollama 8 call-sites · pré-warm Kokoro CUDA · hook pre-push pytest)
+**Score dette, tests, coverage → source unique [`BILAN-TECHNIQUE.md` §0](../BILAN-TECHNIQUE.md)** · audit dette complet 2026-05-22 · refactor JS terminé · fix perf IPv6 · circuit breaker Ollama 8 call-sites · pré-warm Kokoro CUDA · hook pre-push pytest.

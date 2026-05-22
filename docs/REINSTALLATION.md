@@ -1,7 +1,7 @@
 # JARVIS — Guide de réinstallation Windows
 
 > Document critique — à conserver dans les sauvegardes.
-> Dernière mise à jour : 2026-05-22 — Audit dette complet · 35 modules Python · jarvis.py 4814L · refactor JS terminé : jarvis_main.js 7828→148 L (−98,1%), 18 modules static/js/
+> Dernière mise à jour : 2026-05-22 — Audit dette complet · 35 modules Python · refactor JS terminé · 18 modules static/js/
 
 ---
 
@@ -119,8 +119,8 @@ Windows 11 Pro
 │
 └── JARVIS                                          ← assistant IA local
     ├── racine   : C:\Users\mmsab\Documents\0xCyberLiTech\JARVIS\
-    ├── backend  : scripts\jarvis.py (orchestrateur Flask — port 5000 — 4814 L + 33 modules Python)
-    ├── frontend : scripts\templates\jarvis.html (shell Jinja2) + static\jarvis_main.js (148 L — refactor JS terminé, 7828→148) + static\js\ (18 modules) + static\css\ (8 fichiers)
+    ├── backend  : scripts\jarvis.py (orchestrateur Flask — port 5000 — 33 modules Python)
+    ├── frontend : scripts\templates\jarvis.html (shell Jinja2) + static\jarvis_main.js (refactor JS terminé) + static\js\ (18 modules) + static\css\ (8 fichiers)
     └── configs  : jarvis_*.json + jarvis_system_prompt.txt
 ```
 
@@ -141,7 +141,7 @@ D:\BACKUP-WINDOWS\                         ← racine sauvegarde
 │   ├── start_dashboard.bat                ← démarrage JARVIS
 │   ├── stop_jarvis.bat                    ← arrêt JARVIS
 │   ├── scripts\
-│   │   ├── jarvis.py                      ← orchestrateur Flask (4814 lignes · ~150 routes · 33 modules extraits)
+│   │   ├── jarvis.py                      ← orchestrateur Flask (~150 routes · 33 modules extraits)
 │   │   ├── templates\
 │   │   │   ├── jarvis.html                ← shell Jinja2 (211 lignes)
 │   │   │   ├── tabs\                      ← 8 onglets modulaires

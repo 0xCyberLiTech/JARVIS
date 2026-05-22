@@ -12,10 +12,10 @@ Assistant IA personnel (type Iron Man) — serveur Flask **localhost:5000**, tou
 
 | Élément | Emplacement |
 |---|---|
-| Serveur Flask | `JARVIS/scripts/jarvis.py` (~4814 L + 33 modules Python) |
+| Serveur Flask | `JARVIS/scripts/jarvis.py` (orchestrateur Flask + 33 modules Python) |
 | Blueprint SOC | `JARVIS/scripts/blueprints/soc.py` |
 | Serveur MCP | `JARVIS/scripts/jarvis_mcp_server.py` (port 5010, streamable-HTTP) |
-| UI | `JARVIS/scripts/templates/` + `JARVIS/scripts/static/` (`jarvis_main.js` 148 L + 21 modules JS dont 18 dans `static/js/` + 8 CSS) |
+| UI | `JARVIS/scripts/templates/` + `JARVIS/scripts/static/` (`jarvis_main.js` + 21 modules JS dont 18 dans `static/js/` + 8 CSS) |
 | Lancement | `cd JARVIS\scripts && python jarvis.py` → http://localhost:5000 |
 | Arrêt | `JARVIS\stop_jarvis.bat` ou raccourci bureau `JARVIS - Arrêt.lnk` |
 
@@ -94,8 +94,8 @@ Le redémarrage est requis pour : `jarvis.py`, les modules Python, `jarvis_promp
 - ⚠ Les 4 modes : SOC = cybersécurité (défaut), GENERAL = conversation, CODE = code+infogérance (srv-dev-1 uniquement), CR = code+reasoning. Auto-engine SOC actif **uniquement en mode SOC**.
 - ⚠ Injection contexte SOC = **100 % serveur** (system prompt, jamais l'historique) — ne pas réintroduire d'incrustation client-side.
 - ⚠ **Clients internes = 127.0.0.1, pas localhost** : `OLLAMA_URL`, `JARVIS_BASE` (MCP) et tout client interne JARVIS doivent utiliser `http://127.0.0.1:PORT` explicite. `localhost` résout `::1` (IPv6) en premier sur Windows et Flask n'écoute pas IPv6 → timeout ~2s par requête. Source unique : `OLLAMA_URL` dans `jarvis.py:544`. Outil de profiling : `tools/profile_perf.py`.
-- ⚠ **Tests Python** : `python -m pytest` (**959 tests** sur 35 modules · 22 à 100% cov · coverage RÉELLE **52%** via `pytest --cov=scripts` · pyproject.toml `[tool.pytest.ini_options]` · `tests/python/conftest.py` ajoute `scripts/` au sys.path). Doit être vert avant tout commit Python ET avant tout push (hook pre-push installé).
-- ⚠ **Hook pre-push pytest** : `pre-commit install --hook-type pre-push` lance les 959 tests avant chaque `git push`. Bloque sur tests rouges. Alternative locale à CI cloud (impossible « rien sur le web »). Bypass : `git push --no-verify` (à éviter — c'est précisément contre ça).
+- ⚠ **Tests Python** : `python -m pytest` (`pytest --cov=scripts` · config `pyproject.toml` `[tool.pytest.ini_options]` · `tests/python/conftest.py` ajoute `scripts/` au sys.path · nombre de tests + coverage → `BILAN-TECHNIQUE.md` §0). Doit être vert avant tout commit Python ET avant tout push (hook pre-push installé).
+- ⚠ **Hook pre-push pytest** : `pre-commit install --hook-type pre-push` lance la suite pytest avant chaque `git push`. Bloque sur tests rouges. Alternative locale à CI cloud (impossible « rien sur le web »). Bypass : `git push --no-verify` (à éviter — c'est précisément contre ça).
 - ⚠ **Audit log SSH write ops** (`logs/audit_writeops.jsonl` · gitignored · ajouté 2026-05-17) : toute write op SSH (autorisée OU refusée) est tracée en JSONL `{ts, host, cmd, allowed, out_len}` via `audit_writeop()` dans `security_whitelists.py`. Best-effort : un échec d'I/O ne bloque JAMAIS l'exécution de la commande. Forensic post-mortem ciblé (vs noyé dans jarvis.log générique).
 - ⚠ **Circuit breaker Ollama** (`scripts/ollama_circuit.py`, 8 call-sites wrappés dans `jarvis.py`) : si Ollama tombe (3 erreurs consécutives) → circuit OPEN, refus immédiat des requêtes Ollama (1 ms vs timeout 30 s). Auto-recovery via test HALF_OPEN après 30 s, backoff exponentiel ×2 (max 5 min). Indicateur visuel HUD `● OLLAMA` (vert/orange/rouge). Endpoint `/api/ollama-status` retourne `{running, state, retry_in_s, current_timeout_s}`. Bouton SOC dashboard PING JARVIS affiche aussi l'état Ollama (toast + badge).
 - ⚠ **Pré-warm Kokoro CUDA au boot** (`_kokoro_prewarm` dans `jarvis.py`) : thread daemon lancé 60 s après boot, charge le pipeline Kokoro CUDA en VRAM. Élimine le cold start mesuré 42.8 s (profiling `tools/profile_tts.py`). 1re alerte vocale instantanée (~200 ms TTFB) au lieu de 42 s.
