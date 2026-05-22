@@ -1,5 +1,5 @@
 # JARVIS — Guide de référence
-<!-- 2026-05-17 — v2.9 — Audit dette complet final post-migration LAN unique Freebox : git + hooks pre-commit/pre-push + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS terminé (jarvis_main.js 148L, 18 modules) + 933 tests pytest sur 35 modules · 22 à 100% cov · coverage 51% lignes + fix perf IPv6 (-97% latence) + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro CUDA · 35 modules Python · jarvis.py 4739L · score honnête 92/100 -->
+<!-- 2026-05-22 — v3.0 — Audit dette complet : refactor JS terminé (jarvis_main.js 148L, 18 modules) + 959 tests pytest · 0 skip · 22 à 100% cov · coverage 52% lignes + fix perf IPv6 (-97% latence) + circuit breaker Ollama 8 call-sites + pré-warm Kokoro CUDA · 35 modules Python · jarvis.py 4814L · score honnête 88/100 (audit dette complet 2026-05-22) -->
 
 Assistant IA personnel 0xCyberLiTech — infogérance réseau + assistant quotidien.  
 ⚡ = bypass Python direct (sans LLM, instantané) · 🤖 = via LLM (raisonnement)

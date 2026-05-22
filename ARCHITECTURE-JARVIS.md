@@ -1,5 +1,5 @@
 # JARVIS — Architecture & Zones fonctionnelles
-<!-- v2.7 — 2026-05-15 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · NDT 100/100 (script auto) · score honnête global 92/100 RECALIBRÉ post-audit pytest --cov (départ réel 62, +31 chantier dette) · refactor JS jarvis_main.js 7828→148L (−98,1%) 21 modules · 933 tests pytest sur 32 modules · 22 à 100% cov · coverage 51% lignes (tts_engines 83%, jarvis_mcp_server 91%, ollama_circuit 100%, proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26%) · fix perf IPv6 -97% latence interne · circuit breaker Ollama étendu 8 call-sites + bouton SOC enrichi · pré-warm Kokoro CUDA au boot · profiling TTS détaillé · hook pre-push pytest · 32 modules Python (jarvis.py 4739L) · jarvis.css → 8 fichiers · git local + pre-commit hooks bloquants + ruff.toml -->
+<!-- v2.8 — 2026-05-22 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · score honnête global 88/100 (audit dette complet 2026-05-22) · refactor JS jarvis_main.js 7828→148L (−98,1%) 18 modules · 959 tests pytest · 0 skip · coverage 52% lignes (jarvis.py 30%, soc.py 31%, tts_engines 83%, jarvis_mcp_server 91%, ollama_circuit 100%, proxmox_api 93%, bypass_backup 96%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%) · fix perf IPv6 -97% latence interne · circuit breaker Ollama 8 call-sites · pré-warm Kokoro CUDA au boot · hook pre-push pytest · 32 modules Python (jarvis.py 4814L) · jarvis.css → 8 fichiers · git local + pre-commit hooks bloquants + ruff.toml -->
 
 ---
 
@@ -12,7 +12,7 @@
 │  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────┐  │
 │  │  ZONE UI / TABS  │  │  ZONE AUDIO      │  │  ZONE SOC CLIENT     │  │
 │  │  jarvis_main.js  │  │  jarvis_mixing   │  │  jarvis_main.js      │  │
-│  │  4 013 lignes    │  │  1 375 lignes    │  │  (section SOC)       │  │
+│  │  148 lignes      │  │  1 375 lignes    │  │  (section SOC)       │  │
 │  │  + 14 modules JS │  │                  │  │                      │  │
 │  └────────┬─────────┘  └────────┬─────────┘  └──────────┬───────────┘  │
 └───────────┼─────────────────────┼───────────────────────┼──────────────┘
@@ -24,7 +24,7 @@
 │  ┌───────────────────────┐   ┌───────────────────────────────────────┐  │
 │  │  ZONE IA              │   │  ZONE SOC SERVEUR                     │  │
 │  │  jarvis.py            │   │  blueprints/soc.py                    │  │
-│  │  4633 lignes          │   │  1689 lignes                          │  │
+│  │  4814 lignes          │   │  1872 lignes                          │  │
 │  │  75 routes Flask      │   │  _soc_monitor_loop()  (60s Python)    │  │
 │  │  + 31 modules Python  │   │                                       │  │
 │  └───────────────────────┘   └───────────────────────────────────────┘  │
@@ -349,20 +349,27 @@ jarvis_main.js
 
 ---
 
-## Architecture modulaire — chantier dette 2026-05-14
+## Architecture modulaire
 
-`jarvis.py` n'est plus un monolithe : c'est désormais l'**orchestrateur Flask**
-(4633 L) qui délègue à **31 modules Python** extraits dans `scripts/` (audio,
-bypass SSH/VM/backup, infra/RAG, chat/LLM core, `audio_dsp.py`) — voir
+`jarvis.py` n'est plus un monolithe : c'est l'**orchestrateur Flask** (4814 L)
+qui délègue à **31 modules Python** extraits dans `scripts/` (audio, bypass
+SSH/VM/backup, infra/RAG, chat/LLM core, `audio_dsp.py`) — voir
 [`docs/ROUTING-JARVIS.md`](docs/ROUTING-JARVIS.md) pour la liste complète.
-Côté frontend (refactor JS 2026-05-14 soir) : `jarvis_main.js` **7828→4013 L
-(−49%)** + **14 modules JS** — `jarvis_mixing.js`, `recorder.js`,
-`voice_print.js` dans `static/` · **11 modules** dans `static/js/` :
-terminal_code, voice_lab, stt, tasks_tab, welcome, eq_parametric, eq_music,
-audio_mire, audio_viz, settings_llm, dsp_audio. L'ex-`jarvis.css` monolithique
-est éclaté en **8 fichiers** `static/css/`. Dépôt **git local** (aucun remote)
-+ **pre-commit hooks bloquants** (ruff + eslint) + `ruff.toml`.
-Refactor JS **terminé** 2026-05-14/15 : `jarvis_main.js` 7828→148 L (−98,1% cumul), 15 modules extraits dans `static/js/` (18 modules total). **933 tests pytest** sur **32 modules (22 à 100% cov) Python (100%)** avec coverage **39% lignes** (audit pytest --cov rigoureux : tts_engines 83%, jarvis_mcp_server 91%, ollama_circuit 100%, proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26%). Fix perf IPv6 (`OLLAMA_URL` + `JARVIS_BASE` → `127.0.0.1` explicite) : −97% latence sur clients internes (MCP, soc.py auto-engine). **Circuit breaker Ollama** (`scripts/ollama_circuit.py` · 3 états + backoff exponentiel + indicateur HUD `● OLLAMA` · **étendu à 8 call-sites** dans `jarvis.py` · bouton SOC dashboard PING JARVIS enrichi état Ollama). **Pré-warm Kokoro CUDA au boot** (`_kokoro_prewarm` 60 s post-boot · élimine cold start 42.8 s mesuré par `tools/profile_tts.py`). Hook pre-push pytest installé. Score honnête global 92/100 (recalibré post-audit honnête).
+
+Côté frontend, le **refactor JS est terminé** : `jarvis_main.js` **7828→148 L
+(−98,1%)**, 18 modules JS extraits (`static/js/` + `static/`). L'ex-`jarvis.css`
+monolithique est éclaté en **8 fichiers** `static/css/`.
+
+Dépôt **git local** (aucun remote) + **pre-commit hooks bloquants** (ruff +
+eslint) + `ruff.toml` + hook **pre-push pytest**. **959 tests pytest** (0 skip)
+· coverage **52% lignes** (jarvis.py 30%, soc.py 31% — orchestrateurs Flask ;
+modules satellites majoritairement 83-100% : ollama_circuit 100%, ssh_terminal
+100%, stt 98%, bypass_backup 96%, proxmox_api 93%, rag_live 92%, jarvis_mcp_server
+91%, deepfilter 84%, tts_engines 83%). Fix perf IPv6 (`OLLAMA_URL` + `JARVIS_BASE`
+→ `127.0.0.1`) : −97% latence clients internes. **Circuit breaker Ollama**
+(`ollama_circuit.py` · 3 états + backoff exponentiel · 8 call-sites · indicateur
+HUD `● OLLAMA`). **Pré-warm Kokoro CUDA au boot** (`_kokoro_prewarm`). Score
+honnête global **88/100** (audit dette complet 2026-05-22).
 
 ## Modules centralisés — synthèse
 

@@ -41,7 +41,7 @@
 
 ---
 
-## 0ter. Session 2026-05-22 — audit dette complet honnête + 7 correctifs
+## 0bis. Session 2026-05-22 — audit dette complet honnête + 7 correctifs
 
 Audit dette technique complet du projet JARVIS (3 agents d'audit + vérification
 personnelle de chaque finding sérieux). Score recalibré honnêtement : le
@@ -82,7 +82,7 @@ Vérifications : **959 pytest pass · 0 skip · 0 fail**, ruff **0**, eslint **0
 
 ---
 
-## 0bis. Session 2026-05-20 — correctif structurel pipeline voix + optimisation VRAM + instrumentation TTS
+## 0ter. Session 2026-05-20 — correctif structurel pipeline voix + optimisation VRAM + instrumentation TTS
 
 Diagnostic d'une latence voix intermittente au démarrage (parfois ~15-24 s, parfois gel total). Instrumentation AVANT correction (règle `feedback_instrument_first`).
 
@@ -112,7 +112,7 @@ Les modèles d'embedding (RAG) sont toujours affichés en dernier → le segment
 
 ---
 
-## 0ter. Session 2026-05-16 nuit — Sprint 18d + refactor `_SOC_BAN_CONFIG` + intégrations defense_24h
+## 0quater. Session 2026-05-16 nuit — Sprint 18d + refactor `_SOC_BAN_CONFIG` + intégrations defense_24h
 
 ### Sprint 18d — MCP `jarvis_ioc_status` (12ème outil)
 
@@ -154,7 +154,7 @@ QW4 — Hook ESLint pre-commit JARVIS aligné cohérence cross-projet :
 JARVIS est un **assistant IA local** (type Iron Man) tournant sur la **station Windows 11** de Marc (RTX 5080, 16 GB VRAM). Interface web holographique v3.2, serveur Flask sur `localhost:5000`.
 
 **Caractéristiques techniques** :
-- Backend Python — **32 modules** (`jarvis.py` 4739L + 31 modules satellites), Flask + Ollama
+- Backend Python — **32 modules** (`jarvis.py` 4814L + 31 modules satellites), Flask + Ollama
 - Frontend JS — **21 modules** (`jarvis_main.js` 148L + 18 modules `static/js/` + 3 modules `static/`)
 - LLM local : **5 modèles Ollama** routés par mode (SOC/GENERAL/CODE/CR/RAG)
 - TTS chain : **4 moteurs** avec fallback (edge → Kokoro CUDA → Piper → SAPI5)
@@ -162,7 +162,7 @@ JARVIS est un **assistant IA local** (type Iron Man) tournant sur la **station W
 - RAG : **599 chunks** · mxbai-embed-large · seuil 0.35 · TTL 300s · auto-refresh 6h
 - MCP server : **12 outils** exposés à Claude Desktop / Cursor sur port 5010 streamable-HTTP
 - Routing automatique : 3 branches + bypass Python (VM/service/backup → sans LLM)
-- Tests : **933 pytest pass** · coverage 51% · 25 modules à 100% cov
+- Tests : **959 pytest pass** · coverage 52% · 22 modules à 100% cov
 - Sécurité : whitelist SSH 29 patterns bloqués · profil SOC anti-double-ban · injection 100% serveur
 
 **Architecture moteur IA local** :
@@ -195,8 +195,8 @@ Windows 11 (localhost:5000)
 
 | Module | Taille | Coverage | Contenu |
 |---|---|---|---|
-| `jarvis.py` | 4739 L (2918 stmts) | 26% | Serveur Flask · ~150 endpoints · routing 4 modes · auto-engine SOC proactif · pré-warm phi4/Kokoro · circuit breaker imports · 8 call-sites Ollama wrappés |
-| `blueprints/soc.py` | 1007 stmts | 33% | Endpoints SOC (`/api/soc/*`) · cache monitoring.json TTL 30s · fallback SSH · IP history 30j · ban/unban CrowdSec · defense_24h · ioc |
+| `jarvis.py` | 4814 L (2957 stmts) | 30% | Serveur Flask · ~150 endpoints · routing 4 modes · auto-engine SOC proactif · pré-warm phi4/Kokoro · circuit breaker imports · 8 call-sites Ollama wrappés |
+| `blueprints/soc.py` | 1095 stmts (1872 L) | 31% | Endpoints SOC (`/api/soc/*`) · cache monitoring.json TTL 30s · fallback SSH · IP history 30j · ban/unban CrowdSec · defense_24h · ioc |
 
 ### Modules satellites — Chat & LLM
 
@@ -551,7 +551,7 @@ Push backend params DSP → debouncé 100ms (évite spam HTTP sur drag slider EQ
 `tts_engines 83% · jarvis_mcp_server 91% · rag_live 92% · vision 92% · proxmox_api 93% · bot_verify 95% · bypass_backup 96% · stt 98%`
 
 **Modules <50%** (5) — surface monolithique I/O :
-`jarvis.py 26% · audio_dsp.py 25% · blueprints/soc.py 33% · chat_soc_inject.py 38% · code_reasoning.py 44%`
+`jarvis.py 30% · audio_dsp.py 25% · blueprints/soc.py 31% · chat_soc_inject.py 38% · code_reasoning.py 44%`
 
 ### Tests E2E
 
@@ -562,7 +562,7 @@ Push backend params DSP → debouncé 100ms (évite spam HTTP sur drag slider EQ
 ### Pre-commit hooks
 
 - **Commit** : ruff + eslint bloquants (0 erreur required)
-- **Pre-push** : pytest 933 tests bloquants (CI cloud impossible « rien sur le web »)
+- **Pre-push** : pytest 959 tests bloquants (CI cloud impossible « rien sur le web »)
 
 ### ESLint config (`eslint.config.js`)
 
@@ -603,15 +603,15 @@ Push backend params DSP → debouncé 100ms (évite spam HTTP sur drag slider EQ
 ### ⚠ Rappel : ce ne sont PAS des dettes actionnables
 
 Le projet JARVIS est **post-modularisation** des 2 côtés :
-- **Côté Python** : 33 modules satellites extraits de `jarvis.py`. Ce qui reste dans `jarvis.py` (4739L) est un **orchestrateur Flask** : endpoints HTTP + routing + auto-engine SOC + glue code. Logique métier déjà extraite.
+- **Côté Python** : 33 modules satellites extraits de `jarvis.py`. Ce qui reste dans `jarvis.py` (4814L) est un **orchestrateur Flask** : endpoints HTTP + routing + auto-engine SOC + glue code. Logique métier déjà extraite.
 - **Côté JS** : refactor officiellement TERMINÉ. `jarvis_main.js` 7828→148L (−98,1%). 13 modules extraits dans `static/js/`.
 
 **Les chiffres ci-dessous sont des observations honnêtes, pas des dettes à attaquer** :
 
 | Item | Réalité opérationnelle | Action |
 |---|---|---|
-| `jarvis.py` 26% cov (2909 stmts) | Coverage pytest unit normale pour orchestrateur HTTP · couvert indirectement par **25 tests E2E Playwright** + 800 tests pytest sur modules satellites | IGNORER |
-| `blueprints/soc.py` 33% cov (1007 stmts) | Idem orchestrateur SOC · endpoints cache + fallback SSH · testé indirectement via MCP | IGNORER |
+| `jarvis.py` 30% cov (2957 stmts) | Coverage pytest unit normale pour orchestrateur HTTP · couvert indirectement par **25 tests E2E Playwright** + tests pytest sur modules satellites · +26 tests cœur sécurité 2026-05-22 | IGNORER |
+| `blueprints/soc.py` 31% cov (1095 stmts) | Idem orchestrateur SOC · endpoints cache + fallback SSH · testé indirectement via MCP | IGNORER |
 | 155 warnings ESLint | Exports camelCase inter-modules sans bundler → **faux positifs lint**, pas une dette | IGNORER |
 | 135 inline styles JS | Pattern HUD temps réel acceptable · refactor CSS-in-JS = anti-ROI | IGNORER |
 
@@ -621,18 +621,18 @@ Le projet JARVIS est **post-modularisation** des 2 côtés :
 
 ---
 
-## 12. Bilan santé — 2026-05-17
+## 12. Bilan santé — 2026-05-22
 
 | Indicateur | Valeur |
 |---|---|
 | Version JARVIS | **v3.3** (interface holographique) |
-| Score dette honnête | **92/100** (audit dette complet 2026-05-17 soir post-migration LAN unique Freebox) |
-| Tests pytest | **801 pass · 0 fail** |
-| Coverage globale | **44%** (6059 stmts) |
-| Modules ≥100% cov | **21 modules** |
-| ESLint | **155 warnings · 0 erreur** |
+| Score dette honnête | **88/100** (audit dette complet 2026-05-22 · 7 correctifs · E1 couverture cœur partiellement traité) |
+| Tests pytest | **959 pass · 0 skip · 0 fail** |
+| Coverage globale | **52%** (6217 stmts) |
+| Modules ≥100% cov | **22 modules** |
+| ESLint | **0 erreur** (warnings camelCase cross-modules acceptés) |
 | ruff | **0 erreur** |
-| Pre-push hook | **pytest 933 tests** bloquants |
+| Pre-push hook | **pytest 959 tests** bloquants |
 | Refactor JS | **terminé** (`jarvis_main.js` 148 L) |
 | MCP outils | **12** |
 | Circuit breaker | **8 call-sites Ollama** wrappés |
@@ -647,4 +647,4 @@ Le projet JARVIS est **post-modularisation** des 2 côtés :
 
 ---
 
-*Document mis à jour le 2026-05-20 (correctif structurel pipeline voix + optimisation VRAM + instrumentation TTS) — base : audit dette complet final 2026-05-17 — JARVIS 0xCyberLiTech v3.3 — 933 tests pass + 3 skip · coverage 51% · 22 modules à 100% cov · score dette 92/100 honnête*
+*Document mis à jour le 2026-05-22 (audit dette complet honnête + 7 correctifs) — JARVIS 0xCyberLiTech v3.3 — 959 tests pass · 0 skip · coverage 52% · 22 modules à 100% cov · score dette 88/100 honnête*

@@ -1,6 +1,6 @@
 # JARVIS SOC PLATFORM — Architecture IA & Cybersécurité Homelab
 ### Agent autonome local · Surveillance proactive · Contrôle d'infrastructure · LLM on-premise
-<!-- 0xCyberLiTech · v3.3 · 2026-05-17 — routing 4 branches · phi4:14b + qwen3:8b CR + gemma4 + qwen2.5-coder + mxbai-embed · 25 tests E2E Playwright + 933 tests pytest sur 32 modules · 22 à 100% cov · coverage 51% lignes · ESLint 0 errors · MCP **12 outils** (+jarvis_ioc_status Sprint 18d) · 32 modules Python (jarvis.py 4739L) · jarvis.css → 8 fichiers · refactor JS terminé : jarvis_main.js 7828→148L (−98,1%), 21 modules · git local + pre-commit hooks bloquants + hook pre-push pytest + ruff.toml · fix perf IPv6 (-97% latence interne) · circuit breaker Ollama étendu 8 call-sites + bouton SOC enrichi · pré-warm Kokoro CUDA au boot · profiling TTS détaillé · SSH write ops 4 couches + audit log forensic JSONL · Ollama 0.24.0 · score dette HONNÊTE 92/100 (recalibré post-audit pytest --cov · +31 chantier dette 2026-05-14/15 · +1 session 2026-05-17 : coverage +7 pts globaux + SSH security + Ollama upgrade) -->
+<!-- 0xCyberLiTech · v3.3 · 2026-05-22 — routing 4 branches · phi4:14b + qwen3:8b CR + gemma4 + qwen2.5-coder + mxbai-embed · 25 tests E2E Playwright + 959 tests pytest · 0 skip · 22 à 100% cov · coverage 52% lignes · ESLint 0 errors · MCP **12 outils** (+jarvis_ioc_status Sprint 18d) · 32 modules Python (jarvis.py 4814L) · jarvis.css → 8 fichiers · refactor JS terminé : jarvis_main.js 7828→148L (−98,1%), 21 modules · git local + pre-commit hooks bloquants + hook pre-push pytest + ruff.toml · fix perf IPv6 (-97% latence interne) · circuit breaker Ollama étendu 8 call-sites + bouton SOC enrichi · pré-warm Kokoro CUDA au boot · profiling TTS détaillé · SSH write ops 4 couches + audit log forensic JSONL · Ollama 0.24.0 · score dette HONNÊTE 88/100 (audit dette complet 2026-05-22) -->
 
 ---
 
@@ -81,8 +81,8 @@ Le système repose sur deux niveaux d'intelligence complémentaires :
 
 ```
 Windows 11 — localhost:5000
-├── jarvis.py              Flask · 4739 L · 75 routes · host=127.0.0.1 (31 modules extraits)
-├── blueprints/soc.py      Blueprint SOC · 1689 L · rsyslog v1.6.1
+├── jarvis.py              Flask · 4814 L · ~150 routes · host=127.0.0.1 (31 modules extraits)
+├── blueprints/soc.py      Blueprint SOC · 1872 L · rsyslog v1.6.1
 ├── audio_dsp.py           Chaîne DSP audio · 508 L (extrait chantier 2026-05-14)
 ├── 30 modules Phase 3     audio · bypass · infra/RAG · chat/LLM core
 ├── templates/
@@ -90,9 +90,9 @@ Windows 11 — localhost:5000
 │   └── tabs/              tab_monitor · tab_chat · tab_settings · tab_dsp
 │                          tab_terminal · tab_taches · tab_voicelab · tab_soc
 └── static/
-    ├── jarvis_main.js     4013 L · refactor JS 2026-05-14 soir (7828→4013, −49%)
+    ├── jarvis_main.js     148 L · refactor JS terminé (7828→148, −98,1%)
     ├── jarvis_mixing.js   1375 L · recorder.js 660 L · voice_print.js 852 L
-    ├── js/               11 modules : terminal_code·voice_lab·stt·tasks_tab·welcome·eq_parametric·eq_music·audio_mire·audio_viz·settings_llm·dsp_audio
+    ├── js/               18 modules JS extraits (voir docs/ROUTING-JARVIS.md)
     └── css/               8 fichiers par secteur (ex-jarvis.css 5270L · chantier 2026-05-14)
 ```
 
@@ -414,7 +414,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | Imports inutilisés | 0 |
 | Regex inconsistantes | 3 corrigées |
 | Code mort introduit cette session | 0 |
-| **jarvis.py final** | **4739 L · 32 modules extraits · jarvis_main.js 148 L (−98,1%) · score dette HONNÊTE 92/100** (recalibré post-audit pytest --cov · +31 via chantier 2026-05-14/15 : Ruff + git + hooks + CSS 8 fichiers + audio_dsp.py + refactor JS terminé + 933 tests pytest sur 32 modules · 22 à 100% cov · coverage 51% lignes + fix perf IPv6 + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro + hook pre-push) |
+| **jarvis.py final** | **4814 L · 32 modules extraits · jarvis_main.js 148 L (−98,1%) · score dette HONNÊTE 88/100** (audit dette complet 2026-05-22 : 959 tests pytest · 0 skip · 22 modules à 100% cov · coverage 52% lignes · fix perf IPv6 · circuit breaker Ollama 8 call-sites · pré-warm Kokoro · hook pre-push) |
 
 ### 5.7 Validé en prod
 
@@ -513,7 +513,7 @@ npm run test:ui       # mode UI Playwright
 
 ## 7ter. Split monolithe — Phase 3 (session 33) + chantier dette (2026-05-14)
 
-**31 modules extraits** depuis `jarvis.py` 6592L → **4739L** — Phase 3 (30 modules, session 33b) + `audio_dsp.py` (chantier dette 2026-05-14).
+**31 modules extraits** depuis `jarvis.py` 6592L → **4814L** — Phase 3 (30 modules, session 33b) + `audio_dsp.py` (chantier dette 2026-05-14).
 
 | Module | Lignes | Domaine | Couplage |
 |--------|--------|---------|----------|

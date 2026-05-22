@@ -8,7 +8,7 @@ Interface web locale type Iron Man : chat IA, terminal intégré, monitoring GPU
 
 | Composant | Technologie |
 |-----------|-------------|
-| Backend   | Python 3.11 + Flask (port 5000, loopback only) — jarvis.py 4739 lignes · ~150 routes · 33 modules Python extraits |
+| Backend   | Python 3.11 + Flask (port 5000, loopback only) — jarvis.py 4814 lignes · ~150 routes · 33 modules Python extraits |
 | LLM SOC   | Ollama — phi4:14b (SOC défaut · 9.1 GB · full VRAM · zéro swap) |
 | LLM GÉNÉRAL | gemma4:latest (GÉNÉRAL + VOCAL + vision multimodal) |
 | LLM CODE  | qwen2.5-coder:14b (mode CODE · dev srv-dev-1 · 9.0 GB) |
@@ -38,21 +38,21 @@ Arrêt : `stop_jarvis.bat` ou raccourci `JARVIS - Arrêt.lnk` sur le bureau.
 ```
 JARVIS/
 ├── scripts/
-│   ├── jarvis.py                      ← serveur Flask principal (4739 lignes · ~150 routes · réduit via Phase 3 split + audio_dsp.py)
+│   ├── jarvis.py                      ← serveur Flask principal (4814 lignes · ~150 routes · réduit via Phase 3 split + audio_dsp.py)
 │   ├── 31 modules dédiés/             ← Phase 3 : audio (5) + bypass (8) + infra (2) + chat/LLM (15) + audio_dsp.py (chantier 2026-05-14) — voir docs/ROUTING-JARVIS.md
 │   ├── blueprints/
-│   │   └── soc.py                     ← Blueprint SOC (1689 lignes · auto-engine · SSH 4 hôtes)
+│   │   └── soc.py                     ← Blueprint SOC (1872 lignes · auto-engine · SSH 4 hôtes)
 │   ├── jarvis_mcp_server.py           ← MCP bridge Claude Code ↔ JARVIS (12 outils (+jarvis_ioc_status Sprint 18d 2026-05-16))
 │   ├── templates/
 │   │   ├── jarvis.html                ← UI shell Jinja2 (204 lignes · 0 handler inline)
 │   │   ├── tabs/                      ← 8 onglets inclus
 │   │   └── partials/modals.html       ← modaux globaux
 │   ├── static/
-│   │   ├── jarvis_main.js             ← JS principal (4013 lignes · refactor JS 2026-05-14 : 7828→4013, −49%)
+│   │   ├── jarvis_main.js             ← JS principal (148 lignes · refactor JS terminé : 7828→148, −98,1%)
 │   │   ├── jarvis_mixing.js           ← DSP mixer stéréo (1375 lignes)
 │   │   ├── recorder.js                ← DAT RECORDER R-1 IIFE (660 lignes)
 │   │   ├── voice_print.js             ← Voice Print v2 IIFE (852 lignes)
-│   │   ├── js/                        ← 11 modules extraits : terminal_code·voice_lab·stt·tasks_tab·welcome·eq_parametric·eq_music·audio_mire·audio_viz·settings_llm·dsp_audio
+│   │   ├── js/                        ← 18 modules JS extraits (audio_viz·chat_core·chat_ui·boot_init·settings_llm·… — voir docs/ROUTING-JARVIS.md)
 │   │   └── css/                       ← 8 fichiers CSS par secteur (chantier 2026-05-14 · ex-jarvis.css 5270L)
 │   ├── jarvis_rag/                    ← base de connaissances locale
 │   │   ├── meta.json                  ← 599 chunks (MEMORY.md×2 + CIRCUIT_SOC + RUNBOOK)
@@ -75,7 +75,7 @@ JARVIS/
 │   ├── DEPLOIEMENT.md                 ← exploitation, API, dépannage
 │   ├── REINSTALLATION.md              ← réinstallation Windows complète
 │   ├── AUDIT_JARVIS.md                ← audit sécurité (10/10)
-│   └── REFERENCE-TECHNIQUE.md         ← référence complète (NDT 100/100 script auto · score honnête global 92/100 (933 tests, 32 modules · 22 à 100% cov, circuit breaker Ollama 8 call-sites, pré-warm Kokoro))
+│   └── REFERENCE-TECHNIQUE.md         ← référence complète (score honnête global 88/100 · 959 tests · 22 modules à 100% cov · circuit breaker Ollama 8 call-sites · pré-warm Kokoro)
 ├── README.md
 └── MEMORY.md
 ```
@@ -172,18 +172,18 @@ python jarvis.py
 | [`docs/MCP-SERVER.md`](docs/MCP-SERVER.md) | **MCP server** : pont Claude ↔ JARVIS · **12 outils (+jarvis_ioc_status Sprint 18d 2026-05-16)** détaillés (+`jarvis_defense_24h` 2026-05-16) · config Claude Desktop · watchdog |
 | [`docs/AUDIO-DSP.md`](docs/AUDIO-DSP.md) | **Audio DSP** : Web Audio graph (EQ+Comp+Limiter+FX) · 4 engines TTS · STT large-v3-turbo · DeepFilterNet CUDA · Voice Lab |
 | [`docs/AUDIT_JARVIS.md`](docs/AUDIT_JARVIS.md) | Audit sécurité — 10/10 — v2.6 — 0 gap |
-| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence v1.5 — NDT 100/100 (script auto) · **score honnête global 92/100** (recalibré depuis 62 réel · +31 via chantier dette 2026-05-14/15 : git + hooks + ruff.toml + CSS 8 fichiers + audio_dsp.py + refactor JS −98,1% + 933 tests pytest sur 32 modules · 22 à 100% cov (100%) avec coverage 51% lignes + fix perf IPv6 + circuit breaker Ollama étendu 8 call-sites + pré-warm Kokoro + hook pre-push) |
+| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence technique — **score honnête global 88/100** (audit dette complet 2026-05-22 : 959 tests pytest · 22 modules à 100% cov · coverage 52% lignes · refactor JS −98,1% · fix perf IPv6 · circuit breaker Ollama 8 call-sites · pré-warm Kokoro · hook pre-push) |
 | [`docs/ROADMAP-V33.md`](docs/ROADMAP-V33.md) | Fonctionnalités v3.3 planifiées |
 | [`MEMORY.md`](MEMORY.md) | État projet, stack, historique corrections |
 
 ## Qualité — chantier dette technique 2026-05-14/15
 
-Audit honnête et chantier de dette : **score recalibré 62 → 92/100 honnête (39% coverage lignes, 933 tests, 32 modules · 22 à 100% cov, circuit breaker Ollama étendu 8 call-sites, pré-warm Kokoro CUDA)** (l'ancien
+Audit honnête et chantier de dette : **score honnête 88/100 (audit dette complet 2026-05-22 · 52% coverage lignes · 959 tests · 22 modules à 100% cov · circuit breaker Ollama 8 call-sites · pré-warm Kokoro CUDA)** (l'ancien
 « 91/100 » / « 100/100 » étaient optimistes — le NDT script auto mesure le style,
 pas l'architecture/tests/CI). Travaux du chantier :
 - **Dépôt git LOCAL** initialisé (100% local, aucun remote — règle « rien sur le web ») · commits atomiques
 - **Outillage qualité** : `ruff.toml` (Python, baseline 98 → 0 erreurs · 2 vrais bugs F821 corrigés) · `eslint.config.js` (JS, 0 erreur) · `.pre-commit-config.yaml` (hooks bloquants ruff + eslint, 100% locaux)
-- **Architecture modulaire** : 31 modules Python extraits de `jarvis.py` (6592 → 4633 L) · `audio_dsp.py` (508 L, bloc DSP) · `jarvis.css` éclaté en 8 fichiers `static/css/` · **refactor JS 2026-05-14** : `jarvis_main.js` 7828 → 4013 L (−49%), **11 modules** extraits dans `static/js/`
+- **Architecture modulaire** : 31 modules Python extraits de `jarvis.py` (6592 → 4814 L) · `audio_dsp.py` (508 L, bloc DSP) · `jarvis.css` éclaté en 8 fichiers `static/css/` · **refactor JS terminé** : `jarvis_main.js` 7828 → 148 L (−98,1%), **18 modules** extraits dans `static/js/`
 - **Tests E2E** : 25 tests Playwright (dont 2 smoke tests LLM `/api/chat`)
 
 | Commande | Rôle | Pré-requis |

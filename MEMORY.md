@@ -54,7 +54,7 @@ ce N'EST PAS de la dette : `sse_helpers.py` documente que ces modules gardent le
 copie inline pour rester autonomes (choix délibéré). Finding écarté après vérification.
 
 Vérifications finales : **959 pytest pass · 0 skip · 0 fail**, ruff **0**, eslint
-**0 erreur**. Zéro régression. Décomposition détaillée du score → `BILAN-TECHNIQUE.md` §0ter.
+**0 erreur**. Zéro régression. Décomposition détaillée du score → `BILAN-TECHNIQUE.md` §0bis.
 
 ## Session 2026-05-20 (suite) — réalignement description Kill Chain sur KC v4 (5 maillons)
 

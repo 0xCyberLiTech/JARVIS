@@ -44,16 +44,16 @@ ollama pull mxbai-embed-large     # embeddings RAG (obligatoire · 1024 dims · 
 ```
 JARVIS/
 ├── scripts/
-│   ├── jarvis.py                  ← orchestrateur Flask (4739 lignes · ~150 routes · 33 modules Python extraits)
+│   ├── jarvis.py                  ← orchestrateur Flask (4814 lignes · ~150 routes · 33 modules Python extraits)
 │   ├── blueprints/
-│   │   └── soc.py                 ← Blueprint SOC (1689 lignes) · SSH 4 hôtes
+│   │   └── soc.py                 ← Blueprint SOC (1872 lignes) · SSH 4 hôtes
 │   ├── jarvis_mcp_server.py       ← MCP bridge Claude Code ↔ JARVIS (12 outils)
 │   ├── templates/
 │   │   ├── jarvis.html            ← shell Jinja2 (204 lignes · 0 handler inline)
 │   │   ├── tabs/                  ← 8 onglets modulaires
 │   │   └── partials/modals.html
 │   ├── static/
-│   │   ├── jarvis_main.js         ← JS principal (4013 lignes · refactor JS 2026-05-14 : 7828→4013, −49%)
+│   │   ├── jarvis_main.js         ← JS principal (148 lignes · refactor JS terminé : 7828→148, −98,1%)
 │   │   ├── jarvis_mixing.js       ← DSP mixer (1375 lignes)
 │   │   ├── recorder.js            ← DAT RECORDER R-1 IIFE (660 lignes)
 │   │   ├── voice_print.js         ← Voice Print v2 IIFE (852 lignes)
@@ -387,28 +387,28 @@ v3.3  (en cours)
   ✅ Terminal CODE xterm.js + WebSocket PTY SSH srv-dev-1
   ✅ Phase 3 split monolithe Python — 30 modules · session 33b (2026-05-13)
   ✅ Session 33c split JS partiel — recorder.js + voice_print.js extraits · jarvis_main.js -14.4%
-  ✅ Chantier dette technique 2026-05-14/15 — Ruff 98→0 + git local + pre-commit hooks + hook pre-push pytest + ruff.toml + CSS 8 fichiers + audio_dsp.py + **933 tests pytest sur 32 modules · 22 à 100% cov** (coverage 51% lignes · tts_engines 83% + jarvis_mcp_server 91% + ollama_circuit 100%) + refactor JS jarvis_main.js 7828→148 L (−98,1%) + 21 modules JS + fix perf IPv6 (-97% latence interne) + **circuit breaker Ollama étendu 8 call-sites** + bouton SOC PING JARVIS enrichi état Ollama + **pré-warm Kokoro CUDA au boot** (élimine cold start 42.8 s) + **profiling TTS détaillé** (`tools/profile_tts.py`) · **score honnête global 92/100** (recalibré depuis 62 réel · +31)
+  ✅ Chantier dette technique 2026-05-14/15 — Ruff 98→0 + git local + pre-commit hooks + hook pre-push pytest + ruff.toml + CSS 8 fichiers + audio_dsp.py + **959 tests pytest · 22 à 100% cov** (coverage 52% lignes · tts_engines 83% + jarvis_mcp_server 91% + ollama_circuit 100%) + refactor JS jarvis_main.js 7828→148 L (−98,1%) + 21 modules JS + fix perf IPv6 (-97% latence interne) + **circuit breaker Ollama étendu 8 call-sites** + bouton SOC PING JARVIS enrichi état Ollama + **pré-warm Kokoro CUDA au boot** (élimine cold start 42.8 s) + **profiling TTS détaillé** (`tools/profile_tts.py`) · **score honnête global 88/100** (audit dette complet 2026-05-22)
   ⬜ SSH write ops partielles — apt upgrade · restart service
   ✅ Refactor JS terminé (jarvis_main.js 7828→148 L · −98,1% cumul · 21 modules)
-  ✅ Tests unitaires Python (933 tests · 32 modules (22 à 100% cov)) · profiling performance (`profile_perf.py` + `profile_tts.py`)
+  ✅ Tests unitaires Python (959 tests · 22 modules à 100% cov) · profiling performance (`profile_perf.py` + `profile_tts.py`)
 v3.4  (moyen)   — WebSocket Monitor, historique chat SQLite, graphiques Chart.js, alerte GPU
 v4.0  (long)    — Service Windows NSSM, Docker Compose, HTTPS mkcert, SSH write ops matures
 ```
 
 ---
 
-## 12. ÉTAT DES FICHIERS (mis à jour 2026-05-14 · post-chantier dette technique)
+## 12. ÉTAT DES FICHIERS (mis à jour 2026-05-22)
 
 | Fichier | Lignes | État |
 |---------|--------|------|
-| `scripts/jarvis.py` | **4739** | ✅ ~150 routes · NDT 100/100 · routing **4 branches** SOC/GÉNÉRAL/CODE/CR · réduit via 33 modules extraits |
+| `scripts/jarvis.py` | **4814** | ✅ ~150 routes · routing **4 branches** SOC/GÉNÉRAL/CODE/CR · orchestrateur Flask · 33 modules extraits |
 | **31 modules Python extraits** | **~3540** | ✅ Phase 3 (30 modules) + `audio_dsp.py` 508L (chantier 2026-05-14) — voir [`ROUTING-JARVIS.md`](ROUTING-JARVIS.md) |
-| `scripts/blueprints/soc.py` | 1689 | ✅ rsyslog v1.6.1 · SSH 4 hôtes · `_ssh_base()` générique · fix race condition `_soc_actions_save` |
+| `scripts/blueprints/soc.py` | 1872 | ✅ rsyslog v1.6.1 · SSH 4 hôtes · `_ssh_base()` générique · cache 30s + fallback SSH |
 | `scripts/jarvis_mcp_server.py` | ~440 | ✅ **12 outils MCP** (+`jarvis_defense_24h` 2026-05-16) · JARVIS_HEADER · `jarvis_soc_ask` historique IP 30j · streamable-HTTP port 5010 |
 | `scripts/templates/jarvis.html` | ~215 | ✅ 0 handler inline · charge 8 `<link>` CSS + 15 `<script>` JS (jarvis_main + 14 modules) |
-| `scripts/static/jarvis_main.js` | **4013** | 🟡 refactor JS 2026-05-14 soir : 7828→4013 (−49%) · 11 modules extraits · reste à finir |
+| `scripts/static/jarvis_main.js` | **148** | ✅ refactor JS terminé : 7828→148 (−98,1%) · 18 modules extraits |
 | `scripts/static/jarvis_mixing.js` | 1375 | ✅ DSP mixer stéréo |
-| `scripts/static/js/` (11 modules) | ~5000 | ✅ terminal_code·voice_lab·stt + tasks_tab·welcome·eq_parametric·eq_music·audio_mire·audio_viz·settings_llm·dsp_audio (refactor 2026-05-14) |
+| `scripts/static/js/` (18 modules) | ~14600 | ✅ refactor JS terminé — audio_viz·chat_core·chat_ui·boot_init·settings_llm·… (voir docs/ROUTING-JARVIS.md) |
 | `scripts/static/recorder.js` | **660** | ✅ DAT RECORDER R-1 IIFE |
 | `scripts/static/voice_print.js` | **852** | ✅ Voice Print v2 IIFE |
 | `scripts/static/css/` | 8 fichiers | ✅ ex-`jarvis.css` 5270L → core/chat/dsp/terminal-taches/hud-welcome/rack/settings-soc/voicelab (chantier 2026-05-14) |
