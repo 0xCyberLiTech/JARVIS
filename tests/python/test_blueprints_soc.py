@@ -430,3 +430,48 @@ def test_api_soc_ioc_bloc_absent_503(client, monkeypatch):
     monkeypatch.setattr(soc_module, "_fetch_monitoring", lambda *a, **k: (True, "{}"))
     r = client.get("/api/soc/ioc")
     assert r.status_code == 503
+
+
+# ── Routes /api/soc/ip-history + ip-deep (investigation, _deep_* mockés) ─
+
+
+def test_api_soc_ip_history_ip_invalide(client):
+    r = client.post("/api/soc/ip-history", json={"ip": "pas-une-ip"})
+    assert r.status_code == 400
+
+
+def test_api_soc_ip_history_ok(client, monkeypatch):
+    monkeypatch.setattr(soc_module, "_deep_crowdsec", lambda ip: {"banned": False, "count": 0})
+    monkeypatch.setattr(soc_module, "_deep_fail2ban", lambda ip: {"banned": True, "jails": ["sshd"]})
+    r = client.post("/api/soc/ip-history", json={"ip": "203.0.113.40"})
+    assert r.status_code == 200
+    body = r.get_json()
+    assert body["ip"] == "203.0.113.40"
+    assert body["fail2ban"]["banned"] is True
+
+
+def test_api_soc_ip_deep_ip_invalide(client):
+    r = client.post("/api/soc/ip-deep", json={"ip": "999.999.999.999"})
+    assert r.status_code == 400
+
+
+def test_api_soc_ip_deep_ok(client, monkeypatch):
+    """Agrégation investigation IP — tous les collecteurs _deep_* mockés."""
+    deep = {
+        "_deep_geoip":      {"country": "CN"},
+        "_deep_crowdsec":   {"banned": True, "count": 1},
+        "_deep_fail2ban":   {"banned": False},
+        "_deep_autoban":    {"count": 0},
+        "_deep_nginx_hits": 12,
+        "_deep_nginx_last": [],
+        "_deep_rsyslog":    {"total": 0, "sources": {}},
+    }
+    for fn, val in deep.items():
+        monkeypatch.setattr(soc_module, fn, (lambda v: lambda ip: v)(val))
+    monkeypatch.setattr(soc_module, "_ssh_ngix", lambda *a, **k: (True, ""))
+    r = client.post("/api/soc/ip-deep", json={"ip": "203.0.113.41"})
+    assert r.status_code == 200
+    body = r.get_json()
+    assert body["ip"] == "203.0.113.41"
+    assert body["crowdsec"]["banned"] is True
+    assert body["nginx_hits"] == 12

@@ -515,3 +515,55 @@ def test_check_daily_report_fenetre_8h_annonce(monkeypatch):
     ts = soc._threat_score_from_json({"threat_level": "MOYEN", "threat_score": 35}, set())
     soc._check_daily_report({"traffic": {"req_last_hour": 100}}, ts)
     assert spoke and "Rapport SOC" in spoke[0]
+
+
+# ── _soc_*_check — orchestrateurs auto-engine, chemins de garde ──────────
+
+def test_soc_suricata_check_donnees_vides(monkeypatch):
+    monkeypatch.setattr(soc, "_speak", lambda *a, **k: None)
+    assert soc._soc_suricata_check({}) is None
+
+
+def test_soc_reqhour_check_donnees_vides(monkeypatch):
+    monkeypatch.setattr(soc, "_speak", lambda *a, **k: None)
+    assert soc._soc_reqhour_check({}) is None
+
+
+def test_soc_rsyslog_check_donnees_vides(monkeypatch):
+    monkeypatch.setattr(soc, "_speak", lambda *a, **k: None)
+    assert soc._soc_rsyslog_check({}) is None
+
+
+# ── _check_hourly_report — rapport vocal heure pleine (temps figé) ───────
+
+def test_check_hourly_report_hors_minute_silencieux(monkeypatch):
+    import datetime as _dt
+
+    class _Fixe(_dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return _dt.datetime(2026, 5, 22, 14, 30, 0)
+
+    monkeypatch.setattr(soc.datetime, "datetime", _Fixe)
+    spoke = []
+    monkeypatch.setattr(soc, "_speak", lambda msg, **k: spoke.append(msg))
+    soc._check_hourly_report({}, {"threat": "MOYEN", "score": 40})
+    assert spoke == []
+
+
+def test_check_hourly_report_heure_pleine_annonce(monkeypatch):
+    import datetime as _dt
+
+    class _Fixe(_dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return _dt.datetime(2026, 5, 22, 14, 2, 0)
+
+    monkeypatch.setattr(soc.datetime, "datetime", _Fixe)
+    monkeypatch.setattr(soc, "_save_cooldowns", lambda: None)
+    spoke = []
+    monkeypatch.setattr(soc, "_speak", lambda msg, **k: spoke.append(msg))
+    soc._SOC_MON_COOLDOWNS.pop("hourly_report_2026-05-22_14", None)
+    ts = soc._threat_score_from_json({"threat_level": "ÉLEVÉ", "threat_score": 60}, set())
+    soc._check_hourly_report({}, ts)
+    assert spoke and "heure pleine" in spoke[0].lower()

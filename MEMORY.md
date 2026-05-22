@@ -60,11 +60,11 @@ Vérifications finales : **1012 pytest pass · 0 skip · 0 fail**, ruff **0**, e
 documentaire dé-dupliquée — les compteurs volatils (score, lignes, tests,
 coverage) ne vivent plus que dans `BILAN-TECHNIQUE.md §0` (source unique), les
 ~12 autres docs pointent dessus → dérive entre documents structurellement
-impossible ; (2) **campagne couverture étape 1** — 5 incréments, +149 tests
+impossible ; (2) **campagne couverture étape 1** — 6 incréments, +158 tests
 (`test_jarvis_soc_context` cœur sécurité, `test_jarvis_routes` routes Flask,
 `test_jarvis_functions` helpers purs, `test_soc_functions` auto-engine/deep/
-orchestrateurs, `test_blueprints_soc` routes `/api/soc`) → `jarvis.py` 26→**40%**,
-`soc.py` 31→**55%**, total 50→**61%** (1082 tests) ; (3) correctif
+orchestrateurs, `test_blueprints_soc` routes `/api/soc` dont ip-deep/ip-history)
+→ `jarvis.py` 26→**40%**, `soc.py` 31→**59%**, total 50→**62%** (1091 tests) ; (3) correctif
 robustesse `/api/facts` (crash sur corps JSON non-dict — même classe que M4),
 trouvé par un nouveau test. Score honnête recalibré (la grille de décomposition
 sommait à 92 vs titre 88 — incohérence corrigée) : **88 → 91/100**.
