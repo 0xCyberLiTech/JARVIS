@@ -221,3 +221,106 @@ def test_check_services_service_inconnu_down_signale(monkeypatch):
     soc._SOC_MON_COOLDOWNS.pop("svc_servicexyz", None)
     parts = soc._check_services({"servicexyz": False})
     assert parts and "servicexyz" in parts[0]
+
+
+def test_check_services_service_whiteliste_down_restart(monkeypatch):
+    """Service DOWN ∈ whitelist → tentative de restart SSH (mockée)."""
+    monkeypatch.setattr(soc, "_save_cooldowns", lambda: None)
+    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=20: (True, ""))
+    monkeypatch.setattr(soc, "_soc_log", lambda *a, **k: None)
+    soc._SOC_MON_COOLDOWNS.pop("svc_nginx", None)
+    parts = soc._check_services({"nginx": False})
+    assert parts and "nginx" in parts[0].lower()
+
+
+# ── _sur_ban_sev1 — ban auto Suricata sévérité 1 ─────────────────────────
+
+def test_sur_ban_sev1_aucune_alerte():
+    assert soc._sur_ban_sev1({}, {}) == []
+
+
+def test_sur_ban_sev1_ip_whitelistee_ignoree():
+    assert soc._sur_ban_sev1({"recent_critical": [{"src_ip": "192.168.1.50"}]}, {}) == []
+
+
+def test_sur_ban_sev1_ip_deja_bannie_cs_ignoree():
+    sur = {"recent_critical": [{"src_ip": "203.0.113.60"}]}
+    assert soc._sur_ban_sev1(sur, {"203.0.113.60": {"scenario": "x"}}) == []
+
+
+def test_sur_ban_sev1_bannit_ip_critique(monkeypatch):
+    monkeypatch.setattr(soc, "_ip_try_mark_banned", lambda ip: True)
+    monkeypatch.setattr(soc, "_save_auto_banned", lambda: None)
+    monkeypatch.setattr(soc, "_ban_ip_ssh", lambda ip, reason, dur: (True, "ok"))
+    monkeypatch.setattr(soc, "_soc_log", lambda *a, **k: None)
+    bans = soc._sur_ban_sev1({"recent_critical": [{"src_ip": "203.0.113.61"}]}, {})
+    assert bans == ["203.0.113.61"]
+
+
+# ── _sur_ban_scans — ban auto port scan ──────────────────────────────────
+
+def test_sur_ban_scans_aucun_scan():
+    assert soc._sur_ban_scans({}, {}) == []
+
+
+def test_sur_ban_scans_ip_lan_ignoree():
+    assert soc._sur_ban_scans({"recent_scans": [{"src_ip": "10.0.0.1", "count": 99}]}, {}) == []
+
+
+def test_sur_ban_scans_bannit_port_scan(monkeypatch):
+    monkeypatch.setattr(soc, "_ip_try_mark_banned", lambda ip: True)
+    monkeypatch.setattr(soc, "_save_auto_banned", lambda: None)
+    monkeypatch.setattr(soc, "_ban_ip_ssh", lambda ip, reason, dur: (True, "ok"))
+    monkeypatch.setattr(soc, "_soc_log", lambda *a, **k: None)
+    bans = soc._sur_ban_scans({"recent_scans": [{"src_ip": "203.0.113.70", "count": 40}]}, {})
+    assert bans == ["203.0.113.70"]
+
+
+# ── _sur_ban_sev2_surge — ban auto surge C2 ──────────────────────────────
+
+def test_sur_ban_sev2_surge_aucune_ip():
+    assert soc._sur_ban_sev2_surge(50, {}, {}) == []
+
+
+def test_sur_ban_sev2_surge_limite_top_3(monkeypatch):
+    """Au plus 3 IPs (top_ips[:3]) sont traitées."""
+    monkeypatch.setattr(soc, "_ip_try_mark_banned", lambda ip: True)
+    monkeypatch.setattr(soc, "_save_auto_banned", lambda: None)
+    monkeypatch.setattr(soc, "_ban_ip_ssh", lambda ip, reason, dur: (True, "ok"))
+    monkeypatch.setattr(soc, "_soc_log", lambda *a, **k: None)
+    sur = {"top_ips": [{"ip": f"203.0.113.{i}"} for i in range(80, 90)]}
+    bans = soc._sur_ban_sev2_surge(60, sur, {})
+    assert len(bans) == 3
+
+
+# ── get_soc_status ───────────────────────────────────────────────────────
+
+def test_get_soc_status_structure():
+    st = soc.get_soc_status()
+    assert {"soc_engine_active", "bans_24h", "alerts_24h"} <= set(st)
+    assert isinstance(st["bans_24h"], int)
+    assert isinstance(st["alerts_24h"], int)
+
+
+# ── _check_threat_level — branches enrichies ─────────────────────────────
+
+def test_check_threat_level_suricata_et_multi(monkeypatch):
+    """Niveau CRITIQUE avec alertes Suricata + recon multi-cible → détail annoncé."""
+    monkeypatch.setattr(soc, "_save_cooldowns", lambda: None)
+    soc._SOC_MON_COOLDOWNS.pop("threat_CRITIQUE", None)
+    ts = soc._threat_score_from_json(
+        {"threat_level": "CRITIQUE", "threat_score": 80,
+         "threat_sur_sev1": 2, "threat_multi_count": 4}, set())
+    parts = soc._check_threat_level(ts)
+    joined = " ".join(parts)
+    assert parts and ("Suricata" in joined or "Recon" in joined)
+
+
+def test_check_threat_level_cooldown_bloque(monkeypatch):
+    """2e appel dans la fenêtre cooldown → silencieux."""
+    import time as _t
+    monkeypatch.setattr(soc, "_save_cooldowns", lambda: None)
+    soc._SOC_MON_COOLDOWNS["threat_ÉLEVÉ"] = _t.time()
+    ts = soc._threat_score_from_json({"threat_level": "ÉLEVÉ", "threat_score": 55}, set())
+    assert soc._check_threat_level(ts) == []
+    soc._SOC_MON_COOLDOWNS.pop("threat_ÉLEVÉ", None)
