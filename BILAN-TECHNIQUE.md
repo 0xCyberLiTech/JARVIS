@@ -28,10 +28,10 @@
 | **Tests pytest** | **1091 pass · 0 skip · 0 fail** (2026-05-22 : +158, campagne couverture étape 1) |
 | **Coverage globale** | **62%** (6217 stmts · 2360 miss) |
 | **Modules Python à 100% cov** | **22 modules** (recompte audit 2026-05-17 soir) : `bypass_code`, `bypass_proxmox`, `bypass_simple`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_pending_bypass`, `chat_routing`, `chat_soc_inject`, `chat_stream`, `chat_system_prompt`, `chat_tool_calls`, `deferred_speak`, `llm_opts`, `ollama_circuit`, `security_whitelists`, `ssh_terminal`, `stream_tokens`, `tts_cleaner`, `tts_dedup`, `voice_lab`, `blueprints/__init__` |
-| **Couverture orchestrateurs** | `jarvis.py` 40% · `blueprints/soc.py` 58% · `soc_ip_deep.py` 78% (Flask, complétés par 25 tests E2E · campagne couverture en cours) |
+| **Couverture orchestrateurs** | `jarvis.py` 40% · `blueprints/soc.py` 57% · `soc_ip_deep.py` 78% · `soc_suricata_ban.py` 96% (Flask, complétés par 25 tests E2E · campagne en cours) |
 | **`jarvis.py`** | **4814 L** (2957 stmts exécutables) |
-| **`blueprints/soc.py`** | 1040 stmts (**1729 L**) — cluster `_deep_*` extrait dans `soc_ip_deep.py` (refactor incrémental étape 1) |
-| **Modules Python totaux** | 36 modules dans `scripts/` (dont `soc_ip_deep.py` extrait 2026-05-22) |
+| **`blueprints/soc.py`** | 1001 stmts (**1687 L**) — clusters `_deep_*` et `_sur_ban_*` extraits (refactor incrémental étapes 1-2) |
+| **Modules Python totaux** | 37 modules dans `scripts/` (dont `soc_ip_deep.py` + `soc_suricata_ban.py` extraits 2026-05-22) |
 | **`jarvis_main.js`** | 148 L (post-refactor −98,1% depuis 7828L) |
 | **Modules JS totaux** | 21 modules (18 dans `static/js/` + 3 dans `static/`) |
 | **JS LOC total** | ~14 600 lignes |
@@ -95,6 +95,13 @@ d'abord, refactor ensuite, par extraction incrémentale validée à chaque étap
 extrait de `soc.py` vers le module dédié **`soc_ip_deep.py`** (DI : `_ssh_ngix`
 injecté). `soc.py` 1872→**1729 L** (−143). `soc_ip_deep.py` 78% cov. soc.py garde
 des alias légers → routes `ip-history`/`ip-deep` inchangées. 1091 tests, 0 régression.
+
+**Refactor incrémental — étape 2** (2026-05-22) : cluster ban Suricata
+(`_sur_ban_sev1`, `_sur_ban_scans`, `_sur_ban_sev2_surge`) extrait vers
+**`soc_suricata_ban.py`** (DI : 6 fonctions du cœur ban/whitelist injectées).
+`soc.py` 1729→**1687 L**. `soc_suricata_ban.py` 96% cov. `_soc_suricata_check`
+appelle les `_sur_ban_*` via alias, inchangé. Cumul refactor : `soc.py`
+1872→1687 (−185 L), 2 modules cohérents extraits. 1091 tests, 0 régression.
 
 ---
 
@@ -212,8 +219,9 @@ Windows 11 (localhost:5000)
 | Module | Taille | Coverage | Contenu |
 |---|---|---|---|
 | `jarvis.py` | 4814 L (2957 stmts) | 30% | Serveur Flask · ~150 endpoints · routing 4 modes · auto-engine SOC proactif · pré-warm phi4/Kokoro · circuit breaker imports · 8 call-sites Ollama wrappés |
-| `blueprints/soc.py` | 1040 stmts (1729 L) | 58% | Endpoints SOC (`/api/soc/*`) · cache monitoring.json TTL 30s · fallback SSH · IP history 30j · ban/unban CrowdSec · defense_24h · ioc |
+| `blueprints/soc.py` | 1001 stmts (1687 L) | 57% | Endpoints SOC (`/api/soc/*`) · cache monitoring.json TTL 30s · fallback SSH · IP history 30j · ban/unban CrowdSec · defense_24h · ioc |
 | `soc_ip_deep.py` | 69 stmts (180 L) | 78% | Investigation IP — GeoIP/CrowdSec/Fail2ban/autoban/nginx/rsyslog · extrait de soc.py (refactor incrémental étape 1, 2026-05-22) · DI `_ssh_ngix` |
+| `soc_suricata_ban.py` | 57 stmts (82 L) | 96% | Ban auto Suricata — sév.1 / port scans / surge C2 · extrait de soc.py (refactor incrémental étape 2, 2026-05-22) · DI 6 fonctions |
 
 ### Modules satellites — Chat & LLM
 

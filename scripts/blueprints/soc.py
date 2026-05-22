@@ -16,9 +16,10 @@ import time
 import urllib.request
 from pathlib import Path
 
-# soc_ip_deep : cluster investigation IP extrait de soc.py (refactor incrémental).
+# soc_ip_deep / soc_suricata_ban : clusters extraits de soc.py (refactor incrémental).
 # security_whitelists : source unique de la politique de whitelist de sécurité.
 import soc_ip_deep
+import soc_suricata_ban
 from flask import Blueprint, Response, request
 from security_whitelists import ALLOWED_SOC_RESTART_SVCS
 
@@ -1114,57 +1115,14 @@ def _soc_reqhour_check(data):
         _speak(f"Alerte SOC. Pic de trafic : {cur_val} requêtes cette heure. Toutes les IPs actives sont déjà bannies. Aucune action requise.")
 
 
-def _sur_ban_sev1(sur: dict, cs_detail: dict) -> list:
-    """Ban auto sév.1 CRITIQUE — retourne liste IPs bannies."""
-    new_bans = []
-    seen_ips: set = set()
-    for alert in (sur.get("recent_critical") or []):
-        ip  = alert.get("src_ip", "")
-        sig = alert.get("signature", "Suricata sév.1")[:80]
-        if not ip or ip == "?" or _is_whitelisted(ip) or ip in seen_ips:
-            continue
-        seen_ips.add(ip)
-        if cs_detail.get(ip) or not _ip_try_mark_banned(ip):
-            continue
-        _save_auto_banned()
-        ok, out = _ban_ip_ssh(ip, "jarvis-suricata-sev1-critique", "48h")
-        _soc_log("ban_ip", f"{ip} — Suricata sév.1 : {sig} (auto)", ok, out)
-        if ok:
-            new_bans.append(ip)
-    return new_bans
-
-
-def _sur_ban_scans(sur: dict, cs_detail: dict) -> list:
-    """Ban auto sév.3 port scan — retourne liste IPs bannies."""
-    scan_bans = []
-    for scan in (sur.get("recent_scans") or []):
-        ip  = scan.get("src_ip", "")
-        cnt = scan.get("count", 0)
-        if _ip_skip(ip): continue
-        if cs_detail.get(ip) or not _ip_try_mark_banned(ip):
-            continue
-        _save_auto_banned()
-        ok_s, out_s = _ban_ip_ssh(ip, f"jarvis-suricata-portscan-{cnt}hits", "24h")
-        _soc_log("ban_ip", f"{ip} — Suricata port scan : {cnt} hits (auto)", ok_s, out_s)
-        if ok_s:
-            scan_bans.append(ip)
-    return scan_bans
-
-
-def _sur_ban_sev2_surge(sev2: int, sur: dict, cs_detail: dict) -> list:
-    """Ban auto sév.2 surge C2 — retourne liste IPs bannies."""
-    sev2_banned = []
-    top_ips = [e.get("ip", "") for e in (sur.get("top_ips") or [])][:3]
-    for ip in top_ips:
-        if _ip_skip(ip): continue
-        if cs_detail.get(ip) or not _ip_try_mark_banned(ip):
-            continue
-        _save_auto_banned()
-        ok_s2, out_s2 = _ban_ip_ssh(ip, "jarvis-suricata-sev2-surge", "24h")
-        _soc_log("ban_ip", f"{ip} — Suricata sév.2 surge : {sev2} alertes 24h (auto)", ok_s2, out_s2)
-        if ok_s2:
-            sev2_banned.append(ip)
-    return sev2_banned
+# Cluster ban Suricata (_sur_ban_*) extrait dans soc_suricata_ban.py — refactor
+# incrémental étape 2, 2026-05-22. DI : 6 fonctions du cœur ban/whitelist injectées.
+# Alias légers : _soc_suricata_check appelle les _sur_ban_* sans changement.
+soc_suricata_ban.init(_is_whitelisted, _ip_skip, _ip_try_mark_banned,
+                      _save_auto_banned, _ban_ip_ssh, _soc_log)
+_sur_ban_sev1       = soc_suricata_ban._sur_ban_sev1
+_sur_ban_scans      = soc_suricata_ban._sur_ban_scans
+_sur_ban_sev2_surge = soc_suricata_ban._sur_ban_sev2_surge
 
 
 def _soc_suricata_check(data):

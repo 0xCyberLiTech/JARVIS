@@ -8,6 +8,7 @@ checks auto-engine) — testables sans réseau ni SSH.
 import base64
 
 import soc_ip_deep
+import soc_suricata_ban
 from blueprints import soc
 
 # ── _b64py ───────────────────────────────────────────────────────────────
@@ -234,63 +235,59 @@ def test_check_services_service_whiteliste_down_restart(monkeypatch):
     assert parts and "nginx" in parts[0].lower()
 
 
-# ── _sur_ban_sev1 — ban auto Suricata sévérité 1 ─────────────────────────
+# ── _sur_ban_* — ban auto Suricata (module soc_suricata_ban) ─────────────
 
 def test_sur_ban_sev1_aucune_alerte():
-    assert soc._sur_ban_sev1({}, {}) == []
+    assert soc_suricata_ban._sur_ban_sev1({}, {}) == []
 
 
 def test_sur_ban_sev1_ip_whitelistee_ignoree():
-    assert soc._sur_ban_sev1({"recent_critical": [{"src_ip": "192.168.1.50"}]}, {}) == []
+    assert soc_suricata_ban._sur_ban_sev1({"recent_critical": [{"src_ip": "192.168.1.50"}]}, {}) == []
 
 
 def test_sur_ban_sev1_ip_deja_bannie_cs_ignoree():
     sur = {"recent_critical": [{"src_ip": "203.0.113.60"}]}
-    assert soc._sur_ban_sev1(sur, {"203.0.113.60": {"scenario": "x"}}) == []
+    assert soc_suricata_ban._sur_ban_sev1(sur, {"203.0.113.60": {"scenario": "x"}}) == []
 
 
 def test_sur_ban_sev1_bannit_ip_critique(monkeypatch):
-    monkeypatch.setattr(soc, "_ip_try_mark_banned", lambda ip: True)
-    monkeypatch.setattr(soc, "_save_auto_banned", lambda: None)
-    monkeypatch.setattr(soc, "_ban_ip_ssh", lambda ip, reason, dur: (True, "ok"))
-    monkeypatch.setattr(soc, "_soc_log", lambda *a, **k: None)
-    bans = soc._sur_ban_sev1({"recent_critical": [{"src_ip": "203.0.113.61"}]}, {})
+    monkeypatch.setattr(soc_suricata_ban, "_ip_try_mark_banned", lambda ip: True)
+    monkeypatch.setattr(soc_suricata_ban, "_save_auto_banned", lambda: None)
+    monkeypatch.setattr(soc_suricata_ban, "_ban_ip_ssh", lambda ip, reason, dur: (True, "ok"))
+    monkeypatch.setattr(soc_suricata_ban, "_soc_log", lambda *a, **k: None)
+    bans = soc_suricata_ban._sur_ban_sev1({"recent_critical": [{"src_ip": "203.0.113.61"}]}, {})
     assert bans == ["203.0.113.61"]
 
 
-# ── _sur_ban_scans — ban auto port scan ──────────────────────────────────
-
 def test_sur_ban_scans_aucun_scan():
-    assert soc._sur_ban_scans({}, {}) == []
+    assert soc_suricata_ban._sur_ban_scans({}, {}) == []
 
 
 def test_sur_ban_scans_ip_lan_ignoree():
-    assert soc._sur_ban_scans({"recent_scans": [{"src_ip": "10.0.0.1", "count": 99}]}, {}) == []
+    assert soc_suricata_ban._sur_ban_scans({"recent_scans": [{"src_ip": "10.0.0.1", "count": 99}]}, {}) == []
 
 
 def test_sur_ban_scans_bannit_port_scan(monkeypatch):
-    monkeypatch.setattr(soc, "_ip_try_mark_banned", lambda ip: True)
-    monkeypatch.setattr(soc, "_save_auto_banned", lambda: None)
-    monkeypatch.setattr(soc, "_ban_ip_ssh", lambda ip, reason, dur: (True, "ok"))
-    monkeypatch.setattr(soc, "_soc_log", lambda *a, **k: None)
-    bans = soc._sur_ban_scans({"recent_scans": [{"src_ip": "203.0.113.70", "count": 40}]}, {})
+    monkeypatch.setattr(soc_suricata_ban, "_ip_try_mark_banned", lambda ip: True)
+    monkeypatch.setattr(soc_suricata_ban, "_save_auto_banned", lambda: None)
+    monkeypatch.setattr(soc_suricata_ban, "_ban_ip_ssh", lambda ip, reason, dur: (True, "ok"))
+    monkeypatch.setattr(soc_suricata_ban, "_soc_log", lambda *a, **k: None)
+    bans = soc_suricata_ban._sur_ban_scans({"recent_scans": [{"src_ip": "203.0.113.70", "count": 40}]}, {})
     assert bans == ["203.0.113.70"]
 
 
-# ── _sur_ban_sev2_surge — ban auto surge C2 ──────────────────────────────
-
 def test_sur_ban_sev2_surge_aucune_ip():
-    assert soc._sur_ban_sev2_surge(50, {}, {}) == []
+    assert soc_suricata_ban._sur_ban_sev2_surge(50, {}, {}) == []
 
 
 def test_sur_ban_sev2_surge_limite_top_3(monkeypatch):
     """Au plus 3 IPs (top_ips[:3]) sont traitées."""
-    monkeypatch.setattr(soc, "_ip_try_mark_banned", lambda ip: True)
-    monkeypatch.setattr(soc, "_save_auto_banned", lambda: None)
-    monkeypatch.setattr(soc, "_ban_ip_ssh", lambda ip, reason, dur: (True, "ok"))
-    monkeypatch.setattr(soc, "_soc_log", lambda *a, **k: None)
+    monkeypatch.setattr(soc_suricata_ban, "_ip_try_mark_banned", lambda ip: True)
+    monkeypatch.setattr(soc_suricata_ban, "_save_auto_banned", lambda: None)
+    monkeypatch.setattr(soc_suricata_ban, "_ban_ip_ssh", lambda ip, reason, dur: (True, "ok"))
+    monkeypatch.setattr(soc_suricata_ban, "_soc_log", lambda *a, **k: None)
     sur = {"top_ips": [{"ip": f"203.0.113.{i}"} for i in range(80, 90)]}
-    bans = soc._sur_ban_sev2_surge(60, sur, {})
+    bans = soc_suricata_ban._sur_ban_sev2_surge(60, sur, {})
     assert len(bans) == 3
 
 
