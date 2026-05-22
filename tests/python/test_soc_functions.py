@@ -6,8 +6,10 @@ pures et semi-pures (classification autoban, candidats ban, score de menace,
 checks auto-engine) — testables sans réseau ni SSH.
 """
 import base64
+import time
 
 import soc_ip_deep
+import soc_reqhour
 import soc_suricata_ban
 from blueprints import soc
 
@@ -525,6 +527,45 @@ def test_soc_suricata_check_donnees_vides(monkeypatch):
 def test_soc_reqhour_check_donnees_vides(monkeypatch):
     monkeypatch.setattr(soc, "_speak", lambda *a, **k: None)
     assert soc._soc_reqhour_check({}) is None
+
+
+def test_soc_reqhour_check_sous_seuil_silencieux(monkeypatch):
+    """Trafic sous le seuil req/h → aucune annonce vocale."""
+    spoke = []
+    monkeypatch.setattr(soc, "_speak", lambda *a, **k: spoke.append(a))
+    data = {"traffic": {"requests_per_hour": {time.strftime("%H"): 100}}}
+    soc._soc_reqhour_check(data)
+    assert spoke == []
+
+
+def test_soc_reqhour_check_cooldown_actif_silencieux(monkeypatch):
+    """Pic réel mais cooldown global encore actif → pas d'action."""
+    spoke = []
+    monkeypatch.setattr(soc, "_speak", lambda *a, **k: spoke.append(a))
+    monkeypatch.setattr(soc_reqhour, "_soc_cooldown_ok", lambda *a, **k: False)
+    data = {"traffic": {"requests_per_hour": {time.strftime("%H"): 900}}}
+    soc._soc_reqhour_check(data)
+    assert spoke == []
+
+
+def test_soc_reqhour_check_pic_bannit_et_annonce(monkeypatch):
+    """Pic >500 req/h + IP EXPLOIT candidate → ban auto + annonce vocale."""
+    spoke, logged = [], []
+    monkeypatch.setattr(soc, "_speak", lambda *a, **k: spoke.append(a[0] if a else ""))
+    monkeypatch.setattr(soc_reqhour, "_soc_cooldown_ok", lambda *a, **k: True)
+    monkeypatch.setattr(soc_reqhour, "_ip_try_mark_banned", lambda ip: True)
+    monkeypatch.setattr(soc_reqhour, "_save_auto_banned", lambda: None)
+    monkeypatch.setattr(soc_reqhour, "_ban_ip_ssh", lambda ip, reason, dur: (True, "ok"))
+    monkeypatch.setattr(soc_reqhour, "_soc_log", lambda *a, **k: logged.append(a))
+    data = {
+        "traffic": {"requests_per_hour": {time.strftime("%H"): 900}},
+        "kill_chain": {"active_ips": [
+            {"ip": "203.0.113.50", "count": 800, "stage": "EXPLOIT"}]},
+    }
+    soc._soc_reqhour_check(data)
+    assert spoke and "Pic de trafic" in spoke[0]
+    assert "1 IP bannie" in spoke[0]
+    assert logged  # ban journalisé via _soc_log
 
 
 def test_soc_rsyslog_check_donnees_vides(monkeypatch):

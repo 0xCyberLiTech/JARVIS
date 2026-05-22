@@ -93,9 +93,19 @@ ban/whitelist injectées via `init()`. `_soc_suricata_check` appelle les
 nouveau module **`scripts/soc_threat_score.py`** (176 L · 74% cov). DI :
 `_soc_cooldown_ok` + `_ip_to_tts` injectés via `init()`. La route
 `/api/soc/threat-score` et `_soc_monitor_loop` appellent les fonctions via alias,
-inchangés. `soc.py` 1687→**1548 L**. Cumul refactor : **soc.py 1872→1548 (−324 L),
-3 modules cohérents extraits**. **1091 pytest pass · 0 skip · ruff 0 · eslint 0 ·
-zéro régression.** Détail `BILAN §0bis`.
+inchangés. `soc.py` 1687→**1548 L**.
+
+**Refactor incrémental — étape 4** (2026-05-22) : cluster pic de trafic req/h
+(`_reqhour_candidates`, `_reqhour_inject_suricata`, `_soc_reqhour_check`) extrait →
+nouveau module **`scripts/soc_reqhour.py`** (130 L · 97% cov, +3 tests sur
+l'orchestrateur). DI à 12 dépendances via `init()` keyword-only ; `_speak` et le
+dict `_SOC_AUTO_BANNED` (réassignés après chargement) injectés via lambdas
+résolues à l'appel. `soc.py` 1548→**1500 L**. Cumul refactor : **soc.py 1872→1500
+(−372 L), 4 modules cohérents extraits**. **1094 pytest pass · 0 skip · ruff 0 ·
+eslint 0 · zéro régression.** ⚠ **Refactor par extraction suspendu ici** : les
+clusters restants (autoban, rsyslog/LLM, checks auto-engine) sont enchevêtrés
+dans le cœur ban — les extraire serait du déplacement, pas du découplage.
+Priorité remise sur la couverture de `jarvis.py`. Détail `BILAN §0bis`.
 
 ## Session 2026-05-20 (suite) — réalignement description Kill Chain sur KC v4 (5 maillons)
 

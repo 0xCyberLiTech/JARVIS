@@ -25,13 +25,13 @@
 
 | Métrique | Valeur |
 |---|---|
-| **Tests pytest** | **1091 pass · 0 skip · 0 fail** (2026-05-22 : +158, campagne couverture étape 1) |
-| **Coverage globale** | **62%** (6259 stmts · 2360 miss) |
+| **Tests pytest** | **1094 pass · 0 skip · 0 fail** (2026-05-22 : +161, campagne couverture + tests refactor) |
+| **Coverage globale** | **63%** (6290 stmts · 2334 miss) |
 | **Modules Python à 100% cov** | **22 modules** (recompte audit 2026-05-17 soir) : `bypass_code`, `bypass_proxmox`, `bypass_simple`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_pending_bypass`, `chat_routing`, `chat_soc_inject`, `chat_stream`, `chat_system_prompt`, `chat_tool_calls`, `deferred_speak`, `llm_opts`, `ollama_circuit`, `security_whitelists`, `ssh_terminal`, `stream_tokens`, `tts_cleaner`, `tts_dedup`, `voice_lab`, `blueprints/__init__` |
-| **Couverture orchestrateurs** | `jarvis.py` 40% · `blueprints/soc.py` 55% · `soc_ip_deep.py` 78% · `soc_suricata_ban.py` 96% · `soc_threat_score.py` 74% (Flask, complétés par 25 tests E2E · campagne en cours) |
+| **Couverture orchestrateurs** | `jarvis.py` 40% · `blueprints/soc.py` 56% · `soc_ip_deep.py` 78% · `soc_suricata_ban.py` 96% · `soc_threat_score.py` 74% · `soc_reqhour.py` 97% (Flask, complétés par 25 tests E2E · campagne en cours) |
 | **`jarvis.py`** | **4814 L** (2957 stmts exécutables) |
-| **`blueprints/soc.py`** | 914 stmts (**1548 L**) — clusters `_deep_*`, `_sur_ban_*` et scoring menace extraits (refactor incrémental étapes 1-3) |
-| **Modules Python totaux** | 39 (37 dans `scripts/` + 2 dans `scripts/blueprints/`) — `soc_ip_deep.py` + `soc_suricata_ban.py` + `soc_threat_score.py` extraits 2026-05-22 (refactor incrémental) |
+| **`blueprints/soc.py`** | 871 stmts (**1500 L**) — clusters `_deep_*`, `_sur_ban_*`, scoring menace et pic req/h extraits (refactor incrémental étapes 1-4) |
+| **Modules Python totaux** | 40 (38 dans `scripts/` + 2 dans `scripts/blueprints/`) — `soc_ip_deep.py` + `soc_suricata_ban.py` + `soc_threat_score.py` + `soc_reqhour.py` extraits 2026-05-22 (refactor incrémental) |
 | **`jarvis_main.js`** | 148 L (post-refactor −98,1% depuis 7828L) |
 | **Modules JS totaux** | 21 modules (18 dans `static/js/` + 3 dans `static/`) |
 | **JS LOC total** | ~14 600 lignes |
@@ -42,7 +42,7 @@
 | **TTS moteurs** | 4 (edge-tts · Kokoro CUDA · Piper · SAPI5) avec fallback chain |
 | **ESLint warnings** | 155 · 0 erreur |
 | **ruff** | 0 erreur |
-| **Pre-commit hooks** | ruff + eslint (commit) · pytest 1091 tests (pre-push) |
+| **Pre-commit hooks** | ruff + eslint (commit) · pytest 1094 tests (pre-push) |
 
 ---
 
@@ -107,8 +107,20 @@ appelle les `_sur_ban_*` via alias, inchangé.
 vers **`soc_threat_score.py`** (DI : `_soc_cooldown_ok` + `_ip_to_tts` injectés).
 `soc.py` 1687→**1548 L**. `soc_threat_score.py` 74% cov. La route
 `/api/soc/threat-score` et `_soc_monitor_loop` appellent les fonctions via alias,
-inchangés. Cumul refactor : `soc.py` 1872→1548 (−324 L), 3 modules cohérents
-extraits. 1091 tests, 0 régression.
+inchangés.
+
+**Refactor incrémental — étape 4** (2026-05-22) : cluster pic de trafic req/h
+(`_reqhour_candidates`, `_reqhour_inject_suricata`, `_soc_reqhour_check`) extrait
+vers **`soc_reqhour.py`** (équivalent Python de `checkReqPerHour()` JS).
+`soc.py` 1548→**1500 L**. `soc_reqhour.py` 97% cov (+3 tests sur l'orchestrateur,
+jusque-là non couvert). Cumul refactor : `soc.py` 1872→1500 (−372 L), 4 modules
+cohérents extraits, 1094 tests, 0 régression. ⚠ Honnêteté : ce cluster est plus
+couplé au cœur ban que les étapes 1-3 — DI à 12 dépendances, dont `_speak` et le
+dict `_SOC_AUTO_BANNED` (réassignés après chargement du module) injectés via
+lambdas résolues à l'appel. Les clusters restants (autoban, rsyslog/LLM, checks
+auto-engine) sont enchevêtrés dans le cœur ban : les extraire relèverait du
+déplacement plus que du découplage → **refactor par extraction suspendu ici**,
+priorité remise sur la couverture de `jarvis.py`.
 
 ---
 
