@@ -28,10 +28,10 @@
 | **Tests pytest** | **1091 pass · 0 skip · 0 fail** (2026-05-22 : +158, campagne couverture étape 1) |
 | **Coverage globale** | **62%** (6217 stmts · 2360 miss) |
 | **Modules Python à 100% cov** | **22 modules** (recompte audit 2026-05-17 soir) : `bypass_code`, `bypass_proxmox`, `bypass_simple`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_pending_bypass`, `chat_routing`, `chat_soc_inject`, `chat_stream`, `chat_system_prompt`, `chat_tool_calls`, `deferred_speak`, `llm_opts`, `ollama_circuit`, `security_whitelists`, `ssh_terminal`, `stream_tokens`, `tts_cleaner`, `tts_dedup`, `voice_lab`, `blueprints/__init__` |
-| **Couverture orchestrateurs** | `jarvis.py` 40% · `blueprints/soc.py` 59% (Flask, complétés par 25 tests E2E · campagne couverture en cours) |
+| **Couverture orchestrateurs** | `jarvis.py` 40% · `blueprints/soc.py` 58% · `soc_ip_deep.py` 78% (Flask, complétés par 25 tests E2E · campagne couverture en cours) |
 | **`jarvis.py`** | **4814 L** (2957 stmts exécutables) |
-| **`blueprints/soc.py`** | 1095 stmts (1872 L) |
-| **Modules Python totaux** | 35 modules dans `scripts/` (33 + 1 blueprint + `__init__`) |
+| **`blueprints/soc.py`** | 1040 stmts (**1729 L**) — cluster `_deep_*` extrait dans `soc_ip_deep.py` (refactor incrémental étape 1) |
+| **Modules Python totaux** | 36 modules dans `scripts/` (dont `soc_ip_deep.py` extrait 2026-05-22) |
 | **`jarvis_main.js`** | 148 L (post-refactor −98,1% depuis 7828L) |
 | **Modules JS totaux** | 21 modules (18 dans `static/js/` + 3 dans `static/`) |
 | **JS LOC total** | ~14 600 lignes |
@@ -88,7 +88,13 @@ Travaux complémentaires le même jour : dé-duplication documentaire (source un
 §0) + **campagne couverture étape 1** (+158 tests → `jarvis.py` 26→40%, `soc.py`
 31→59%, total 62%) + correctif crash `/api/facts` sur corps non-dict → score
 **88 → 91/100**. ⚠ Refactor des monolithes : décidé avec Marc = couverture
-d'abord (cible ~70-80%), refactor ensuite — campagne en cours, plusieurs sessions.
+d'abord, refactor ensuite, par extraction incrémentale validée à chaque étape.
+
+**Refactor incrémental — étape 1** (2026-05-22) : cluster investigation IP
+(`_b64py`, `_ssh_json_exec`, `_deep_geoip/crowdsec/fail2ban/autoban/nginx/rsyslog`)
+extrait de `soc.py` vers le module dédié **`soc_ip_deep.py`** (DI : `_ssh_ngix`
+injecté). `soc.py` 1872→**1729 L** (−143). `soc_ip_deep.py` 78% cov. soc.py garde
+des alias légers → routes `ip-history`/`ip-deep` inchangées. 1091 tests, 0 régression.
 
 ---
 
@@ -206,7 +212,8 @@ Windows 11 (localhost:5000)
 | Module | Taille | Coverage | Contenu |
 |---|---|---|---|
 | `jarvis.py` | 4814 L (2957 stmts) | 30% | Serveur Flask · ~150 endpoints · routing 4 modes · auto-engine SOC proactif · pré-warm phi4/Kokoro · circuit breaker imports · 8 call-sites Ollama wrappés |
-| `blueprints/soc.py` | 1095 stmts (1872 L) | 31% | Endpoints SOC (`/api/soc/*`) · cache monitoring.json TTL 30s · fallback SSH · IP history 30j · ban/unban CrowdSec · defense_24h · ioc |
+| `blueprints/soc.py` | 1040 stmts (1729 L) | 58% | Endpoints SOC (`/api/soc/*`) · cache monitoring.json TTL 30s · fallback SSH · IP history 30j · ban/unban CrowdSec · defense_24h · ioc |
+| `soc_ip_deep.py` | 69 stmts (180 L) | 78% | Investigation IP — GeoIP/CrowdSec/Fail2ban/autoban/nginx/rsyslog · extrait de soc.py (refactor incrémental étape 1, 2026-05-22) · DI `_ssh_ngix` |
 
 ### Modules satellites — Chat & LLM
 

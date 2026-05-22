@@ -70,10 +70,19 @@ trouvé par un nouveau test. Score honnête recalibré (la grille de décomposit
 sommait à 92 vs titre 88 — incohérence corrigée) : **88 → 91/100**.
 
 **Décision actée — refactor des monolithes `jarvis.py`/`soc.py`** : sur demande
-de Marc, plan retenu = **couverture d'abord (~70-80%), refactor ensuite**, par
-extraction incrémentale validée à chaque étape. Ne PAS refactorer tant que la
-couverture filet n'est pas atteinte (`feedback_no_big_refactor` respecté).
-Campagne couverture en cours — plusieurs sessions. Détail → `BILAN-TECHNIQUE.md` §0.
+de Marc, plan retenu = **couverture d'abord, refactor ensuite**, par extraction
+incrémentale validée à chaque étape (`feedback_no_big_refactor` respecté — pas de
+big-bang).
+
+**Refactor incrémental — étape 1** (2026-05-22) : extraction du cluster
+investigation IP (`_b64py`, `_ssh_json_exec`, `_deep_geoip/crowdsec/fail2ban/
+autoban/nginx_hits/nginx_last/rsyslog`) de `blueprints/soc.py` → nouveau module
+**`scripts/soc_ip_deep.py`** (180 L · 78% cov). Dépendance `_ssh_ngix` injectée
+via `soc_ip_deep.init()` (pattern DI). `soc.py` garde 7 alias légers → routes
+`/api/soc/ip-history` et `/api/soc/ip-deep` **inchangées**. `soc.py` 1872→**1729 L**
+(−143). Tests `_deep_*` rebranchés sur `soc_ip_deep`. **1091 pytest pass · 0 skip ·
+ruff 0 · eslint 0 · zéro régression.** Méthode validée — réutilisable pour les
+extractions suivantes. Campagne couverture + refactor en cours — détail `BILAN §0bis`.
 
 ## Session 2026-05-20 (suite) — réalignement description Kill Chain sur KC v4 (5 maillons)
 

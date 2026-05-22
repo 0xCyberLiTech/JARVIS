@@ -7,20 +7,21 @@ checks auto-engine) — testables sans réseau ni SSH.
 """
 import base64
 
+import soc_ip_deep
 from blueprints import soc
 
 # ── _b64py ───────────────────────────────────────────────────────────────
 
 def test_b64py_construit_commande_ssh():
     """_b64py emballe un script Python en commande SSH `echo … | base64 -d | python3`."""
-    cmd = soc._b64py("print('x')")
+    cmd = soc_ip_deep._b64py("print('x')")
     assert cmd.startswith("echo ")
     assert cmd.endswith("| base64 -d | python3")
 
 
 def test_b64py_payload_round_trip():
     """Le jeton base64 inséré décode bien le script d'origine."""
-    cmd = soc._b64py("print('hello')")
+    cmd = soc_ip_deep._b64py("print('hello')")
     token = cmd.split("echo ", 1)[1].split(" |", 1)[0]
     assert base64.b64decode(token).decode() == "print('hello')"
 
@@ -326,11 +327,11 @@ def test_check_threat_level_cooldown_bloque(monkeypatch):
     soc._SOC_MON_COOLDOWNS.pop("threat_ÉLEVÉ", None)
 
 
-# ── _deep_* — investigation IP approfondie (SSH mocké) ───────────────────
+# ── _deep_* — investigation IP approfondie (module soc_ip_deep, SSH mocké) ─
 
 def test_deep_crowdsec_aucune_decision(monkeypatch):
-    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=10: (True, "[]"))
-    res = soc._deep_crowdsec("203.0.113.5")
+    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=10: (True, "[]"))
+    res = soc_ip_deep._deep_crowdsec("203.0.113.5")
     assert res["banned"] is False
     assert res["count"] == 0
 
@@ -339,9 +340,9 @@ def test_deep_crowdsec_avec_decision(monkeypatch):
     decisions = ('[{"decisions":[{"id":1,"scenario":"http-probing",'
                  '"duration":"24h","origin":"crowdsec","type":"ban"}]}]')
     monkeypatch.setattr(
-        soc, "_ssh_ngix",
+        soc_ip_deep, "_ssh_ngix",
         lambda cmd, timeout=10: (True, decisions) if "decisions list" in cmd else (True, "[]"))
-    res = soc._deep_crowdsec("203.0.113.6")
+    res = soc_ip_deep._deep_crowdsec("203.0.113.6")
     assert res["banned"] is True
     assert res["count"] == 1
     assert res["decisions"][0]["scenario"] == "http-probing"
@@ -349,57 +350,57 @@ def test_deep_crowdsec_avec_decision(monkeypatch):
 
 def test_deep_fail2ban_parse(monkeypatch):
     monkeypatch.setattr(
-        soc, "_ssh_json_exec",
+        soc_ip_deep, "_ssh_json_exec",
         lambda script, timeout=10: {"active": ["sshd"],
                                     "history": [{"jail": "sshd", "ts": 1, "bantime": 2, "count": 1}],
                                     "total_records": 1})
-    res = soc._deep_fail2ban("203.0.113.7")
+    res = soc_ip_deep._deep_fail2ban("203.0.113.7")
     assert res["banned"] is True
     assert res["jails"] == ["sshd"]
     assert res["total_records"] == 1
 
 
 def test_deep_fail2ban_aucun_ban(monkeypatch):
-    monkeypatch.setattr(soc, "_ssh_json_exec",
+    monkeypatch.setattr(soc_ip_deep, "_ssh_json_exec",
                         lambda script, timeout=10: {"active": [], "history": [], "total_records": 0})
-    assert soc._deep_fail2ban("203.0.113.8")["banned"] is False
+    assert soc_ip_deep._deep_fail2ban("203.0.113.8")["banned"] is False
 
 
 def test_deep_autoban_compte_recidive(monkeypatch):
-    monkeypatch.setattr(soc, "_ssh_json_exec",
+    monkeypatch.setattr(soc_ip_deep, "_ssh_json_exec",
                         lambda script, timeout=10: {"count": 3, "history": [{"ip": "x"}]})
-    assert soc._deep_autoban("203.0.113.9")["count"] == 3
+    assert soc_ip_deep._deep_autoban("203.0.113.9")["count"] == 3
 
 
 def test_deep_nginx_hits_nombre(monkeypatch):
-    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=15: (True, "42\n"))
-    assert soc._deep_nginx_hits("203.0.113.10") == 42
+    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=15: (True, "42\n"))
+    assert soc_ip_deep._deep_nginx_hits("203.0.113.10") == 42
 
 
 def test_deep_nginx_hits_sortie_invalide(monkeypatch):
-    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=15: (True, "erreur"))
-    assert soc._deep_nginx_hits("203.0.113.11") == 0
+    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=15: (True, "erreur"))
+    assert soc_ip_deep._deep_nginx_hits("203.0.113.11") == 0
 
 
 def test_deep_nginx_hits_ssh_ko(monkeypatch):
-    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=15: (False, ""))
-    assert soc._deep_nginx_hits("203.0.113.12") == 0
+    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=15: (False, ""))
+    assert soc_ip_deep._deep_nginx_hits("203.0.113.12") == 0
 
 
 def test_deep_nginx_last_lignes(monkeypatch):
-    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=10: (True, "ligne1\nligne2\n"))
-    assert soc._deep_nginx_last("203.0.113.13") == ["ligne1", "ligne2"]
+    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=10: (True, "ligne1\nligne2\n"))
+    assert soc_ip_deep._deep_nginx_last("203.0.113.13") == ["ligne1", "ligne2"]
 
 
 def test_deep_nginx_last_ssh_ko(monkeypatch):
-    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=10: (False, ""))
-    assert soc._deep_nginx_last("203.0.113.14") == []
+    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=10: (False, ""))
+    assert soc_ip_deep._deep_nginx_last("203.0.113.14") == []
 
 
 def test_deep_rsyslog_agrege_compteurs(monkeypatch):
     out = "/var/log/central/srv-ngix/auth.log:5\n/var/log/central/clt/access.log:3"
-    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=25: (True, out))
-    res = soc._deep_rsyslog("203.0.113.15")
+    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=25: (True, out))
+    res = soc_ip_deep._deep_rsyslog("203.0.113.15")
     assert res["total"] == 8
     assert len(res["sources"]) == 2
 
