@@ -26,12 +26,12 @@
 | Métrique | Valeur |
 |---|---|
 | **Tests pytest** | **1091 pass · 0 skip · 0 fail** (2026-05-22 : +158, campagne couverture étape 1) |
-| **Coverage globale** | **62%** (6217 stmts · 2360 miss) |
+| **Coverage globale** | **62%** (6259 stmts · 2360 miss) |
 | **Modules Python à 100% cov** | **22 modules** (recompte audit 2026-05-17 soir) : `bypass_code`, `bypass_proxmox`, `bypass_simple`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_pending_bypass`, `chat_routing`, `chat_soc_inject`, `chat_stream`, `chat_system_prompt`, `chat_tool_calls`, `deferred_speak`, `llm_opts`, `ollama_circuit`, `security_whitelists`, `ssh_terminal`, `stream_tokens`, `tts_cleaner`, `tts_dedup`, `voice_lab`, `blueprints/__init__` |
-| **Couverture orchestrateurs** | `jarvis.py` 40% · `blueprints/soc.py` 57% · `soc_ip_deep.py` 78% · `soc_suricata_ban.py` 96% (Flask, complétés par 25 tests E2E · campagne en cours) |
+| **Couverture orchestrateurs** | `jarvis.py` 40% · `blueprints/soc.py` 55% · `soc_ip_deep.py` 78% · `soc_suricata_ban.py` 96% · `soc_threat_score.py` 74% (Flask, complétés par 25 tests E2E · campagne en cours) |
 | **`jarvis.py`** | **4814 L** (2957 stmts exécutables) |
-| **`blueprints/soc.py`** | 1001 stmts (**1687 L**) — clusters `_deep_*` et `_sur_ban_*` extraits (refactor incrémental étapes 1-2) |
-| **Modules Python totaux** | 37 modules dans `scripts/` (dont `soc_ip_deep.py` + `soc_suricata_ban.py` extraits 2026-05-22) |
+| **`blueprints/soc.py`** | 914 stmts (**1548 L**) — clusters `_deep_*`, `_sur_ban_*` et scoring menace extraits (refactor incrémental étapes 1-3) |
+| **Modules Python totaux** | 39 (37 dans `scripts/` + 2 dans `scripts/blueprints/`) — `soc_ip_deep.py` + `soc_suricata_ban.py` + `soc_threat_score.py` extraits 2026-05-22 (refactor incrémental) |
 | **`jarvis_main.js`** | 148 L (post-refactor −98,1% depuis 7828L) |
 | **Modules JS totaux** | 21 modules (18 dans `static/js/` + 3 dans `static/`) |
 | **JS LOC total** | ~14 600 lignes |
@@ -42,7 +42,7 @@
 | **TTS moteurs** | 4 (edge-tts · Kokoro CUDA · Piper · SAPI5) avec fallback chain |
 | **ESLint warnings** | 155 · 0 erreur |
 | **ruff** | 0 erreur |
-| **Pre-commit hooks** | ruff + eslint (commit) · pytest 959 tests (pre-push) |
+| **Pre-commit hooks** | ruff + eslint (commit) · pytest 1091 tests (pre-push) |
 
 ---
 
@@ -100,8 +100,15 @@ des alias légers → routes `ip-history`/`ip-deep` inchangées. 1091 tests, 0 r
 (`_sur_ban_sev1`, `_sur_ban_scans`, `_sur_ban_sev2_surge`) extrait vers
 **`soc_suricata_ban.py`** (DI : 6 fonctions du cœur ban/whitelist injectées).
 `soc.py` 1729→**1687 L**. `soc_suricata_ban.py` 96% cov. `_soc_suricata_check`
-appelle les `_sur_ban_*` via alias, inchangé. Cumul refactor : `soc.py`
-1872→1687 (−185 L), 2 modules cohérents extraits. 1091 tests, 0 régression.
+appelle les `_sur_ban_*` via alias, inchangé.
+
+**Refactor incrémental — étape 3** (2026-05-22) : cluster scoring menace
+(`_threat_score_from_json`, `_check_threat_level`, `_check_escalation`) extrait
+vers **`soc_threat_score.py`** (DI : `_soc_cooldown_ok` + `_ip_to_tts` injectés).
+`soc.py` 1687→**1548 L**. `soc_threat_score.py` 74% cov. La route
+`/api/soc/threat-score` et `_soc_monitor_loop` appellent les fonctions via alias,
+inchangés. Cumul refactor : `soc.py` 1872→1548 (−324 L), 3 modules cohérents
+extraits. 1091 tests, 0 régression.
 
 ---
 

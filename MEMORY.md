@@ -86,9 +86,16 @@ via `soc_ip_deep.init()` (pattern DI). `soc.py` garde 7 alias légers → routes
 (`_sur_ban_sev1`, `_sur_ban_scans`, `_sur_ban_sev2_surge`) extrait → nouveau
 module **`scripts/soc_suricata_ban.py`** (82 L · 96% cov). 6 dépendances du cœur
 ban/whitelist injectées via `init()`. `_soc_suricata_check` appelle les
-`_sur_ban_*` via alias, inchangé. `soc.py` 1729→**1687 L**. Cumul refactor :
-**soc.py 1872→1687 (−185 L), 2 modules cohérents extraits**. **1091 pytest pass ·
-0 skip · ruff 0 · eslint 0 · zéro régression.** Détail `BILAN §0bis`.
+`_sur_ban_*` via alias, inchangé. `soc.py` 1729→**1687 L**.
+
+**Refactor incrémental — étape 3** (2026-05-22) : cluster scoring menace
+(`_threat_score_from_json`, `_check_threat_level`, `_check_escalation`) extrait →
+nouveau module **`scripts/soc_threat_score.py`** (176 L · 74% cov). DI :
+`_soc_cooldown_ok` + `_ip_to_tts` injectés via `init()`. La route
+`/api/soc/threat-score` et `_soc_monitor_loop` appellent les fonctions via alias,
+inchangés. `soc.py` 1687→**1548 L**. Cumul refactor : **soc.py 1872→1548 (−324 L),
+3 modules cohérents extraits**. **1091 pytest pass · 0 skip · ruff 0 · eslint 0 ·
+zéro régression.** Détail `BILAN §0bis`.
 
 ## Session 2026-05-20 (suite) — réalignement description Kill Chain sur KC v4 (5 maillons)
 
