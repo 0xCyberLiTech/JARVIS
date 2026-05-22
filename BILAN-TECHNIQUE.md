@@ -10,12 +10,12 @@
 > Les autres docs JARVIS pointent ici au lieu de recopier ces chiffres : un seul
 > endroit à mettre à jour, plus de dérive entre documents.
 
-**Score honnête : 91/100** — décomposition (audit dette complet 2026-05-22) :
+**Score honnête : 92/100** — décomposition (audit dette + refactor 2026-05-22) :
 
 | Critère | Score | Justification |
 |---|---|---|
-| Architecture | 22/25 | `jarvis.py` = orchestrateur Flask (~150 endpoints · routing 4 modes · auto-engine SOC) ; logique métier extraite dans **31 modules satellites** ; refactor JS terminé (18 modules). −3 : monolithes `jarvis.py` + `blueprints/soc.py` denses — **accepté par décision** (`feedback_no_big_refactor`), pas un chantier ouvert. |
-| Tests | 22/25 | **1091 tests pytest · 0 skip · 0 fail** · 22 modules à 100% cov. Campagne couverture 2026-05-22 (étape 1 « couverture d'abord, refactor ensuite ») : +158 tests → `jarvis.py` 26→**40%**, `soc.py` 31→**59%**, coverage globale **62%**. −3 : `jarvis.py` (40%) encore sous la cible — le reste = handlers de routes lourds (mock Ollama/SSH/TTS), ROI décroissant ; campagne en cours avant tout refactor des monolithes. |
+| Architecture | 23/25 | `jarvis.py` = orchestrateur Flask (~150 endpoints · routing 4 modes · auto-engine SOC) ; logique métier extraite dans **38 modules satellites** ; refactor JS terminé (18 modules). `blueprints/soc.py` **dé-monolithisé** : 1872→1500 L, 4 clusters cohérents extraits (refactor incrémental étapes 1-4). −2 : `jarvis.py` reste un monolithe de 4814 L — réduction non engagée (`feedback_no_big_refactor`), assumée. |
+| Tests | 22/25 | **1120 tests pytest · 0 skip · 0 fail** · 22 modules à 100% cov · 4 modules extraits couverts 74-97%. Campagne couverture 2026-05-22 : +187 tests → `jarvis.py` 26→**43%**, `soc.py` 31→**56%**, coverage globale **64%**. −3 : les deux fichiers cœur (`jarvis.py` 43%, `soc.py` 56%) restent sous 60% — le non-couvert = handlers de routes Flask + générateurs SSE (mock lourd Ollama/SSH/TTS), ROI décroissant, plafond pragmatique assumé. |
 | Documentation | 14/15 | CLAUDE.md + BILAN-TECHNIQUE.md + RUNBOOK.md + MEMORY.md + docs/ (7 fichiers) — réalignés, **dé-dupliqués** et rattachés à une **source unique** des métriques (§0) le 2026-05-22 : dérive entre documents structurellement impossible. −1 : set documentaire volumineux, inhérent au projet. |
 | Lisibilité/Conventions | 13/15 | ruff **0** · eslint **0 erreur** · pre-commit/pre-push hooks bloquants. −2 : ~155 warnings eslint (exports camelCase inter-modules sans bundler) + ~135 inline styles JS (HUD temps réel) — acceptés, faux positifs de lint plus que dette réelle. |
 | Performance | 10/10 | Circuit breaker Ollama 8 call-sites (refus 1ms vs timeout 30s si Ollama down) · cache SOC 30s · debounce DSP audio · fix IPv6 systémique (`127.0.0.1` partout, −97% latence) · pré-warm Kokoro CUDA au boot (0 cold start 42.8s sur 1re alerte) · pré-warm phi4 SOC en `num_ctx 8192` · pipeline voix : invariant AudioContext + découpage TTS `_splitForTts` (voix en ~1s vs ~15-24s) · optimisation VRAM (`_SOC_NUM_CTX` 16384→8192, embed dé-épinglé · VRAM libre ~2.0-2.8 Go). |
