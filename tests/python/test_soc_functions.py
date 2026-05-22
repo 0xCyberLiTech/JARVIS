@@ -402,3 +402,116 @@ def test_deep_rsyslog_agrege_compteurs(monkeypatch):
     res = soc._deep_rsyslog("203.0.113.15")
     assert res["total"] == 8
     assert len(res["sources"]) == 2
+
+
+# ── _check_net_spikes — alerte pic bande passante ────────────────────────
+
+def test_check_net_spikes_aucun_pic():
+    assert soc._check_net_spikes({}) is None
+
+
+def test_check_net_spikes_pic_recent_alerte(monkeypatch):
+    import time as _t
+    spoke = []
+    monkeypatch.setattr(soc, "_speak", lambda msg, **k: spoke.append(msg))
+    monkeypatch.setattr(soc, "_soc_log", lambda *a, **k: None)
+    monkeypatch.setattr(soc, "_save_cooldowns", lambda: None)
+    soc._SOC_MON_COOLDOWNS.pop("net_spike", None)
+    soc._check_net_spikes({"net_spikes": [{"ts": _t.time(), "tx_mbps": 120, "rx_mbps": 40}]})
+    assert spoke and "bande passante" in spoke[0].lower()
+
+
+def test_check_net_spikes_pic_ancien_silencieux(monkeypatch):
+    spoke = []
+    monkeypatch.setattr(soc, "_speak", lambda msg, **k: spoke.append(msg))
+    monkeypatch.setattr(soc, "_save_cooldowns", lambda: None)
+    soc._SOC_MON_COOLDOWNS.pop("net_spike", None)
+    soc._check_net_spikes({"net_spikes": [{"ts": 1.0, "tx_mbps": 99, "rx_mbps": 99}]})
+    assert spoke == []
+
+
+# ── _soc_subnet_campaign_check — campagne /24 coordonnée ─────────────────
+
+def test_subnet_campaign_aucune():
+    assert soc._soc_subnet_campaign_check({}) is None
+
+
+def test_subnet_campaign_sous_seuil_silencieux(monkeypatch):
+    spoke = []
+    monkeypatch.setattr(soc, "_speak", lambda msg, **k: spoke.append(msg))
+    soc._soc_subnet_campaign_check({"slow_campaigns": [{"subnet": "1.2.3.0/24", "count": 3}]})
+    assert spoke == []
+
+
+def test_subnet_campaign_au_dessus_seuil_alerte(monkeypatch):
+    spoke = []
+    monkeypatch.setattr(soc, "_speak", lambda msg, **k: spoke.append(msg))
+    monkeypatch.setattr(soc, "_save_cooldowns", lambda: None)
+    soc._SOC_MON_COOLDOWNS.pop("campaign_45_146_165_0_24", None)
+    soc._soc_subnet_campaign_check(
+        {"slow_campaigns": [{"subnet": "45.146.165.0/24", "count": 8, "countries": ["RU"]}]})
+    assert spoke and "45.146.165.0/24" in spoke[0]
+
+
+# ── _soc_autoban / _soc_exploit_gap_check — chemins de garde ─────────────
+
+def test_soc_autoban_aucune_ip():
+    assert soc._soc_autoban({}) is None
+
+
+def test_soc_autoban_ip_lan_jamais_bannie(monkeypatch):
+    banned = []
+    monkeypatch.setattr(soc, "_speak", lambda *a, **k: None)
+    monkeypatch.setattr(soc, "_ban_ip_ssh", lambda *a, **k: (banned.append(a), (True, ""))[1])
+    soc._soc_autoban({"kill_chain": {"active_ips": [
+        {"ip": "192.168.1.50", "stage": "EXPLOIT", "count": 9999}]}})
+    assert banned == []
+
+
+def test_soc_exploit_gap_check_aucune_ip():
+    assert soc._soc_exploit_gap_check({}) == set()
+
+
+def test_soc_exploit_gap_check_stage_non_exploit_ignore(monkeypatch):
+    banned = []
+    monkeypatch.setattr(soc, "_ban_ip_ssh", lambda *a, **k: (banned.append(a), (True, ""))[1])
+    res = soc._soc_exploit_gap_check({"kill_chain": {"active_ips": [
+        {"ip": "203.0.113.200", "stage": "SCAN", "count": 9999}]}})
+    assert res == set() and banned == []
+
+
+# ── _check_daily_report — rapport vocal 8h (temps figé) ──────────────────
+
+def test_check_daily_report_hors_fenetre_silencieux(monkeypatch):
+    """En dehors du créneau 08h00-08h09 → aucun rapport (sauf hasard du wall-clock)."""
+    import datetime as _dt
+
+    class _Fixe(_dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return _dt.datetime(2026, 5, 22, 14, 30, 0)
+
+    monkeypatch.setattr(soc.datetime, "datetime", _Fixe)
+    spoke = []
+    monkeypatch.setattr(soc, "_speak", lambda msg, **k: spoke.append(msg))
+    soc._check_daily_report({}, {"threat": "MOYEN", "score": 35})
+    assert spoke == []
+
+
+def test_check_daily_report_fenetre_8h_annonce(monkeypatch):
+    """Créneau 08h03 + cooldown libre → rapport vocal quotidien émis."""
+    import datetime as _dt
+
+    class _Fixe(_dt.datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return _dt.datetime(2026, 5, 22, 8, 3, 0)
+
+    monkeypatch.setattr(soc.datetime, "datetime", _Fixe)
+    monkeypatch.setattr(soc, "_save_cooldowns", lambda: None)
+    spoke = []
+    monkeypatch.setattr(soc, "_speak", lambda msg, **k: spoke.append(msg))
+    soc._SOC_MON_COOLDOWNS.pop("daily_report_2026-05-22", None)
+    ts = soc._threat_score_from_json({"threat_level": "MOYEN", "threat_score": 35}, set())
+    soc._check_daily_report({"traffic": {"req_last_hour": 100}}, ts)
+    assert spoke and "Rapport SOC" in spoke[0]

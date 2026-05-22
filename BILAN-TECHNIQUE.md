@@ -15,7 +15,7 @@
 | Critère | Score | Justification |
 |---|---|---|
 | Architecture | 22/25 | `jarvis.py` = orchestrateur Flask (~150 endpoints · routing 4 modes · auto-engine SOC) ; logique métier extraite dans **31 modules satellites** ; refactor JS terminé (18 modules). −3 : monolithes `jarvis.py` + `blueprints/soc.py` denses — **accepté par décision** (`feedback_no_big_refactor`), pas un chantier ouvert. |
-| Tests | 22/25 | **1070 tests pytest · 0 skip · 0 fail** · 22 modules à 100% cov. Campagne couverture 2026-05-22 (étape 1 « couverture d'abord, refactor ensuite ») : +137 tests → `jarvis.py` 26→**40%**, `soc.py` 31→**49%**, coverage globale **60%**. −3 : `jarvis.py`/`soc.py` encore sous la cible — le reste = handlers de routes lourds (mock Ollama/SSH/TTS), ROI décroissant ; campagne en cours avant tout refactor des monolithes. |
+| Tests | 22/25 | **1082 tests pytest · 0 skip · 0 fail** · 22 modules à 100% cov. Campagne couverture 2026-05-22 (étape 1 « couverture d'abord, refactor ensuite ») : +149 tests → `jarvis.py` 26→**40%**, `soc.py` 31→**55%**, coverage globale **61%**. −3 : `jarvis.py` (40%) encore sous la cible — le reste = handlers de routes lourds (mock Ollama/SSH/TTS), ROI décroissant ; campagne en cours avant tout refactor des monolithes. |
 | Documentation | 14/15 | CLAUDE.md + BILAN-TECHNIQUE.md + RUNBOOK.md + MEMORY.md + docs/ (7 fichiers) — réalignés, **dé-dupliqués** et rattachés à une **source unique** des métriques (§0) le 2026-05-22 : dérive entre documents structurellement impossible. −1 : set documentaire volumineux, inhérent au projet. |
 | Lisibilité/Conventions | 13/15 | ruff **0** · eslint **0 erreur** · pre-commit/pre-push hooks bloquants. −2 : ~155 warnings eslint (exports camelCase inter-modules sans bundler) + ~135 inline styles JS (HUD temps réel) — acceptés, faux positifs de lint plus que dette réelle. |
 | Performance | 10/10 | Circuit breaker Ollama 8 call-sites (refus 1ms vs timeout 30s si Ollama down) · cache SOC 30s · debounce DSP audio · fix IPv6 systémique (`127.0.0.1` partout, −97% latence) · pré-warm Kokoro CUDA au boot (0 cold start 42.8s sur 1re alerte) · pré-warm phi4 SOC en `num_ctx 8192` · pipeline voix : invariant AudioContext + découpage TTS `_splitForTts` (voix en ~1s vs ~15-24s) · optimisation VRAM (`_SOC_NUM_CTX` 16384→8192, embed dé-épinglé · VRAM libre ~2.0-2.8 Go). |
@@ -25,10 +25,10 @@
 
 | Métrique | Valeur |
 |---|---|
-| **Tests pytest** | **1070 pass · 0 skip · 0 fail** (2026-05-22 : +137, campagne couverture étape 1) |
-| **Coverage globale** | **60%** (6217 stmts · 2467 miss) |
+| **Tests pytest** | **1082 pass · 0 skip · 0 fail** (2026-05-22 : +149, campagne couverture étape 1) |
+| **Coverage globale** | **61%** (6217 stmts · 2406 miss) |
 | **Modules Python à 100% cov** | **22 modules** (recompte audit 2026-05-17 soir) : `bypass_code`, `bypass_proxmox`, `bypass_simple`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_pending_bypass`, `chat_routing`, `chat_soc_inject`, `chat_stream`, `chat_system_prompt`, `chat_tool_calls`, `deferred_speak`, `llm_opts`, `ollama_circuit`, `security_whitelists`, `ssh_terminal`, `stream_tokens`, `tts_cleaner`, `tts_dedup`, `voice_lab`, `blueprints/__init__` |
-| **Modules Python <50% cov** | `jarvis.py` 40% · `blueprints/soc.py` 49% (orchestrateurs Flask, complétés par 25 tests E2E · campagne couverture en cours) |
+| **Couverture orchestrateurs** | `jarvis.py` 40% · `blueprints/soc.py` 55% (Flask, complétés par 25 tests E2E · campagne couverture en cours) |
 | **`jarvis.py`** | **4814 L** (2957 stmts exécutables) |
 | **`blueprints/soc.py`** | 1095 stmts (1872 L) |
 | **Modules Python totaux** | 35 modules dans `scripts/` (33 + 1 blueprint + `__init__`) |
@@ -85,8 +85,8 @@ personnelle de chaque finding sérieux). Score recalibré honnêtement : le
 
 Vérifications : **983 pytest pass · 0 skip · 0 fail**, ruff **0**, eslint **0 erreur**.
 Travaux complémentaires le même jour : dé-duplication documentaire (source unique
-§0) + **campagne couverture étape 1** (+137 tests → `jarvis.py` 26→40%, `soc.py`
-31→49%, total 60%) + correctif crash `/api/facts` sur corps non-dict → score
+§0) + **campagne couverture étape 1** (+149 tests → `jarvis.py` 26→40%, `soc.py`
+31→55%, total 61%) + correctif crash `/api/facts` sur corps non-dict → score
 **88 → 91/100**. ⚠ Refactor des monolithes : décidé avec Marc = couverture
 d'abord (cible ~70-80%), refactor ensuite — campagne en cours, plusieurs sessions.
 
@@ -637,12 +637,12 @@ Le projet JARVIS est **post-modularisation** des 2 côtés :
 |---|---|
 | Version JARVIS | **v3.3** (interface holographique) |
 | Score dette honnête | **91/100** (audit dette complet 2026-05-22 + lot tests routes + dé-duplication doc) |
-| Tests pytest | **1070 pass · 0 skip · 0 fail** |
-| Coverage globale | **60%** (6217 stmts) |
+| Tests pytest | **1082 pass · 0 skip · 0 fail** |
+| Coverage globale | **61%** (6217 stmts) |
 | Modules ≥100% cov | **22 modules** |
 | ESLint | **0 erreur** (warnings camelCase cross-modules acceptés) |
 | ruff | **0 erreur** |
-| Pre-push hook | **pytest 1070 tests** bloquants |
+| Pre-push hook | **pytest 1082 tests** bloquants |
 | Refactor JS | **terminé** (`jarvis_main.js` 148 L) |
 | MCP outils | **12** |
 | Circuit breaker | **8 call-sites Ollama** wrappés |
@@ -657,4 +657,4 @@ Le projet JARVIS est **post-modularisation** des 2 côtés :
 
 ---
 
-*Document mis à jour le 2026-05-22 (audit dette complet honnête + correctifs + campagne couverture étape 1 + dé-duplication doc) — JARVIS 0xCyberLiTech v3.3 — 1070 tests pass · 0 skip · coverage 60% · 22 modules à 100% cov · score dette 91/100 honnête*
+*Document mis à jour le 2026-05-22 (audit dette complet honnête + correctifs + campagne couverture étape 1 + dé-duplication doc) — JARVIS 0xCyberLiTech v3.3 — 1082 tests pass · 0 skip · coverage 61% · 22 modules à 100% cov · score dette 91/100 honnête*
