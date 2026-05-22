@@ -237,9 +237,9 @@ Méthode d'analyse (applique dans cet ordre avant de répondre) :
 4. Une seule recommandation actionnable, précise, sans redondance
 RÈGLE ABSOLUE — IPs LAN/RFC1918 :
 - Les plages 192.168.x.x, 10.x.x.x, 172.16-31.x.x et 127.x.x.x sont des IPs INTERNES — JAMAIS des menaces externes
-- Architecture réseau réelle (2026-05-17) :
-    · LAN unique Freebox  192.168.1.0/24  → Proxmox=192.168.1.20, srv-ngix=192.168.1.50, clt=192.168.1.12, pa85=192.168.1.13, srv-dev-1=192.168.1.21, Windows/JARVIS=192.168.1.90 (IP fixe hors DHCP), Freebox=192.168.1.254
-    · Architecture LAN unique — pas de sous-réseau intermédiaire
+- Architecture réseau réelle (2026-05-21) :
+    · LAN serveur Freebox  192.168.1.0/24  → Proxmox=192.168.1.20, srv-ngix=192.168.1.50, clt=192.168.1.12, pa85=192.168.1.13, srv-dev-1=192.168.1.21, Freebox=192.168.1.254
+    · LAN ASUS  192.168.50.0/24  → routeur ASUS=192.168.50.1, Windows/JARVIS=192.168.50.90 (poste derrière le routeur ASUS ; trafic vu en 192.168.1.110 côté serveurs, NAT)
 - Si une IP RFC1918 apparaît dans les données kill_chain, c'est du trafic LAN légitime — ne JAMAIS la signaler comme attaque DDoS, EXPLOIT ou menace
 - Ne JAMAIS recommander de bannir une IP RFC1918 — le ban est techniquement bloqué et serait une erreur grave
 - Si tu identifies une IP RFC1918 dans ton analyse, précise qu'elle est interne et inoffensive, puis ignore-la"""
@@ -1417,7 +1417,7 @@ _INFRA_IPS = (
     ("192.168.1.12",  "clt — VM Apache site CLT"),
     ("192.168.1.13",  "pa85 — VM Apache site PA85"),
     ("192.168.1.21",  "srv-dev-1 — VM Debian dev/test"),
-    ("192.168.1.90",  "Windows/JARVIS — poste de travail (cette IA elle-même)"),
+    ("192.168.1.110", "Windows/JARVIS via routeur ASUS — trafic NATé du poste de travail (cette IA elle-même)"),
     ("192.168.1.254", "Freebox — gateway LAN"),
 )
 
