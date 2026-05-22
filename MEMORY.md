@@ -53,8 +53,19 @@ inflaté → consolidé honnêtement **84/100**, puis **88/100** après correcti
 ce N'EST PAS de la dette : `sse_helpers.py` documente que ces modules gardent leur
 copie inline pour rester autonomes (choix délibéré). Finding écarté après vérification.
 
-Vérifications finales : **959 pytest pass · 0 skip · 0 fail**, ruff **0**, eslint
-**0 erreur**. Zéro régression. Décomposition détaillée du score → `BILAN-TECHNIQUE.md` §0bis.
+Vérifications finales : **983 pytest pass · 0 skip · 0 fail**, ruff **0**, eslint
+**0 erreur**. Zéro régression.
+
+**Suite de session — dé-duplication doc + lot de tests routes** : (1) dette
+documentaire dé-dupliquée — les compteurs volatils (score, lignes, tests,
+coverage) ne vivent plus que dans `BILAN-TECHNIQUE.md §0` (source unique), les
+~12 autres docs pointent dessus → dérive entre documents structurellement
+impossible ; (2) `tests/python/test_jarvis_routes.py` — +24 tests sur les routes
+Flask GET/POST de `jarvis.py` → coverage `jarvis.py` 30→**38%**, globale 52→**56%** ;
+(3) correctif robustesse `/api/facts` (crash sur corps JSON non-dict — même classe
+que M4) trouvé par un des nouveaux tests. Score honnête recalibré (la grille de
+décomposition sommait à 92 vs titre 88 — incohérence corrigée) : **88 → 91/100**.
+Décomposition détaillée → `BILAN-TECHNIQUE.md` §0.
 
 ## Session 2026-05-20 (suite) — réalignement description Kill Chain sur KC v4 (5 maillons)
 

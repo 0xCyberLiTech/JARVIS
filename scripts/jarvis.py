@@ -2175,7 +2175,7 @@ def api_rag_refresh():
 @limiter.limit("30 per minute")
 @app.route("/api/facts", methods=["POST"])
 def api_facts_save():
-    payload = request.json or {}
+    payload = request.json if isinstance(request.json, dict) else {}
     facts = payload.get("facts", [])
     if not isinstance(facts, list):
         return Response('{"error":"facts must be a list"}', status=400, mimetype="application/json")
