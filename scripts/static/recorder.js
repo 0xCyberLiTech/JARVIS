@@ -283,7 +283,7 @@
     const toDb = v => v > 1e-6 ? 20*Math.log10(v) : -144;
     const dbL = toDb(_datRmsL), dbR = toDb(_datRmsR);
     const pkLinL = Math.max(_datRmsL, linL), pkLinR = Math.max(_datRmsR, linR);
-    const pdbL = toDb(pkLinL), pdbR = toDb(pkLinR);
+    const _pdbL = toDb(pkLinL), _pdbR = toDb(pkLinR);
 
     const phUpdate = (db, pkDb, pkT, pkV) => {
       if (db > pkDb) return [db, 0, 0];

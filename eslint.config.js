@@ -265,7 +265,16 @@ export default [
       // Convention identique au repo SOC : variables partagées cross-fichier
       // suivent _camelCase / _SCREAMING / SCREAMING_SNAKE → exclues du signal
       // no-unused-vars (sans bundler, ESLint ne voit pas les usages cross-files).
+      //
+      // `vars: 'local'` (2026-05-23) : les fonctions top-level en mode script
+      // sont des handlers exposés à HTML via le dispatcher data-action de
+      // jarvis.html (`window[fn]` lookup dynamique). ESLint ne voit pas le HTML,
+      // donc flag de FP structurel — désactivé pour le scope global, conservé
+      // pour les vars locales (vrai signal). Alignement de politique cohérent
+      // avec ruff.toml qui ignore E701/E702 pour les one-liners délibérés.
       'no-unused-vars': ['warn', {
+        vars: 'local',
+        args: 'after-used',
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^(_|[A-Z][A-Z0-9_])',
         caughtErrors: 'none',

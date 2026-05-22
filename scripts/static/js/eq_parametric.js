@@ -300,7 +300,7 @@ function _eqDrawHandles(lp){
   });
 }
 function _eqDrawHover(lp, freqs, combined){
-  const {ctx,W,H,ML,MR,MT,MB,PW,dbMin,dbMax,fMin,fMax,freqToX,dbToY}=lp;
+  const {ctx,W,H,ML,MR,MT,MB,PW,fMin,fMax}=lp;
   if(_eqHoverX===null||_eqHoverX<ML||_eqHoverX>W-MR) return;
   const N=freqs.length, hoverFreq=fMin*Math.pow(fMax/fMin,(_eqHoverX-ML)/PW);
   ctx.strokeStyle='#ffffff18'; ctx.lineWidth=1; ctx.setLineDash([3,3]);

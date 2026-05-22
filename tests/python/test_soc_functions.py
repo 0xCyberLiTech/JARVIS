@@ -606,3 +606,183 @@ def test_check_hourly_report_heure_pleine_annonce(monkeypatch):
     ts = soc._threat_score_from_json({"threat_level": "ÉLEVÉ", "threat_score": 60}, set())
     soc._check_hourly_report({}, ts)
     assert spoke and "heure pleine" in spoke[0].lower()
+
+
+# ── _dur_to_tts — conversion durée brute en TTS ──────────────────────────
+
+def test_dur_to_tts_valeurs_predefinies():
+    assert soc._dur_to_tts("24h") == "vingt-quatre heures"
+    assert soc._dur_to_tts("48h") == "quarante-huit heures"
+    assert soc._dur_to_tts("8760h") == "un an"
+
+
+def test_dur_to_tts_regex_heures_generique():
+    """Une durée hors map (ex: 5h) doit être convertie via le regex."""
+    assert soc._dur_to_tts("5h") == "5 heures"
+
+
+def test_dur_to_tts_format_invalide_retour_tel_quel():
+    assert soc._dur_to_tts("durée bizarre") == "durée bizarre"
+
+
+# ── _ip_to_tts — conversion IP en TTS prononceable ───────────────────────
+
+def test_ip_to_tts_ipv4_point_a_point():
+    assert soc._ip_to_tts("203.0.113.50") == "203 point 0 point 113 point 50"
+
+
+def test_ip_to_tts_chaine_vide():
+    assert soc._ip_to_tts("") == ""
+
+
+# ── _is_whitelisted / _ip_skip — politique whitelist anti-ban ────────────
+
+def test_is_whitelisted_lan_192():
+    assert soc._is_whitelisted("192.168.1.50") is True
+
+
+def test_is_whitelisted_lan_10():
+    assert soc._is_whitelisted("10.0.0.1") is True
+
+
+def test_is_whitelisted_lan_172_16():
+    """172.16-31 = plage privée RFC1918."""
+    assert soc._is_whitelisted("172.20.0.1") is True
+
+
+def test_is_whitelisted_ip_publique_non_listee():
+    assert soc._is_whitelisted("8.8.8.8") is False
+
+
+def test_is_whitelisted_entree_exacte_dynamique(monkeypatch):
+    monkeypatch.setattr(soc, "_SOC_WHITELIST", ["198.51.100.7"])
+    assert soc._is_whitelisted("198.51.100.7") is True
+
+
+def test_is_whitelisted_prefixe_dynamique(monkeypatch):
+    """Une entrée se terminant par '.' couvre tout le préfixe."""
+    monkeypatch.setattr(soc, "_SOC_WHITELIST", ["198.51.100."])
+    assert soc._is_whitelisted("198.51.100.99") is True
+
+
+def test_ip_skip_vide_renvoie_true():
+    assert soc._ip_skip("") is True
+
+
+def test_ip_skip_lan_renvoie_true():
+    assert soc._ip_skip("192.168.1.50") is True
+
+
+def test_ip_skip_ip_publique_renvoie_false():
+    assert soc._ip_skip("8.8.8.8") is False
+
+
+# ── _load_soc_config — fusion overrides + défauts ────────────────────────
+
+def test_load_soc_config_fichier_absent_renvoie_defauts(monkeypatch, tmp_path):
+    monkeypatch.setattr(soc, "_SOC_CONFIG_PATH", tmp_path / "absent.json")
+    cfg = soc._load_soc_config()
+    assert cfg == soc._SOC_CONFIG_DEFAULTS
+
+
+def test_load_soc_config_override_partiel(monkeypatch, tmp_path):
+    """Un override partiel ne remplace que les clés présentes ET connues."""
+    import json as _j
+    f = tmp_path / "soc_config.json"
+    f.write_text(_j.dumps({"ngix_host": "10.0.0.99", "cle_inconnue": "ignorée"}),
+                 encoding="utf-8")
+    monkeypatch.setattr(soc, "_SOC_CONFIG_PATH", f)
+    cfg = soc._load_soc_config()
+    assert cfg["ngix_host"] == "10.0.0.99"
+    assert "cle_inconnue" not in cfg
+    # Les autres clés gardent leurs défauts
+    assert cfg["proxmox_host"] == soc._SOC_CONFIG_DEFAULTS["proxmox_host"]
+
+
+# ── Wrappers SSH par hôte — délégation vers _ssh_host ────────────────────
+
+def test_ssh_ngix_delegue_a_ssh_host(monkeypatch):
+    calls = []
+    monkeypatch.setattr(soc, "_ssh_host",
+                        lambda arr, cmd, t, r: calls.append((arr, cmd)) or (True, "ok"))
+    ok, out = soc._ssh_ngix("uptime")
+    assert (ok, out) == (True, "ok")
+    assert calls[0][0] is soc._SSH_NGIX and calls[0][1] == "uptime"
+
+
+def test_ssh_proxmox_delegue_a_ssh_host(monkeypatch):
+    calls = []
+    monkeypatch.setattr(soc, "_ssh_host",
+                        lambda arr, cmd, t, r: calls.append(arr) or (True, ""))
+    soc._ssh_proxmox("qm list")
+    assert calls[0] is soc._SSH_PROXMOX
+
+
+def test_ssh_dev1_delegue_a_ssh_host(monkeypatch):
+    calls = []
+    monkeypatch.setattr(soc, "_ssh_host",
+                        lambda arr, cmd, t, r: calls.append(arr) or (True, ""))
+    soc._ssh_dev1("ls")
+    assert calls[0] is soc._SSH_DEV1
+
+
+# ── _ssh_host — invocation subprocess + gestion erreurs ──────────────────
+
+def test_ssh_host_succes_renvoie_stdout(monkeypatch):
+    """returncode == 0 → (True, stdout+stderr)."""
+    class _R:
+        returncode = 0
+        stdout = "uptime line"
+        stderr = ""
+    monkeypatch.setattr(soc.subprocess, "run", lambda *a, **k: _R())
+    ok, out = soc._ssh_host(["ssh", "host"], "uptime", timeout=2, retries=0)
+    assert (ok, out) == (True, "uptime line")
+
+
+def test_ssh_host_timeout_renvoie_message(monkeypatch):
+    def _raise(*a, **k):
+        raise soc.subprocess.TimeoutExpired(cmd="ssh", timeout=2)
+    monkeypatch.setattr(soc.subprocess, "run", _raise)
+    ok, out = soc._ssh_host(["ssh", "host"], "uptime", timeout=2, retries=0)
+    assert ok is False and "Timeout" in out
+
+
+# ── _ban_ip_ssh — délégation à cscli via _ssh_ngix ───────────────────────
+
+def test_ban_ip_ssh_construit_commande_cscli(monkeypatch):
+    captured = {}
+    def _fake(cmd, **k):
+        captured["cmd"] = cmd
+        return True, "Decision added"
+    monkeypatch.setattr(soc, "_ssh_ngix", _fake)
+    ok, out = soc._ban_ip_ssh("203.0.113.7", "test-jarvis", "24h")
+    assert ok is True
+    assert "cscli decisions add" in captured["cmd"]
+    assert "203.0.113.7" in captured["cmd"]
+    assert "24h" in captured["cmd"]
+
+
+# ── _load_whitelist / _save_whitelist — round-trip persistance ───────────
+
+def test_save_puis_load_whitelist_round_trip(monkeypatch, tmp_path):
+    f = tmp_path / "jarvis_soc_whitelist.json"
+    monkeypatch.setattr(soc, "_SOC_WHITELIST_PATH", f)
+    monkeypatch.setattr(soc, "_SOC_WHITELIST", ["198.51.100.42"])
+    soc._save_whitelist()
+    # Reset puis recharge
+    monkeypatch.setattr(soc, "_SOC_WHITELIST", [])
+    soc._load_whitelist()
+    assert soc._SOC_WHITELIST == ["198.51.100.42"]
+
+
+# ── _soc_log — journal d'actions proactives ──────────────────────────────
+
+def test_soc_log_ajoute_entree(monkeypatch):
+    """_soc_log doit ajouter une entrée au journal en mémoire."""
+    monkeypatch.setattr(soc, "_soc_actions_save", lambda: None)
+    before = len(soc._SOC_ACTIONS)
+    soc._soc_log("ban_ip", "détail-test-unique", True, "result-test")
+    assert len(soc._SOC_ACTIONS) == before + 1
+    last = soc._SOC_ACTIONS[-1]
+    assert (last["type"], last["detail"], last["success"]) == (
+        "ban_ip", "détail-test-unique", True)

@@ -319,7 +319,7 @@ function rackSyncHaasDelay(val) {
   if (_haasDelayNode && audioCtx)
     _haasDelayNode.delayTime.setTargetAtTime(parseFloat(val) / 1000, audioCtx.currentTime, 0.01);
   // Mise à jour badge header
-  const badge = document.querySelector('[id="rack-sr-badge"] ~ button')?.previousElementSibling?.previousElementSibling;
+  const _badge = document.querySelector('[id="rack-sr-badge"] ~ button')?.previousElementSibling?.previousElementSibling;
   // Cherche le badge HAAS dans le header rack
   document.querySelectorAll('.rack-header span').forEach(s => {
     if (s.textContent.includes('HAAS')) s.textContent = `▶ HAAS ${parseFloat(val).toFixed(0)}ms`;

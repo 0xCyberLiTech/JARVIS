@@ -378,13 +378,13 @@ function eqCanvasMove(e) {
   }
 }
 
-function eqCanvasUp(e) {
+function eqCanvasUp(_e) {
   _eqDrag = null;
   const canvas = document.getElementById('eq-curve-canvas');
   if (canvas) canvas.style.cursor = 'crosshair';
 }
 
-function eqCanvasLeave(e) {
+function eqCanvasLeave(_e) {
   if (_eqDrag) { _eqDrag = null; }
   _eqHoverX = null;
   drawEqCurve();

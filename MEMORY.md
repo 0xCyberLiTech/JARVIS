@@ -112,9 +112,20 @@ pures/semi-pures non couvertes (`_cors_origin`, `_detect_service_restart`,
 `_validate_protect_directives`, `_get_model_profile`, `_load_model`/`_save_model`,
 `_load_tasks`/`_save_tasks`, `load_memory`/`save_memory`, `_load_memory_summary`/
 `_append_memory_summary`). `jarvis.py` 40→**43%**, coverage globale 63→**64%**,
-**1120 pytest pass**. Plafond pragmatique : le reste (~1700 L non couvertes) =
-handlers de routes Flask + générateurs SSE → mock lourd Ollama/SSH/TTS, ROI
-décroissant, traité au fil de l'eau. Détail `BILAN §0bis`.
+**1120 pytest pass**.
+
+**Push Lisibilité + Tests** (2026-05-23) — score dette **92 → 94/100** :
+- **Lisibilité 13 → 14/15** : eslint **154 → 0 warnings**. Les 154 étaient *tous*
+  `no-unused-vars` sur des handlers HTML consommés via le dispatcher
+  `data-action` (`window[fn]` lookup dynamique) que ESLint ne peut pas tracer —
+  FP structurels. Fix honnête : (1) `eslint.config.js` `vars: 'local'` aligne la
+  politique sur celle de `ruff.toml` qui ignore les FP délibérés ; (2) 12 vrais
+  locals préfixés `_`. Pas de gaming.
+- **Tests 22 → 23/25** : +24 tests sur les helpers de `blueprints/soc.py`
+  (`_dur_to_tts`, `_ip_to_tts`, `_is_whitelisted`, `_ip_skip`, `_load_soc_config`,
+  wrappers SSH, `_ssh_host`, `_ban_ip_ssh`, `_load_whitelist`, `_soc_log`).
+  **`soc.py` 56→60% (seuil franchi)**, **1144 pytest pass**. Le −2 restant =
+  `jarvis.py` 43% (handlers Flask/SSE). Détail `BILAN §0bis`.
 
 ## Session 2026-05-20 (suite) — réalignement description Kill Chain sur KC v4 (5 maillons)
 

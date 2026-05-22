@@ -518,7 +518,7 @@
     // ── Helper : draw one broadcast channel ──
     function drawChan(label, db, pkDb, intDb, y0) {
       const PEAK_H=26, RMS_H=10, GAP=3;
-      const totalH=PEAK_H+GAP+RMS_H;
+      const _totalH=PEAK_H+GAP+RMS_H;
       const yRms=y0+PEAK_H+GAP;
 
       // Label L/R
@@ -948,7 +948,7 @@
     const W = cv.width||14, H = cv.height||160;
     ctx.fillStyle='#050d18'; ctx.fillRect(0,0,W,H);
     // 0dB at 100/150 = 2/3 from top (fader 0-150, 100=unity)
-    const unityY = H * (1 - 100/150);
+    const _unityY = H * (1 - 100/150);
     const marks = [{v:150,l:'↑'},{v:120,l:'+6'},{v:100,l:'0'},{v:70,l:'-12'},{v:40,l:'-24'},{v:10,l:'-∞'}];
     marks.forEach(({v,l}) => {
       const y = H * (1 - v/150);

@@ -452,7 +452,7 @@ function fx2Render() {
   prst.innerHTML = phtml;
 }
 
-function _fx2FormatVal(v, unit, p) {
+function _fx2FormatVal(v, unit, _p) {
   if (unit === '%') return Math.round(v) + '%';
   if (unit === 's') return v.toFixed(1) + 's';
   if (unit === 'ms') return Math.round(v) + 'ms';

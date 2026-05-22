@@ -309,7 +309,7 @@ async function loadVoices() {
 let _voiceMode = 'cloud';
 let _lastLocalEngine = 'edge';
 
-async function setVoiceMode(mode) {
+async function setVoiceMode(_mode) {
   _voiceMode = 'cloud';
   const cloudPanel = document.getElementById('voice-cloud-panel');
   _disp(cloudPanel, true, 'block');

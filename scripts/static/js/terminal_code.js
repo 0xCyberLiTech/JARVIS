@@ -232,7 +232,7 @@ function _devJarvisRender(text, el) {
   el.innerHTML = safe;
 }
 
-function devJarvisSend(opts) {
+function devJarvisSend(_opts) {
   var input    = document.getElementById('dev-jarvis-input');
   var respEl   = document.getElementById('dev-jarvis-response');
   var respText = document.getElementById('dev-jarvis-resp-text');

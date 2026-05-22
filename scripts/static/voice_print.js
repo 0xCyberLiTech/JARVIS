@@ -390,7 +390,7 @@
         _disp(sel, true);
         _vpUpdateSelInfo();
         requestAnimationFrame(_vpDrawSelector);
-      }, function(err) {
+      }, function(_err) {
       });
     };
     reader.readAsArrayBuffer(file);

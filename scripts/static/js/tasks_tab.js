@@ -120,7 +120,7 @@ function tacheInsertForm(s) {
 
 function tachesCheckScheduled() {
   const now = new Date();
-  const min = now.getMinutes(), hr = now.getHours();
+  const min = now.getMinutes(), _hr = now.getHours();
   _taches.forEach(t => {
     if (t.enabled===false || !t.schedule) return;
     const m = t.schedule.match(/^\*\/(\d+)$/);

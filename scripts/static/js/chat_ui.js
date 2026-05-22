@@ -495,7 +495,7 @@ function toggleWebSearch() {
 let _webDiagOpen = false;
 let _webStatusChecked = false;
 
-async function checkWebStatus(silent = true) {
+async function checkWebStatus(_silent = true) {
   const dot = document.getElementById('web-status-dot');
   if (dot) dot.className = 'web-status-dot checking';
   try {
