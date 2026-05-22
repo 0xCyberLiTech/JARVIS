@@ -377,3 +377,56 @@ def test_fetch_monitoring_cache_hit_skip_http(monkeypatch):
         ok, raw = soc_module._fetch_monitoring(force=False)
     assert ok is True
     assert raw == '{"cached": true}'
+
+
+# ── Routes /api/soc/* — lecture monitoring/defense (mockées) ─────────────
+
+
+def test_api_soc_monitor_get(client):
+    r = client.get("/api/soc/monitor")
+    assert r.status_code == 200
+    assert "enabled" in r.get_json()
+
+
+def test_api_soc_threat_score_ok(client, monkeypatch):
+    monkeypatch.setattr(soc_module, "_fetch_monitoring",
+                        lambda *a, **k: (True, '{"threat_score": 40, "threat_level": "MOYEN"}'))
+    r = client.get("/api/soc/threat-score")
+    assert r.status_code == 200
+    body = r.get_json()
+    assert body["ok"] is True
+    assert body["score"] == 40
+
+
+def test_api_soc_threat_score_monitoring_ko_503(client, monkeypatch):
+    monkeypatch.setattr(soc_module, "_fetch_monitoring", lambda *a, **k: (False, ""))
+    r = client.get("/api/soc/threat-score")
+    assert r.status_code == 503
+
+
+def test_api_soc_defense_ok(client, monkeypatch):
+    monkeypatch.setattr(soc_module, "_fetch_defense", lambda *a, **k: (True, '{"bans_24h": 7}'))
+    r = client.get("/api/soc/defense")
+    assert r.status_code == 200
+    assert r.get_json()["ok"] is True
+
+
+def test_api_soc_defense_ko_503(client, monkeypatch):
+    monkeypatch.setattr(soc_module, "_fetch_defense", lambda *a, **k: (False, ""))
+    r = client.get("/api/soc/defense")
+    assert r.status_code == 503
+
+
+def test_api_soc_ioc_ok(client, monkeypatch):
+    monkeypatch.setattr(soc_module, "_fetch_monitoring",
+                        lambda *a, **k: (True, '{"ioc": {"score": 12, "level": "OK"}}'))
+    r = client.get("/api/soc/ioc")
+    assert r.status_code == 200
+    assert r.get_json()["ioc"]["level"] == "OK"
+
+
+def test_api_soc_ioc_bloc_absent_503(client, monkeypatch):
+    """monitoring.json sans clé `ioc` → 503 (déploiement SOC partiel)."""
+    monkeypatch.setattr(soc_module, "_fetch_monitoring", lambda *a, **k: (True, "{}"))
+    r = client.get("/api/soc/ioc")
+    assert r.status_code == 503

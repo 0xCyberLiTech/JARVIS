@@ -61,8 +61,9 @@ documentaire dé-dupliquée — les compteurs volatils (score, lignes, tests,
 coverage) ne vivent plus que dans `BILAN-TECHNIQUE.md §0` (source unique), les
 ~12 autres docs pointent dessus → dérive entre documents structurellement
 impossible ; (2) **campagne couverture étape 1** — `test_jarvis_routes.py` (+24
-routes Flask) + `test_soc_functions.py` (+42 fonctions auto-engine/scoring/ban) →
-`jarvis.py` 26→**38%**, `soc.py` 31→**44%**, total 52→**58%** (1025 tests) ; (3) correctif
+routes Flask), `test_soc_functions.py` (+60 fonctions auto-engine/scoring/ban/deep)
+et `test_blueprints_soc.py` (+7 routes `/api/soc/*`) → `jarvis.py` 26→**38%**,
+`soc.py` 31→**49%**, total 52→**59%** (1043 tests) ; (3) correctif
 robustesse `/api/facts` (crash sur corps JSON non-dict — même classe que M4),
 trouvé par un nouveau test. Score honnête recalibré (la grille de décomposition
 sommait à 92 vs titre 88 — incohérence corrigée) : **88 → 91/100**.

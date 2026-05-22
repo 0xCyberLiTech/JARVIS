@@ -324,3 +324,81 @@ def test_check_threat_level_cooldown_bloque(monkeypatch):
     ts = soc._threat_score_from_json({"threat_level": "ÉLEVÉ", "threat_score": 55}, set())
     assert soc._check_threat_level(ts) == []
     soc._SOC_MON_COOLDOWNS.pop("threat_ÉLEVÉ", None)
+
+
+# ── _deep_* — investigation IP approfondie (SSH mocké) ───────────────────
+
+def test_deep_crowdsec_aucune_decision(monkeypatch):
+    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=10: (True, "[]"))
+    res = soc._deep_crowdsec("203.0.113.5")
+    assert res["banned"] is False
+    assert res["count"] == 0
+
+
+def test_deep_crowdsec_avec_decision(monkeypatch):
+    decisions = ('[{"decisions":[{"id":1,"scenario":"http-probing",'
+                 '"duration":"24h","origin":"crowdsec","type":"ban"}]}]')
+    monkeypatch.setattr(
+        soc, "_ssh_ngix",
+        lambda cmd, timeout=10: (True, decisions) if "decisions list" in cmd else (True, "[]"))
+    res = soc._deep_crowdsec("203.0.113.6")
+    assert res["banned"] is True
+    assert res["count"] == 1
+    assert res["decisions"][0]["scenario"] == "http-probing"
+
+
+def test_deep_fail2ban_parse(monkeypatch):
+    monkeypatch.setattr(
+        soc, "_ssh_json_exec",
+        lambda script, timeout=10: {"active": ["sshd"],
+                                    "history": [{"jail": "sshd", "ts": 1, "bantime": 2, "count": 1}],
+                                    "total_records": 1})
+    res = soc._deep_fail2ban("203.0.113.7")
+    assert res["banned"] is True
+    assert res["jails"] == ["sshd"]
+    assert res["total_records"] == 1
+
+
+def test_deep_fail2ban_aucun_ban(monkeypatch):
+    monkeypatch.setattr(soc, "_ssh_json_exec",
+                        lambda script, timeout=10: {"active": [], "history": [], "total_records": 0})
+    assert soc._deep_fail2ban("203.0.113.8")["banned"] is False
+
+
+def test_deep_autoban_compte_recidive(monkeypatch):
+    monkeypatch.setattr(soc, "_ssh_json_exec",
+                        lambda script, timeout=10: {"count": 3, "history": [{"ip": "x"}]})
+    assert soc._deep_autoban("203.0.113.9")["count"] == 3
+
+
+def test_deep_nginx_hits_nombre(monkeypatch):
+    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=15: (True, "42\n"))
+    assert soc._deep_nginx_hits("203.0.113.10") == 42
+
+
+def test_deep_nginx_hits_sortie_invalide(monkeypatch):
+    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=15: (True, "erreur"))
+    assert soc._deep_nginx_hits("203.0.113.11") == 0
+
+
+def test_deep_nginx_hits_ssh_ko(monkeypatch):
+    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=15: (False, ""))
+    assert soc._deep_nginx_hits("203.0.113.12") == 0
+
+
+def test_deep_nginx_last_lignes(monkeypatch):
+    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=10: (True, "ligne1\nligne2\n"))
+    assert soc._deep_nginx_last("203.0.113.13") == ["ligne1", "ligne2"]
+
+
+def test_deep_nginx_last_ssh_ko(monkeypatch):
+    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=10: (False, ""))
+    assert soc._deep_nginx_last("203.0.113.14") == []
+
+
+def test_deep_rsyslog_agrege_compteurs(monkeypatch):
+    out = "/var/log/central/srv-ngix/auth.log:5\n/var/log/central/clt/access.log:3"
+    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=25: (True, out))
+    res = soc._deep_rsyslog("203.0.113.15")
+    assert res["total"] == 8
+    assert len(res["sources"]) == 2
