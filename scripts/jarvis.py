@@ -566,6 +566,7 @@ import stream_tokens as _stream_tokens_mod
 import system as _system
 import tasks as _tasks
 import vision as _vision
+import web as _web
 import voice as _voice
 from voice import tts_cleaner as _tts_cleaner
 from voice import tts_dedup as _tts_dedup
@@ -1995,122 +1996,18 @@ _health.init(
 app.register_blueprint(_health.bp)
 
 # ── Web Search (DuckDuckGo HTML) ──────────────────────────────
-_WEB_HEADERS = {
-    "User-Agent": "JARVIS/3.0 (personal-assistant; fr)",
-    "Accept-Language": "fr-FR,fr;q=0.9,en;q=0.8",
-}
-
-def _web_search_ddg(query: str, max_results: int) -> list:
-    """DuckDuckGo Instant Answer API — pas de scraping HTML."""
-    try:
-        r = req.get(
-            "https://api.duckduckgo.com/",
-            params={"q": query, "format": "json", "no_redirect": "1",
-                    "no_html": "1", "skip_disambig": "1", "kl": "fr-fr"},
-            headers=_WEB_HEADERS, timeout=_WEB_SEARCH_TIMEOUT_S
-        )
-        d = r.json()
-        results = []
-        abstract = (d.get("AbstractText") or d.get("Abstract") or "").strip()
-        if abstract:
-            results.append(f"[{d.get('AbstractSource','DDG')}] {abstract[:400]}")
-        answer = d.get("Answer", "").strip()
-        if answer and answer not in abstract:
-            results.append(f"[Réponse directe] {answer}")
-        definition = d.get("Definition", "").strip()
-        if definition and definition not in abstract:
-            results.append(f"[Définition] {definition}")
-        for topic in d.get("RelatedTopics", [])[:max_results]:
-            if isinstance(topic, dict) and topic.get("Text"):
-                txt = topic["Text"].strip()
-                if txt and len(results) < max_results + 2:
-                    results.append(f"• {txt[:200]}")
-        return results
-    except Exception:
-        return []  # Fallback Wikipedia
-
-
-def web_search(query: str, max_results: int = 5) -> str:
-    """Recherche web combinée : DuckDuckGo + Wikipedia FR fallback."""
-    results = _web_search_ddg(query, max_results)
-
-    try:
-        r2 = req.get(
-            "https://fr.wikipedia.org/w/api.php",
-            params={"action": "opensearch", "search": query, "limit": max_results,
-                    "namespace": "0", "format": "json"},
-            headers=_WEB_HEADERS, timeout=_WEB_FETCH_TIMEOUT_S
-        )
-        data = r2.json()
-        titles   = data[1] if len(data) > 1 else []
-        snippets = data[2] if len(data) > 2 else []
-        for t, s in zip(titles, snippets, strict=False):
-            if t and t not in str(results):
-                entry = f"[Wikipedia] {t}"
-                if s: entry += f": {s}"
-                results.append(entry)
-                if len(results) >= max_results + 3:
-                    break
-    except Exception as e:
-        _log.warning(f"[JARVIS] WARNING web_search Wikipedia: {e}")
-
-    if not results:
-        return f"[Aucun résultat web trouvé pour: {query}]"
-    return (
-        f"=== RÉSULTATS WEB ({len(results)} sources) ===\n"
-        + "\n".join(results[:max_results + 2])
-        + "\n====================="
-    )
-
-
-@limiter.limit("10 per minute")
-@app.route("/api/web-test", methods=["GET"])
-def api_web_test():
-    """Teste la connectivité web et les moteurs de recherche."""
-    result = {"connectivity": False, "ddg": False, "wikipedia": False,
-              "latency_ms": None, "results_count": 0, "search_ok": False, "error": None}
-
-    # Connectivité générale
-    try:
-        t0 = time.time()
-        r = req.get("https://www.google.com", timeout=_WEB_CONN_TIMEOUT_S, allow_redirects=True)
-        result["connectivity"] = r.status_code < 500
-        result["latency_ms"] = round((time.time() - t0) * 1000)
-    except Exception as e:
-        result["error"] = str(e)
-
-    # DDG Instant Answer API (celui qu'on utilise réellement)
-    try:
-        r2 = req.get("https://api.duckduckgo.com/",
-                     params={"q": "intelligence artificielle", "format": "json",
-                             "no_redirect": "1", "no_html": "1"},
-                     headers=_WEB_HEADERS, timeout=_WEB_FETCH_TIMEOUT_S)
-        d2 = r2.json()
-        result["ddg"] = bool(d2.get("AbstractText") or d2.get("RelatedTopics") or d2.get("Answer"))
-    except Exception as e:
-        result["ddg_error"] = str(e)
-
-    # Wikipedia FR
-    try:
-        r3 = req.get("https://fr.wikipedia.org/w/api.php",
-                     params={"action": "opensearch", "search": "intelligence artificielle",
-                             "limit": 2, "format": "json"},
-                     headers=_WEB_HEADERS, timeout=_WEB_FETCH2_TIMEOUT_S)
-        data = r3.json()
-        result["wikipedia"] = len(data[1]) > 0 if len(data) > 1 else False
-    except Exception as e:
-        result["wikipedia_error"] = str(e)
-
-    # Test de recherche réelle avec web_search()
-    try:
-        res = web_search("intelligence artificielle", max_results=3)
-        result["search_ok"] = not res.startswith("[Aucun") and len(res) > 40
-        result["results_count"] = res.count("\n") if result["search_ok"] else 0
-        result["sample"] = res[:250]
-    except Exception as e:
-        result["search_error"] = str(e)
-
-    return Response(json.dumps(result, ensure_ascii=False), mimetype="application/json")
+# Web search + /api/web-test déménagés dans web/ tuile (étape 23, 2026-05-23).
+# web_search() exposée en alias pour _chat_build_system_prompt (chat orchestrator).
+_web.init(
+    limiter                = limiter,
+    log                    = _log,
+    web_search_timeout_s   = _WEB_SEARCH_TIMEOUT_S,
+    web_fetch_timeout_s    = _WEB_FETCH_TIMEOUT_S,
+    web_conn_timeout_s     = _WEB_CONN_TIMEOUT_S,
+    web_fetch2_timeout_s   = _WEB_FETCH2_TIMEOUT_S,
+)
+app.register_blueprint(_web.bp)
+web_search = _web.search.web_search  # alias pour chat orchestrator
 
 # Listes SOC keywords déplacées dans chat_soc_inject.py — alias backward-compat
 _CHAT_SOC_KW       = _chat_soc.SOC_KW
