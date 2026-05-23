@@ -377,3 +377,171 @@ def test_append_puis_load_memory_summary(monkeypatch, tmp_path):
     jm._append_memory_summary("Marc a travaillé sur le refactor SOC.")
     out = jm._load_memory_summary()
     assert "refactor SOC" in out
+
+
+# ── _tool_lister_dossier ─────────────────────────────────────────────────
+
+def test_tool_lister_dossier_liste_fichiers_et_dossiers(tmp_path):
+    (tmp_path / "fichier.txt").write_text("x", encoding="utf-8")
+    (tmp_path / "sousdossier").mkdir()
+    out = jm._tool_lister_dossier({"chemin": str(tmp_path)})
+    assert "📄 fichier.txt" in out
+    assert "📁 sousdossier" in out
+
+
+def test_tool_lister_dossier_introuvable():
+    out = jm._tool_lister_dossier({"chemin": "/inexistant-123abc"})
+    assert "introuvable" in out
+
+
+def test_tool_lister_dossier_vide(tmp_path):
+    assert jm._tool_lister_dossier({"chemin": str(tmp_path)}) == "(dossier vide)"
+
+
+# ── _tool_arborescence_projet ────────────────────────────────────────────
+
+def test_tool_arborescence_projet_respecte_profondeur(tmp_path):
+    (tmp_path / "a").mkdir()
+    (tmp_path / "a" / "b").mkdir()
+    (tmp_path / "a" / "b" / "deep.txt").write_text("x", encoding="utf-8")
+    out = jm._tool_arborescence_projet({"chemin": str(tmp_path), "profondeur": 1})
+    assert "📁 a/" in out
+    assert "deep.txt" not in out  # exclu par la profondeur
+
+
+def test_tool_arborescence_projet_ignore_cache_et_caches(tmp_path):
+    (tmp_path / "__pycache__").mkdir()
+    (tmp_path / ".git").mkdir()
+    (tmp_path / "code.py").write_text("x", encoding="utf-8")
+    out = jm._tool_arborescence_projet({"chemin": str(tmp_path), "profondeur": 2})
+    assert "code.py" in out
+    assert "__pycache__" not in out
+    assert ".git" not in out
+
+
+def test_tool_arborescence_projet_introuvable():
+    assert "introuvable" in jm._tool_arborescence_projet({"chemin": "/abc-xyz-404"})
+
+
+# ── _tool_lire_plusieurs_fichiers ────────────────────────────────────────
+
+def test_tool_lire_plusieurs_fichiers_concatene(tmp_path):
+    f1 = tmp_path / "a.txt"; f1.write_text("contenu A", encoding="utf-8")
+    f2 = tmp_path / "b.txt"; f2.write_text("contenu B", encoding="utf-8")
+    out = jm._tool_lire_plusieurs_fichiers({"chemins": [str(f1), str(f2)]})
+    assert "contenu A" in out and "contenu B" in out
+
+
+def test_tool_lire_plusieurs_fichiers_marque_introuvable(tmp_path):
+    f1 = tmp_path / "a.txt"; f1.write_text("A", encoding="utf-8")
+    out = jm._tool_lire_plusieurs_fichiers(
+        {"chemins": [str(f1), str(tmp_path / "absent.txt")]})
+    assert "INTROUVABLE" in out
+
+
+def test_tool_lire_plusieurs_fichiers_aucun_chemin():
+    assert jm._tool_lire_plusieurs_fichiers({"chemins": []}) == "Aucun fichier spécifié."
+
+
+# ── _tool_rechercher_dans_fichiers ───────────────────────────────────────
+
+def test_tool_rechercher_dans_fichiers_trouve_pattern(tmp_path):
+    f = tmp_path / "x.py"
+    f.write_text("import os\ndef hello():\n    return 'world'\n", encoding="utf-8")
+    out = jm._tool_rechercher_dans_fichiers(
+        {"dossier": str(tmp_path), "pattern": "hello", "extension": ".py"})
+    assert "x.py" in out and "hello" in out
+
+
+def test_tool_rechercher_dans_fichiers_aucun_resultat(tmp_path):
+    (tmp_path / "x.py").write_text("rien", encoding="utf-8")
+    out = jm._tool_rechercher_dans_fichiers(
+        {"dossier": str(tmp_path), "pattern": "introuvable-marqueur", "extension": ".py"})
+    assert "Aucun résultat" in out
+
+
+def test_tool_rechercher_dans_fichiers_dossier_absent():
+    out = jm._tool_rechercher_dans_fichiers(
+        {"dossier": "/abc-xyz-404", "pattern": "x"})
+    assert "introuvable" in out
+
+
+def test_tool_rechercher_dans_fichiers_exclut_dossiers_sensibles(tmp_path):
+    """__pycache__ / .git / node_modules sont exclus de la recherche."""
+    (tmp_path / "__pycache__").mkdir()
+    (tmp_path / "__pycache__" / "x.py").write_text("MARQUEUR", encoding="utf-8")
+    (tmp_path / "ok.py").write_text("MARQUEUR", encoding="utf-8")
+    out = jm._tool_rechercher_dans_fichiers(
+        {"dossier": str(tmp_path), "pattern": "MARQUEUR", "extension": ".py"})
+    assert "ok.py" in out
+    assert "__pycache__" not in out
+
+
+# ── _tool_executer_code — gardes sécurité (sans exécution) ───────────────
+
+def test_tool_executer_code_pattern_dur_refuse():
+    """shutil.rmtree dans le code → refus immédiat, journalisé."""
+    before = len(jm._SEC_EVENTS)
+    out = jm._tool_executer_code({"code": "import shutil; shutil.rmtree('/tmp/x')"})
+    assert "refusée" in out
+    assert len(jm._SEC_EVENTS) == before + 1
+    assert jm._SEC_EVENTS[-1]["level"] == "hard"
+
+
+def test_tool_executer_code_argument_destructif_refuse():
+    """'rm -rf' dans le code → refus pour argument de commande."""
+    out = jm._tool_executer_code(
+        {"code": "import os; os.system('rm -rf /tmp/x')"})
+    assert "refusé" in out
+
+
+# ── _load_welcome — file IO + fallback défaut ────────────────────────────
+
+def test_load_welcome_fichier_present(monkeypatch, tmp_path):
+    import json as _j
+    f = tmp_path / "welcome.json"
+    f.write_text(_j.dumps({"title": "Bonjour Marc"}), encoding="utf-8")
+    monkeypatch.setattr(jm, "WELCOME_FILE", f)
+    assert jm._load_welcome() == {"title": "Bonjour Marc"}
+
+
+def test_load_welcome_fichier_absent_ecrit_defauts(monkeypatch, tmp_path):
+    """Si le fichier n'existe pas, il est créé avec DEFAULT_WELCOME et renvoyé."""
+    f = tmp_path / "welcome-absent.json"
+    monkeypatch.setattr(jm, "WELCOME_FILE", f)
+    out = jm._load_welcome()
+    assert out == jm.DEFAULT_WELCOME
+    assert f.exists()  # créé au passage
+
+
+# ── _get_bm25_cached — réutilisation du cache TTL ────────────────────────
+
+def test_get_bm25_cached_reutilise_objet_meme_meta():
+    """Deux appels successifs avec le même meta → même objet BM25 (cache hit)."""
+    jm._bm25_obj_cache.update({"bm25": None, "meta_len": 0, "ts": 0.0})
+    meta = [{"text": "alpha beta"}, {"text": "gamma delta"}]
+    bm25_a = jm._get_bm25_cached(meta)
+    bm25_b = jm._get_bm25_cached(meta)
+    assert bm25_a is bm25_b
+
+
+# ── _load_facts — JSON corrompu (chemin d'erreur) ────────────────────────
+
+def test_load_facts_json_corrompu_renvoie_liste_vide(monkeypatch, tmp_path):
+    f = tmp_path / "facts.json"
+    f.write_text("{ pas du json", encoding="utf-8")
+    monkeypatch.setattr(jm, "FACTS_FILE", f)
+    assert jm._load_facts() == []
+
+
+# ── _facts_inject — bloc résumé long terme ───────────────────────────────
+
+def test_facts_inject_inclut_resume_memoire(monkeypatch, tmp_path):
+    """Quand un résumé existe, _facts_inject le concatène au system prompt."""
+    summary = tmp_path / "summary.json"
+    monkeypatch.setattr(jm, "FACTS_FILE", tmp_path / "facts-absent.json")
+    monkeypatch.setattr(jm, "SUMMARY_FILE", summary)
+    jm._append_memory_summary("Marc préfère les réponses concises.")
+    out = jm._facts_inject("SYSTEM:")
+    assert "RÉSUMÉS DE CONVERSATIONS" in out
+    assert "concises" in out
