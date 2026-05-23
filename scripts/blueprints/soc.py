@@ -33,6 +33,19 @@ _speak   = None
 _limiter = None
 _log     = logging.getLogger("JARVIS.SOC")
 
+# DI étape 36b (2026-05-23) : élimine les 4 `from jarvis import` dans
+# fonctions thread qui ré-importaient jarvis.py comme module → re-exec
+# top-level → cascade de side-effects (doublons logs, threads boot relancés,
+# _JARVIS_BOOT_ID régénéré → reload UI). Cf. bug Marc 2026-05-23 14:30/14:51.
+# Le palliatif `8e3d518` (cache os.environ pour boot_id) reste en place par
+# sécurité, mais ce fix élimine la cause racine au lieu de masquer.
+def _INJ_get_jarvis_mode():        # callable → str (mode mutable, défaut sûr "soc")
+    return "soc"
+_INJ_CODE_REASONING_MODE = "code_reasoning"        # constante (immuable)
+def _INJ_get_model():              # callable → str (MODEL mutable, défaut sûr phi4)
+    return "phi4:14b"
+_INJ_OLLAMA_URL          = "http://127.0.0.1:11434"  # constante (immuable)
+
 # Limites par route — appliquées en une seule passe dans init_soc()
 _ROUTE_LIMITS = {
     "api_soc_ban_ip":            "10 per minute",
@@ -58,11 +71,27 @@ _ROUTE_LIMITS = {
 _SCRIPTS_DIR = Path(__file__).parent.parent
 
 
-def init_soc(speak_fn, limiter_obj):
-    """Injecte speak() et limiter, applique les rate limits, lance le thread."""
+def init_soc(speak_fn, limiter_obj, *,
+             get_jarvis_mode=None, code_reasoning_mode=None,
+             get_model=None, ollama_url=None):
+    """Injecte speak() + limiter + 4 deps anciennement importées via
+    `from jarvis import` (étape 36b, 2026-05-23). Les 4 nouvelles deps sont
+    kwargs avec défauts pour rester rétro-compatible (anciens tests qui
+    appellent `init_soc(speak, limiter)` sans les nouveaux args continuent
+    à passer — les défauts module-level prennent le relais)."""
     global _speak, _limiter
+    global _INJ_get_jarvis_mode, _INJ_CODE_REASONING_MODE
+    global _INJ_get_model, _INJ_OLLAMA_URL
     _speak   = speak_fn
     _limiter = limiter_obj
+    if get_jarvis_mode is not None:
+        _INJ_get_jarvis_mode = get_jarvis_mode
+    if code_reasoning_mode is not None:
+        _INJ_CODE_REASONING_MODE = code_reasoning_mode
+    if get_model is not None:
+        _INJ_get_model = get_model
+    if ollama_url is not None:
+        _INJ_OLLAMA_URL = ollama_url
     # Applique les rate limits sur chaque view function
     import sys
     module = sys.modules[__name__]
@@ -1146,14 +1175,14 @@ def _soc_ollama_query(prompt: str, max_tokens: int = 400) -> str:
     Utilise gemma4:latest — léger, rapide (~5s), suffisant pour 3 phrases d'analyse.
     Bloqué pendant CODE REASONING — évite collision VRAM avec qwen3:8b."""
     try:
-        from jarvis import _CODE_REASONING_MODE, _jarvis_mode
-        if _jarvis_mode == _CODE_REASONING_MODE:
+        # DI étape 36b : valeurs injectées via init_soc(), plus de
+        # `from jarvis import` qui ré-importait jarvis.py et ré-exécutait
+        # le top-level (bug UI reload Marc 2026-05-23).
+        if _INJ_get_jarvis_mode() == _INJ_CODE_REASONING_MODE:
             _log.info("[SOC-LLM] Bypass — CODE REASONING actif (protection VRAM)")
             return ""
-        from jarvis import MODEL as _SOC_MODEL
-        from jarvis import (
-            OLLAMA_URL as _SOC_OLLAMA_URL,  # source unique : évite duplication du hostname
-        )
+        _SOC_MODEL = _INJ_get_model()
+        _SOC_OLLAMA_URL = _INJ_OLLAMA_URL
         payload = json.dumps({
             "model":  _SOC_MODEL,
             "messages": [{"role": "user", "content": prompt}],
@@ -1460,8 +1489,8 @@ def _soc_monitor_loop():
         if not _SOC_MON_ENABLED:
             continue
         try:
-            from jarvis import _jarvis_mode
-            if _jarvis_mode != "soc":
+            # DI étape 36b : valeur injectée via init_soc() (plus de re-import jarvis).
+            if _INJ_get_jarvis_mode() != "soc":
                 continue  # SOC actif uniquement en mode SOC
         except Exception:
             pass  # import jarvis non encore prêt au démarrage — on continue

@@ -1038,7 +1038,11 @@ _think_filter_step = _llm_stream.think_filter_step
 stream_llm         = _llm_stream.stream_llm
 
 # ── Routes ───────────────────────────────────────────────────
-init_soc(speak, limiter)
+init_soc(speak, limiter,
+         get_jarvis_mode=lambda: _jarvis_mode,
+         code_reasoning_mode=_CODE_REASONING_MODE,
+         get_model=lambda: MODEL,
+         ollama_url=OLLAMA_URL)
 app.register_blueprint(soc_bp)
 
 @app.route("/")
