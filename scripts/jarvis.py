@@ -561,6 +561,7 @@ import sse_helpers as _sse
 import ssh_terminal as _ssh_term
 import stream_tokens as _stream_tokens_mod
 import stt as _stt
+import sys_diag as _sys_diag
 import tts_cleaner as _tts_cleaner
 import tts_dedup as _tts_dedup
 import tts_engines as _tts_eng
@@ -1115,7 +1116,8 @@ _STATS_LOCK  = threading.Lock()
 _stats_cache = {"data": None, "ts": 0.0}
 _STATS_TTL   = 5.0  # secondes — évite les appels pynvml concurrents (stats GPU changent lentement)
 # Tracker état Ollama pour alerte vocale au changement d'état (J34)
-_ollama_prev_ok: bool | None = None
+# _ollama_prev_ok déplacé dans sys_diag.py (refactor incrémental jarvis.py
+# étape 1, 2026-05-23) — était l'unique consommateur de la variable.
 
 # Initialisation nvml une seule fois (nvmlInit/nvmlShutdown coûteux à répéter)
 _nvml_handle = None
@@ -2626,79 +2628,21 @@ def api_welcome_evolve():
     return Response('{"ok":false,"error":"parse failed"}', mimetype="application/json")
 
 # ── Diagnostic Système ────────────────────────────────────────
-def _diag_gpu(h):
-    try:
-        if h is None:
-            raise RuntimeError("NVML non disponible")
-        name_raw = pynvml.nvmlDeviceGetName(h)
-        mem = pynvml.nvmlDeviceGetMemoryInfo(h)
-        try:   gpu_temp  = pynvml.nvmlDeviceGetTemperature(h, pynvml.NVML_TEMPERATURE_GPU)
-        except Exception: gpu_temp = None
-        try:   gpu_power = round(pynvml.nvmlDeviceGetPowerUsage(h) / 1000, 1)
-        except Exception: gpu_power = None
-        try:   gpu_clock = pynvml.nvmlDeviceGetClockInfo(h, pynvml.NVML_CLOCK_GRAPHICS)
-        except Exception: gpu_clock = None
-        return {
-            "gpu_name":   name_raw.decode() if isinstance(name_raw, bytes) else name_raw,
-            "gpu_pct":    pynvml.nvmlDeviceGetUtilizationRates(h).gpu,
-            "vram_used":  round(mem.used  / _GB_BYTES, 1),
-            "vram_total": round(mem.total / _GB_BYTES, 1),
-            "gpu_temp": gpu_temp, "gpu_power": gpu_power, "gpu_clock": gpu_clock,
-        }
-    except Exception:
-        return {"gpu_name": "N/A", "gpu_pct": 0, "vram_used": 0, "vram_total": 0,
-                "gpu_temp": None, "gpu_power": None, "gpu_clock": None}
-
-def _diag_ollama():
-    global _ollama_prev_ok
-    try:
-        t0 = time.time()
-        r_ol = req.get(f"{OLLAMA_URL}/api/tags", timeout=_OLLAMA_DIAG_TIMEOUT_S)
-        ok      = r_ol.status_code == 200
-        latency = round((time.time() - t0) * 1000)
-        models  = [m["name"] for m in r_ol.json().get("models", [])]
-    except Exception:
-        ok = False; latency = -1; models = []
-    if _ollama_prev_ok is not False and ok is False:
-        speak("Attention, Ollama est hors ligne. Le moteur LLM est indisponible.")
-    _ollama_prev_ok = ok
-    return {"ollama_ok": ok, "ollama_latency": latency, "ollama_models": models}
-
-def _diag_cpu_temp():
-    try:
-        temps = psutil.sensors_temperatures()
-        if temps:
-            return round(next(iter(temps.values()))[0].current, 1)
-    except Exception:
-        pass  # capteurs non disponibles sur ce système
-    return None
-
-def _diag_memory_count():
-    try:
-        hist = json.loads(MEMORY_FILE.read_text(encoding="utf-8")) if MEMORY_FILE.exists() else []
-        return len(hist)
-    except (OSError, ValueError):
-        return 0
-
-def _diag_cpu_ram_disk() -> dict:
-    data = {}
-    data["cpu_pct"]     = psutil.cpu_percent(interval=0.5)
-    freq                = psutil.cpu_freq()
-    data["cpu_freq"]    = round(freq.current / 1000, 2) if freq else 0
-    data["cpu_cores"]   = psutil.cpu_count(logical=False)
-    data["cpu_threads"] = psutil.cpu_count(logical=True)
-    ram = psutil.virtual_memory()
-    data["ram_total"] = round(ram.total / _GB_BYTES, 1)
-    data["ram_used"]  = round(ram.used  / _GB_BYTES, 1)
-    data["ram_pct"]   = ram.percent
-    try:
-        disk = psutil.disk_usage("C:\\")
-        data["disk_total"] = round(disk.total / _GB_BYTES, 0)
-        data["disk_used"]  = round(disk.used  / _GB_BYTES, 0)
-        data["disk_pct"]   = disk.percent
-    except Exception:
-        data["disk_total"] = data["disk_used"] = data["disk_pct"] = 0
-    return data
+# Cluster diagnostics système (_diag_gpu/_diag_ollama/_diag_cpu_temp/
+# _diag_memory_count/_diag_cpu_ram_disk) extrait dans sys_diag.py — refactor
+# incrémental jarvis.py étape 1 (2026-05-23). État _ollama_prev_ok déplacé
+# dans le module. DI : speak via lambda (préserve les monkeypatch de test) +
+# OLLAMA_URL + MEMORY_FILE. Alias légers → la route /api/sysdiag inchangée.
+_sys_diag.init(
+    speak=lambda *a, **k: speak(*a, **k),
+    ollama_url=OLLAMA_URL,
+    memory_file=MEMORY_FILE,
+)
+_diag_gpu          = _sys_diag._diag_gpu
+_diag_ollama       = _sys_diag._diag_ollama
+_diag_cpu_temp     = _sys_diag._diag_cpu_temp
+_diag_memory_count = _sys_diag._diag_memory_count
+_diag_cpu_ram_disk = _sys_diag._diag_cpu_ram_disk
 
 
 @limiter.limit("30 per minute")

@@ -114,6 +114,16 @@ pures/semi-pures non couvertes (`_cors_origin`, `_detect_service_restart`,
 `_append_memory_summary`). `jarvis.py` 40→**43%**, coverage globale 63→**64%**,
 **1120 pytest pass**.
 
+**Refactor incrémental jarvis.py — étape 1** (2026-05-23) : amorce du
+dé-monolithisme côté orchestrateur. Cluster diagnostics système (`_diag_gpu`,
+`_diag_ollama`, `_diag_cpu_temp`, `_diag_memory_count`, `_diag_cpu_ram_disk`)
+extrait → nouveau module **`scripts/sys_diag.py`** (115 L · 80% cov). État
+`_ollama_prev_ok` déplacé dans le module (unique consommateur). DI : `speak`
+via lambda + `OLLAMA_URL` + `MEMORY_FILE`. `jarvis.py` 4814→**4758 L** (−56).
+Route `/api/sysdiag` inchangée via alias légers. **1164 pytest pass, ruff 0,
+0 régression.** Score dette inchangé (`Architecture` 23/25 : 4758 L reste
+un monolithe — l'étape valide la méthode pour la suite).
+
 **Push Lisibilité + Tests** (2026-05-23) — score dette **92 → 94/100** :
 - **Lisibilité 13 → 14/15** : eslint **154 → 0 warnings**. Les 154 étaient *tous*
   `no-unused-vars` sur des handlers HTML consommés via le dispatcher

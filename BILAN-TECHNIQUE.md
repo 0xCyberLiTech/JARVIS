@@ -28,10 +28,10 @@
 | **Tests pytest** | **1144 pass · 0 skip · 0 fail** (2026-05-22/23 : +211, campagne couverture + tests refactor) |
 | **Coverage globale** | **64%** (6290 stmts · 2246 miss) |
 | **Modules Python à 100% cov** | **22 modules** (recompte audit 2026-05-17 soir) : `bypass_code`, `bypass_proxmox`, `bypass_simple`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_pending_bypass`, `chat_routing`, `chat_soc_inject`, `chat_stream`, `chat_system_prompt`, `chat_tool_calls`, `deferred_speak`, `llm_opts`, `ollama_circuit`, `security_whitelists`, `ssh_terminal`, `stream_tokens`, `tts_cleaner`, `tts_dedup`, `voice_lab`, `blueprints/__init__` |
-| **Couverture orchestrateurs** | `jarvis.py` 43% · `blueprints/soc.py` **60%** · `soc_ip_deep.py` 78% · `soc_suricata_ban.py` 96% · `soc_threat_score.py` 74% · `soc_reqhour.py` 97% (Flask, complétés par 25 tests E2E) |
-| **`jarvis.py`** | **4814 L** (2957 stmts exécutables) |
+| **Couverture orchestrateurs** | `jarvis.py` 45% · `blueprints/soc.py` **60%** · `sys_diag.py` 80% · `soc_ip_deep.py` 78% · `soc_suricata_ban.py` 96% · `soc_threat_score.py` 74% · `soc_reqhour.py` 97% (Flask, complétés par 25 tests E2E) |
+| **`jarvis.py`** | **4758 L** (2902 stmts) — cluster diagnostics système extrait (refactor incrémental jarvis.py étape 1) |
 | **`blueprints/soc.py`** | 871 stmts (**1500 L**) — clusters `_deep_*`, `_sur_ban_*`, scoring menace et pic req/h extraits (refactor incrémental étapes 1-4) |
-| **Modules Python totaux** | 40 (38 dans `scripts/` + 2 dans `scripts/blueprints/`) — `soc_ip_deep.py` + `soc_suricata_ban.py` + `soc_threat_score.py` + `soc_reqhour.py` extraits 2026-05-22 (refactor incrémental) |
+| **Modules Python totaux** | 41 (39 dans `scripts/` + 2 dans `scripts/blueprints/`) — `soc_ip_deep.py` + `soc_suricata_ban.py` + `soc_threat_score.py` + `soc_reqhour.py` + `sys_diag.py` extraits 2026-05-22/23 (refactor incrémental) |
 | **`jarvis_main.js`** | 148 L (post-refactor −98,1% depuis 7828L) |
 | **Modules JS totaux** | 21 modules (18 dans `static/js/` + 3 dans `static/`) |
 | **JS LOC total** | ~14 600 lignes |
@@ -132,6 +132,16 @@ prompt (`_get_model_profile`), persistance modèle/tâches/mémoire/résumés
 reste des ~1700 lignes non couvertes est constitué de handlers de routes Flask
 et de générateurs SSE qui exigent un mock lourd d'Ollama/SSH/TTS — ROI
 décroissant, traités au fil de l'eau plutôt qu'en chantier dédié.
+
+**Refactor incrémental jarvis.py — étape 1** (2026-05-23) : cluster diagnostics
+système (`_diag_gpu` + `_diag_ollama` + `_diag_cpu_temp` + `_diag_memory_count` +
+`_diag_cpu_ram_disk`) extrait vers **`sys_diag.py`** (115 L · 80% cov). État
+`_ollama_prev_ok` déplacé dans le module (son unique consommateur était
+`_diag_ollama`). DI : `speak` injecté via lambda + `OLLAMA_URL` + `MEMORY_FILE`.
+`jarvis.py` 4814→**4758 L** (−56 L, −55 stmts). La route `/api/sysdiag` reste
+inchangée via les alias légers. **1164 tests, 0 régression.** ⚠ Score `Architecture`
+inchangé : 4758 L reste un monolithe — l'extraction valide la méthode et amorce
+la suite, mais le franchissement de palier demandera plusieurs étapes.
 
 **Push Lisibilité + Tests** (2026-05-23) — 92 → **94/100** :
 
