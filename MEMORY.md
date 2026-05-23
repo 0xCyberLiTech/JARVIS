@@ -120,9 +120,42 @@ dé-monolithisme côté orchestrateur. Cluster diagnostics système (`_diag_gpu`
 extrait → nouveau module **`scripts/sys_diag.py`** (115 L · 80% cov). État
 `_ollama_prev_ok` déplacé dans le module (unique consommateur). DI : `speak`
 via lambda + `OLLAMA_URL` + `MEMORY_FILE`. `jarvis.py` 4814→**4758 L** (−56).
-Route `/api/sysdiag` inchangée via alias légers. **1164 pytest pass, ruff 0,
-0 régression.** Score dette inchangé (`Architecture` 23/25 : 4758 L reste
-un monolithe — l'étape valide la méthode pour la suite).
+
+**Conversion COMPLÈTE de JARVIS en architecture par tuiles — étapes 3-26**
+(2026-05-23) : sur demande de Marc (« je veux un JARVIS sans monolithique,
+que du modularisé » + « on poursuit jusqu'au bout »), conversion de tout
+JARVIS en 16 tuiles autoportantes en 24 étapes / 24 commits, **0 régression**
+sur toute la série.
+
+**16 tuiles créées** : `system`, `memory`, `rag`, `files`, `ssh`, `bypass`
+(regroupement), `proxmox`, `chat` (avec 4 sous-modules : `orchestrator`,
+`file_correct`, `tool_schemas`, `soc_context`), `voice` (avec STT + TTS + speak
++ voice_lab routes), `vision`, `settings` (16 routes config), `tasks`, `health`,
+`commands` (générateurs SSE infra), `dev` (4 routes sans WS), `web` (recherche
++ diag). `blueprints/soc.py` existant conservé.
+
+**Pattern uniforme** : `scripts/<tuile>/__init__.py` = Blueprint + `init(...)`
+qui injecte les deps, sous-modules métier dans `<tuile>/*.py`. Aliases
+backward-compat conservés dans `jarvis.py` pour tests existants et consommateurs
+internes (`_chat_try_bypass`, etc.).
+
+**Bilan** : `jarvis.py` **4814→2556 L (−47 %, −2258 L)** · **16 tuiles
+autoportantes** · **13 Blueprints register** · **1164 pytest pass · 0 régression**
+sur 24 commits enchaînés · coverage globale **64→69 %** (+5 pts car le code
+extrait est plus testable que les routes Flask monolithes).
+
+**VRAM lock + sync `/api/ps`** (parenthèse étape 12) : `_VRAM_LOCK` sérialise
+les mutations de `_vram_model`, `_vram_sync_loop` thread daemon synchronise
+toutes les 60s avec l'état réel d'Ollama — pré-requis multi-user posés.
+
+**Score dette** : **94 → 95/100** (`Architecture` 23→24, `Tests` 23→24 grâce
+au +5pts coverage globale). Restart JARVIS effectué et validé fonctionnel par
+Marc avant continuation des étapes 13-26.
+
+**Plancher pratique** : ~2500 L est l'ossature résiduelle légitime (Flask app
++ glue DI/aliases + boot threads + api_chat carrefour + WS terminal). La cible
+« 700-1000 L ossature pure » initiale était trop optimiste — glue DI pour 16
+tuiles incompressible à ~500 L. Détail `BILAN §0bis`.
 
 **Push Lisibilité + Tests** (2026-05-23) — score dette **92 → 94/100** :
 - **Lisibilité 13 → 14/15** : eslint **154 → 0 warnings**. Les 154 étaient *tous*

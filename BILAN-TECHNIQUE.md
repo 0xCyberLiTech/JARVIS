@@ -10,12 +10,12 @@
 > Les autres docs JARVIS pointent ici au lieu de recopier ces chiffres : un seul
 > endroit à mettre à jour, plus de dérive entre documents.
 
-**Score honnête : 94/100** — décomposition (audit dette + refactor + push 2026-05-22/23) :
+**Score honnête : 95/100** — décomposition (architecture par tuiles 2026-05-23) :
 
 | Critère | Score | Justification |
 |---|---|---|
-| Architecture | 23/25 | `jarvis.py` = orchestrateur Flask (~150 endpoints · routing 4 modes · auto-engine SOC) ; logique métier extraite dans **38 modules satellites** ; refactor JS terminé (18 modules). `blueprints/soc.py` **dé-monolithisé** : 1872→1500 L, 4 clusters cohérents extraits (refactor incrémental étapes 1-4). −2 : `jarvis.py` reste un monolithe de 4814 L — réduction non engagée (`feedback_no_big_refactor`), assumée. |
-| Tests | 23/25 | **1144 tests pytest · 0 skip · 0 fail** · 22 modules à 100% cov · 4 modules extraits couverts 74-97%. Campagne couverture 2026-05-22/23 : +211 tests → `jarvis.py` 26→**43%**, `soc.py` 31→**60%** (seuil franchi), coverage globale **64%**. −2 : `jarvis.py` (43%) reste sous la cible — le non-couvert = handlers de routes Flask + générateurs SSE (mock lourd Ollama/SSH/TTS), ROI décroissant, plafond pragmatique assumé. |
+| Architecture | **24/25** | **JARVIS converti en architecture par tuiles** (24 étapes commitées 2026-05-23) : 16 tuiles autoportantes (`system`, `memory`, `rag`, `files`, `ssh`, `bypass`, `proxmox`, `chat`, `voice`, `vision`, `settings`, `tasks`, `health`, `commands`, `dev`, `web`) + 4 sous-modules chat (`orchestrator`, `file_correct`, `tool_schemas`, `soc_context`) + `blueprints/soc.py` toujours présent. `jarvis.py` **4814→2556 L (−47%)**, devenu ossature qui register 13 Blueprints. Pattern Blueprint+DI validé partout. −1 : ossature résiduelle ~2500 L (Flask app + glue DI + boot threads + api_chat carrefour + WS terminal), plancher pragmatique atteint. |
+| Tests | **24/25** | **1164 tests pytest · 0 skip · 0 fail · 0 régression** sur les 24 étapes de refactor. Coverage globale **69%** (6938 stmts · 2176 miss) — gain +5pts vs avant refactor (le code extrait dans les tuiles est plus testable que les routes Flask monolithes). −1 : `jarvis.py` à 58% (ossature qui contient encore boot threads + handlers WS + api_chat = code peu testable sans mock Ollama/SSH/TTS lourd). |
 | Documentation | 14/15 | CLAUDE.md + BILAN-TECHNIQUE.md + RUNBOOK.md + MEMORY.md + docs/ (7 fichiers) — réalignés, **dé-dupliqués** et rattachés à une **source unique** des métriques (§0) le 2026-05-22 : dérive entre documents structurellement impossible. −1 : set documentaire volumineux, inhérent au projet. |
 | Lisibilité/Conventions | 14/15 | ruff **0** · eslint **0 warning** (config alignée 2026-05-23 sur la politique du projet : `vars: 'local'` neutralise les FP structurels sur les handlers HTML `data-action` que ESLint ne peut pas tracer + 12 vrais locals préfixés `_`). Pre-commit/pre-push hooks bloquants. −1 : ~135 inline styles JS (HUD temps réel) — accepté, refactor non engagé. |
 | Performance | 10/10 | Circuit breaker Ollama 8 call-sites (refus 1ms vs timeout 30s si Ollama down) · cache SOC 30s · debounce DSP audio · fix IPv6 systémique (`127.0.0.1` partout, −97% latence) · pré-warm Kokoro CUDA au boot (0 cold start 42.8s sur 1re alerte) · pré-warm phi4 SOC en `num_ctx 8192` · pipeline voix : invariant AudioContext + découpage TTS `_splitForTts` (voix en ~1s vs ~15-24s) · optimisation VRAM (`_SOC_NUM_CTX` 16384→8192, embed dé-épinglé · VRAM libre ~2.0-2.8 Go). |
@@ -25,13 +25,14 @@
 
 | Métrique | Valeur |
 |---|---|
-| **Tests pytest** | **1144 pass · 0 skip · 0 fail** (2026-05-22/23 : +211, campagne couverture + tests refactor) |
-| **Coverage globale** | **64%** (6290 stmts · 2246 miss) |
-| **Modules Python à 100% cov** | **22 modules** (recompte audit 2026-05-17 soir) : `bypass_code`, `bypass_proxmox`, `bypass_simple`, `chat_capture`, `chat_generate`, `chat_messages`, `chat_pending_bypass`, `chat_routing`, `chat_soc_inject`, `chat_stream`, `chat_system_prompt`, `chat_tool_calls`, `deferred_speak`, `llm_opts`, `ollama_circuit`, `security_whitelists`, `ssh_terminal`, `stream_tokens`, `tts_cleaner`, `tts_dedup`, `voice_lab`, `blueprints/__init__` |
-| **Couverture orchestrateurs** | `jarvis.py` 45% · `blueprints/soc.py` **60%** · `sys_diag.py` 80% · `soc_ip_deep.py` 78% · `soc_suricata_ban.py` 96% · `soc_threat_score.py` 74% · `soc_reqhour.py` 97% (Flask, complétés par 25 tests E2E) |
-| **`jarvis.py`** | **4758 L** (2902 stmts) — cluster diagnostics système extrait (refactor incrémental jarvis.py étape 1) |
-| **`blueprints/soc.py`** | 871 stmts (**1500 L**) — clusters `_deep_*`, `_sur_ban_*`, scoring menace et pic req/h extraits (refactor incrémental étapes 1-4) |
-| **Modules Python totaux** | 41 (39 dans `scripts/` + 2 dans `scripts/blueprints/`) — `soc_ip_deep.py` + `soc_suricata_ban.py` + `soc_threat_score.py` + `soc_reqhour.py` + `sys_diag.py` extraits 2026-05-22/23 (refactor incrémental) |
+| **Tests pytest** | **1164 pass · 0 skip · 0 fail** (2026-05-22/23) |
+| **Coverage globale** | **69%** (6938 stmts · 2176 miss) |
+| **Tuiles autoportantes** | **16** : `system` `memory` `rag` `files` `ssh` `bypass` `proxmox` `chat` `voice` `vision` `settings` `tasks` `health` `commands` `dev` `web` + `blueprints/soc` (existant) |
+| **Sous-modules chat** | `capture` · `file_correct` · `generate` · `messages` · `orchestrator` · `pending_bypass` · `routing` · `soc_context` · `soc_inject` · `stream` · `system_prompt` · `tool_calls` · `tool_schemas` |
+| **Couverture orchestrateurs** | `jarvis.py` **58%** · `blueprints/soc.py` 60% · tuiles 60-100% selon module |
+| **`jarvis.py`** | **2556 L** (1285 stmts) — ossature qui register 13 Blueprints + boot threads + api_chat carrefour + glue DI |
+| **`blueprints/soc.py`** | 871 stmts (**1500 L**) — clusters `_deep_*`, `_sur_ban_*`, scoring menace et pic req/h extraits |
+| **Modules Python totaux** | 14 modules à plat dans `scripts/` + 23 dossiers tuiles/sous-modules (vs 39 fichiers à plat avant le refactor) |
 | **`jarvis_main.js`** | 148 L (post-refactor −98,1% depuis 7828L) |
 | **Modules JS totaux** | 21 modules (18 dans `static/js/` + 3 dans `static/`) |
 | **JS LOC total** | ~14 600 lignes |
@@ -42,7 +43,7 @@
 | **TTS moteurs** | 4 (edge-tts · Kokoro CUDA · Piper · SAPI5) avec fallback chain |
 | **ESLint warnings** | **0** · 0 erreur (config alignée 2026-05-23) |
 | **ruff** | 0 erreur |
-| **Pre-commit hooks** | ruff + eslint (commit) · pytest 1144 tests (pre-push) |
+| **Pre-commit hooks** | ruff + eslint (commit) · pytest 1164 tests (pre-push) |
 
 ---
 
@@ -139,9 +140,65 @@ système (`_diag_gpu` + `_diag_ollama` + `_diag_cpu_temp` + `_diag_memory_count`
 `_ollama_prev_ok` déplacé dans le module (son unique consommateur était
 `_diag_ollama`). DI : `speak` injecté via lambda + `OLLAMA_URL` + `MEMORY_FILE`.
 `jarvis.py` 4814→**4758 L** (−56 L, −55 stmts). La route `/api/sysdiag` reste
-inchangée via les alias légers. **1164 tests, 0 régression.** ⚠ Score `Architecture`
-inchangé : 4758 L reste un monolithe — l'extraction valide la méthode et amorce
-la suite, mais le franchissement de palier demandera plusieurs étapes.
+inchangée via les alias légers. **1164 tests, 0 régression.**
+
+**Conversion complète en architecture par tuiles — étapes 3-26** (2026-05-23) :
+sur demande de Marc (« je veux un JARVIS sans monolithique, que du modularisé »
++ « on poursuit jusqu'au bout »), conversion de tout JARVIS en 16 tuiles
+autoportantes en 24 étapes / 24 commits, **0 régression** sur toute la série.
+
+| Étape | Tuile / cluster | Effet sur `jarvis.py` |
+|---|---|---|
+| 3  | `system/` (sys_diag → tuile) | 4814→4758 (−56) |
+| 4  | `memory/` (Blueprint + 6 routes) | 4758→4663 |
+| 5  | `rag/` (Blueprint + 5 routes) | 4663→4419 |
+| 6  | `files/` (outils LLM, pas de routes) | 4419→4316 |
+| 7  | `ssh/` (outils LLM) | 4316→4281 |
+| 8  | `bypass/` (regroupement 5 modules) | 4281→4281 (visuel) |
+| 9  | `proxmox/` (api PVE) | 4281→4274 |
+| 10 | `chat/` phase A (9 modules `chat_*` regroupés) | 4274→4256 |
+| 11 | `voice/` phase A (8 modules tts/audio regroupés) | 4256→4256 (visuel) |
+| 12 | `chat/orchestrator.py` (12 wrappers `_chat_*` extraits) | 4256→4211 |
+| VRAM lock + sync `/api/ps` (post-checkpoint) | — | maintien 4211 |
+| 13 | `voice/` Phase B1 (routes STT) | 4211→4217 |
+| 14 | `voice/` Phase B2 (9 routes TTS/speak) | 4217→3994 |
+| 15 | `voice/` Phase B3 (7 routes voice_lab) | 3994→3883 |
+| 16 | `vision/` tuile | 3883→3867 |
+| 17 | `settings/` tuile (16 routes config) | 3867→3694 |
+| 18 | `tasks/` tuile (5 routes) | 3694→3612 |
+| 19 | `health/` tuile (8 routes santé/stats) | 3612→3501 |
+| 20 | `commands/` (6 générateurs SSE infra) | 3501→3292 |
+| 21 | `chat/file_correct.py` (3 SSE + validate directives) | 3292→3150 |
+| 22 | `dev/` tuile (4 routes + dev_exec_sse, sans WS) | 3150→3023 |
+| 23 | `web/` tuile (recherche + /api/web-test) | 3023→2920 |
+| 24 | `chat/tool_schemas.py` (210 L de schémas LLM) | 2920→2714 |
+| 25 | `chat/orchestrator` reçoit `execute_tool` + `call_llm_with_tools` | 2714→2694 |
+| 26 | `chat/soc_context.py` (`_build_monitoring_context` + helpers) | 2694→**2556** |
+
+**Pattern** : chaque tuile = dossier `scripts/<tuile>/` + `__init__.py` (Blueprint
+si routes + `init(...)` qui injecte les deps) + sous-modules métier. DI typique
+20-30 paramètres injectés depuis `jarvis.py` au démarrage, jamais d'import
+inverse `from jarvis import …`. Aliases backward-compat conservés dans
+`jarvis.py` pour les tests existants et les consommateurs internes.
+
+**VRAM lock + sync** (parenthèse non comptée comme étape) : `_VRAM_LOCK`
+(threading.Lock) sérialise `_ensure_vram`/`_ollama_swap` ; `_vram_sync_loop`
+thread daemon (60s) synchronise `_vram_model` avec l'état réel d'Ollama via
+`/api/ps` — élimine les cold starts surprise quand Ollama décharge un modèle
+(TTL embed 10m, pression mémoire). Pré-requis multi-user/productisation posés.
+
+**Bilan cumulé** : `jarvis.py` **4814→2556 L (−47%, −2258 L)** · **16 tuiles
+autoportantes** · **13 Blueprints register** · **1164 pytest pass · 0 régression**
+sur les 24 commits enchaînés · coverage globale **64→69%** (+5pts).
+
+**Plancher pratique atteint** : ~2500 L est l'ossature résiduelle légitime
+(Flask app + imports + constants + glue DI/aliases + boot threads + api_chat
+carrefour + WS terminal). La cible initiale « 700-1000 L ossature pure » était
+trop optimiste — la glue DI/aliases pour 16 tuiles est incompressible à ~500 L.
+
+**Restart obligatoire** entre la session précédente (étape 12 chat orchestrator)
+et celle-ci pour valider le boot avec les 14 nouvelles tuiles. JARVIS confirmé
+**fonctionnel** par Marc après restart (étape 13).
 
 **Push Lisibilité + Tests** (2026-05-23) — 92 → **94/100** :
 
