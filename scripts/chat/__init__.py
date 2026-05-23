@@ -23,6 +23,7 @@ from . import (  # noqa: F401
     capture,
     generate,
     messages,
+    orchestrator,
     pending_bypass,
     routing,
     soc_inject,

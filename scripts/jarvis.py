@@ -15,10 +15,10 @@ import sys
 import tempfile
 import threading
 import time
-from collections import deque, namedtuple
 from pathlib import Path
 
-LlmCtx = namedtuple('LlmCtx', ['messages', 'model', 'np_override', 'soc_ctx', 'soc_trigger'])
+# LlmCtx + _LAST_EXCHANGES déplacés dans chat/orchestrator.py — aliases définis
+# après l'import `from chat import ...` (étape 12 refactor jarvis.py).
 
 logging.basicConfig(
     level=logging.INFO,
@@ -541,15 +541,15 @@ from bypass import code as _bypass_code
 from bypass import filesystem as _bypass_fs
 from bypass import proxmox as _bypass_pve
 from bypass import simple as _bypass_simple
-from chat import capture as _chat_capture
-from chat import generate as _chat_gen_mod
 from chat import messages as _chat_msg
-from chat import pending_bypass as _chat_pending
-from chat import routing as _chat_routing
+from chat import orchestrator as _chat_orch
 from chat import soc_inject as _chat_soc
-from chat import stream as _chat_stream_mod
-from chat import system_prompt as _chat_sp
-from chat import tool_calls as _chat_tools
+
+# LlmCtx + _LAST_EXCHANGES vivent dans chat/orchestrator.py (étape 12) —
+# aliases ici pour que jarvis.py garde la même surface (LlmCtx construit
+# l'instance ligne 3457, _LAST_EXCHANGES consommé par api_history_last).
+LlmCtx          = _chat_orch.LlmCtx
+_LAST_EXCHANGES = _chat_orch._LAST_EXCHANGES
 import code_reasoning as _cr_mod
 from voice import deferred_speak as _deferred_speak
 import files as _files
@@ -2521,98 +2521,24 @@ _pve_context_summary = _pve_api.context_summary
 _chat_inject_pve     = _pve_api.chat_inject
 
 
-def _chat_inject_soc(system, last_user, is_vocal, soc_ctx_injected, force_soc=False):
-    """Wrapper DI — délègue à chat_soc_inject.inject() avec les helpers monitoring
-    + l'agrégat defense_24h.json (bloc compact KPI/top/heatmap pré-calculé)."""
-    return _chat_soc.inject(
-        system, last_user, is_vocal, soc_ctx_injected, force_soc,
-        fetch_monitoring_fn=_fetch_monitoring,
-        build_monitoring_context_fn=_build_monitoring_context,
-        fetch_defense_fn=_fetch_defense,
-    )
-
-# _chat_build_messages déplacé dans chat_messages.py — alias backward-compat
+# Wrappers chat déplacés dans chat/orchestrator.py (étape 12 refactor jarvis.py,
+# 2026-05-23). Aliases conservés ici pour les consommateurs internes
+# (_chat_try_bypass, api_chat avant son déménagement étape 13).
 _chat_build_messages = _chat_msg.build_messages
-
-# Mapping tool name → (host_label, ssh_fn) — pour capture pending APT (couplage _ssh_*)
 _APT_HOST_MAP = {
     "commande_ssh_clt":     ("clt",      _ssh_clt),
     "commande_ssh_pa85":    ("pa85",     _ssh_pa85),
     "commande_ssh_ngix":    ("srv-ngix", _ssh_ngix),
     "commande_ssh_proxmox": ("proxmox",  _ssh_proxmox),
 }
-
-def _run_tool_calls(messages: list, active_model):
-    """Wrapper DI — délègue à chat_tool_calls.run_tool_calls() avec runtime deps."""
-    yield from _chat_tools.run_tool_calls(
-        messages, active_model,
-        call_llm_with_tools_fn=call_llm_with_tools,
-        execute_tool_fn=execute_tool,
-        tool_dispatch=_TOOL_DISPATCH,
-        apt_host_map=_APT_HOST_MAP,
-        pending_infra_cmd=_pending_infra_cmd,
-        parse_upgradable_packages_fn=_sec.parse_upgradable_packages,
-        log_info_fn=_log.info,
-        now_fn=time.time,
-        tool_call_max=_TOOL_CALL_MAX,
-        tool_result_trunc=_TOOL_RESULT_TRUNC,
-    )
-
-
-def _build_llm_opts(np_override, soc_ctx_injected: bool, soc_trigger: bool, active_model, msg_len: int = 0):
-    """Wrapper DI — délègue à llm_opts.build_llm_opts() avec constantes runtime."""
-    return _llm_opts_mod.build_llm_opts(
-        np_override, soc_ctx_injected, soc_trigger, active_model, msg_len,
-        default_model=MODEL,
-        llm_params=LLM_PARAMS,
-        soc_temperature=_SOC_TEMPERATURE,
-        soc_num_ctx=_SOC_NUM_CTX,
-        num_ctx_short=_NUM_CTX_SHORT,
-        reasoning_np_min=_REASONING_NP_MIN,
-    )
-
-
-def _stream_tokens_tts(messages: list, active_model, opts):
-    """Wrapper DI — délègue à stream_tokens.stream_tokens_tts() avec stream_llm + _clean_for_tts."""
-    yield from _stream_tokens_mod.stream_tokens_tts(
-        messages, active_model, opts,
-        stream_llm_fn=stream_llm,
-        clean_text_fn=_clean_for_tts,
-        phrase_min=_TTS_PHRASE_MIN,
-    )
-
-
-def _flush_deferred_speak():
-    """Wrapper DI — délègue à deferred_speak.flush_deferred_speak() avec la queue runtime."""
-    yield from _deferred_speak.flush_deferred_speak(_speak_deferred)
-
-
-# ── CODE REASONING — pipeline polling (tâches background) ────────────────────
-# Code Reasoning déplacé dans code_reasoning.py — alias backward-compat
-_cr_tasks = _cr_mod.tasks  # state partagé (utilisé par /api/cr-poll/<task_id>)
-
-def _code_reasoning_gen(messages, np_override):
-    """Wrapper DI — délègue à code_reasoning.code_reasoning_gen() avec deps runtime."""
-    return _cr_mod.code_reasoning_gen(
-        messages, np_override,
-        ensure_vram_fn=_ensure_vram,
-        model=_CODE_REASONING_ANALYSIS_MODEL,
-        system_suffix=_CODE_SYSTEM_SUFFIX,
-        ollama_url=OLLAMA_URL,
-        llm_params=LLM_PARAMS,
-    )
-
-
-def _chat_stream_inner(ctx: "LlmCtx", no_tools=False, temp_override=None):
-    """Wrapper DI — délègue à chat_stream.stream_inner() avec runtime helpers."""
-    yield from _chat_stream_mod.stream_inner(
-        ctx, no_tools, temp_override,
-        ensure_vram_fn=_ensure_vram,
-        run_tool_calls_fn=_run_tool_calls,
-        build_llm_opts_fn=_build_llm_opts,
-        stream_tokens_tts_fn=_stream_tokens_tts,
-        flush_deferred_speak_fn=_flush_deferred_speak,
-    )
+_cr_tasks            = _cr_mod.tasks  # state partagé (utilisé par /api/cr-poll/<task_id>)
+_chat_inject_soc     = _chat_orch._chat_inject_soc
+_run_tool_calls      = _chat_orch._run_tool_calls
+_build_llm_opts      = _chat_orch._build_llm_opts
+_stream_tokens_tts   = _chat_orch._stream_tokens_tts
+_flush_deferred_speak= _chat_orch._flush_deferred_speak
+_code_reasoning_gen  = _chat_orch._code_reasoning_gen
+_chat_stream_inner   = _chat_orch._chat_stream_inner
 
 # ── Détection commandes VM Proxmox (bypass LLM) ───────────────
 # Lookup dynamique via API Proxmox — plus de liste hardcodée
@@ -2926,12 +2852,9 @@ _sse_tok = _sse.sse_tok
 _sse_response = _sse.sse_response
 
 
-# ── Historique des échanges (API /api/history/last) ──────────────────────────
-_LAST_EXCHANGES: deque = deque(maxlen=10)
-
-def _capture_gen(gen, user_msg: str):
-    """Wrapper DI — délègue à chat_capture.capture_gen() avec _LAST_EXCHANGES."""
-    return _chat_capture.capture_gen(gen, user_msg, _LAST_EXCHANGES)
+# _LAST_EXCHANGES + _capture_gen vivent dans chat/orchestrator.py (étape 12).
+# Alias _LAST_EXCHANGES défini en haut (consommé par api_history_last).
+_capture_gen = _chat_orch._capture_gen
 
 
 # ── Bypass : lecture/édition fichier sur VM ───────────────────────────────────
@@ -3274,24 +3197,8 @@ def _dev_exec_sse(cmd: str):
     yield _sse_tok("", done=True)
 
 
-def _chat_resolve_pending_bypass(orig_last: str):
-    """Wrapper DI — délègue à chat_pending_bypass.resolve_pending_bypass() avec runtime deps."""
-    return _chat_pending.resolve_pending_bypass(
-        orig_last,
-        pending_infra_cmd=_pending_infra_cmd,
-        pending_reboot=_pending_reboot,
-        ttl_s=_PENDING_APT_TTL_S,
-        confirm_re=_CONFIRM_RE,
-        cancel_re=_CANCEL_RE,
-        reboot_now_re=_bypass_pve.REBOOT_NOW_RE,
-        reboot_defer_re=_bypass_pve.REBOOT_DEFER_RE,
-        apt_upgrade_sse_fn=_apt_upgrade_bypass_sse,
-        reboot_machine_sse_fn=_reboot_machine_sse,
-        sse_response_fn=_sse_response,
-        sse_tok_fn=_sse_tok,
-        log_info_fn=_log.info,
-        now_fn=time.time,
-    )
+# _chat_resolve_pending_bypass vit dans chat/orchestrator.py (étape 12).
+_chat_resolve_pending_bypass = _chat_orch._chat_resolve_pending_bypass
 
 
 def _chat_try_bypass(orig_last: str, is_vocal: bool):
@@ -3354,42 +3261,10 @@ def _chat_try_bypass(orig_last: str, is_vocal: bool):
     return None
 
 
-def _chat_generate(ctx: "LlmCtx", no_tools=False):
-    """Wrapper DI — délègue à chat_generate.chat_generate() avec runtime deps."""
-    yield from _chat_gen_mod.chat_generate(
-        ctx, no_tools,
-        deferred_queue=_speak_deferred,
-        stream_active_event=_chat_stream_active,
-        stream_inner_fn=_chat_stream_inner,
-        log_error_fn=_log.error,
-    )
-
-
-def _chat_build_system_prompt(last_user: str, web_enabled: bool,
-                              soc_ctx_injected: bool, is_vocal: bool,
-                              force_soc: bool = False) -> tuple[str, bool]:
-    """Wrapper DI — délègue à chat_system_prompt.build() avec les helpers runtime."""
-    return _chat_sp.build(
-        last_user, web_enabled, soc_ctx_injected, is_vocal,
-        system_prompt=SYSTEM_PROMPT,
-        facts_inject_fn=_facts_inject,
-        rag_relevant_re=_RAG_RELEVANT_KW,
-        rag_inject_fn=_rag_inject,
-        web_search_fn=web_search,
-        soc_inject_fn=_chat_inject_soc,
-        pve_inject_fn=_chat_inject_pve,
-        force_soc=force_soc,
-    )
-
-
-def _chat_resolve_model(is_vocal: bool, no_tools: bool, model_override: str | None = None) -> tuple[str | None, str]:
-    """Wrapper DI — délègue à chat_routing.resolve_model() avec les constantes runtime."""
-    return _chat_routing.resolve_model(
-        is_vocal, no_tools, model_override,
-        general_model=_GENERAL_MODEL,
-        code_model=_CODE_MODEL,
-        current_mode=_jarvis_mode,
-    )
+# 3 derniers wrappers chat déplacés dans chat/orchestrator.py (étape 12).
+_chat_generate            = _chat_orch._chat_generate
+_chat_build_system_prompt = _chat_orch._chat_build_system_prompt
+_chat_resolve_model       = _chat_orch._chat_resolve_model
 
 
 def _detect_file_corrections(orig_last, is_vocal):
@@ -4223,6 +4098,61 @@ def _rag_auto_refresh_loop():
         _log.info("[RAG] Auto-refresh 6h terminé.")
 
 threading.Thread(target=_rag_auto_refresh_loop, daemon=True, name="rag-auto-refresh").start()
+
+# ── Init différé de la tuile chat (refactor jarvis.py étape 12, 2026-05-23) ──
+# Placé ici car les SSE generators (_apt_upgrade_bypass_sse, _reboot_machine_sse)
+# sont définis tard. À ce point, TOUTES les deps du chat orchestrator existent.
+_chat_orch.init(
+    log                            = _log,
+    security                       = _sec,
+    llm_opts_mod                   = _llm_opts_mod,
+    stream_tokens_mod              = _stream_tokens_mod,
+    voice_deferred_speak           = _deferred_speak,
+    code_reasoning_mod             = _cr_mod,
+    bypass_pve                     = _bypass_pve,
+    fetch_monitoring               = _fetch_monitoring,
+    build_monitoring_context       = _build_monitoring_context,
+    fetch_defense                  = _fetch_defense,
+    call_llm_with_tools            = call_llm_with_tools,
+    execute_tool                   = execute_tool,
+    ensure_vram                    = _ensure_vram,
+    stream_llm                     = stream_llm,
+    clean_for_tts                  = _clean_for_tts,
+    facts_inject                   = _facts_inject,
+    rag_inject                     = _rag_inject,
+    web_search                     = web_search,
+    chat_inject_pve                = _chat_inject_pve,
+    apt_upgrade_sse                = _apt_upgrade_bypass_sse,
+    reboot_machine_sse             = _reboot_machine_sse,
+    sse_response                   = _sse_response,
+    sse_tok                        = _sse_tok,
+    tool_dispatch                  = _TOOL_DISPATCH,
+    apt_host_map                   = _APT_HOST_MAP,
+    pending_infra_cmd              = _pending_infra_cmd,
+    pending_reboot                 = _pending_reboot,
+    speak_deferred                 = _speak_deferred,
+    chat_stream_active             = _chat_stream_active,
+    get_system_prompt              = lambda: SYSTEM_PROMPT,
+    get_model                      = lambda: MODEL,
+    get_mode                       = lambda: _jarvis_mode,
+    general_model                  = _GENERAL_MODEL,
+    code_model                     = _CODE_MODEL,
+    code_reasoning_analysis_model  = _CODE_REASONING_ANALYSIS_MODEL,
+    code_system_suffix             = _CODE_SYSTEM_SUFFIX,
+    ollama_url                     = OLLAMA_URL,
+    llm_params                     = LLM_PARAMS,
+    soc_temperature                = _SOC_TEMPERATURE,
+    soc_num_ctx                    = _SOC_NUM_CTX,
+    num_ctx_short                  = _NUM_CTX_SHORT,
+    reasoning_np_min               = _REASONING_NP_MIN,
+    tts_phrase_min                 = _TTS_PHRASE_MIN,
+    tool_call_max                  = _TOOL_CALL_MAX,
+    tool_result_trunc              = _TOOL_RESULT_TRUNC,
+    pending_apt_ttl_s              = _PENDING_APT_TTL_S,
+    confirm_re                     = _CONFIRM_RE,
+    cancel_re                      = _CANCEL_RE,
+    rag_relevant_kw                = _RAG_RELEVANT_KW,
+)
 
 if __name__ == "__main__":
     # Filtre les TimeoutError Werkzeug (connexions keep-alive fermées par le navigateur — pas de vraies erreurs)
