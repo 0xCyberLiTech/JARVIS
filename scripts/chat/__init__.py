@@ -27,6 +27,7 @@ from . import (  # noqa: F401
     orchestrator,
     pending_bypass,
     routing,
+    soc_context,
     soc_inject,
     stream,
     system_prompt,
