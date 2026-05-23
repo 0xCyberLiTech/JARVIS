@@ -6,6 +6,7 @@ Relie Ollama (LLM) + edge-tts (voix) + Flask (interface web)
 import json
 import logging
 import logging.handlers
+import os
 import re
 import subprocess
 import sys
@@ -657,7 +658,25 @@ else:
     _k = _sec.token_bytes(32)
     _SK_FILE.write_bytes(_k)
     app.secret_key = _k
-_JARVIS_BOOT_ID = str(int(time.time()))
+# _JARVIS_BOOT_ID : identifiant unique de la session JARVIS (timestamp boot).
+# Consommé par /api/boot-id côté frontend (_pollBootId boot_init.js:870) qui
+# fait location.reload() si l'ID stocké en sessionStorage diffère du courant
+# — mécanisme normal pour rafraîchir l'UI après un redémarrage serveur.
+#
+# ⚠ IDEMPOTENCE via env var (2026-05-23) : blueprints/soc.py contient des
+# `from jarvis import X` dans des fonctions thread qui ré-importent jarvis.py
+# comme module `jarvis` (Python ne le voit pas dans sys.modules car il tourne
+# en `__main__`) → top-level RÉ-EXÉCUTÉ → `_JARVIS_BOOT_ID` régénéré avec un
+# nouveau timestamp → côté JS, sessionStorage devient désynchrone → reload
+# UI déclenché à tort. Le cache via os.environ est partagé entre tous les
+# imports du même process Python, garantit que tous les modules voient
+# exactement le même boot_id. C'est la VRAIE racine du bug UI reboot reporté
+# par Marc à 14:30, 14:33, 14:51, 14:55 — fix précédent (idempotence handler
+# + threads boot) résolvait les symptômes secondaires mais pas celui-ci.
+_JARVIS_BOOT_ID = os.environ.get("_JARVIS_BOOT_ID_CACHE")
+if not _JARVIS_BOOT_ID:
+    _JARVIS_BOOT_ID = str(int(time.time()))
+    os.environ["_JARVIS_BOOT_ID_CACHE"] = _JARVIS_BOOT_ID
 
 limiter = Limiter(get_remote_address, app=app, default_limits=[], storage_uri="memory://")
 sock    = _Sock(app)
