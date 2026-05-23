@@ -20,8 +20,14 @@ threads en une seule passe). `start_all()` démarre les 10 threads en daemon.
 `_vram_model` côté jarvis.py est muté via les callables `get_vram_model` /
 `set_vram_model` (sous protection `_VRAM_LOCK`), pour éviter le couplage par
 global mutable.
+
+Garde-fou : variable d'env `JARVIS_SKIP_BOOT_THREADS=1` → `start_all()`
+retourne immédiatement sans rien lancer. Utile pour les smoke tests
+(`python -c "import jarvis"`) qui ne doivent ni synthétiser, ni toucher la
+VRAM, ni interférer avec une instance JARVIS en service sur la même machine.
 """
 import json
+import os
 import socket
 import threading
 import time
@@ -312,7 +318,16 @@ def vram_sync_loop() -> None:
 
 
 def start_all() -> None:
-    """Démarre les 10 threads daemon dans l'ordre attendu par le boot."""
+    """Démarre les 10 threads daemon dans l'ordre attendu par le boot.
+
+    Garde-fou JARVIS_SKIP_BOOT_THREADS : si la variable d'env est définie
+    (toute valeur non vide), aucun thread n'est démarré. Utile pour les
+    smoke tests `python -c "import jarvis"` qui n'ont pas à toucher la
+    VRAM, déclencher de synthèse Kokoro, ni interférer avec une instance
+    JARVIS déjà en service sur la même machine (Ollama + VRAM partagés)."""
+    if os.environ.get("JARVIS_SKIP_BOOT_THREADS"):
+        _log.info("[BOOTSTRAP] JARVIS_SKIP_BOOT_THREADS défini — threads boot SHUNTÉS (smoke import)")
+        return
     threading.Thread(target=kokoro_preload,        daemon=True, name="kokoro-preload").start()
     threading.Thread(target=tts_connectivity_loop, daemon=True).start()
     threading.Thread(target=gpu_temp_monitor_loop, daemon=True).start()
