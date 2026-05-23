@@ -901,45 +901,24 @@ _BLOCKED_ARGS = [
     "service fail2ban stop", "service ssh stop",
 ]
 
-def _tool_executer_code(args):
-    code    = args["code"]
-    timeout = int(args.get("timeout", 15))
-    for pattern in _BLOCKED_HARD:
-        if pattern in code:
-            _sec_log("hard", pattern, code)
-            return f"Erreur : opération refusée par sécurité ({pattern})"
-    code_lower = code.lower()
-    for pattern in _BLOCKED_ARGS:
-        if pattern.lower() in code_lower:
-            _sec_log("args", pattern, code)
-            return f"Erreur : argument de commande refusé par sécurité ({pattern})"
-    try:
-        result = subprocess.run(
-            [sys.executable, "-c", code],
-            capture_output=True, text=True, timeout=timeout
-        )
-        out = result.stdout[:3000] if result.stdout else ""
-        err = result.stderr[:1000] if result.stderr else ""
-        if err and not out:
-            return f"ERREUR:\n{err}"
-        if err:
-            return f"SORTIE:\n{out}\nAVERTISSEMENT:\n{err}"
-        return out or "(aucune sortie)"
-    except subprocess.TimeoutExpired:
-        return f"Erreur : timeout dépassé ({timeout}s)"
+# 3 tools LLM déménagés dans tools/local.py (étape 33, 2026-05-23).
+# Init déféré juste après _ALLOWED_SCRIPTS défini ; aliases backward-compat ci-dessous.
+from tools import local as _tools_local  # noqa: E402
+_tools_local.init(
+    blocked_hard              = _BLOCKED_HARD,
+    blocked_args              = _BLOCKED_ARGS,
+    sec_log                   = _sec_log,
+    fetch_monitoring          = _fetch_monitoring,
+    build_monitoring_context  = _build_monitoring_context,
+    allowed_scripts           = {},  # placeholder : init() re-appelé après _ALLOWED_SCRIPTS défini
+    proc_timeout_s            = _BACKUP_PROC_TIMEOUT_S,
+)
+_tool_executer_code = _tools_local.executer_code
+_tool_soc_status    = _tools_local.soc_status
 
 # _tool_rechercher_dans_fichiers + constantes _RGLOB_* déménagées dans
 # scripts/files/tools.py (étape 6).
 _tool_rechercher_dans_fichiers = _files._tool_rechercher_dans_fichiers
-
-def _tool_soc_status():
-    ok, raw = _fetch_monitoring(force=True)
-    if not ok:
-        return f"Erreur SSH srv-ngix : {raw}"
-    try:
-        return _build_monitoring_context(json.loads(raw), header="=== SOC STATUS ===")
-    except Exception as e:
-        return f"monitoring.json brut (parse error: {e}):\n{raw[:3000]}"
 
 # _BLOCKED_SSH, _ALLOWED_RESTART_SVCS, _ALLOWED_APT_PKGS, _check_write_op,
 # _parse_upgradable_packages : déplacés dans security_whitelists.py (Phase 3 module 6b)
@@ -970,28 +949,11 @@ _ALLOWED_SCRIPTS = {
     "backup-jarvis": str(_WORKSPACE_ROOT / "JARVIS" / "scripts" / "backup-jarvis.ps1"),
 }
 
-def _tool_executer_script_windows(args):
-    """Exécute un script PowerShell local (whitelist stricte)."""
-    script_key = args.get("script", "").strip()
-    script_path = _ALLOWED_SCRIPTS.get(script_key)
-    if not script_path:
-        return f"Erreur : script '{script_key}' non autorisé. Scripts disponibles : {', '.join(_ALLOWED_SCRIPTS)}"
-    try:
-        proc = subprocess.Popen(
-            ["powershell.exe", "-NonInteractive", "-ExecutionPolicy", "Bypass",
-             "-File", script_path],
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            text=True, encoding="utf-8", errors="replace"
-        )
-        out, _ = proc.communicate(timeout=_BACKUP_PROC_TIMEOUT_S)
-        rc = proc.returncode
-        result = out.strip()[:3000] if out else "(aucune sortie)"
-        return f"Script '{script_key}' terminé (code {rc}).\n{result}"
-    except subprocess.TimeoutExpired:
-        proc.kill()
-        return f"Script '{script_key}' : timeout dépassé (300s)"
-    except Exception as e:
-        return f"Erreur exécution script '{script_key}' : {e}"
+# _tool_executer_script_windows déménagé dans tools/local.py (étape 33).
+# Mutation in-place du dict _ALLOWED_SCRIPTS passé en DI (cohérent avec
+# le placeholder de tools_local.init() ci-dessus — meme objet partagé).
+_tools_local._allowed_scripts = _ALLOWED_SCRIPTS
+_tool_executer_script_windows  = _tools_local.executer_script_windows
 
 _TOOL_DISPATCH = {
     "lire_fichier":             lambda args: _tool_lire_fichier(args),
