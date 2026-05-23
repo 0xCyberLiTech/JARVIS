@@ -1,37 +1,37 @@
 # BILAN TECHNIQUE — JARVIS 0xCyberLiTech
-## Assistant IA local v3.3 — 2026-05-23 (refactor architecture par tuiles complet : 22 tuiles, jarvis.py −61% · audit honnête + couverture +50 tests + fix conftest)
+## Assistant IA local v3.3 — 2026-05-23 (refactor architecture par tuiles complet : 23 tuiles, jarvis.py −62% · bug UI reload résolu racine · couverture +271 tests · score 93/100)
 
 ---
 
-## 0. État actuel (audit dette honnête 2026-05-23 — post étapes 27-34)
+## 0. État actuel (audit dette honnête 2026-05-23 — post étapes 27-36 + couverture finale)
 
 > 📊 **SOURCE UNIQUE des métriques courantes du projet** — score dette, lignes
 > `jarvis.py` / `soc.py` / `jarvis_main.js`, nombre de tests pytest, coverage.
 > Les autres docs JARVIS pointent ici au lieu de recopier ces chiffres : un seul
 > endroit à mettre à jour, plus de dérive entre documents.
 
-**Score honnête : 91/100** — décomposition (architecture par tuiles complète + couverture ciblée + fix conftest + fix idempotence anti-double-import + JS-DIAG instrumentation + doc 2026-05-23) :
+**Score honnête : 93/100** — décomposition (architecture par tuiles 23 modules + bug UI reload résolu cause racine + couverture +271 tests + observabilité 6 garde-fous + mode-loading indicator + doc 2026-05-23) :
 
 | Critère | Score | Justification |
 |---|---|---|
-| Architecture | **23/25** | **JARVIS converti en architecture par tuiles complète** (35 étapes commitées 2026-05-22/23) : **22 tuiles autoportantes** (`system`, `memory`, `rag`, `files`, `ssh`, `bypass`, `proxmox`, `chat`, `voice`, `vision`, `settings`, `tasks`, `health`, `commands`, `dev`, `web`, `bootstrap`, `terminal`, `runtime`, `facts`, `tools` — `facts` enrichi de `inject.py` étape 34b, `tools` enrichi de `dispatch.py` étape 34a) + 14 sous-modules chat + `blueprints/soc.py` toujours présent. `jarvis.py` **4814 → 1866 L (−61%)**, devenu ossature qui register 22 Blueprints. Pattern Blueprint+DI validé partout. **`_TOOL_DISPATCH` et `_facts_inject` sortis** (était la dette restante de §0/27-33). **−2 honnêtes** : 5 globals mutables conservés (MODEL, _vram_model, SYSTEM_PROMPT, _welcome_data, _AUTO_PROFILE_MODEL) avec setters lambda — pattern legacy assumé · patterns d'init() hétérogènes (mutate-in-place vs reassign vs getter callable). |
-| Tests | **20/25** | **1214 tests pytest · 0 skip · 0 fail · 0 régression** sur les 35 étapes de refactor (+50 tests session après-midi sur modules sous-couverts). Coverage globale **71%** (7257 stmts · 2111 miss). **Gains ciblés étape 34c (couverture)** : `tools/local.py` **49% → 95%**, `runtime/speak.py` **41% → 89%**, `bypass/wrappers.py` **65% → 97%**. **Fix critique étape 34d (conftest)** : `tests/python/conftest.py` pose `os.environ.setdefault('JARVIS_SKIP_BOOT_THREADS', '1')` avant tout import — empêche `pytest` de démarrer les 10 threads boot dans son process et d'interférer avec une instance JARVIS en service. **−5 honnêtes** : modules restant sous-couverts — `terminal/ssh_ws.py` **15%** (paramiko + WS difficile à mocker), `commands/sse.py` **12%** (6 SSE generators Proxmox), `chat/dispatcher.py` **46%**, `bootstrap/threads.py` **54%** (threads + Ollama mock lourd). |
-| Documentation | 14/15 | CLAUDE.md + BILAN-TECHNIQUE.md (ce doc) + RUNBOOK.md + MEMORY.md + docs/ (7 fichiers) — réalignés sur le refactor 27-34 le 2026-05-23. Source unique des métriques (§0). −1 : set documentaire volumineux, inhérent au projet. |
-| Lisibilité/Conventions | 23/25 | ruff **0** (un `noqa F401` ajouté sur `psutil` après extraction runtime/gpu_stats — utilisé indirectement) · eslint **0** · pre-commit/pre-push hooks bloquants. −2 : ~135 inline styles JS (HUD temps réel) accepté · aliases backward-compat ajoutent du bruit dans jarvis.py (~80 L). |
-| Performance | 10/10 | Circuit breaker Ollama 8 call-sites · cache SOC 30s · debounce DSP audio · fix IPv6 systémique · pré-warm Kokoro CUDA au boot · pré-warm phi4 SOC en `num_ctx 8192` · pipeline voix : invariant AudioContext + découpage TTS `_splitForTts` · optimisation VRAM · **`JARVIS_SKIP_BOOT_THREADS=1`** (étape 29) → smoke imports sans interférence VRAM/audio. |
-| Sécurité | 24/25 | Whitelist SSH stricte 29 patterns bloqués (`_BLOCKED_SSH`) · profil SOC anti-double-ban (`_SOC_BAN_CONFIG` source unique) · règle anti-hallucination phi4 · injection SOC 100% serveur · IPs hardcodées en `.gitignore` · **try/except global sur `/api/tts`** (commit `f4ad131`) **enrichi avec contexte voix+moteur+texte au crash** (commit `d3eb0b0`) · **RotatingFileHandler `_log` → `scripts/jarvis.log`** persistant 5MB×7 backups (commit `d3eb0b0`) — les exceptions silencieuses survivent désormais à la fermeture console PowerShell · **fix idempotence `_log.addHandler` + `bootstrap.threads.start_all()`** (commit `06e4297`) — empêche la cascade ré-import déclenchée par `from jarvis import` dans `blueprints/soc.py` (lignes 1149/1153/1154/1463) de relancer les threads boot et de polluer le log · **instrumentation JS-DIAG passive** (commit `30462b1`) — endpoint `POST /api/_diag/jslog` + hooks JS `onerror`/`unhandledrejection`/`location.reload` (monkey-patch) → toute future occurrence du bug UI reload laissera une trace `[JS-DIAG]` exploitable avec stack trace du caller. **−1 honnête** : 1 bug intermittent surveillance active (UI qui se relance — fix idempotence pose le palliatif, JS-DIAG capture la cause exacte si reproduit). |
+| Architecture | **24/25** | **23 tuiles autoportantes** (étape 35 → `llm/` avec `vram.py` + `stream.py` extraits + étape 36b → DI explicite soc.py élimine les 4 `from jarvis import` lazy = cause racine bug UI reload). `jarvis.py` **4814 → 1819 L (−62%)**, devenu ossature qui register 23 Blueprints. Pattern Blueprint+DI validé partout. **−1 honnête** : 5 globals mutables conservés (MODEL, _vram_model, SYSTEM_PROMPT, _welcome_data, _AUTO_PROFILE_MODEL) avec setters lambda — pattern legacy assumé · ~80 L d'aliases backward-compat dans jarvis.py (bruit mais nécessaire pour tests existants). |
+| Tests | **22/25** | **1283 tests pytest · 0 skip · 0 fail · 0 régression** sur les 36+ étapes de refactor (+271 tests sur la journée). Coverage globale **75%** (7360 stmts · 1815 miss). **Gains ciblés** : `tools/local.py` 49→**95%**, `runtime/speak.py` 41→**89%**, `bypass/wrappers.py` 65→**97%**, `terminal/ssh_ws.py` 15→**82%**, `commands/sse.py` 12→**92%**, `llm/vram.py` 40→**100%**, `chat/file_correct.py` 22→**97%**. **Fix critique conftest** : `JARVIS_SKIP_BOOT_THREADS=1` auto-set avant tout import — empêche pytest de démarrer les threads boot. **−3 honnêtes** : Blueprints HTTP testés indirectement par E2E Playwright (`voice/routes` 36%, `settings/routes` 44%, `dev/routes` 27%, `web/routes` 26%) — décision archi assumée. |
+| Documentation | 14/15 | CLAUDE.md + BILAN-TECHNIQUE.md (ce doc) + RUNBOOK.md + MEMORY.md + ARCHITECTURE-TUILES.md (schéma 23 tuiles, créé 2026-05-23) + docs/ (7 fichiers) — tous réalignés. Source unique des métriques (§0). −1 : set documentaire volumineux, inhérent au projet. |
+| Lisibilité/Conventions | 23/25 | ruff **0** (un `noqa F401` ajouté sur `psutil` après extraction runtime/gpu_stats) · eslint **0** · pre-commit/pre-push hooks bloquants. −2 : ~135 inline styles JS (HUD temps réel) accepté · aliases backward-compat ajoutent du bruit dans jarvis.py (~80 L). |
+| Performance | 10/10 | Circuit breaker Ollama · cache SOC 30s · fix IPv6 systémique · pré-warm Kokoro CUDA + phi4 SOC · pipeline voix invariant AudioContext + découpage TTS · optimisation VRAM · **`JARVIS_SKIP_BOOT_THREADS=1`** (conftest auto-set) · **indicateur visuel `mode-loading`** (étape 36) → pulse cyan + ⏳ sur le bouton mode pendant le swap VRAM (1-3s) → UX explicite quand le LLM est vraiment prêt. |
+| Sécurité | 24/25 | Whitelist SSH stricte 29 patterns bloqués · profil SOC anti-double-ban · règle anti-hallucination phi4 · injection SOC 100% serveur · IPs hardcodées en `.gitignore` · **try/except global sur `/api/tts`** + contexte voix+moteur+texte au crash · **RotatingFileHandler `_log` → `scripts/jarvis.log`** persistant 5MB×7 · **fix idempotence × 3** (handler + threads + boot_id) · **DI explicite soc.py** (étape 36b commit `709049f` : élimine la cause racine du bug UI reload) · **instrumentation JS-DIAG v2** (commit `da7384d`) → `beforeunload` + stack trace capture toute navigation sortante. **−1 honnête** : Marc accepte que l'auto-engine SOC reste silencieux en mode CODE/CR/GENERAL (règle ABSOLUE `feedback_jarvis_no_regression`). |
 
-**Chiffres clés (2026-05-23 post étape 34)** :
+**Chiffres clés (2026-05-23 post couverture finale)** :
 
 | Métrique | Valeur |
 |---|---|
-| **Tests pytest** | **1214 pass · 0 skip · 0 fail** (+50 vs §0 d'étape 33) |
-| **Coverage globale** | **71%** (7257 stmts · 2111 miss) |
-| **Tuiles autoportantes** | **22** : `system` `memory` `rag` `files` `ssh` `bypass` `proxmox` `chat` `voice` `vision` `settings` `tasks` `health` `commands` `dev` `web` `bootstrap` `terminal` `runtime` `facts` (+ `inject.py` 34b) `tools` (+ `dispatch.py` 34a) + `blueprints/soc` (existant) |
+| **Tests pytest** | **1283 pass · 0 skip · 0 fail** (+271 vs début matin) |
+| **Coverage globale** | **75%** (7360 stmts · 1815 miss) |
+| **Tuiles autoportantes** | **23** : `system` `memory` `rag` `files` `ssh` `bypass` `proxmox` `chat` `voice` `vision` `settings` `tasks` `health` `commands` `dev` `web` `bootstrap` `terminal` `runtime` `facts` (+ `inject.py`) `tools` (+ `dispatch.py`) `llm` (+ `vram.py` + `stream.py`) + `blueprints/soc` (existant) |
 | **Sous-modules chat** | `capture` · `dispatcher` · `file_correct` · `generate` · `messages` · `orchestrator` · `pending_bypass` · `routing` · `soc_context` · `soc_inject` · `stream` · `system_prompt` · `tool_calls` · `tool_schemas` |
-| **Couverture clés** | `jarvis.py` **80%** · `tools/local.py` **95%** · `runtime/speak.py` **89%** · `bypass/wrappers.py` **97%** · `facts/routes.py` 87% |
-| **`jarvis.py`** | **1866 L** — ossature qui register 22 Blueprints + glue DI + carrefour boot + 5 setters globaux + `index/favicon/api_debug/api_mode` + `stream_llm` + `_ensure_vram`+`_ollama_swap` |
-| **`blueprints/soc.py`** | 871 stmts — + api_soc_context ajoutée étape 32 |
+| **Couverture clés (≥80%)** | `jarvis.py` 80% · `tools/local.py` **95%** · `runtime/speak.py` 89% · `bypass/wrappers.py` **97%** · `terminal/ssh_ws.py` 82% · `commands/sse.py` **92%** · `llm/vram.py` **100%** · `chat/file_correct.py` **97%** · `facts/routes.py` 87% |
+| **`jarvis.py`** | **1819 L** — ossature qui register 23 Blueprints + glue DI + carrefour boot + 5 setters globaux + `index/favicon/api_debug/api_mode` |
+| **`blueprints/soc.py`** | 894 stmts (DI explicite 36b) |
 | **`jarvis_main.js`** | 148 L (post-refactor −98,1% depuis 7828L) |
 | **Modules JS totaux** | 21 modules (18 `static/js/` + 3 `static/`) |
 | **CSS** | 8 fichiers · ~5100 lignes |
@@ -41,9 +41,92 @@
 | **TTS moteurs** | 4 (edge-tts · Kokoro CUDA · Piper · SAPI5) avec fallback chain |
 | **ESLint warnings** | **0** · 0 erreur |
 | **ruff** | 0 erreur (1 `noqa F401` documenté sur `psutil`) |
-| **Pre-commit hooks** | ruff + eslint (commit) · pytest 1214 tests (pre-push) |
+| **Pre-commit hooks** | ruff + eslint (commit) · pytest 1283 tests (pre-push) |
 | **Env flags runtime** | `JARVIS_SKIP_BOOT_THREADS=1` → smoke imports sans threads boot (auto-set par conftest.py) |
-| **Logs persistants** | `scripts/jarvis.log` (5MB×7, _log JARVIS principal) · `scripts/tts.log` (2MB×7, JARVIS.TTS) · `scripts/tts_perf.log` (1MB×3, filtre `[TTS-PERF]`) |
+| **Logs persistants** | `scripts/jarvis.log` (5MB×7, _log JARVIS principal) · `scripts/tts.log` (2MB×7, JARVIS.TTS) · `scripts/tts_perf.log` (1MB×3, filtre `[TTS-PERF]`) — total **~52 MB max** plafonnés |
+| **Bug UI reload (15+ jours)** | **résolu cause racine** (étape 36b — DI explicite soc.py) + palliatif `os.environ` boot_id cache + instrumentation JS-DIAG v2 active en permanence |
+
+---
+
+## 0sexies. Session 2026-05-23 fin d'après-midi — étapes 35-36 + bug UI reload RÉSOLU cause racine + couverture finale
+
+Suite directe de §0quinquies. 8 commits supplémentaires en fin de session :
+
+### Étape 35 — Tuile `llm/` (commit `3bcbea3`)
+
+23ème tuile : extraction du cœur runtime LLM de jarvis.py :
+- `llm/vram.py` (98 L) : `ensure_vram` + `ollama_swap` (unload SYNC + preload
+  thread daemon), DI via getters/setter `_vram_model`
+- `llm/stream.py` (158 L) : `stream_llm` (generator SSE Ollama /api/chat) +
+  `think_filter_step` (filtre `<think>...</think>` modèles raisonnement)
+
+jarvis.py : 1866 → 1819 L (−47).
+
+### Étape 36 — Indicateur visuel `mode-loading` (commit `6506199`)
+
+Suite à diagnostic latence fantôme au switch mode (1-3s côté Marc, RTX 5080) :
+- CSS `.mode-loading` : pulse cyan + suffixe ⏳ sur les 4 boutons mode
+- JS `_pollModeReady(mode)` : poll `/api/vram` toutes les 500ms (max 30s)
+  jusqu'à voir le modèle target dans la liste loaded, puis retire la classe
+- Mapping `_MODE_TARGET_MODEL` : general→gemma4, code→qwen2.5-coder,
+  code_reasoning→qwen3 (SOC = MODEL résolu via GET /api/mode)
+
+### Étape 36b — DI explicite `soc.py` = FIX RACINE bug UI reload (commit `709049f`)
+
+**Le fix LONG TERME du bug UI reload signalé par Marc depuis des semaines**.
+
+Remplace les 4 `from jarvis import` dans `blueprints/soc.py` (lignes 1149/
+1153/1154/1463 — pattern lazy import dans fonctions thread) par DI explicite
+via `init_soc()` étendu avec 4 kwargs optionnels : `get_jarvis_mode`,
+`code_reasoning_mode`, `get_model`, `ollama_url`.
+
+**Mécanisme du bug enfin compris** : Python ne voyait pas `jarvis` dans
+`sys.modules` (qui tournait en `__main__`), donc à chaque appel de
+`_soc_llm_call` ou similaire, **import jarvis.py UNE 2ème fois** comme
+module → tout le top-level ré-exécuté → `_JARVIS_BOOT_ID` régénéré → côté
+JS `_pollBootId` détectait nouveau boot_id → `location.reload()`. **UNE
+fois par session** (après c'est en cache sys.modules) — d'où le caractère
+aléatoire et non corrélé aux actions utilisateur.
+
+Diagnostic n'a été possible que grâce à l'instrumentation JS-DIAG v2
+(commit `da7384d`) qui a capturé la stack exacte `boot_init.js:870`.
+
+Fix `8e3d518` (palliatif `os.environ` boot_id cache) reste en place par
+sécurité mais n'est plus nécessaire. Marc a validé end-to-end : « l'ui
+ne bronche pas top ».
+
+### Étape couverture B + finale (commits `a8a9c5a` + `9a2c23b`)
+
++69 tests sur 4 modules les plus sous-couverts restants :
+- `test_terminal_ssh_ws.py` (15 tests) : 15% → **82%** (mock paramiko + WS)
+- `test_commands_sse.py` (23 tests) : 12% → **92%** (mock Proxmox API + SSH)
+- `test_llm_vram.py` (10 tests) : 40% → **100%** (mock urllib + threads)
+- `test_chat_file_correct.py` (21 tests) : 22% → **97%** (mock SSH + LLM
+  stream + validate_protect_directives nginx)
+
+### Score honnête recalibré (post étapes 35-36 + couverture finale)
+
+| | Après §0quinquies | Post étapes 35-36 + couverture |
+|---|---|---|
+| jarvis.py | 1866 L | **1819 L** (−47) |
+| Tuiles | 22 | **23** (+ `llm/`) |
+| Tests | 1214 | **1283** (+69) |
+| Coverage globale | 71% | **75%** (+4 pts ciblés) |
+| Bug UI reload | palliatif + JS-DIAG en surveillance | **résolu cause racine** (DI explicite soc.py) + validé end-to-end Marc |
+| Score | 91/100 | **93/100** |
+
+### Commits de la fin d'après-midi (chronologique)
+
+- `3bcbea3` — `refactor(jarvis): llm/vram + llm/stream - VRAM swap + stream Ollama (etape 35)`
+- `7972eb5` — `docs(jarvis): ARCHITECTURE-TUILES.md - schema structure 23 tuiles post etape 35`
+- `6506199` — `feat(jarvis): indicateur visuel mode-loading pendant swap VRAM (etape 36)`
+- `8e3d518` — `fix(jarvis): _JARVIS_BOOT_ID idempotent via os.environ cache (RACINE bug UI reload)`
+- `9a8162c` — `docs(jarvis): MEMORY trace finale bug UI reload (race + fix racine + validation Marc)`
+- `709049f` — `refactor(jarvis): DI explicite soc.py - elimine les 4 from jarvis import (etape 36b)`
+- `a8a9c5a` — `test(jarvis): +38 tests terminal/ssh_ws + commands/sse (etape B couverture)`
+- `9a2c23b` — `test(jarvis): +31 tests llm/vram (100%) + chat/file_correct (97%) — couverture`
+
+⚠ **Pour atteindre 95+/100** : (a) sortir `api_mode` dans tuile dédiée (~30 min, +0.5 pt) · (b) tests E2E Playwright nettoyés (~2-3h, +1 pt) · (c) réduction des aliases backward-compat dans jarvis.py (~1-2h risqué, +0.5 pt) · (d) doc auto-générée à partir des docstrings (~1h, +0.5 pt).
 
 ---
 

@@ -1,4 +1,85 @@
-# JARVIS — Mémoire projet (2026-05-23 — refactor architecture par tuiles complet, 22 tuiles + couverture +50 tests)
+# JARVIS — Mémoire projet (2026-05-23 — refactor architecture par tuiles complet, 23 tuiles + bug UI reload résolu cause racine + couverture +271 tests)
+
+## Session 2026-05-23 fin d'après-midi — étapes 35-36 + bug UI reload résolu cause racine + couverture finale
+
+Suite directe de la session après-midi (étapes 27-34 + JS-DIAG + fix
+idempotence). 8 commits supplémentaires :
+
+### Étapes refactor (jarvis.py 1866 → 1819 L, −47)
+
+| Étape | Commit | Tuile | Détail |
+|---|---|---|---|
+| 35 | `3bcbea3` | `llm/` (vram + stream) | 23ème tuile : ensure_vram + ollama_swap (98L) + stream_llm + think_filter_step (158L) |
+| 36 | `6506199` | indicateur visuel | CSS .mode-loading + JS _pollModeReady → pulse cyan + ⏳ pendant swap VRAM (1-3s) |
+| 36b | `709049f` | DI explicite soc.py | **FIX RACINE bug UI reload** : remplace les 4 `from jarvis import` par init_soc(get_jarvis_mode, code_reasoning_mode, get_model, ollama_url) |
+| B | `a8a9c5a` | +38 tests | terminal/ssh_ws 15→82% + commands/sse 12→92% |
+| C (couv) | `9a2c23b` | +31 tests | llm/vram 40→100% + chat/file_correct 22→97% |
+
+### Bug UI reload — résolution finale
+
+**Diagnostic complet** (commit `709049f` message détaillé) :
+
+Python ne voyait pas `jarvis` dans `sys.modules` (qui tournait en
+`__main__`), donc à chaque appel de `_soc_llm_call` (auto-engine SOC),
+**import jarvis.py UNE 2ème fois** comme module → tout le top-level
+ré-exécuté → `_JARVIS_BOOT_ID = str(int(time.time()))` régénéré → côté
+JS `_pollBootId` (`boot_init.js:870`) détectait nouveau boot_id →
+`location.reload()`. **UNE fois par session** (sys.modules cache après)
+— d'où le caractère aléatoire et non corrélé aux actions utilisateur.
+
+**Validations terrain** :
+1. JS-DIAG v2 capture la stack exacte `boot_init.js:870` à 14:56:17
+2. Marc reproduit à 14:51:37 : `[JS-DIAG] jsdiag.ready` ×2 espacées 93s
+3. Palliatif `8e3d518` (`_JARVIS_BOOT_ID` en cache `os.environ`) tient
+4. Fix racine `709049f` (DI explicite soc.py) → cause éliminée
+5. Marc valide end-to-end : « l'ui ne bronche pas top »
+
+### Validation continuité SOC
+
+Pendant le diag bug UI, vérif que SOC continue de remonter les alertes
+vocales :
+- Backend `/api/status` + `/api/soc/context` répondent : ÉLEVÉ 58/100,
+  78 IPs CrowdSec, 8 fail2ban, 4 VMs running
+- TTS log montre alertes vocales toutes les ~15-30 min selon cooldowns
+  (rapport horaire 15:00, alerte SOC ÉLEVÉ 15:01, Suricata 15:16, etc.)
+- **Silence de 20 min entre 15:31 et 15:51** = NORMAL (cooldowns + mode
+  CODE/CR/GENERAL silencieux par règle ABSOLUE `feedback_jarvis_no_regression`)
+- Marc accepte cette règle ABSOLUE (n'a pas demandé de changement)
+
+### Couverture finale (+69 tests fin de session)
+
+| Module | Avant | Après |
+|---|---|---|
+| `terminal/ssh_ws.py` | 15% | **82%** |
+| `commands/sse.py` | 12% | **92%** |
+| `llm/vram.py` | 40% | **100%** |
+| `chat/file_correct.py` | 22% | **97%** |
+| **Global** | **71%** | **75%** |
+
+Tests post-étape 35 (llm/vram création) immédiatement couverts par 10
+tests (init/get_model/get_vram_model/set/lock + unload sync + preload
+thread daemon + exceptions). Patron isolant : pas de polling réseau réel.
+
+### Bilan complet session (matin + après-midi)
+
+| Métrique | Début matin | Fin de session |
+|---|---|---|
+| jarvis.py | 4814 L | **1819 L** (−62%) |
+| Tuiles | 0 | **23** + blueprints/soc |
+| Tests pytest | 1012 | **1283** (+271) |
+| Coverage globale | 62% | **75%** (+13 pts) |
+| Commits total | — | **25** (12 refactor + 13 fix/feat/test/docs) |
+| Bug UI reload | aléatoire 15+ jours | **résolu cause racine + validé Marc** |
+| Score honnête | 82-84/100 (matin) | **93/100** |
+
+### Outils investigation laissés actifs (décision Marc)
+
+Mémoire centrale : `~/.claude/.../memory/jarvis_diag_tools_active.md`.
+Volumétrie max disque : **~52 MB plafonnés** par RotatingFileHandler
+(`jarvis.log` 35 + `tts.log` 14 + `tts_perf.log` 3). Aucun risque de
+saturation. À NE PAS supprimer sans validation Marc.
+
+---
 
 ## Session 2026-05-23 après-midi — étapes 34a/b + couverture +50 tests + fix conftest critique + jarvis.log
 
