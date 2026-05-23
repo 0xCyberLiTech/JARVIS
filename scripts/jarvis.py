@@ -7,7 +7,6 @@ import json
 import logging
 import logging.handlers
 import re
-import shlex
 import subprocess
 import sys
 import threading
@@ -550,6 +549,7 @@ _LAST_EXCHANGES = _chat_orch._LAST_EXCHANGES
 import code_reasoning as _cr_mod
 import commands as _commands
 from voice import deferred_speak as _deferred_speak
+import dev as _dev
 import files as _files
 import health as _health
 import llm_opts as _llm_opts_mod
@@ -1185,7 +1185,7 @@ app.register_blueprint(_rag.bp)
 _vram_model:    str | None = None   # modèle actuellement chargé en VRAM (tracké par JARVIS)
 _VRAM_LOCK = threading.Lock()       # protège _vram_model + _ollama_swap (anti-race multi-requête)
 _last_toks_per_sec: float = 0.0     # vitesse dernière génération (tok/s)
-_dev_cwd:       str = "/root"   # répertoire courant de la session terminal DEV (srv-dev-1)
+# _dev_cwd déplacé dans dev/routes.py (étape 22).
 
 
 # _DATETIME_RE déplacé dans bypass_simple.py (Phase 3 module 6a)
@@ -1702,28 +1702,7 @@ def api_facts_get():
 
 # Routes /api/rag/* déménagées dans la tuile scripts/rag/routes.py (étape 5).
 
-@limiter.limit("10 per minute")
-@app.route("/api/code/exec", methods=["POST"])
-def api_code_exec():
-    """Écrit un fichier code localement, SCP sur srv-dev-1, exécute, retourne SSE."""
-    data     = request.get_json(force=True, silent=True) or {}
-    filename = (data.get("filename") or "").strip()
-    code     = (data.get("code")     or "").strip()
-    if not filename or not code:
-        return Response(json.dumps({"error": "filename et code requis"}), status=400, mimetype="application/json")
-    if not re.match(r'^[\w.-]+\.(py|sh|js|ts|html|css|json|yml|yaml|rb|go|php|sql|txt)$', filename) or ".." in filename:
-        return Response(json.dumps({"error": "filename invalide"}), status=400, mimetype="application/json")
-    local_path = Path.home() / "Documents" / filename
-    local_path.write_text(code, encoding="utf-8")
-    _log.info(f"[CODE/EXEC] Fichier écrit : {local_path}")
-    def _gen_and_cleanup():
-        yield from _code_scp_exec_sse(filename, exec_it=True)
-        try:
-            local_path.unlink(missing_ok=True)
-            _log.info(f"[CODE/EXEC] Fichier temp supprimé : {local_path}")
-        except Exception:
-            pass  # PermissionError ou race — non bloquant
-    return _sse_response(_gen_and_cleanup())
+# api_code_exec déménagée dans dev/routes.py (étape 22)
 
 # Route /api/rag/refresh déménagée dans la tuile scripts/rag/routes.py (étape 5).
 
@@ -1815,41 +1794,7 @@ def api_mode():
     return Response(json.dumps({"mode": _jarvis_mode, "model": _model_map.get(_jarvis_mode, MODEL)}),
                     mimetype="application/json")
 
-@limiter.limit("60 per minute")
-@app.route("/api/dev/exec", methods=["POST"])
-def api_dev_exec():
-    data = request.get_json(silent=True) or {}
-    cmd  = data.get("cmd", "").strip()
-    if not cmd:
-        return Response(json.dumps({"error": "cmd requis"}), status=400, mimetype="application/json")
-    return Response(stream_with_context(_dev_exec_sse(cmd)), content_type="text/event-stream")
-
-@app.route("/api/dev/stats")
-@limiter.limit("30/minute")
-def dev_stats():
-    """Stats système srv-dev-1 via SSH · cache 12s · TTY-free."""
-    import time as _t
-
-    from flask import jsonify
-    now = _t.time()
-    if now - _dev_stats_cache["ts"] < 12 and _dev_stats_cache["data"]:
-        return jsonify(_dev_stats_cache["data"])
-    try:
-        import paramiko as _pm
-        cl = _pm.SSHClient()
-        cl.set_missing_host_key_policy(_pm.AutoAddPolicy())
-        cl.connect(hostname=_CODE_DEV_IP, port=_CODE_DEV_PORT, username="root",
-                   key_filename=_CODE_DEV_KEY, timeout=5,
-                   look_for_keys=False, allow_agent=False)
-        _, out, _ = cl.exec_command(_STATS_CMD, timeout=8)
-        raw = out.read().decode().strip()
-        cl.close()
-        data = json.loads(raw)
-        _dev_stats_cache["ts"]   = _t.time()
-        _dev_stats_cache["data"] = data
-        return jsonify(data)
-    except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+# api_dev_exec + dev_stats déménagées dans dev/routes.py (étape 22)
 
 
 def _ws_ssh_reader(channel, out_queue, data_ready, running):
@@ -1969,22 +1914,7 @@ def ws_dev(ws):
     """WebSocket PTY SSH — terminal CODE srv-dev-1 (alias de /ws/ssh/dev1)."""
     _ws_ssh_handler(ws, _SSH_TERMINAL_MAP["dev1"])
 
-@limiter.limit("30 per minute")
-@limiter.limit("10 per minute")
-@app.route("/api/save-code", methods=["POST"])
-def api_save_code():
-    import re as _re
-    data     = request.get_json(silent=True) or {}
-    filename = data.get("filename", "untitled.py")
-    code     = data.get("code", "")
-    if not _re.match(r'^[\w\-. ]+$', filename):
-        return Response(json.dumps({"error": "filename invalide"}), status=400, mimetype="application/json")
-    save_dir = Path(__file__).parent / "generated_code"
-    save_dir.mkdir(exist_ok=True)
-    filepath = save_dir / filename
-    filepath.write_text(code, encoding="utf-8")
-    _log.info(f"[CODE] Fichier sauvegardé : {filepath}")
-    return Response(json.dumps({"saved": str(filepath)}), mimetype="application/json")
+# api_save_code déménagée dans dev/routes.py (étape 22)
 
 # api_ollama_status + api_vram déménagées dans health/routes.py (étape 19).
 
@@ -2352,35 +2282,7 @@ _CODE_REMOTE_DIR = _bypass_code.CODE_REMOTE_DIR
 
 # Carte SSH terminal déplacée dans ssh_terminal.py — alias backward-compat (utilisée par _ws_ssh_handler)
 _SSH_TERMINAL_MAP = _ssh_term.TERMINAL_MAP
-_dev_stats_cache: dict = {"ts": 0.0, "data": {}}
-
-_STATS_CMD = r"""python3 -c '
-import json, shutil
-la = open("/proc/loadavg").read().split()
-m = {}
-for l in open("/proc/meminfo"):
-    if ":" in l:
-        k, v = l.split(":", 1)
-        try: m[k.strip()] = int(v.strip().split()[0])
-        except Exception: pass  # ligne /proc/meminfo non numérique — skip
-mt = m.get("MemTotal",0)//1024
-mf = (m.get("MemFree",0)+m.get("Buffers",0)+m.get("Cached",0)+m.get("SReclaimable",0))//1024
-mu = mt-mf; mp = int(mu*100/mt) if mt else 0
-du = shutil.disk_usage("/")
-up = float(open("/proc/uptime").read().split()[0])
-d=int(up//86400); h=int((up%86400)//3600); mn=int((up%3600)//60)
-ut = f"{d}j {h}h" if d else f"{h}h {mn}m"
-rx=tx=0
-for l in open("/proc/net/dev"):
-    if ":" not in l: continue
-    iface,cols=l.strip().split(":",1); cols=cols.split()
-    if iface.strip()=="lo": continue
-    rx+=int(cols[0]); tx+=int(cols[8])
-def hb(b): return f"{b//2**30}G" if b>=2**30 else f"{b//2**20}M" if b>=2**20 else f"{b//2**10}K"
-print(json.dumps({"load1":la[0],"load5":la[1],"ram_used":mu,"ram_total":mt,"ram_pct":mp,
-"disk_used":du.used//2**30,"disk_total":du.total//2**30,"disk_pct":int(du.used*100/du.total),
-"uptime":ut,"net_rx":hb(rx),"net_tx":hb(tx)}))
-'"""
+# _dev_stats_cache + _STATS_CMD déplacés dans dev/routes.py (étape 22).
 
 # Regex/helpers code déplacés dans bypass_code.py (Phase 3 module 10)
 
@@ -2451,51 +2353,8 @@ def _apt_upgrade_bypass_sse(pending: dict):
     yield "data: " + json.dumps({"type": "speak", "text": tts_msg}) + "\n\n"
 
 
-def _dev_exec_sse(cmd: str):
-    """Mode terminal DEV — exécute une commande sur srv-dev-1, maintient _dev_cwd.
-    Émet des events dev_output (rendu <pre> côté JS) — jamais de blocs markdown ``` ."""
-    global _dev_cwd
-    cmd = cmd.strip()
-    if not cmd:
-        yield _sse_tok("", done=True)
-        return
-
-    # cd : mise à jour cwd sans sortie visible
-    cd_m = re.match(r'^cd\s*(.*)', cmd)
-    if cd_m:
-        target = cd_m.group(1).strip() or "/root"
-        ok, out = _ssh_dev1(
-            f"cd {shlex.quote(_dev_cwd)} 2>/dev/null && cd {target} 2>&1 && pwd",
-            timeout=10)
-        if ok and out and out.strip().startswith('/'):
-            _dev_cwd = out.strip()
-            yield f"data: {json.dumps({'type':'dev_cwd','cwd':_dev_cwd})}\n\n"
-            yield f"data: {json.dumps({'type':'dev_output','prompt':f'root@srv-dev-1:{_dev_cwd} $','cmd':cmd,'output':''})}\n\n"
-        else:
-            err = (out or "").strip() or f"bash: cd: {target}: No such file or directory"
-            yield f"data: {json.dumps({'type':'dev_output','prompt':f'root@srv-dev-1:{_dev_cwd} $','cmd':cmd,'output':err})}\n\n"
-        yield _sse_tok("", done=True)
-        return
-
-    # Commande générale — capture le nouveau cwd via marqueur
-    full_cmd = (
-        f"cd {shlex.quote(_dev_cwd)} 2>/dev/null; "
-        f"{cmd}; "
-        "echo '__JARVIS_PWD__'\"$(pwd)\""
-    )
-    ok, out = _ssh_dev1(full_cmd, timeout=30)
-
-    new_cwd = _dev_cwd
-    if out and '__JARVIS_PWD__' in out:
-        parts = out.rsplit('__JARVIS_PWD__', 1)
-        out = parts[0].rstrip('\n')
-        new_cwd = parts[1].strip() or _dev_cwd
-    _dev_cwd = new_cwd
-
-    output_text = out if ok else (out or "✗ Erreur SSH.")
-    yield f"data: {json.dumps({'type':'dev_output','prompt':f'root@srv-dev-1:{_dev_cwd} $','cmd':cmd,'output':output_text})}\n\n"
-    yield f"data: {json.dumps({'type':'dev_cwd','cwd':_dev_cwd})}\n\n"
-    yield _sse_tok("", done=True)
+# _dev_exec_sse + _dev_cwd + _STATS_CMD + _dev_stats_cache déménagés
+# dans dev/routes.py (étape 22).
 
 
 # _chat_resolve_pending_bypass vit dans chat/orchestrator.py (étape 12).
@@ -2878,6 +2737,20 @@ threading.Thread(target=_rag_auto_refresh_loop, daemon=True, name="rag-auto-refr
 
 # ── Init chat/file_correct (étape 21) — placé tard pour _sse_tok ──
 _file_correct_mod.init(log=_log, sse_tok=_sse_tok)
+
+# ── Init tuile dev (étape 22) — code/exec + dev/exec + dev/stats + save-code ──
+_dev.init(
+    limiter               = limiter,
+    log                   = _log,
+    ssh_dev1              = _ssh_dev1,
+    code_scp_exec_sse_fn  = _code_scp_exec_sse,
+    sse_tok               = _sse_tok,
+    code_dev_ip           = _CODE_DEV_IP,
+    code_dev_port         = _CODE_DEV_PORT,
+    code_dev_key          = _CODE_DEV_KEY,
+    generated_code_dir    = Path(__file__).parent / "generated_code",
+)
+app.register_blueprint(_dev.bp)
 
 # ── Init tuile commands (étape 20, 2026-05-23) — placé tard car nécessite ──
 # _pve_fetch_state (alias chat orchestrator) + _sse_tok (sse helpers alias).
