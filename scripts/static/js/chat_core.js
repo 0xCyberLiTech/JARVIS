@@ -216,6 +216,70 @@ async function _setMode(mode) {
   }).catch(e => _jwarn('[jarvis] _setMode /api/mode:', e));
   _updateModeBtn();
   setTimeout(_refreshVramNow, 800);
+  // Indicateur visuel : bouton mode en pulse 'mode-loading' tant que le LLM
+  // attendu n'est pas chargé en VRAM Ollama. Le swap prend 1-3s en pratique
+  // (RTX 5080 + NVMe). Sans ça, l'UI dit "Mode X activé" mais cold start
+  // possible au 1er message si on tape immédiatement. (étape 36, 2026-05-23)
+  _pollModeReady(_jarvisMode);
+}
+
+// Mapping mode → identifiant du modèle Ollama attendu en VRAM
+const _MODE_TARGET_MODEL = {
+  general:        'gemma4:latest',
+  code:           'qwen2.5-coder:14b',
+  code_reasoning: 'qwen3:8b',
+  // soc = MODEL Ollama par défaut (phi4:14b en config standard) → résolu via /api/mode
+};
+
+async function _pollModeReady(mode) {
+  // Détermine le target model. Pour SOC, on lit /api/mode pour récupérer le
+  // MODEL actuel (qui peut différer de phi4:14b si Marc l'a changé).
+  let target = _MODE_TARGET_MODEL[mode];
+  if (!target) {
+    try {
+      const r = await fetch('/api/mode');
+      const d = await r.json();
+      target = d.model;
+    } catch (_) { return; /* fallback silencieux — bouton reste en pulse jusqu'au timeout */ }
+  }
+  if (!target) return;
+
+  const btnIds = {
+    soc:            'btn-mode-soc',
+    general:        'btn-mode-general',
+    code:           'btn-mode-code',
+    code_reasoning: 'btn-mode-code-reasoning',
+  };
+  const btn = document.getElementById(btnIds[mode]);
+  if (!btn) return;
+
+  btn.classList.add('mode-loading');
+
+  // Poll /api/vram toutes les 500ms, max 30s (60 cycles)
+  const startedAt = Date.now();
+  const TIMEOUT_MS = 30000;
+  const POLL_MS = 500;
+
+  const _check = async () => {
+    // Si l'utilisateur a re-cliqué entre-temps et changé de mode, on lâche.
+    if (_jarvisMode !== mode) { btn.classList.remove('mode-loading'); return; }
+    try {
+      const r = await fetch('/api/vram', { cache: 'no-store' });
+      const d = await r.json();
+      const loaded = (d.models || []).map(m => m.name);
+      if (loaded.includes(target)) {
+        btn.classList.remove('mode-loading');
+        return; // ✅ modèle prêt
+      }
+    } catch (_) { /* ignore — on retry */ }
+    if (Date.now() - startedAt > TIMEOUT_MS) {
+      btn.classList.remove('mode-loading');
+      _jwarn(`[jarvis] _pollModeReady timeout 30s pour ${target}`);
+      return;
+    }
+    setTimeout(_check, POLL_MS);
+  };
+  setTimeout(_check, POLL_MS);
 }
 
 async function setModeSoc()              { await _setMode('soc'); }

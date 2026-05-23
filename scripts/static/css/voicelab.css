@@ -1089,6 +1089,32 @@
   #btn-mode-general.mode-active-general           { color:#00ff88; border-color:#00ff8888; background:rgba(0,255,136,.10);  text-shadow:0 0 8px #00ff8866; }
   #btn-mode-code.mode-active-code                 { color:#ff9900; border-color:#ff990088; background:rgba(255,153,0,.10);  text-shadow:0 0 8px #ff990066; }
   #btn-mode-code-reasoning.mode-active-code       { color:#ff9900; border-color:#ff990088; background:rgba(255,153,0,.10);  text-shadow:0 0 8px #ff990066; }
+  /* État LOADING — pulse cyan pendant que le LLM est en cours de chargement VRAM (étape 36, 2026-05-23) */
+  /* Visible quand _setMode() vient d'être cliqué et que le modèle attendu n'est pas encore en VRAM Ollama */
+  #btn-mode-soc.mode-loading,
+  #btn-mode-general.mode-loading,
+  #btn-mode-code.mode-loading,
+  #btn-mode-code-reasoning.mode-loading {
+    animation: mode-loading-pulse 1.2s ease-in-out infinite;
+    position: relative;
+    cursor: progress;
+  }
+  #btn-mode-soc.mode-loading::after,
+  #btn-mode-general.mode-loading::after,
+  #btn-mode-code.mode-loading::after,
+  #btn-mode-code-reasoning.mode-loading::after {
+    content: '⏳';
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+    opacity: 0.85;
+  }
+  @keyframes mode-loading-pulse {
+    0%, 100% { box-shadow: 0 0 4px currentColor; opacity: 1; }
+    50%      { box-shadow: 0 0 14px currentColor; opacity: 0.6; }
+  }
   /* Ollama status dot */
   .ollama-dot          { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; vertical-align: middle; background: #333; }
   .ollama-dot.ollama-on  { background: #00ff88; box-shadow: 0 0 6px #00ff8888; }
