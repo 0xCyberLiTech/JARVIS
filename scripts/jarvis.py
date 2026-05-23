@@ -615,35 +615,22 @@ _rag_query         = _rag.engine._rag_query
 _rag_inject        = _rag.engine._rag_inject
 _rag_live_cache: list = []  # conservé pour compatibilité ascendante
 
-def _load_facts() -> list:
-    """Charge les faits persistants depuis jarvis_facts.json."""
-    try:
-        if FACTS_FILE.exists():
-            data = json.loads(FACTS_FILE.read_text(encoding="utf-8"))
-            return data.get("facts", []) if isinstance(data, dict) else []
-    except Exception as e:
-        _log.warning(f"[JARVIS] WARNING load_facts: {e}")
-    return []
-
-_MOIS_FR = ["janvier","février","mars","avril","mai","juin",
-            "juillet","août","septembre","octobre","novembre","décembre"]
-_JOURS_FR = ["lundi","mardi","mercredi","jeudi","vendredi","samedi","dimanche"]
-
-def _now_fr() -> str:
-    from datetime import datetime as _dt
-    n = _dt.now()
-    return f"{_JOURS_FR[n.weekday()]} {n.day:02d} {_MOIS_FR[n.month-1]} {n.year} — {n.hour:02d}:{n.minute:02d}"
-
-def _facts_inject(system: str) -> str:
-    """Injecte date/heure, faits persistants et résumés de mémoire dans le system prompt."""
-    additions = [f"[SYSTÈME] Date et heure actuelles : {_now_fr()}. Tu disposes de cette information en temps réel — réponds directement sans dire que tu n'y as pas accès."]
-    facts = _load_facts()
-    if facts:
-        additions.append("[MÉMOIRE PERSISTANTE — faits toujours vrais, priorité absolue]\n" + "\n".join(f"• {f}" for f in facts))
-    summary = _load_memory_summary()
-    if summary:
-        additions.append("[RÉSUMÉS DE CONVERSATIONS PASSÉES — contexte long terme]\n" + summary)
-    return system + "\n\n" + "\n\n".join(additions)
+# _load_facts + _now_fr + _facts_inject déménagés dans facts/inject.py
+# (étape 34b, 2026-05-23). DI : FACTS_FILE + _load_memory_summary + _log.
+from facts import inject as _facts_inject_mod  # noqa: E402
+# Getter lambda pour FACTS_FILE : permet aux tests de monkeypatch jm.FACTS_FILE
+# et de voir l'effet (sinon copie figée au moment de init()).
+_facts_inject_mod.init(
+    get_facts_file=lambda: FACTS_FILE,
+    load_memory_summary=_load_memory_summary,
+    log=_log,
+)
+# Aliases backward-compat pour les consommateurs (chat orchestrator, tests) :
+_load_facts   = _facts_inject_mod.load_facts
+_now_fr       = _facts_inject_mod.now_fr
+_facts_inject = _facts_inject_mod.inject
+_MOIS_FR      = _facts_inject_mod._MOIS_FR
+_JOURS_FR     = _facts_inject_mod._JOURS_FR
 
 app = Flask(__name__, template_folder=str(TEMPLATES))
 app.jinja_env.auto_reload = True   # recharge les templates modifiés sans redémarrer
