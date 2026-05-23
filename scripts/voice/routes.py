@@ -22,6 +22,7 @@ import os
 import queue as _queue_mod
 import tempfile
 import time
+import traceback
 from pathlib import Path
 
 from flask import Response, request, send_file
@@ -294,6 +295,22 @@ def _tts_edge_fallback(text, local_voice):
 
 @bp.route("/api/tts", methods=["POST"])
 def api_tts():
+    """Wrapper sécurité : try/except global garantit qu'aucune exception
+    silencieuse ne remonte au navigateur (sinon 500 sans log → debug aveugle).
+    Le corps réel est dans `_api_tts_impl()`."""
+    try:
+        return _api_tts_impl()
+    except Exception as e:
+        tb = traceback.format_exc()
+        _log.error(f"[TTS] /api/tts EXCEPTION GLOBALE ({type(e).__name__}: {e})\n{tb}")
+        _tts_logger.error(f"[GLOBAL-CRASH] /api/tts {type(e).__name__}: {e}")
+        return Response(
+            json.dumps({"ok": False, "error": f"{type(e).__name__}: {e}"}, ensure_ascii=False),
+            mimetype="application/json", status=500,
+        )
+
+
+def _api_tts_impl():
     _perf_t0 = time.monotonic()
     data = request.json or {}
     text = _clean_for_tts(data.get("text", ""))
