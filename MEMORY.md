@@ -1,4 +1,135 @@
-# JARVIS — Mémoire projet (2026-05-23 — refactor architecture par tuiles complet, 21 tuiles)
+# JARVIS — Mémoire projet (2026-05-23 — refactor architecture par tuiles complet, 22 tuiles + couverture +50 tests)
+
+## Session 2026-05-23 après-midi — étapes 34a/b + couverture +50 tests + fix conftest critique + jarvis.log
+
+Suite directe du matin (étapes 27-33 + jarvis.log + try/except /api/tts +
+SKIP_BOOT_THREADS). 5 commits supplémentaires l'après-midi.
+
+### Étapes refactor (jarvis.py 1860 → 1866 L, -6 net)
+
+| Étape | Commit | Tuile | jarvis.py | Détail |
+|---|---|---|---|---|
+| 34a | `569500b` | `tools/dispatch.py` (nouveau) | 1860→1879 (+19) | _TOOL_DISPATCH sorti — fabrique build(**handlers) avec 14 callables en DI explicite, suppression 14 lambdas thunk |
+| 34b | `36e8f17` | `facts/inject.py` (nouveau) | 1879→**1866** (−13) | _facts_inject + _load_facts + _now_fr + _MOIS/JOURS_FR sortis, DI via get_facts_file callable (testabilité monkeypatch jm.FACTS_FILE) |
+
+### Couverture ciblée (+50 tests, modules sous-couverts → 89-97%)
+
+3 fichiers test ajoutés (commits `d3eb0b0` + `7ffbcec`) :
+
+| Module | Coverage avant | Coverage après | Tests ajoutés |
+|---|---|---|---|
+| `tools/local.py` | 49% | **95%** | 16 (executer_code blocked, soc_status, executer_script_windows mock Popen) |
+| `runtime/speak.py` | 41% | **89%** | 14 (dedup intra 3s, dedup global, drop-oldest queue, routage stream actif/inactif) |
+| `bypass/wrappers.py` | 65% | **97%** | 20 (detect_service_restart par hôte, detect_vm/reboot/update, 4 wrappers backup, apt_upgrade_bypass_sse) |
+| `facts/routes.py` | (juste créé) | **87%** | — |
+
+Particularité `test_bypass_wrappers.py` : fixture autouse avec
+**restauration de l'état initial en teardown** (sauvegarde + restore des
+18 attributs DI de `bp_wrap`) → évite la contamination des tests
+`test_jarvis_functions::_detect_service_restart_*` qui lisent
+`jm._detect_service_restart` (alias vers `bp_wrap.detect_service_restart`)
+et attendent les VRAIES fonctions SSH injectées au boot, pas des mocks.
+
+### Fix infra critique : conftest.py SKIP_BOOT_THREADS (commit `be4dc8b`)
+
+**Bug remonté par Marc 14:07** : « UI se relance pendant lecture audio +
+slider EQ » sur le dashboard SOC pendant une session.
+
+Diagnostic post-mortem (logs `jarvis.log` + `tts.log` + `Get-Process python`) :
+
+- **0 crash backend** — wrapper try/except `/api/tts` bien posé mais rien
+  à capturer. Le bug n'est PAS dans `/api/tts`.
+- **2 process Python sains à l'instant T** : PID 25588 (JARVIS prod, port
+  5000) + PID 28368 (jarvis_mcp_server, port 5010). Normal.
+- **MAIS doublons dans `jarvis.log` entre 14:07:11 et 14:08:11** (~1 min) :
+  toutes les lignes écrites 2× pendant cette fenêtre = signature d'un **3ème
+  process Python éphémère** qui a chargé jarvis et lancé les 10 threads boot.
+- **Cause racine identifiée** : 5 fichiers `test_jarvis_*` font `import jarvis`
+  au chargement. Mes 6 commandes `pytest tests/python/` pendant la session
+  ont donc chacune démarré les threads boot **sans le flag** que j'avais
+  créé exactement pour ça. Pendant ~5-15 s de vie de chaque pytest :
+  - `kokoro_preload` synthétise "JARVIS opérationnel." sur les enceintes
+  - `boot_vram_cleanup` décharge des modèles Ollama actifs
+  - `soc_model_prewarm` force phi4 en VRAM (TTL 30 min)
+  - `kokoro_prewarm` charge Kokoro CUDA
+  - → **interférence directe avec la session de Marc** : audio en double,
+    VRAM swap, modèles déchargés. Le bug observé est le symptôme côté
+    frontend de cette interférence backend.
+
+**Fix** : `tests/python/conftest.py` pose
+`os.environ.setdefault("JARVIS_SKIP_BOOT_THREADS", "1")` **AVANT** le
+`sys.path.insert` (donc avant que pytest collecte les modules).
+`bootstrap/threads.start_all()` retourne immédiatement avec un log
+`[BOOTSTRAP] ... SHUNTÉS`. **Plus jamais d'interférence pytest ↔ JARVIS prod**
+sur la même machine. 1214 tests passent toujours.
+
+### Améliorations infra (commit `d3eb0b0`)
+
+- **`scripts/jarvis.log` persistant** : `RotatingFileHandler` ajouté au
+  logger `_log` JARVIS (5 MB × 7 backups). Format ISO datetime + niveau +
+  name + traceback complet sur ERROR. Avant : `basicConfig` stdout seul,
+  perdu si scrollback ou fermeture console PowerShell.
+- **Wrapper `/api/tts` enrichi** : au crash, snapshot du contexte
+  `{voice, engine, len, preview}` construit via getters `_get_voice` +
+  `_get_dsp_params` (try/except interne pour gérer DI non encore injectée).
+  Ligne `tts.log [GLOBAL-CRASH]` inclut désormais voix + moteur + longueur +
+  preview du texte ayant provoqué le crash → diagnostic ciblé pour la
+  prochaine occurrence du bug switch voix Edge.
+
+### Score honnête recalibré (post étape 34)
+
+| | Matin (post-33) | Après-midi (post-34) |
+|---|---|---|
+| jarvis.py | 1860 L | **1866 L** (+6 net) |
+| Tuiles | 21 | **22** |
+| Tests | 1164 | **1214** (+50) |
+| Coverage globale | 70% | **71%** (gain ciblé sur modules récents) |
+| Score | 87/100 | **90/100** |
+
+⚠ **Reste pour 92+** : (a) sortir `_ensure_vram` + `_ollama_swap` +
+`stream_llm` + `_think_filter_step` dans `llm/` (~140 L, étape 35) · (b)
+couvrir `terminal/ssh_ws.py` (15%) et `commands/sse.py` (12%) — gros effort
+mocking paramiko + Proxmox API · (c) résoudre proprement le bug switch
+voix Edge si reproduit avec le diagnostic enrichi.
+
+### Commits de l'après-midi (chronologique)
+
+- `d3eb0b0` — `feat(jarvis): jarvis.log persistant + enrich crash /api/tts + 16 tests tools/local`
+- `7ffbcec` — `test(jarvis): +34 tests runtime/speak + bypass/wrappers (couverture nouveaux modules)`
+- `be4dc8b` — `fix(jarvis): conftest.py set JARVIS_SKIP_BOOT_THREADS=1 avant tout import`
+- `569500b` — `refactor(jarvis): tools/dispatch.py - centralise _TOOL_DISPATCH (etape 34a)`
+- `36e8f17` — `refactor(jarvis): facts/inject.py - 3 fonctions injection prompt (etape 34b)`
+- `06e4297` — `fix(jarvis): idempotence _log.addHandler + start_all() (bug doublons / interference VRAM)`
+- `30462b1` — `feat(jarvis): instrumentation JS-DIAG anti-bug UI reload (passive)` — v1 hooks JS error/unhandledrejection + monkey-patch location.reload
+- `da7384d` — `fix(jarvis): JS-DIAG v2 — beforeunload + visibilitychange (reload tracable)` — v2 bascule sur beforeunload event (monkey-patch reload refusé par les navigateurs modernes)
+
+### Séquence diagnostic complète bug « UI reload »
+
+1. **14:07** — Bug reproduit par Marc (lecture audio + slider EQ). Aucun crash backend. Premier rapport.
+2. **14:18-14:30** — Étape 34a/b + tests +50 commitées. Plusieurs pytests lancés pendant la session = artefact qui parasitait le log (doublons threads boot). Fix `conftest.py` commit `be4dc8b` règle ce parasitage.
+3. **14:30** — Bug reproduit À NOUVEAU par Marc. Analyse approfondie `jarvis.log` : doublons systématiques depuis 14:29 même après conftest fix. **Cause racine trouvée** : `blueprints/soc.py` fait `from jarvis import` dans fonctions thread (lignes 1149/1153/1154/1463) → ré-import jarvis comme module → ré-exécute top-level → handlers + threads boot doublés. Fix idempotence commit `06e4297` (palliatif : protège `_log.addHandler` et `start_all()` contre les doubles appels).
+4. **14:33** — Marc redémarre JARVIS. Log post-restart 14:34:53 : **zéro doublon** (fix confirmé).
+5. **14:46** — Commit `30462b1` instrumentation JS-DIAG v1 (anticipation bug futur côté frontend). Monkey-patch reload échoue silencieusement chez les navigateurs modernes (property non-configurable).
+6. **14:50** — Marc redémarre, log montre `jsdiag.setup reload monkey-patch failed: Cannot redefine property: reload` + `jsdiag.ready`. Hook reload mort.
+7. **14:51:37** — **Bug reproduit à nouveau**. Preuve dans log : 2 occurrences de `[JS-DIAG] jsdiag.ready` espacées de 93s = **VRAI reload de la page** (tous les scripts rechargés). Aucun `window.error` ni `unhandledrejection` capturé → **confirme que le bug est un `location.reload()` direct JS** (pas une exception backend, pas une exception JS non catchée).
+8. **14:53** — Commit `da7384d` fix JS-DIAG v2 (beforeunload event qui capte tout). Marc redémarre + Ctrl+F5.
+9. **14:54:44** — Log montre `[JS-DIAG] kind=jsdiag.ready msg=JS-DIAG hooks active (v2 — beforeunload + visibility)`. v2 actif.
+
+### Conclusion partielle
+
+- ✅ **Doublons log + interférence threads boot** : résolu par fix idempotence
+- ✅ **Cause du bug UI reload** : confirmée frontend pur (`location.reload()` direct, pas exception)
+- ⏳ **Identification du caller JS** : en attente de la prochaine occurrence avec JS-DIAG v2 (la stack trace de `beforeunload` pointera la fonction responsable)
+
+### Action requise au prochain bug
+
+```bash
+grep '\[JS-DIAG\]' scripts/jarvis.log | tail -20
+```
+
+Chercher la ligne `kind=beforeunload msg=UNLOAD/RELOAD` — le champ `src=<stack>` pointera vers la fonction JS appelant `location.reload` (ou autre forme de navigation sortante).
+
+---
 
 ## Session 2026-05-23 — refactor jarvis.py étapes 27-33 + 2 hot-fixes
 
