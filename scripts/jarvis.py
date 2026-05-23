@@ -1133,28 +1133,26 @@ _llm_vram.init(
 _ensure_vram = _llm_vram.ensure_vram
 _ollama_swap = _llm_vram.ollama_swap
 
-@limiter.limit("30 per minute")
-@app.route("/api/mode", methods=["GET", "POST"])
-def api_mode():
+# api_mode déménagée dans mode/routes.py (étape 37, 2026-05-23).
+# Init avec DI (getter+setter _jarvis_mode + 4 constantes modèles + ensure_vram).
+import mode as _mode  # noqa: E402
+
+def _set_jarvis_mode_global(v: str) -> None:
     global _jarvis_mode
-    if request.method == "POST":
-        data = request.json or {}
-        new_mode = data.get("mode", "").lower()
-        if new_mode not in ("soc", "general", "code", "code_reasoning"):
-            return Response(json.dumps({"error": "mode invalide (soc|general|code|code_reasoning)"}), status=400,
-                            mimetype="application/json")
-        prev_mode = _jarvis_mode
-        if new_mode != prev_mode:
-            _jarvis_mode = new_mode
-            _log.info(f"[JARVIS] Mode {prev_mode} → {new_mode}")
-            _model_next = {"soc": MODEL, "general": _GENERAL_MODEL, "code": _CODE_MODEL, "code_reasoning": _CODE_REASONING_ANALYSIS_MODEL}.get(new_mode, MODEL)
-            # _ensure_vram() est protégé par _VRAM_LOCK (Improvement #1) :
-            # sérialise check + swap + mutation. Plus de chemin direct vers
-            # _ollama_swap qui contournerait le lock.
-            _ensure_vram(_model_next)
-    _model_map = {"soc": MODEL, "general": _GENERAL_MODEL, "code": _CODE_MODEL, "code_reasoning": _CODE_REASONING_ANALYSIS_MODEL}
-    return Response(json.dumps({"mode": _jarvis_mode, "model": _model_map.get(_jarvis_mode, MODEL)}),
-                    mimetype="application/json")
+    _jarvis_mode = v
+
+_mode.routes.init(
+    limiter=limiter,
+    log=_log,
+    get_jarvis_mode=lambda: _jarvis_mode,
+    set_jarvis_mode=_set_jarvis_mode_global,
+    get_model=lambda: MODEL,
+    general_model=_GENERAL_MODEL,
+    code_model=_CODE_MODEL,
+    code_reasoning_model=_CODE_REASONING_ANALYSIS_MODEL,
+    ensure_vram=_ensure_vram,
+)
+app.register_blueprint(_mode.bp)
 
 # api_dev_exec + dev_stats déménagées dans dev/routes.py (étape 22)
 
