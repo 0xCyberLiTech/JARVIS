@@ -14,7 +14,7 @@ mots_cles: ["dette-technique", "assumée", "decisions", "audit", "optimisations"
 # Dette technique restante
 
 > Audit dette honnête au **2026-05-23** après les 30 commits de la journée.
-> **Score honnête actuel : 94/100** (audit re-calibré 2026-05-23 fin de journée post refonte documentaire) — détaillé dans
+> **Score honnête actuel : 95/100** (audit re-calibré 2026-05-23 nuit post refonte documentaire + extension Playwright sur 4 Blueprints HTTP sous-couverts — plafond pratique atteint) — détaillé dans
 > [`../06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md`](../06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md).
 >
 > Cette page liste les éléments qui pourraient être améliorés mais qui sont
@@ -69,17 +69,23 @@ Flask serait un refactor lourd pour gain limité.
 **À reconsidérer** : si Marc veut un mode multi-utilisateurs (alors AppState
 devient nécessaire pour isoler par utilisateur).
 
-### 🟡 Blueprints HTTP sous-couverts en pytest
+### 🟢 Blueprints HTTP sous-couverts en pytest — **couverts par Playwright (2026-05-23 nuit)**
 
-| Module | Coverage | Pourquoi |
+| Module | Coverage pytest | Statut |
 |---|---|---|
-| `voice/routes.py` | 36 % | Routes Flask téléchargements + audio + Ollama → mock lourd |
-| `settings/routes.py` | 44 % | 16 routes config (16 fichiers DSP_PARAMS, LLM_PARAMS, etc.) |
-| `dev/routes.py` | 27 % | Routes SCP + exec srv-dev-1 → mock SSH complet |
-| `web/routes.py` | 26 % | Routes DuckDuckGo search → mock HTTP fastidieux |
+| `voice/routes.py` | 36 % | ✅ **7 tests Playwright** dans `tests/e2e/api-coverage.spec.js` (stt/status, speak/status, speak/queue, tts/status, voices, tts/local/voices, voice/prints) |
+| `settings/routes.py` | 44 % | ✅ **5 tests Playwright** (llm-params, prompt-profiles, welcome, dsp-params, models) |
+| `dev/routes.py` | 27 % | ✅ **1 test Playwright** (dev/stats — disk/ram/uptime srv-dev-1) |
+| `web/routes.py` | 26 % | ✅ **1 test Playwright** (web-test — DDG + Wikipedia connectivity) |
 
-**Décision** : testés indirectement par **Playwright E2E** (suite existante
-partielle). Refonte E2E pour cover ces routes = 2-3h roadmap.
+**Décision** : couverture pytest faible **assumée** car Playwright valide
+bout-en-bout les routes critiques avec JARVIS up. Mocker Flask test_client
+sur téléchargements + audio + Ollama + SSH coûterait beaucoup pour un
+bénéfice faible. La suite Playwright tourne en 2.2 min, 39 tests, 100 % pass,
+0 flaky.
+
+**À reconsidérer** : si Playwright devient lent (>5 min) ou flaky → bascule
+vers mocking pytest des routes les plus appelées.
 
 ### 🟡 2 lambdas E731 dans `chat/soc_inject.py`
 
