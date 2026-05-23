@@ -7,12 +7,10 @@ import datetime
 import json
 import logging
 import logging.handlers
-import os
 import re
 import shlex
 import subprocess
 import sys
-import tempfile
 import threading
 import time
 from pathlib import Path
@@ -569,7 +567,6 @@ import voice as _voice
 from voice import tts_cleaner as _tts_cleaner
 from voice import tts_dedup as _tts_dedup
 from voice import tts_engines as _tts_eng
-from voice import voice_lab as _voice_lab
 from ollama_circuit import circuit as _ollama_circuit, OllamaUnavailable
 
 # ── Config ──────────────────────────────────────────────────
@@ -3506,126 +3503,16 @@ def api_set_model():
                         mimetype="application/json")
     return Response(json.dumps({"ok": False}), mimetype="application/json", status=400)
 
-@limiter.limit("60 per minute")
-@app.route("/api/voices", methods=["GET"])
-def api_voices():
-    return Response(json.dumps({"voices": VOICES, "current": VOICE}), mimetype="application/json")
+# Routes /api/voices + /api/voice/* déménagées dans voice/routes.py (étape 15).
 
-@limiter.limit("20 per minute")
-@app.route("/api/voices", methods=["POST"])
-def api_set_voice():
+
+def _set_voice_global(voice_id: str) -> bool:
+    """Setter VOICE injecté à la tuile voice. Valide l'id dans VOICES."""
     global VOICE
-    voice_id = (request.json or {}).get("voice", "")
     if any(v["id"] == voice_id for v in VOICES):
         VOICE = voice_id
-        return Response(json.dumps({"ok": True, "voice": VOICE}), mimetype="application/json")
-    return Response(json.dumps({"ok": False}), mimetype="application/json", status=400)
-
-
-# ── Voice Lab — logique métier dans `voice_lab.py` (Phase 3 module 2) ────────
-
-def _voice_analyse_err(msg, code=400):
-    return Response(json.dumps({"ok": False, "error": msg}, ensure_ascii=False),
-                    mimetype="application/json", status=code)
-
-
-@limiter.limit("10 per minute")
-@app.route("/api/voice/analyse", methods=["POST"])
-def api_voice_analyse():
-    if not _voice_lab.is_librosa_available():
-        return _voice_analyse_err("librosa non disponible — pip install librosa", 500)
-
-    f = request.files.get("audio")
-    if not f:
-        return _voice_analyse_err("Aucun fichier audio reçu")
-
-    fmin   = max(30.0,  min(500.0,  float(request.form.get("fmin",   50))))
-    fmax   = max(200.0, min(2000.0, float(request.form.get("fmax",  800))))
-    n_mels = max(16,    min(128,    int(request.form.get("n_mels",   32))))
-
-    suffix   = Path(f.filename).suffix.lower() if f.filename else ".wav"
-    tmp_path = None
-    try:
-        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
-            f.save(tmp.name)
-            tmp_path = tmp.name
-        y, sr = _voice_lab.load_audio(tmp_path, duration=60.0)
-    except Exception as e:
-        return _voice_analyse_err(f"Lecture audio impossible: {e}")
-    finally:
-        if tmp_path:
-            try: os.unlink(tmp_path)
-            except OSError: pass  # tmp file may already be deleted — ignore
-
-    try:
-        feat = _voice_lab.analyse_features(y, sr, fmin, fmax, n_mels)
-        return Response(json.dumps({
-            "ok": True,
-            "duration": round(feat["dur"], 2),
-            "sr":       feat["sr"],
-            "params":   {"fmin": fmin, "fmax": fmax, "n_mels": n_mels},
-            "metrics": {
-                "pitch_median":      round(feat["pitch_median"], 1),
-                "pitch_min":         round(feat["pitch_min"], 1),
-                "pitch_max":         round(feat["pitch_max"], 1),
-                "spectral_centroid": round(feat["centroid_mean"], 0),
-                "rolloff_hz":        round(feat["rolloff_mean"], 0),
-                "flatness":          round(feat["flatness_mean"], 4),
-                "zcr":               round(feat["zcr_mean"], 4),
-                "dynamic_range_db":  feat["dynamic_range_db"],
-                "voice_type":        feat["voice_type"],
-                "brightness":        feat["brightness"],
-                "breathiness":       feat["breathiness"],
-                "voicing":           feat["voicing"],
-                "mfcc_means":        feat["mfcc_means"],
-            },
-            "waveform":    feat["waveform"],
-            "pitch_curve": feat["pitch_curve"],
-            "spectrum":    feat["spectrum"],
-            "eq_preset":   feat["eq_preset"],
-        }, ensure_ascii=False), mimetype="application/json")
-    except Exception as e:
-        _log.error(f"[VOICE-PRINT] Analyse échouée: {e}", exc_info=True)
-        return _voice_analyse_err(f"Analyse échouée: {e}", 500)
-
-
-@app.route("/api/voice/prints", methods=["GET"])
-def api_voice_prints():
-    return Response(json.dumps(_voice_lab.list_prints(), ensure_ascii=False),
-                    mimetype="application/json")
-
-
-@limiter.limit("60 per minute")
-@app.route("/api/voice/print/audio/<path:name>", methods=["GET"])
-def api_voice_print_audio(name):
-    """Sert un fichier WAV depuis voice_prints/ pour écoute/chargement dans le sélecteur."""
-    wav_path = _voice_lab.get_print_path(name)
-    if wav_path is None:
-        return Response(status=404)
-    from flask import send_file as _sf
-    return _sf(wav_path, mimetype="audio/wav")
-
-
-@limiter.limit("10 per minute")
-@app.route("/api/voice/print/delete", methods=["POST"])
-def api_voice_print_delete():
-    data = request.get_json(silent=True) or {}
-    name = data.get("name", "").strip()
-    if not name:
-        return Response(json.dumps({"ok": False, "error": "Nom requis"}, ensure_ascii=False),
-                        mimetype="application/json", status=400)
-    ok, result = _voice_lab.delete_print(name)
-    if not ok:
-        return Response(json.dumps({"ok": False, "error": result}, ensure_ascii=False),
-                        mimetype="application/json", status=404)
-    return Response(json.dumps({"ok": True, "name": result}, ensure_ascii=False),
-                    mimetype="application/json")
-
-
-@app.route("/api/voice/samples", methods=["GET"])
-def api_voice_samples():
-    return Response(json.dumps(_voice_lab.list_samples(), ensure_ascii=False),
-                    mimetype="application/json")
+        return True
+    return False
 
 
 
@@ -3836,6 +3723,8 @@ _voice.init(
     tts_log_path       = _TTS_LOG_PATH,
     get_dsp_params     = lambda: DSP_PARAMS,
     get_voice          = lambda: VOICE,
+    get_voices         = lambda: VOICES,
+    set_voice          = _set_voice_global,
     get_internet_up    = lambda: _tts_internet_was_up,
     clean_for_tts      = _clean_for_tts,
     tts_log_preview    = _TTS_LOG_PREVIEW,

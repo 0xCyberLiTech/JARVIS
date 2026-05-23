@@ -22,12 +22,13 @@ import os
 import queue as _queue_mod
 import tempfile
 import time
+from pathlib import Path
 
-from flask import Response, request
+from flask import Response, request, send_file
 
-from . import audio_dsp, bp, stt, tts_dedup, tts_engines
+from . import audio_dsp, bp, stt, tts_dedup, tts_engines, voice_lab
 
-# Dépendances injectées par __init__.init() — pour les routes TTS/speak.
+# Dépendances injectées par __init__.init() — pour les routes TTS/speak/voice_lab.
 _log               = None
 _tts_logger        = None
 _speak_fn          = None              # speak() de jarvis.py (deferred TTS)
@@ -37,6 +38,8 @@ _chat_stream_active = None             # threading.Event
 _tts_log_path      = None              # Path
 _get_dsp_params    = None              # callable → dict mutable
 _get_voice         = None              # callable → str (voix edge-tts active)
+_get_voices        = None              # callable → list (catalogue edge-tts)
+_set_voice         = None              # callable (voice_id: str) → bool
 _get_internet_up   = None              # callable → bool (edge-tts joignable)
 _clean_for_tts     = None              # callable
 _tts_log_preview   = 0
@@ -53,6 +56,8 @@ def init_routes(*,
                 tts_log_path=None,
                 get_dsp_params=None,
                 get_voice=None,
+                get_voices=None,
+                set_voice=None,
                 get_internet_up=None,
                 clean_for_tts=None,
                 tts_log_preview=200,
@@ -60,7 +65,8 @@ def init_routes(*,
     """Injecte les dépendances (log obligatoire, le reste optionnel pour phase B1)."""
     global _log, _tts_logger, _speak_fn, _speak_queue, _speak_deferred
     global _chat_stream_active, _tts_log_path, _get_dsp_params, _get_voice
-    global _get_internet_up, _clean_for_tts, _tts_log_preview, _tts_dedup_s
+    global _get_voices, _set_voice, _get_internet_up, _clean_for_tts
+    global _tts_log_preview, _tts_dedup_s
     _log               = log
     _tts_logger        = tts_logger
     _speak_fn          = speak_fn
@@ -70,6 +76,8 @@ def init_routes(*,
     _tts_log_path      = tts_log_path
     _get_dsp_params    = get_dsp_params
     _get_voice         = get_voice
+    _get_voices        = get_voices
+    _set_voice         = set_voice
     _get_internet_up   = get_internet_up
     _clean_for_tts     = clean_for_tts
     _tts_log_preview   = tts_log_preview
@@ -346,6 +354,126 @@ def api_tts_local_voices():
         "current_voice":  dsp.get("tts_local_voice", "ff_siwis"),
     }
     return Response(json.dumps(result, ensure_ascii=False), mimetype="application/json")
+
+
+@bp.route("/api/voices", methods=["GET"])
+def api_voices():
+    return Response(json.dumps({"voices": _get_voices(), "current": _get_voice()}),
+                    mimetype="application/json")
+
+
+@bp.route("/api/voices", methods=["POST"])
+def api_set_voice():
+    voice_id = (request.json or {}).get("voice", "")
+    if _set_voice(voice_id):
+        return Response(json.dumps({"ok": True, "voice": _get_voice()}), mimetype="application/json")
+    return Response(json.dumps({"ok": False}), mimetype="application/json", status=400)
+
+
+# ── Voice Lab — analyse acoustique + voice prints (CRUD) ────────────────
+
+
+def _voice_analyse_err(msg, code=400):
+    return Response(json.dumps({"ok": False, "error": msg}, ensure_ascii=False),
+                    mimetype="application/json", status=code)
+
+
+@bp.route("/api/voice/analyse", methods=["POST"])
+def api_voice_analyse():
+    if not voice_lab.is_librosa_available():
+        return _voice_analyse_err("librosa non disponible — pip install librosa", 500)
+
+    f = request.files.get("audio")
+    if not f:
+        return _voice_analyse_err("Aucun fichier audio reçu")
+
+    fmin   = max(30.0,  min(500.0,  float(request.form.get("fmin",   50))))
+    fmax   = max(200.0, min(2000.0, float(request.form.get("fmax",  800))))
+    n_mels = max(16,    min(128,    int(request.form.get("n_mels",   32))))
+
+    suffix   = Path(f.filename).suffix.lower() if f.filename else ".wav"
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            f.save(tmp.name)
+            tmp_path = tmp.name
+        y, sr = voice_lab.load_audio(tmp_path, duration=60.0)
+    except Exception as e:
+        return _voice_analyse_err(f"Lecture audio impossible: {e}")
+    finally:
+        if tmp_path:
+            try: os.unlink(tmp_path)
+            except OSError: pass
+
+    try:
+        feat = voice_lab.analyse_features(y, sr, fmin, fmax, n_mels)
+        return Response(json.dumps({
+            "ok": True,
+            "duration": round(feat["dur"], 2),
+            "sr":       feat["sr"],
+            "params":   {"fmin": fmin, "fmax": fmax, "n_mels": n_mels},
+            "metrics": {
+                "pitch_median":      round(feat["pitch_median"], 1),
+                "pitch_min":         round(feat["pitch_min"], 1),
+                "pitch_max":         round(feat["pitch_max"], 1),
+                "spectral_centroid": round(feat["centroid_mean"], 0),
+                "rolloff_hz":        round(feat["rolloff_mean"], 0),
+                "flatness":          round(feat["flatness_mean"], 4),
+                "zcr":               round(feat["zcr_mean"], 4),
+                "dynamic_range_db":  feat["dynamic_range_db"],
+                "voice_type":        feat["voice_type"],
+                "brightness":        feat["brightness"],
+                "breathiness":       feat["breathiness"],
+                "voicing":           feat["voicing"],
+                "mfcc_means":        feat["mfcc_means"],
+            },
+            "waveform":    feat["waveform"],
+            "pitch_curve": feat["pitch_curve"],
+            "spectrum":    feat["spectrum"],
+            "eq_preset":   feat["eq_preset"],
+        }, ensure_ascii=False), mimetype="application/json")
+    except Exception as e:
+        _log.error(f"[VOICE-PRINT] Analyse échouée: {e}", exc_info=True)
+        return _voice_analyse_err(f"Analyse échouée: {e}", 500)
+
+
+@bp.route("/api/voice/prints", methods=["GET"])
+def api_voice_prints():
+    return Response(json.dumps(voice_lab.list_prints(), ensure_ascii=False),
+                    mimetype="application/json")
+
+
+@bp.route("/api/voice/print/audio/<path:name>", methods=["GET"])
+def api_voice_print_audio(name):
+    """Sert un fichier WAV depuis voice_prints/ pour écoute/chargement dans le sélecteur."""
+    wav_path = voice_lab.get_print_path(name)
+    if wav_path is None:
+        return Response(status=404)
+    return send_file(wav_path, mimetype="audio/wav")
+
+
+@bp.route("/api/voice/print/delete", methods=["POST"])
+def api_voice_print_delete():
+    data = request.get_json(silent=True) or {}
+    name = data.get("name", "").strip()
+    if not name:
+        return Response(json.dumps({"ok": False, "error": "Nom requis"}, ensure_ascii=False),
+                        mimetype="application/json", status=400)
+    ok, result = voice_lab.delete_print(name)
+    if not ok:
+        return Response(json.dumps({"ok": False, "error": result}, ensure_ascii=False),
+                        mimetype="application/json", status=404)
+    return Response(json.dumps({"ok": True, "name": result}, ensure_ascii=False),
+                    mimetype="application/json")
+
+
+@bp.route("/api/voice/samples", methods=["GET"])
+def api_voice_samples():
+    return Response(json.dumps(voice_lab.list_samples(), ensure_ascii=False),
+                    mimetype="application/json")
+
+
+# ── /api/tts/local/download conservée en fin de fichier (route héritée) ─
 
 
 @bp.route("/api/tts/local/download", methods=["POST"])
