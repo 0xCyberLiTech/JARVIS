@@ -1014,97 +1014,28 @@ _TOOL_DISPATCH = _tools_dispatch.build(
 execute_tool         = _chat_orch.execute_tool
 call_llm_with_tools  = _chat_orch.call_llm_with_tools
 
-def _think_filter_step(tbuf: str, in_think: bool):
-    """Un pas du filtre <think>…</think> sur le buffer courant.
-    Retourne (chars_à_émettre, nouveau_tbuf, nouveau_in_think, stop).
-    Gère les tags à cheval sur plusieurs tokens (buffer partiel en fin).
-    Gère aussi les </think> orphelins (émis sans <think> précédent par phi4-reasoning).
-    """
-    if not in_think:
-        idx = tbuf.find('<think>')
-        if idx == -1:
-            ci = tbuf.find('</think>')
-            if ci != -1:
-                return tbuf[:ci] + tbuf[ci + 8:], "", False, True
-            for plen in range(min(7, len(tbuf)), 0, -1):
-                if tbuf[-plen:] == '<think>'[:plen]:
-                    return tbuf[:-plen], tbuf[-plen:], False, True
-            return tbuf, "", False, True
-        return tbuf[:idx], tbuf[idx + 7:], True, False
-    idx = tbuf.find('</think>')
-    if idx == -1:
-        return "", "", True, True   # tout le buffer est du thinking — jeter
-    return "", tbuf[idx + 8:], False, False
+# _think_filter_step + stream_llm déménagés dans llm/stream.py (étape 35, 2026-05-23).
+# DI : circuit Ollama + getter MODEL + getter LLM_PARAMS + URL + timeout +
+# setter _last_toks_per_sec (mutable global → setter lambda lazy).
+from llm import stream as _llm_stream  # noqa: E402
 
+def _set_last_toks_per_sec(v) -> None:
+    global _last_toks_per_sec
+    _last_toks_per_sec = v
 
-def stream_llm(messages, model_override=None, options_override=None):
-    """Generator — stream de tokens (Ollama local).
-    options_override : dict partiel pour surcharger LLM_PARAMS (ex: {"num_predict": 512}).
-    Filtre les blocs <think>...</think> des modèles de raisonnement (phi4-reasoning, deepseek-r1).
-    """
-    messages_with_prefill = messages + [{"role": "assistant", "content": ""}]
-    opts = {
-        "temperature":    LLM_PARAMS["temperature"],
-        "num_predict":    LLM_PARAMS["num_predict"],
-        "top_p":          LLM_PARAMS["top_p"],
-        "top_k":          LLM_PARAMS["top_k"],
-        "repeat_penalty": LLM_PARAMS["repeat_penalty"],
-        "num_ctx":        LLM_PARAMS.get("num_ctx", 2048),
-    }
-    if options_override:
-        opts.update(options_override)
-    active_model_name = model_override or MODEL
-    payload = {
-        "model":      active_model_name,
-        "messages":   messages_with_prefill,
-        "stream":     True,
-        "keep_alive": "30m",
-        "options":    opts,
-        "think":      LLM_PARAMS.get("think", False),
-    }
-    _in_think = False
-    _tbuf     = ""
-    # Circuit breaker : si Ollama est down (3 erreurs récentes), refus immédiat (1ms au lieu de 30s timeout)
-    try:
-        resp = _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/chat", json=payload, stream=True, timeout=_OLLAMA_STREAM_TIMEOUT_S)
-    except OllamaUnavailable as e:
-        yield f"[JARVIS] {e}", True
-        return
-    with resp:
-        for line in resp.iter_lines():
-            if not line:
-                continue
-            try:
-                chunk = json.loads(line)
-            except (json.JSONDecodeError, ValueError):
-                continue  # ligne Ollama malformée — on saute sans casser le flux
-            msg   = chunk.get("message", {})
-            done  = chunk.get("done", False)
-            if done:
-                ec = chunk.get("eval_count", 0)
-                ed = chunk.get("eval_duration", 0)
-                if ec and ed:
-                    global _last_toks_per_sec
-                    _last_toks_per_sec = round(ec / (ed / 1e9), 1)
-            # Nouveau API Ollama : champ .thinking séparé → ignorer
-            if msg.get("thinking"):
-                if done:
-                    yield "", True
-                continue
-            raw = msg.get("content", "")
-            if not raw:
-                if done:
-                    yield "", True
-                continue
-            _tbuf += raw
-            out = ""
-            while _tbuf:
-                chunk_out, _tbuf, _in_think, stop = _think_filter_step(_tbuf, _in_think)
-                out += chunk_out
-                if stop:
-                    break
-            if out or done:
-                yield out, done
+_llm_stream.init(
+    log=_log,
+    ollama_circuit=_ollama_circuit,
+    ollama_unavailable_exc=OllamaUnavailable,
+    req=req,
+    ollama_url=OLLAMA_URL,
+    ollama_stream_timeout_s=_OLLAMA_STREAM_TIMEOUT_S,
+    get_model=lambda: MODEL,
+    get_llm_params=lambda: LLM_PARAMS,
+    set_last_toks_per_sec=_set_last_toks_per_sec,
+)
+_think_filter_step = _llm_stream.think_filter_step
+stream_llm         = _llm_stream.stream_llm
 
 # ── Routes ───────────────────────────────────────────────────
 init_soc(speak, limiter)
@@ -1182,53 +1113,21 @@ def api_diag_jslog():
 # Routes /api/llm-params + /api/llm-params/reset-prompt déménagées dans
 # settings/routes.py (étape 17, 2026-05-23).
 
-def _ensure_vram(next_model: str):
-    """Décharge le modèle actuellement en VRAM si différent du prochain.
-    Évite les collisions VRAM lors du routing automatique inter-modes.
-
-    Protégé par `_VRAM_LOCK` (Improvement #1, 2026-05-23) : sérialise le
-    check + swap + mutation pour éliminer la race condition multi-requête
-    (ex: /api/chat user A + /api/sysdiag _diag_ollama en parallèle)."""
-    global _vram_model
-    effective = next_model or MODEL
-    with _VRAM_LOCK:
-        if _vram_model and _vram_model != effective:
-            _log.info(f"[VRAM] Routing switch : {_vram_model} → {effective} — unload forcé")
-            _ollama_swap(_vram_model, effective)
-        _vram_model = effective
-
-
-def _ollama_swap(unload_model: str, load_model: str):
-    """Décharge unload_model (keep_alive=0) de façon SYNCHRONE, puis preload load_model en background.
-    Synchrone pour garantir VRAM libre avant le chargement du modèle suivant (évite le split VRAM/RAM)."""
-    import threading as _th
-    import urllib.request as _ur
-    # 1. Unload synchrone — on attend la confirmation avant de continuer
-    try:
-        payload = json.dumps({
-            "model": unload_model, "prompt": "", "stream": False, "keep_alive": 0
-        }).encode()
-        req_u = _ur.Request("http://127.0.0.1:11434/api/generate",
-                            data=payload, method="POST")
-        req_u.add_header("Content-Type", "application/json")
-        with _ur.urlopen(req_u, timeout=8): pass
-        _log.info(f"[VRAM] {unload_model} déchargé (sync)")
-    except Exception as e:
-        _log.warning(f"[VRAM] unload {unload_model}: {e}")
-    # 2. Preload du nouveau modèle en background — VRAM est maintenant libre
-    def _preload():
-        try:
-            payload = json.dumps({
-                "model": load_model, "prompt": "", "stream": False, "keep_alive": "30m"
-            }).encode()
-            req_p = _ur.Request("http://127.0.0.1:11434/api/generate",
-                                data=payload, method="POST")
-            req_p.add_header("Content-Type", "application/json")
-            with _ur.urlopen(req_p, timeout=180): pass
-            _log.info(f"[VRAM] {load_model} préchargé (plein VRAM)")
-        except Exception as e:
-            _log.warning(f"[VRAM] preload {load_model}: {e}")
-    _th.Thread(target=_preload, daemon=True).start()
+# _ensure_vram + _ollama_swap déménagés dans llm/vram.py (étape 35, 2026-05-23).
+# init() différé : `_set_vram_model_global` est défini plus bas (ligne ~1697).
+# On passe le setter via lambda pour résolution lazy à l'appel (sinon NameError
+# au moment d'évaluer l'argument). Aliases backward-compat ici pour api_mode + tests.
+from llm import vram as _llm_vram  # noqa: E402
+_llm_vram.init(
+    log=_log,
+    get_model=lambda: MODEL,
+    get_vram_model=lambda: _vram_model,
+    set_vram_model=lambda v: _set_vram_model_global(v),  # lazy : défini plus bas
+    vram_lock=_VRAM_LOCK,
+    ollama_url=OLLAMA_URL,
+)
+_ensure_vram = _llm_vram.ensure_vram
+_ollama_swap = _llm_vram.ollama_swap
 
 @limiter.limit("30 per minute")
 @app.route("/api/mode", methods=["GET", "POST"])
