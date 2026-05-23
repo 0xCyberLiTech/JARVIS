@@ -1130,6 +1130,29 @@ import facts as _facts  # noqa: E402
 _facts.routes.init(limiter=limiter, facts_file=FACTS_FILE)
 app.register_blueprint(_facts.bp)
 
+
+# ── Diagnostic JS — instrumentation passive (2026-05-23) ──────────────────────
+# Endpoint qui ingère les events JS critiques (window.onerror,
+# unhandledrejection, location.reload pre-call) postés par boot_init.js.
+# Tout est loggé dans scripts/jarvis.log sous le tag [JS-DIAG] avec source.
+# Objectif : capturer la prochaine occurrence du bug « UI qui se relance »
+# (Marc 2026-05-23) — révèle la cause exacte si reload JS ou exception non
+# gérée frontend, sinon on saura que ça vient d'ailleurs.
+@limiter.limit("60 per minute")
+@app.route("/api/_diag/jslog", methods=["POST"])
+def api_diag_jslog():
+    try:
+        data = request.json or {}
+        kind = str(data.get("kind", "?"))[:32]
+        msg = str(data.get("msg", ""))[:1000].replace("\n", " ⏎ ")
+        src = str(data.get("src", ""))[:300]
+        url = str(data.get("url", ""))[:300]
+        _log.warning(f"[JS-DIAG] kind={kind} | url={url} | src={src} | msg={msg}")
+    except Exception as e:
+        _log.warning(f"[JS-DIAG] parse failed: {e}")
+    return Response('{"ok":true}', mimetype="application/json")
+
+
 # Routes /api/memory* + /api/memory-summary* + /api/memory/summarize-session
 # déménagées dans la tuile scripts/memory/routes.py (étape 4).
 

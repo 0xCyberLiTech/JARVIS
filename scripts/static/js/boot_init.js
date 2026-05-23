@@ -14,6 +14,66 @@
 // Fichier .js classique (scope global). Chargé EN DERNIER dans
 // jarvis.html : c'est le point d'entrée (registration DOMContentLoaded).
 
+// ══════════════════════════════════════════════════════════════
+// JS-DIAG — Instrumentation passive (2026-05-23, anti-bug UI reload)
+// ══════════════════════════════════════════════════════════════
+// Posté très tôt pour capturer 3 cibles qui pourraient expliquer un reload
+// UI ponctuel non reproduit : exceptions JS non catchées, promesses
+// rejetées non gérées, et appels à location.reload() (qui est la SEULE
+// source de vrai reload dans le code — _pollBootId ligne 812).
+// Tout est posté à POST /api/_diag/jslog → logué dans scripts/jarvis.log
+// sous le tag [JS-DIAG]. Léger : send-and-forget, pas de blocage.
+(function _jsDiagSetup() {
+  function _diagPost(kind, msg, src) {
+    try {
+      navigator.sendBeacon
+        ? navigator.sendBeacon('/api/_diag/jslog', new Blob(
+            [JSON.stringify({kind, msg, src, url: location.href})],
+            {type: 'application/json'}))
+        : fetch('/api/_diag/jslog', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({kind, msg, src, url: location.href}),
+            keepalive: true,
+          }).catch(() => {});
+    } catch (_) { /* never throw from diag */ }
+  }
+
+  // 1. Exceptions JS non catchées
+  window.addEventListener('error', function(e) {
+    _diagPost('window.error',
+      (e.message || '') + ' @ ' + (e.filename || '?') + ':' + (e.lineno || 0),
+      (e.error && e.error.stack ? String(e.error.stack).slice(0, 500) : ''));
+  });
+
+  // 2. Promesses rejetées non gérées
+  window.addEventListener('unhandledrejection', function(e) {
+    var reason = e.reason;
+    _diagPost('unhandledrejection',
+      reason && reason.message ? reason.message : String(reason).slice(0, 300),
+      reason && reason.stack ? String(reason.stack).slice(0, 500) : '');
+  });
+
+  // 3. Override location.reload pour tracer qui l'appelle (avec stack)
+  // location étant non-writable, on monkey-patch via Object.defineProperty
+  // sur location.reload (writable: true → on peut le remplacer).
+  try {
+    var _origReload = location.reload.bind(location);
+    Object.defineProperty(location, 'reload', {
+      value: function() {
+        var st = new Error('location.reload() called').stack || '';
+        _diagPost('location.reload', 'TRIGGERED', st.slice(0, 800));
+        // Send-and-forget : on laisse 50ms à sendBeacon avant de reload pour vrai
+        setTimeout(function() { _origReload.apply(location, arguments); }, 50);
+      },
+      writable: true, configurable: true,
+    });
+  } catch (e) {
+    _diagPost('jsdiag.setup', 'reload monkey-patch failed: ' + e.message, '');
+  }
+
+  _diagPost('jsdiag.ready', 'JS-DIAG hooks active', '');
+})();
+
 // ── Message vocal d'introduction ────────────────────────────────
 const WELCOME_SPEECH = "Systèmes en ligne. Intelligence artificielle activée. Accélération CUDA Blackwell confirmée. Bonjour, Marc. JARVIS est prêt.";
 
