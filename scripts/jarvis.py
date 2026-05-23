@@ -383,6 +383,7 @@ _REASONING_NP_MIN   = 768    # plancher num_predict pour modèles reasoning en m
 _TTS_PHRASE_MIN     = 4      # longueur min phrase pour envoi TTS
 
 # ── Constantes thread GPU temperature ────────────────────────────────────────
+_GPU_TEMP_WARN      = 82     # °C — seuil d'alerte logiciel (avant throttle HW à 90°C)
 _GPU_MON_START_S    = 20     # attente initiale avant premier check (Flask doit être prêt)
 _GPU_MON_POLL_S     = 30     # intervalle de vérification température GPU
 
@@ -1839,198 +1840,19 @@ def _set_voice_global(voice_id: str) -> bool:
 
 
 
-# Préchargement Kokoro en background si engine actif = kokoro
-def _kokoro_preload():
-    if DSP_PARAMS.get("tts_engine") != "kokoro":
-        return
-    try:
-        # Phrase représentative → chauffe CUDA kernels + pipeline complet
-        _warm_wav = _tts_eng.kokoro_synth("JARVIS opérationnel.", "ff_siwis")
-        # Chauffe aussi le pipeline DSP (EQ, Haas, enrich)
-        apply_dsp_to_mp3(_warm_wav)
-        _log.info("[TTS-Kokoro] Préchargement ff_siwis + DSP terminé.")
-    except Exception as _e:
-        _log.warning(f"[TTS-Kokoro] Préchargement échoué: {_e}")
-_kokoro_preload_thread = threading.Thread(target=_kokoro_preload, daemon=True, name="kokoro-preload")
-_kokoro_preload_thread.start()
+# 9 threads boot (kokoro/tts-conn/gpu-temp/rag-embed/boot-vram/soc-prewarm/
+# kokoro-prewarm/rag-auto-refresh/vram-sync) + rag-live-prewarm démenagés
+# dans bootstrap/threads.py (étape 29, 2026-05-23). Init + start_all() en
+# fin de fichier (nécessite speak, _vram_lock, get/set _vram_model définis).
+from bootstrap import threads as _boot_th  # noqa: E402
 
+# Aliases backward-compat — _tts_internet_was_up est lu par voice/routes (get_internet_up)
+# Compatibilité maintenue via getter lambda passé à _voice.init() plus bas.
+_tts_stop_evt         = _boot_th._tts_stop_evt
+_gpu_stop_evt         = _boot_th._gpu_stop_evt
+_rag_refresh_stop_evt = _boot_th._rag_refresh_stop_evt
 
-
-# ---------------------------------------------------------------------------
-# Thread de surveillance connectivité → basculement TTS automatique
-# ---------------------------------------------------------------------------
-_tts_internet_was_up = None  # None = inconnu au démarrage → premier cycle force le switch
-_tts_stop_evt = threading.Event()  # set() pour arrêter proprement le thread
-
-def _tts_connectivity_loop():
-    """Vérifie toutes les 10 s si speech.platform.bing.com est joignable.
-    Logique simple :
-    - Internet OK  → edge-tts Antoine (si tts_default_engine == "edge")
-    - Internet KO  → Kokoro → Piper → SAPI5 (premier moteur local disponible)
-    Premier cycle forcé au démarrage (_tts_internet_was_up = None).
-    Arrêt propre : _tts_stop_evt.set()
-    """
-    global _tts_internet_was_up
-    import socket as _socket
-    while not _tts_stop_evt.is_set():
-        try:
-            s = _socket.create_connection(("speech.platform.bing.com", 443), timeout=_OLLAMA_DIAG_TIMEOUT_S)
-            s.close()
-            up = True
-        except OSError:
-            up = False
-
-        if up != _tts_internet_was_up:
-            default_eng = DSP_PARAMS.get("tts_default_engine", "edge")
-            cur_eng     = DSP_PARAMS.get("tts_engine", "edge")
-            if up:
-                # Internet revient : revenir sur edge uniquement si c'est le défaut configuré
-                if default_eng == "edge" and cur_eng != "edge":
-                    DSP_PARAMS["tts_engine"] = "edge"
-                    _log.info("[TTS-AUTO] Internet OK → edge-tts Antoine (défaut EDGE)")
-                else:
-                    _log.info(f"[TTS-AUTO] Internet OK — défaut={default_eng}, engine={cur_eng}, pas de switch")
-            else:
-                # Internet KO : Kokoro en priorité (local, haute qualité)
-                if _tts_eng.is_kokoro_available() is not False:
-                    DSP_PARAMS["tts_engine"] = "kokoro"
-                    _log.info("[TTS-AUTO] Internet KO → Kokoro (fallback local)")
-                elif _tts_eng.is_piper_available():
-                    DSP_PARAMS["tts_engine"] = "piper"
-                    _log.info("[TTS-AUTO] Internet KO → Piper local")
-                elif _tts_eng.is_sapi_available():
-                    DSP_PARAMS["tts_engine"] = "sapi"
-                    _log.info("[TTS-AUTO] Internet KO → SAPI5")
-                else:
-                    _log.info("[TTS-AUTO] Internet KO → aucun moteur local disponible")
-            _tts_internet_was_up = up
-
-        _tts_stop_evt.wait(10)  # interruptible — sort immédiatement si stop_evt.set()
-
-_tts_conn_thread = threading.Thread(target=_tts_connectivity_loop, daemon=True)
-_tts_conn_thread.start()
-
-# ---------------------------------------------------------------------------
-# Thread de surveillance température GPU
-# ---------------------------------------------------------------------------
-_GPU_TEMP_WARN    = 82   # °C — seuil d'alerte logiciel (avant throttle hardware à 90°C)
-_gpu_stop_evt     = threading.Event()  # set() pour arrêt propre
-
-def _gpu_temp_monitor_loop():
-    """Thread background — surveille la température GPU toutes les 30s.
-    Alerte vocale si temp >= _GPU_TEMP_WARN, cooldown 15 min."""
-    from blueprints.soc import _soc_cooldown_ok
-    time.sleep(_GPU_MON_START_S)  # délai one-shot démarrage, pas de loop ici
-    while not _gpu_stop_evt.wait(_GPU_MON_POLL_S):
-        try:
-            if _nvml_handle is None:
-                continue
-            temp = pynvml.nvmlDeviceGetTemperature(_nvml_handle, pynvml.NVML_TEMPERATURE_GPU)
-            if temp >= _GPU_TEMP_WARN and _soc_cooldown_ok("gpu_temp_warn", minutes=15):
-                speak(f"Alerte thermique. Température GPU à {temp} degrés. Seuil d'alerte à {_GPU_TEMP_WARN} degrés. Vérifier la ventilation.")
-        except Exception as _ge:
-            _log.error(f"[GPU-TEMP-MON] {_ge}")
-
-_gpu_temp_thread = threading.Thread(target=_gpu_temp_monitor_loop, daemon=True)
-_gpu_temp_thread.start()
-
-# ── RAG LIVE — Pré-chauffe du cache logs SOC au démarrage ──────────────────
-threading.Thread(target=_rag_live_prewarm, daemon=True, name="rag-live-prewarm").start()
-
-# ── RAG EMBED — Préchargement mxbai-embed-large en VRAM au démarrage ────────
-def _rag_embed_prewarm():
-    # RAG chargé tôt — avant le LLM (logique : la recherche RAG précède la
-    # génération). 5s suffisent ; si Ollama pas encore prêt, le circuit breaker
-    # gère et l'embed se chargera à la demande au 1er usage RAG. (2026-05-20)
-    time.sleep(5)
-    try:
-        _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/embeddings",
-                 json={"model": RAG_EMBED_MODEL, "prompt": "warm", "keep_alive": "10m"},
-                 timeout=30)
-        _log.info(f"[RAG] {RAG_EMBED_MODEL} préchauffé (keep_alive=10m — dé-épinglé 2026-05-20, anti-éviction VRAM)")
-    except Exception as e:
-        _log.warning(f"[RAG] Préchargement embed échoué : {e}")
-threading.Thread(target=_rag_embed_prewarm, daemon=True, name="rag-embed-prewarm").start()
-
-# ── BOOT VRAM CLEANUP — décharge les modèles résiduels du mode précédent ─────
-def _boot_vram_cleanup():
-    """Au boot, éjecte tout modèle Ollama chargé qui n'est pas phi4 ni le RAG embed."""
-    time.sleep(25)  # après _rag_embed_prewarm (20s + marge)
-    try:
-        r = req.get(f"{OLLAMA_URL}/api/ps", timeout=8)
-        if not r.ok:
-            return
-        loaded = [m.get("name", "") for m in (r.json().get("models") or [])]
-        embed_base = RAG_EMBED_MODEL.split(":")[0]
-        for m in loaded:
-            if m == MODEL or m.split(":")[0] == embed_base:
-                continue  # SOC model ou embed — garder
-            import urllib.request as _ur3
-            payload = json.dumps({"model": m, "prompt": "", "stream": False, "keep_alive": 0}).encode()
-            _req = _ur3.Request(f"{OLLAMA_URL}/api/generate", data=payload, method="POST")
-            _req.add_header("Content-Type", "application/json")
-            with _ur3.urlopen(_req, timeout=10): pass
-            _log.info(f"[BOOT-VRAM] {m} déchargé (résidu mode précédent)")
-    except Exception as e:
-        _log.warning(f"[BOOT-VRAM] cleanup: {e}")
-threading.Thread(target=_boot_vram_cleanup, daemon=True, name="boot-vram-cleanup").start()
-
-# ── BOOT SOC PRELOAD — préchauffe phi4:14b après le cleanup ──────────────────
-def _soc_model_prewarm():
-    """Précharge le modèle SOC (phi4:14b) en VRAM 30s après le boot, une fois le cleanup terminé."""
-    time.sleep(30)
-    _prewarm_t0 = time.monotonic()
-    try:
-        # num_ctx explicite = _SOC_NUM_CTX : phi4 se charge directement au contexte
-        # SOC (8192) → pas de reload au 1er chat SOC (sinon prewarm charge en 4096
-        # défaut Ollama puis reload en 8192 à la 1re requête SOC).
-        _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/generate",
-                 json={"model": MODEL, "prompt": "", "stream": False, "keep_alive": "30m",
-                       "options": {"num_ctx": _SOC_NUM_CTX}},
-                 timeout=180)
-        _log.info(f"[TTS-PERF] [BOOT-VRAM] {MODEL} préchargé (SOC default, ctx={_SOC_NUM_CTX}) en {time.monotonic() - _prewarm_t0:.2f}s")
-    except Exception as e:
-        _log.warning(f"[BOOT-VRAM] preload SOC: {e}")
-threading.Thread(target=_soc_model_prewarm, daemon=True, name="soc-model-prewarm").start()
-
-# ── BOOT TTS KOKORO PREWARM — élimine cold start 42.8s mesuré (profile_tts) ─
-def _kokoro_prewarm():
-    """Précharge Kokoro CUDA en VRAM 60s après le boot.
-    Profiling 2026-05-15 : 1er appel Kokoro = 42.8s (chargement modèle CUDA),
-    appels suivants = 200ms TTFB. Préchauffage = TTS instantané dès la 1re alerte."""
-    time.sleep(60)  # après _soc_model_prewarm (30s + marge GPU)
-    _prewarm_t0 = time.monotonic()
-    try:
-        _tts_eng._get_kokoro("f")
-        if _tts_eng.is_kokoro_available():
-            _log.info(f"[TTS-PERF] [BOOT-TTS] Kokoro préchargé en VRAM en {time.monotonic() - _prewarm_t0:.2f}s (cold start évité)")
-        else:
-            _log.info("[TTS-PERF] [BOOT-TTS] Kokoro indisponible — pas de préchauffage")
-    except Exception as e:
-        _log.warning(f"[BOOT-TTS] Kokoro prewarm échoué : {e}")
-threading.Thread(target=_kokoro_prewarm, daemon=True, name="kokoro-prewarm").start()
-
-# ── RAG AUTO-REFRESH — Re-indexe les MEMORY.md toutes les 6h ────────────────
-_rag_refresh_stop_evt = threading.Event()  # set() pour arrêt propre
-
-def _rag_auto_refresh_loop():
-    _PATHS = [
-        str(_WORKSPACE_ROOT / "JARVIS"  / "MEMORY.md"),
-        str(_WORKSPACE_ROOT / "SOC"     / "MEMORY.md"),
-        str(_WORKSPACE_ROOT / "PROXMOX" / "MEMORY.md"),
-        str(_WORKSPACE_ROOT / "NGINX"   / "MEMORY.md"),
-    ]
-    while not _rag_refresh_stop_evt.wait(_RAG_REFRESH_H * 3600):
-        for path_str in _PATHS:
-            p = Path(path_str)
-            if p.exists():
-                try:
-                    _rag_index_text(p.read_text(encoding="utf-8", errors="ignore"), p.name)
-                except Exception as e:
-                    _log.warning(f"[RAG] Auto-refresh {p.name}: {e}")
-        _log.info("[RAG] Auto-refresh 6h terminé.")
-
-threading.Thread(target=_rag_auto_refresh_loop, daemon=True, name="rag-auto-refresh").start()
+# _rag_auto_refresh_loop : déménagée dans bootstrap/threads.py (étape 29).
 
 # ── Init chat/file_correct (étape 21) — placé tard pour _sse_tok ──
 _file_correct_mod.init(log=_log, sse_tok=_sse_tok)
@@ -2184,7 +2006,7 @@ _voice.init(
     get_voice          = lambda: VOICE,
     get_voices         = lambda: VOICES,
     set_voice          = _set_voice_global,
-    get_internet_up    = lambda: _tts_internet_was_up,
+    get_internet_up    = lambda: _boot_th._tts_internet_was_up,
     clean_for_tts      = _clean_for_tts,
     tts_log_preview    = _TTS_LOG_PREVIEW,
     tts_dedup_s        = _TTS_DEDUP_S,
@@ -2192,43 +2014,45 @@ _voice.init(
 app.register_blueprint(_voice.bp)
 
 
-def _vram_sync_loop():
-    """Sync _vram_model avec l'état réel d'Ollama toutes les 60s.
+# _vram_sync_loop : déménagée dans bootstrap/threads.py (étape 29).
 
-    Improvement #2 (2026-05-23) : élimine la divergence entre la vue JARVIS et
-    l'état réel quand Ollama décharge un modèle sans qu'on le sache (TTL
-    keep_alive expiré, pression mémoire, etc.). Sans ça, le prochain appel sur
-    ce modèle déclenche un cold start « surprise » (~3 s), invisible au log.
-
-    Sync sur /api/ps Ollama. Ignore l'embed RAG (autre cycle de vie : TTL 10m
-    géré séparément). Mutation de _vram_model sous _VRAM_LOCK (cohérent avec
-    _ensure_vram).
-    """
+# Setter pour _vram_model — injecté à bootstrap/threads (vram_sync_loop)
+def _set_vram_model_global(v) -> None:
     global _vram_model
-    while True:
-        time.sleep(60)
-        try:
-            r = req.get(f"{OLLAMA_URL}/api/ps", timeout=5)
-            if not r.ok:
-                continue
-            loaded = [m.get("name", "") for m in (r.json().get("models") or [])]
-            embed_base = RAG_EMBED_MODEL.split(":")[0]
-            # Filtre l'embed : on ne tracke que les LLM chat
-            chat_loaded = [m for m in loaded if m.split(":")[0] != embed_base]
-            with _VRAM_LOCK:
-                if not chat_loaded:
-                    if _vram_model is not None:
-                        _log.info(f"[VRAM-SYNC] Ollama a déchargé {_vram_model} (TTL/mémoire) — _vram_model reset")
-                        _vram_model = None
-                elif _vram_model not in chat_loaded:
-                    # Désynchro : Ollama a un LLM chargé différent de ce qu'on pense
-                    actual = chat_loaded[0]
-                    _log.info(f"[VRAM-SYNC] désynchro : interne={_vram_model} → réel={actual}")
-                    _vram_model = actual
-        except Exception as e:
-            _log.debug(f"[VRAM-SYNC] {e}")
+    _vram_model = v
 
-threading.Thread(target=_vram_sync_loop, daemon=True, name="vram-sync").start()
+# ── Init bootstrap/threads (étape 29, 2026-05-23) — placé tard car nécessite ──
+# speak (défini après voice.init), _vram_lock + _vram_model (globals jarvis),
+# _rag_live_prewarm (alias rag.engine). start_all() lance les 10 threads daemon.
+import blueprints.soc as _soc_bp  # noqa: E402
+_boot_th.init(
+    log                  = _log,
+    dsp_params           = DSP_PARAMS,
+    tts_eng              = _tts_eng,
+    apply_dsp_to_mp3     = apply_dsp_to_mp3,
+    pynvml               = pynvml,
+    nvml_handle          = _nvml_handle,
+    speak                = speak,
+    ollama_circuit       = _ollama_circuit,
+    req                  = req,
+    ollama_url           = OLLAMA_URL,
+    rag_embed_model      = RAG_EMBED_MODEL,
+    soc_num_ctx          = _SOC_NUM_CTX,
+    workspace_root       = _WORKSPACE_ROOT,
+    rag_index_text       = _rag_index_text,
+    rag_live_prewarm     = _rag_live_prewarm,
+    vram_lock            = _VRAM_LOCK,
+    get_model            = lambda: MODEL,
+    get_vram_model       = lambda: _vram_model,
+    set_vram_model       = _set_vram_model_global,
+    soc_cooldown_ok      = _soc_bp._soc_cooldown_ok,
+    ollama_diag_timeout_s = _OLLAMA_DIAG_TIMEOUT_S,
+    gpu_temp_warn        = _GPU_TEMP_WARN,
+    gpu_mon_start_s      = _GPU_MON_START_S,
+    gpu_mon_poll_s       = _GPU_MON_POLL_S,
+    rag_refresh_h        = _RAG_REFRESH_H,
+)
+_boot_th.start_all()
 
 # ── Init différé de la tuile chat (refactor jarvis.py étape 12, 2026-05-23) ──
 # Placé ici car les SSE generators (_apt_upgrade_bypass_sse, _reboot_machine_sse)
