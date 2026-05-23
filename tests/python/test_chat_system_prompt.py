@@ -1,7 +1,7 @@
 """Tests chat_system_prompt — orchestration assemblage system prompt (5 helpers DI)."""
 import re
 
-from chat_system_prompt import build
+from chat.system_prompt import build
 
 
 def _make_call(**overrides):

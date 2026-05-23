@@ -1,7 +1,7 @@
 """Tests chat_pending_bypass — confirmation/annulation commandes infra différées (apt/reboot)."""
 import re
 
-from chat_pending_bypass import resolve_pending_bypass
+from chat.pending_bypass import resolve_pending_bypass
 
 
 def _captured_args():

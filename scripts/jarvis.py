@@ -541,15 +541,15 @@ from bypass import code as _bypass_code
 from bypass import filesystem as _bypass_fs
 from bypass import proxmox as _bypass_pve
 from bypass import simple as _bypass_simple
-import chat_capture as _chat_capture
-import chat_generate as _chat_gen_mod
-import chat_messages as _chat_msg
-import chat_pending_bypass as _chat_pending
-import chat_routing as _chat_routing
-import chat_soc_inject as _chat_soc
-import chat_stream as _chat_stream_mod
-import chat_system_prompt as _chat_sp
-import chat_tool_calls as _chat_tools
+from chat import capture as _chat_capture
+from chat import generate as _chat_gen_mod
+from chat import messages as _chat_msg
+from chat import pending_bypass as _chat_pending
+from chat import routing as _chat_routing
+from chat import soc_inject as _chat_soc
+from chat import stream as _chat_stream_mod
+from chat import system_prompt as _chat_sp
+from chat import tool_calls as _chat_tools
 import code_reasoning as _cr_mod
 import deferred_speak as _deferred_speak
 import files as _files

@@ -1,7 +1,7 @@
 """Tests chat_soc_inject — détection keywords SOC + injection contexte monitoring."""
 import json as _json
 
-from chat_soc_inject import (
+from chat.soc_inject import (
     SOC_KW,
     SOC_VOCAL_KW,
     _format_defense_block,

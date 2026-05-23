@@ -1,7 +1,7 @@
 """Tests chat_tool_calls — boucle tool-calling Ollama (max iterations + parsing args)."""
 import json
 
-from chat_tool_calls import run_tool_calls
+from chat.tool_calls import run_tool_calls
 
 
 def _no_tool_msg(content="réponse directe"):

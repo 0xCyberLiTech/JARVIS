@@ -3,7 +3,7 @@ import json
 import queue
 import threading
 
-from chat_generate import chat_generate
+from chat.generate import chat_generate
 
 
 class _Ctx:

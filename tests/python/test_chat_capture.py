@@ -2,7 +2,7 @@
 import json
 from collections import deque
 
-from chat_capture import capture_gen
+from chat.capture import capture_gen
 
 
 def _sse_token(t, done=False):

@@ -1,5 +1,5 @@
 """Tests chat_messages — assemblage history → liste messages Ollama (zéro IO)."""
-from chat_messages import _VOCAL_OVERRIDE, build_messages
+from chat.messages import _VOCAL_OVERRIDE, build_messages
 
 
 def test_mode_normal_renvoie_system_puis_history():

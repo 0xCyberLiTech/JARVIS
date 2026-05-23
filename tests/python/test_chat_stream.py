@@ -1,7 +1,7 @@
 """Tests chat_stream — orchestrateur pipeline LLM streaming."""
 from collections import namedtuple
 
-from chat_stream import stream_inner
+from chat.stream import stream_inner
 
 LlmCtx = namedtuple("LlmCtx", "messages model np_override soc_ctx soc_trigger")
 

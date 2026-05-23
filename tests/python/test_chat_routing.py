@@ -1,5 +1,5 @@
 """Tests chat_routing — sélection modèle Ollama selon mode + flags requête (zéro IO)."""
-from chat_routing import resolve_model
+from chat.routing import resolve_model
 
 GENERAL = "gemma4:latest"
 CODE = "qwen2.5-coder:14b"
