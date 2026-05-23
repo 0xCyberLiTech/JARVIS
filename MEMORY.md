@@ -1,4 +1,83 @@
-# JARVIS — Mémoire projet (2026-05-22 — audit dette complet honnête + 7 correctifs)
+# JARVIS — Mémoire projet (2026-05-23 — refactor architecture par tuiles complet, 21 tuiles)
+
+## Session 2026-05-23 — refactor jarvis.py étapes 27-33 + 2 hot-fixes
+
+Poursuite directe de la session 2026-05-22 (étapes 3-26 closes par commit
+`62ac692` qui mettait à jour la doc). 7 nouvelles étapes commitées dans la
+journée, jarvis.py descend de **2556 → 1860 L** (cumul depuis monolithe :
+4814 → 1860 L, **−61 %**). 5 nouvelles tuiles créées (`bootstrap`, `terminal`,
+`runtime`, `facts`, `tools`) → **21 tuiles** au total. 0 régression sur
+**1164 tests pytest**. Coverage globale 70%.
+
+### Étapes commitées (ordre chronologique)
+
+| Étape | Commit | Tuile | jarvis.py | Détail |
+|---|---|---|---|---|
+| 27 | `a329f3c` | `bypass/wrappers.py` | 2556→2477 (−79) | 11 wrappers DI couplés jarvis + 3 constantes calculées dans init() |
+| 28 | `ef97d17` | `chat/dispatcher.py` | 2477→2386 (−91) | Carrefour /api/chat extrait (route + chat_try_bypass + detect_file_corrections) |
+| 29 | `1497604` | `bootstrap/threads.py` | 2386→2210 (−176) | 10 threads daemon regroupés derrière init()+start_all() |
+| 30 | `9964c4e` | `terminal/ssh_ws.py` | 2210→2105 (−105) | 2 routes WS PTY SSH (/ws/ssh/<host> + /ws/dev) |
+| 31 | `af62370` | `runtime/gpu_stats.py` + `runtime/speak.py` | 2105→**1954** (−151) | 3 fns GPU + speak() ; **première fois <2000L** |
+| 32 | `617e480` | `facts/` + 3 routes dispatch | 1954→1898 (−56) | Tuile facts/ + api_status→health/, api_history_last→chat/dispatcher, api_soc_context→blueprints/soc |
+| 33 | `6103358` | `tools/local.py` | 1898→**1860** (−38) | 3 outils LLM locaux (executer_code, soc_status, executer_script_windows) |
+
+### Hot-fixes (révélés en cours de session, non-refactor)
+
+- **`f4ad131` — try/except global sur `/api/tts`** : wrapper `api_tts` avec
+  capture exhaustive (`_log.error` + `_tts_logger.error 'GLOBAL-CRASH'`) +
+  retour 500 JSON propre. Posé pour diagnostiquer le bug intermittent « UI
+  qui se relance au switch voix Edge » signalé par Marc → la prochaine
+  occurrence laissera une trace exploitable. Le corps réel est extrait dans
+  `_api_tts_impl()` (séparation route wrapper vs logique métier).
+
+- **`b03f23f` — `JARVIS_SKIP_BOOT_THREADS` env flag** : garde-fou dans
+  `bootstrap/threads.start_all()`. Suite d'une boulette : mes 2 smoke tests
+  `python -c "import jarvis"` lors des étapes 28-29 avaient déclenché les
+  threads boot dans des process Python parallèles au JARVIS en service →
+  `kokoro_preload` a synthétisé "JARVIS opérationnel." (interruption audio
+  utilisateur via sortie audio partagée) + `boot_vram_cleanup` a déchargé
+  des modèles Ollama encore utilisés. Usage smoke désormais :
+  `JARVIS_SKIP_BOOT_THREADS=1 python -c "import jarvis"` → 0 thread lancé.
+
+### Décision honnête sur le score
+
+Le **95/100 affiché par §0bis du BILAN-TECHNIQUE** était surévalué : il ne
+couvrait pas les nouveaux modules sous-couverts ajoutés en étapes 27-33 (5
+modules entre 12% et 54% de coverage) ni les 9 commits de retard sur la doc.
+**Score recalibré honnêtement avant MAJ doc : 82/100**, **après MAJ doc :
+87/100**. Demande explicite de Marc : « honnêteté brute, pas de chiffres
+gonflés ». Pour atteindre 90+ : ajouter ~50 tests directs sur les modules
+récents (+3-4 pts) et résoudre le bug switch voix Edge (+2 pts).
+
+### Reste à refactoriser dans jarvis.py (1860 L résiduelles)
+
+- **VRAM/Ollama** (~140 L) : `_ensure_vram`, `_ollama_swap`, `_think_filter_step`,
+  `stream_llm` — cœur runtime LLM, couplage `_vram_model` global avec setter
+  lambda → candidat étape 34 (tuile `llm/` ou `ollama/`)
+- **`_TOOL_DISPATCH` dict** : appartient logiquement à `tools/dispatch.py`
+- **`_facts_inject` + `_load_facts` + `_now_fr`** : appartient à `facts/inject.py`
+- **3 setters globaux** (SYSTEM_PROMPT, MODEL, _welcome_data, _AUTO_PROFILE_MODEL,
+  _vram_model) — pattern legacy assumé
+- **Routes restantes** : `index`, `favicon`, `api_debug_inject_pending`, `api_mode`
+  (la dernière a une DI lourde → laisser sur place)
+- **Ossature légitime** : config bootstrap, CORS, registration des 21 tuiles,
+  bloc `__main__` (MCP subprocess + app.run) — ~1500 L incompressibles
+
+### Aliases backward-compat conservés dans jarvis.py
+
+Pour ne casser aucun test existant et aucun consommateur interne MCP, tous
+les modules extraits gardent un alias dans jarvis.py :
+- Tools : `_tool_executer_code`, `_tool_soc_status`, `_tool_executer_script_windows`
+- Bypass wrappers : `_detect_service_restart`, `_detect_vm_command`, etc.
+- Runtime : `get_stats`, `speak`, `_speak_queue`, `_chat_stream_active`, `_speak_deferred`
+- Terminal : `_ws_ssh_reader`, `_ws_ssh_connect`, `_ws_ssh_handler`
+- Chat dispatcher : `_chat_try_bypass`, `_detect_file_corrections`
+
+Ces aliases ajoutent un peu de bruit dans jarvis.py (≈80 lignes) mais ils
+font office de contrat stable pour les tests pytest qui consomment via
+`jarvis_module.X` — leur retrait nécessiterait de réécrire ~30 tests.
+
+---
 
 ## Session 2026-05-22 — audit dette complet honnête + 7 correctifs
 
