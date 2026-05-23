@@ -51,6 +51,7 @@ _ROUTE_LIMITS = {
     "api_soc_test":              "30 per minute",
     "api_soc_ip_deep":           "20 per minute",
     "api_soc_ip_history":        "20 per minute",
+    "api_soc_context":           "30 per minute",
 }
 
 # Dossier parent = scripts/ (ce fichier est dans scripts/blueprints/)
@@ -874,6 +875,24 @@ def api_soc_monitor():
     if request.method == "POST":
         _SOC_MON_ENABLED = bool((request.json or {}).get("enabled", True))
     return Response(json.dumps({"enabled": _SOC_MON_ENABLED, "dashboard_open": _soc_dashboard_open()}),
+                    mimetype="application/json")
+
+
+@soc_bp.route("/api/soc/context", methods=["GET"])
+def api_soc_context():
+    """Contexte SOC complet formaté pour injection LLM (monitoring.json parsé).
+    Déménagée de jarvis.py étape 32 (2026-05-23) — consommateur unique du
+    formatteur SOC, conceptuellement à sa place ici."""
+    from chat.soc_context import build_monitoring_context
+    ok, raw = _fetch_monitoring(force=False)
+    if not ok:
+        return Response(json.dumps({"ok": False, "context": raw or "monitoring.json indisponible"},
+                                   ensure_ascii=False), mimetype="application/json")
+    try:
+        ctx = build_monitoring_context(json.loads(raw))
+    except Exception as e:
+        ctx = f"monitoring.json brut (parse error: {e}):\n{raw[:3000]}"
+    return Response(json.dumps({"ok": True, "context": ctx}, ensure_ascii=False),
                     mimetype="application/json")
 
 

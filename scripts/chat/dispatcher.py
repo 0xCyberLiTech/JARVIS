@@ -19,6 +19,8 @@ tous les autres sous-systèmes. Plutôt que de mocker chaque dep, on injecte
 au boot via `init(...)`. Les getters lambda (`get_system_prompt`,
 `get_model`, `get_mode`) permettent de relire les globals jarvis mutables.
 """
+import json
+
 from flask import Blueprint, Response, request, stream_with_context
 
 bp = Blueprint("chat_dispatcher", __name__)
@@ -304,3 +306,13 @@ def api_chat():
     return Response(
         stream_with_context(_capture_gen(_chat_generate(_llm_ctx, no_tools), _orig_last)),
         mimetype="text/event-stream", headers=_SSE_HEADERS)
+
+
+@bp.route("/api/history/last", methods=["GET"])
+def api_history_last():
+    """Retourne les N derniers échanges chat (user + assistant). Utilisé par le MCP.
+    Déménagée de jarvis.py étape 32 (2026-05-23) — consomme _chat_orch._LAST_EXCHANGES."""
+    n = min(int(request.args.get("n", 3)), 10)
+    entries = list(_chat_orch._LAST_EXCHANGES)[-n:]
+    return Response(json.dumps({"ok": True, "count": len(entries), "exchanges": entries}),
+                    mimetype="application/json")

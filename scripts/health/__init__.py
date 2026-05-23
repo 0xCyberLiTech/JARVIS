@@ -9,6 +9,7 @@ _ROUTE_LIMITS = {
     "api_boot_id":         "60 per minute",
     "api_health":          "120 per minute",
     "api_stats":           "60 per minute",
+    "api_status":          "60 per minute",
     "api_ollama_status":   "60 per minute",
     "api_vram":            "30 per minute",
     "api_security":        "60 per minute",

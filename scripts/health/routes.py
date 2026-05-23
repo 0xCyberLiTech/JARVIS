@@ -1,9 +1,10 @@
 """Routes HTTP de la tuile **health** — santé runtime + stats + ping + security.
 
-8 endpoints :
+9 endpoints :
 - GET /api/boot-id        — ID unique de session JARVIS (changement = restart)
 - GET /api/health         — health check léger (<10ms, sans appel Ollama)
 - GET /api/stats          — CPU/RAM/GPU/VRAM (cache 5s)
+- GET /api/status         — état JARVIS pour defense chain SOC (model + bans/alerts 24h)
 - GET /api/ollama-status  — Ollama running + état circuit breaker
 - GET /api/vram           — modèles chargés en VRAM (Ollama /api/ps)
 - GET /api/security       — journal sécurité (tentatives bloquées)
@@ -33,6 +34,7 @@ _get_stats_fn = None
 _get_model = None
 _get_last_toks_per_sec = None
 _get_llm_params = None
+_get_soc_status = None  # callable → {soc_engine_active, bans_24h, alerts_24h}
 _code_reasoning_model = ""
 _code_model = ""
 _general_model = ""
@@ -42,7 +44,7 @@ def init_routes(*, log, ollama_circuit,
                 ollama_status_timeout_s, ssh_proxmox_cmd_timeout_s,
                 stats_cache, stats_ttl, sec_events, sec_lock,
                 get_boot_id, get_stats_fn, get_model, get_last_toks_per_sec,
-                get_llm_params,
+                get_llm_params, get_soc_status,
                 code_reasoning_model, code_model, general_model) -> None:
     globals().update({
         "_log": log,
@@ -58,6 +60,7 @@ def init_routes(*, log, ollama_circuit,
         "_get_model": get_model,
         "_get_last_toks_per_sec": get_last_toks_per_sec,
         "_get_llm_params": get_llm_params,
+        "_get_soc_status": get_soc_status,
         "_code_reasoning_model": code_reasoning_model,
         "_code_model": code_model,
         "_general_model": general_model,
@@ -89,6 +92,19 @@ def api_stats():
     _stats_cache["data"] = data
     _stats_cache["ts"] = now
     return Response(json.dumps(data), mimetype="application/json")
+
+
+@bp.route("/api/status")
+def api_status():
+    """État JARVIS — utilisé par la defense chain SOC (_dcPollJarvis)."""
+    soc = _get_soc_status()
+    return Response(json.dumps({
+        "available":          True,
+        "model":              _get_model(),
+        "soc_engine_active":  soc["soc_engine_active"],
+        "bans_24h":           soc["bans_24h"],
+        "alerts_24h":         soc["alerts_24h"],
+    }), mimetype="application/json")
 
 
 @bp.route("/api/ollama-status", methods=["GET"])

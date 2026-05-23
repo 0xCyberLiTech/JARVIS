@@ -1141,70 +1141,21 @@ def api_debug_inject_pending():
     return Response(json.dumps({"ok": True, "pending": "clt → __test-bypass__"}),
                     mimetype="application/json")
 
-# api_health déménagée dans health/routes.py (étape 19).
-
-@limiter.limit("30 per minute")
-@app.route("/api/soc/context", methods=["GET"])
-def api_soc_context():
-    """Retourne le contexte SOC complet formaté pour injection LLM (monitoring.json parsé)."""
-    ok, raw = _fetch_monitoring(force=False)
-    if not ok:
-        return Response(json.dumps({"ok": False, "context": raw or "monitoring.json indisponible"},
-                                   ensure_ascii=False), mimetype="application/json")
-    try:
-        ctx = _build_monitoring_context(json.loads(raw))
-    except Exception as e:
-        ctx = f"monitoring.json brut (parse error: {e}):\n{raw[:3000]}"
-    return Response(json.dumps({"ok": True, "context": ctx}, ensure_ascii=False),
-                    mimetype="application/json")
-
-@limiter.limit("60 per minute")
-@app.route("/api/status")
-def api_status():
-    """État JARVIS — utilisé par la defense chain SOC (_dcPollJarvis)."""
-    soc = get_soc_status()
-    return Response(json.dumps({
-        "available":          True,
-        "model":              MODEL,
-        "soc_engine_active":  soc["soc_engine_active"],
-        "bans_24h":           soc["bans_24h"],
-        "alerts_24h":         soc["alerts_24h"],
-    }), mimetype="application/json")
-
-# api_stats déménagée dans health/routes.py (étape 19).
+# api_health, api_stats déménagées dans health/routes.py (étape 19).
+# api_status déménagée dans health/routes.py (étape 32, 2026-05-23).
+# api_soc_context déménagée dans blueprints/soc.py (étape 32, 2026-05-23).
+# api_facts_get + api_facts_save déménagées dans facts/routes.py (étape 32).
+# Init facts/ tardif (nécessite limiter défini) :
+import facts as _facts  # noqa: E402
+_facts.routes.init(limiter=limiter, facts_file=FACTS_FILE)
+app.register_blueprint(_facts.bp)
 
 # Routes /api/memory* + /api/memory-summary* + /api/memory/summarize-session
 # déménagées dans la tuile scripts/memory/routes.py (étape 4).
-# /api/facts reste ici — la tuile « facts » sera son propre Blueprint plus tard.
-
-@limiter.limit("60 per minute")
-@app.route("/api/facts", methods=["GET"])
-def api_facts_get():
-    try:
-        data = json.loads(FACTS_FILE.read_text(encoding="utf-8")) if FACTS_FILE.exists() else {"facts": []}
-    except Exception:
-        data = {"facts": []}
-    return Response(json.dumps(data, ensure_ascii=False), mimetype="application/json")
 
 # Routes /api/rag/* déménagées dans la tuile scripts/rag/routes.py (étape 5).
 
 # api_code_exec déménagée dans dev/routes.py (étape 22)
-
-# Route /api/rag/refresh déménagée dans la tuile scripts/rag/routes.py (étape 5).
-
-@limiter.limit("30 per minute")
-@app.route("/api/facts", methods=["POST"])
-def api_facts_save():
-    payload = request.json if isinstance(request.json, dict) else {}
-    facts = payload.get("facts", [])
-    if not isinstance(facts, list):
-        return Response('{"error":"facts must be a list"}', status=400, mimetype="application/json")
-    data = {"updated_at": __import__("datetime").date.today().isoformat(), "facts": facts}
-    try:
-        FACTS_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
-    except Exception as e:
-        return Response(json.dumps({"error": str(e)}), status=500, mimetype="application/json")
-    return Response('{"ok":true}', mimetype="application/json")
 
 # Routes /api/llm-params + /api/llm-params/reset-prompt déménagées dans
 # settings/routes.py (étape 17, 2026-05-23).
@@ -1366,6 +1317,7 @@ _health.init(
     get_model                  = lambda: MODEL,
     get_last_toks_per_sec      = lambda: _last_toks_per_sec,
     get_llm_params             = lambda: LLM_PARAMS,
+    get_soc_status             = get_soc_status,
     code_reasoning_model       = _CODE_REASONING_ANALYSIS_MODEL,
     code_model                 = _CODE_MODEL,
     general_model              = _GENERAL_MODEL,
@@ -1549,15 +1501,7 @@ _chat_generate            = _chat_orch._chat_generate
 _chat_build_system_prompt = _chat_orch._chat_build_system_prompt
 _chat_resolve_model       = _chat_orch._chat_resolve_model
 
-@app.route("/api/history/last", methods=["GET"])
-def api_history_last():
-    """Retourne les N derniers échanges chat (user + assistant). Utilisé par le MCP."""
-    n = min(int(request.args.get("n", 3)), 10)
-    entries = list(_LAST_EXCHANGES)[-n:]
-    return Response(json.dumps({"ok": True, "count": len(entries), "exchanges": entries}),
-                    mimetype="application/json")
-
-
+# api_history_last déménagée dans chat/dispatcher.py (étape 32, 2026-05-23).
 # api_security + api_security_clear déménagées dans health/routes.py (étape 19).
 
 # api_dsp_process_audio déménagée dans settings/routes.py (étape 17).
