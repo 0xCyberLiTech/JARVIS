@@ -341,7 +341,7 @@ except ImportError:
     install("nvidia-ml-py"); import pynvml
 
 try:
-    import psutil  # noqa: F401 — utilisé indirectement par runtime/gpu_stats + import local _psutil
+    import psutil  # noqa: F401 — utilisé indirectement par runtime/gpu_stats + import local _psutil pour MCP cleanup
 except ImportError:
     install("psutil"); import psutil  # noqa: F401
 
@@ -367,7 +367,8 @@ LlmCtx          = _chat_orch.LlmCtx
 _LAST_EXCHANGES = _chat_orch._LAST_EXCHANGES
 
 # TOOLS schemas (étape 24, 2026-05-23) — alias depuis chat/tool_schemas.py
-from chat.tool_schemas import TOOLS  # noqa: E402,F401
+# Exposé pour MCP server + tests qui consomment jm.TOOLS via l'alias module.
+from chat.tool_schemas import TOOLS  # noqa: F401
 
 import code_reasoning as _cr_mod
 import commands as _commands
@@ -630,7 +631,7 @@ _rag_live_cache: list = []  # conservé pour compatibilité ascendante
 
 # _load_facts + _now_fr + _facts_inject déménagés dans facts/inject.py
 # (étape 34b, 2026-05-23). DI : FACTS_FILE + _load_memory_summary + _log.
-from facts import inject as _facts_inject_mod  # noqa: E402
+from facts import inject as _facts_inject_mod
 # Getter lambda pour FACTS_FILE : permet aux tests de monkeypatch jm.FACTS_FILE
 # et de voir l'effet (sinon copie figée au moment de init()).
 _facts_inject_mod.init(
@@ -750,7 +751,7 @@ except Exception as _e:
 # 3 fonctions GPU stats déménagées dans runtime/gpu_stats.py (étape 31).
 # init() inline ici : pynvml, _nvml_handle, _GPU_TEMP_WARN tous déjà définis ;
 # MODEL est lu via getter lambda pour rester en phase avec _set_model_global.
-from runtime import gpu_stats as _runtime_stats  # noqa: E402
+from runtime import gpu_stats as _runtime_stats
 _runtime_stats.init(
     pynvml=pynvml,
     nvml_handle=_nvml_handle,
@@ -766,7 +767,7 @@ _STATS_LOCK          = _runtime_stats._STATS_LOCK  # re-export pour code legacy
 # _clean_for_tts garde son alias jarvis.py (consommateurs internes : chat orch).
 _clean_for_tts = _tts_cleaner.clean_for_tts
 
-from runtime import speak as _runtime_speak  # noqa: E402
+from runtime import speak as _runtime_speak
 _runtime_speak.init(
     log=_log,
     tts_logger=_tts_logger,
@@ -896,7 +897,7 @@ def _get_model_profile(model: str) -> tuple[str, str] | tuple[None, None]:
 
 # _build_monitoring_context + _kc_ban_signal + _pve_context_lines + _INFRA_IPS
 # déménagés dans chat/soc_context.py (étape 26, 2026-05-23). Aliases :
-from chat import soc_context as _soc_context  # noqa: E402
+from chat import soc_context as _soc_context
 _KC_BAN_SIGNAL_MIN_HITS  = _soc_context._KC_BAN_SIGNAL_MIN_HITS
 _INFRA_IPS               = _soc_context._INFRA_IPS
 _kc_ban_signal           = _soc_context.kc_ban_signal
@@ -937,7 +938,7 @@ _BLOCKED_ARGS = [
 
 # 3 tools LLM déménagés dans tools/local.py (étape 33, 2026-05-23).
 # Init déféré juste après _ALLOWED_SCRIPTS défini ; aliases backward-compat ci-dessous.
-from tools import local as _tools_local  # noqa: E402
+from tools import local as _tools_local
 _tools_local.init(
     blocked_hard              = _BLOCKED_HARD,
     blocked_args              = _BLOCKED_ARGS,
@@ -991,7 +992,7 @@ _tool_executer_script_windows  = _tools_local.executer_script_windows
 
 # _TOOL_DISPATCH construit dans tools/dispatch.py (étape 34a, 2026-05-23).
 # Tous les handlers (14 outils, 4 tuiles) sont injectes en DI explicite.
-from tools import dispatch as _tools_dispatch  # noqa: E402
+from tools import dispatch as _tools_dispatch
 _TOOL_DISPATCH = _tools_dispatch.build(
     lire_fichier             = _tool_lire_fichier,
     ecrire_fichier           = _tool_ecrire_fichier,
@@ -1017,7 +1018,7 @@ call_llm_with_tools  = _chat_orch.call_llm_with_tools
 # _think_filter_step + stream_llm déménagés dans llm/stream.py (étape 35, 2026-05-23).
 # DI : circuit Ollama + getter MODEL + getter LLM_PARAMS + URL + timeout +
 # setter _last_toks_per_sec (mutable global → setter lambda lazy).
-from llm import stream as _llm_stream  # noqa: E402
+from llm import stream as _llm_stream
 
 def _set_last_toks_per_sec(v) -> None:
     global _last_toks_per_sec
@@ -1080,7 +1081,7 @@ def api_debug_inject_pending():
 # api_soc_context déménagée dans blueprints/soc.py (étape 32, 2026-05-23).
 # api_facts_get + api_facts_save déménagées dans facts/routes.py (étape 32).
 # Init facts/ tardif (nécessite limiter défini) :
-import facts as _facts  # noqa: E402
+import facts as _facts
 _facts.routes.init(limiter=limiter, facts_file=FACTS_FILE)
 app.register_blueprint(_facts.bp)
 
@@ -1121,7 +1122,7 @@ def api_diag_jslog():
 # init() différé : `_set_vram_model_global` est défini plus bas (ligne ~1697).
 # On passe le setter via lambda pour résolution lazy à l'appel (sinon NameError
 # au moment d'évaluer l'argument). Aliases backward-compat ici pour api_mode + tests.
-from llm import vram as _llm_vram  # noqa: E402
+from llm import vram as _llm_vram
 _llm_vram.init(
     log=_log,
     get_model=lambda: MODEL,
@@ -1135,7 +1136,7 @@ _ollama_swap = _llm_vram.ollama_swap
 
 # api_mode déménagée dans mode/routes.py (étape 37, 2026-05-23).
 # Init avec DI (getter+setter _jarvis_mode + 4 constantes modèles + ensure_vram).
-import mode as _mode  # noqa: E402
+import mode as _mode
 
 def _set_jarvis_mode_global(v: str) -> None:
     global _jarvis_mode
@@ -1160,7 +1161,7 @@ app.register_blueprint(_mode.bp)
 # WS PTY SSH (ws_ssh_host + ws_dev + 3 helpers) déménagés dans
 # terminal/ssh_ws.py (étape 30, 2026-05-23). init() différé en fin de fichier
 # (nécessite _SSH_TERMINAL_MAP défini plus bas via _ssh_term.TERMINAL_MAP).
-from terminal import ssh_ws as _term_ws  # noqa: E402
+from terminal import ssh_ws as _term_ws
 # Aliases backward-compat pour tests éventuels :
 _ws_ssh_reader  = _term_ws._ssh_reader
 _ws_ssh_connect = _term_ws._ssh_connect
@@ -1299,7 +1300,7 @@ _chat_stream_inner   = _chat_orch._chat_stream_inner
 _pending_reboot: dict = {}  # {host, ssh_fn, is_proxmox, ts} — reboot différé après upgrade
 
 # Aliases backward-compat — pointeurs vers bypass/wrappers (rempli par init() tardif)
-from bypass import wrappers as _bypass_wrap  # noqa: E402
+from bypass import wrappers as _bypass_wrap
 _detect_service_restart = _bypass_wrap.detect_service_restart
 _detect_vm_command      = _bypass_wrap.detect_vm_command
 _detect_reboot_command  = _bypass_wrap.detect_reboot_command
@@ -1349,7 +1350,7 @@ _FCORR_RE = _bypass_fs.FCORR_RE
 # File correction (validate_protect_directives + PROTECTED_DIRECTIVES + 3 SSE gens)
 # déplacée dans chat/file_correct.py (étape 21, 2026-05-23). Aliases backward-compat
 # pour les tests existants (jm._validate_protect_directives) :
-from chat import file_correct as _file_correct_mod  # noqa: E402
+from chat import file_correct as _file_correct_mod
 _PROTECTED_DIRECTIVES        = _file_correct_mod.PROTECTED_DIRECTIVES
 _validate_protect_directives = _file_correct_mod.validate_protect_directives
 
@@ -1415,7 +1416,7 @@ _chat_resolve_pending_bypass = _chat_orch._chat_resolve_pending_bypass
 # _chat_try_bypass + _detect_file_corrections + api_chat déménagés dans
 # chat/dispatcher.py (étape 28, 2026-05-23). Aliases backward-compat ci-dessous
 # et register_blueprint + init() tardif en fin de fichier.
-from chat import dispatcher as _chat_dispatch  # noqa: E402
+from chat import dispatcher as _chat_dispatch
 _chat_try_bypass         = _chat_dispatch.chat_try_bypass
 _detect_file_corrections = _chat_dispatch.detect_file_corrections
 
@@ -1455,7 +1456,7 @@ def _set_voice_global(voice_id: str) -> bool:
 # kokoro-prewarm/rag-auto-refresh/vram-sync) + rag-live-prewarm démenagés
 # dans bootstrap/threads.py (étape 29, 2026-05-23). Init + start_all() en
 # fin de fichier (nécessite speak, _vram_lock, get/set _vram_model définis).
-from bootstrap import threads as _boot_th  # noqa: E402
+from bootstrap import threads as _boot_th
 
 # Aliases backward-compat — _tts_internet_was_up est lu par voice/routes (get_internet_up)
 # Compatibilité maintenue via getter lambda passé à _voice.init() plus bas.
@@ -1635,7 +1636,7 @@ def _set_vram_model_global(v) -> None:
 # ── Init bootstrap/threads (étape 29, 2026-05-23) — placé tard car nécessite ──
 # speak (défini après voice.init), _vram_lock + _vram_model (globals jarvis),
 # _rag_live_prewarm (alias rag.engine). start_all() lance les 10 threads daemon.
-import blueprints.soc as _soc_bp  # noqa: E402
+import blueprints.soc as _soc_bp
 _boot_th.init(
     log                  = _log,
     dsp_params           = DSP_PARAMS,

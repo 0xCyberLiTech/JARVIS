@@ -270,7 +270,7 @@ def api_chat():
     if _get_mode() == _CODE_REASONING_MODE:
         system_prompt = _get_system_prompt()
         messages = _chat_build_messages(_facts_inject(system_prompt), history, is_vocal)
-        _log.info(f"[ROUTE] CODE-REASONING | q={repr(_orig_last[:80])}")
+        _log.info(f"[ROUTE] CODE-REASONING | q={_orig_last[:80]!r}")
         return Response(
             stream_with_context(_capture_gen(_code_reasoning_gen(messages, np_override), _orig_last)),
             mimetype="text/event-stream", headers=_SSE_HEADERS)
@@ -284,7 +284,7 @@ def api_chat():
     active_model, route = _chat_resolve_model(is_vocal, no_tools, model_override)
     if active_model == _CODE_MODEL:
         system += _CODE_SYSTEM_SUFFIX
-    _log.info(f"[ROUTE] {route}/{active_model or _get_model()} | soc={soc_trigger} | q={repr(_orig_last[:80])}")
+    _log.info(f"[ROUTE] {route}/{active_model or _get_model()} | soc={soc_trigger} | q={_orig_last[:80]!r}")
 
     messages = _chat_build_messages(system, history, is_vocal)
 
