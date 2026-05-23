@@ -1,4 +1,90 @@
-# JARVIS — Mémoire projet (2026-05-23 — refactor architecture par tuiles complet, 23 tuiles + bug UI reload résolu cause racine + couverture +271 tests)
+# JARVIS — Mémoire projet (2026-05-23 — refactor architecture par tuiles complet, 24 tuiles + bug UI reload résolu cause racine + couverture +282 tests + audit ruff strict)
+
+## Session 2026-05-23 soirée — étape 37 mode/ + audit ruff strict + clôture honnête
+
+Suite directe de la session fin d'après-midi (étapes 35-36 + bug UI reload
+résolu via DI soc.py + couverture finale +69 tests). 4 commits supplémentaires
+pour clôturer proprement la journée :
+
+### Étape 37 — Tuile `mode/` (commit `5215547` + tests `b2cd4c4`)
+
+24ème tuile : extraction de `api_mode` (route GET+POST /api/mode) vers
+`scripts/mode/routes.py` + Blueprint dédié.
+- DI : limiter + log + getter/setter `_jarvis_mode` + 3 constantes modèles
+  + `ensure_vram` callable
+- Validation stricte 4 modes (soc|general|code|code_reasoning), case
+  insensitive, swap VRAM uniquement si mode différent
+- Tests : 11 tests Flask test_client, **100% coverage** sur la nouvelle tuile
+
+jarvis.py : 1819 → 1821 L (+2 net — DI explicite occupe la place gagnée).
+**Bénéfice sémantique** : pattern Blueprint+DI uniforme, route plus
+éparpillée dans l'ossature.
+
+### Audit ruff strict `--select=B,C4,SIM,UP,RUF` (commit `98c9e0c`)
+
+84 suggestions ruff évaluées avec rigueur honnête :
+- **42 noqa F401 légitimes** auto-virés (pattern import-for-side-effects
+  dans les `__init__.py` de tuiles) → restaurés
+- **2 modernisations f-string `repr(x)` → `{x!r}`** conservées dans
+  `chat/dispatcher.py` (RUF010, sans risque)
+- **2 noqa F401 documentés explicitement** dans jarvis.py (`psutil`
+  utilisé indirectement par runtime/gpu_stats + import local `_psutil`
+  pour MCP cleanup · `TOOLS` exposé pour MCP server + tests)
+
+### Audit aliases backward-compat (~80 L jarvis.py, 120 aliases)
+
+**Décision honnête après inventaire** : ON LAISSE. Pattern délibéré, les
+tests pytest consomment `jm._X`. La réduction nécessiterait de modifier
+30+ tests pour gagner ≤0.5 pt — risque/bénéfice défavorable. Documenté
+dans le commit `98c9e0c` comme décision archi assumée.
+
+### Décisions architecturales finales (toutes documentées dans commit `98c9e0c`)
+
+- Aliases backward-compat (~80 L) : conservés, pattern délibéré
+- 5 globals mutables avec setters lambda : pattern legacy assumé
+- Blueprints HTTP sous-couverts (voice/routes 36%, settings/routes 44%,
+  dev/routes 27%, web/routes 26%) : testés E2E Playwright, décision archi
+- 2 lambdas E731 dans `chat/soc_inject.py` : noms expressifs (`top`, `kvd`),
+  usage local strict
+- 13 try/except: pass (SIM105) : non convertis en contextlib.suppress
+  (verbeux sans gain)
+- 8 `arr + [x]` (RUF005) : non modernisés en `[*arr, x]`
+
+### Audit TODO/FIXME/HACK/XXX dans tout le code
+
+**0 TODO ouvert** dans le code Marc (Python + JS scripts/static/). Que
+des occurrences dans des libs tierces (xterm.min.css, highlight.min.js).
+Code remarquablement propre.
+
+### Bilan complet session (matin + après-midi + soirée)
+
+| Métrique | Début matin (~12:00) | Fin de session (~17:55) |
+|---|---|---|
+| Durée | — | ~6 h |
+| Commits | — | **29** (13 refactor + 16 fix/feat/test/docs/chore) |
+| jarvis.py | 4814 L | **1821 L** (−62%) |
+| Tuiles | 0 | **24** + blueprints/soc |
+| Tests pytest | 1012 | **1294** (+282) |
+| Coverage globale | 62% | **76%** (+14 pts) |
+| Modules <80% utilisés en runtime | 12 modules | 0 (sauf Blueprints HTTP E2E) |
+| TODO/FIXME ouverts | inconnu | **0** |
+| Bug UI reload (15+ jours) | aléatoire | **résolu cause racine + validé Marc** |
+| Observabilité | console PowerShell seule | jarvis.log persistant + JS-DIAG v2 + try/except + 6 garde-fous idempotence (52 MB max disque) |
+| Score honnête | 82-84/100 (matin) | **93/100** |
+
+### Pour atteindre 95+/100 (non urgent — projet stable)
+
+- (a) Tests E2E Playwright nettoyés (~2-3 h, +1 pt)
+- (b) Doc auto-générée des docstrings (~1 h, +0.5 pt)
+- (c) Réduction aliases backward-compat (~1-2 h risqué, +0.5 pt — décidé NON aujourd'hui)
+
+### Commits de la soirée (chronologique)
+
+- `5215547` — `refactor(jarvis): mode/ - route /api/mode + DI explicite (etape 37)`
+- `b2cd4c4` — `test(jarvis): +11 tests mode/routes (100% coverage)`
+- `98c9e0c` — `chore(jarvis): cleanup ruff strict — f-string modernisation + noqa documentes`
+
+---
 
 ## Session 2026-05-23 fin d'après-midi — étapes 35-36 + bug UI reload résolu cause racine + couverture finale
 

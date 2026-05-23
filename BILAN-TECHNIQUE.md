@@ -1,9 +1,9 @@
 # BILAN TECHNIQUE — JARVIS 0xCyberLiTech
-## Assistant IA local v3.3 — 2026-05-23 (refactor architecture par tuiles complet : 23 tuiles, jarvis.py −62% · bug UI reload résolu racine · couverture +271 tests · score 93/100)
+## Assistant IA local v3.3 — 2026-05-23 (refactor architecture par tuiles complet : 24 tuiles, jarvis.py −62% · bug UI reload résolu racine · couverture +282 tests · score 93/100)
 
 ---
 
-## 0. État actuel (audit dette honnête 2026-05-23 — post étapes 27-36 + couverture finale)
+## 0. État actuel (audit dette honnête 2026-05-23 — post étapes 27-37 + couverture finale + ruff strict cleanup)
 
 > 📊 **SOURCE UNIQUE des métriques courantes du projet** — score dette, lignes
 > `jarvis.py` / `soc.py` / `jarvis_main.js`, nombre de tests pytest, coverage.
@@ -14,23 +14,23 @@
 
 | Critère | Score | Justification |
 |---|---|---|
-| Architecture | **24/25** | **23 tuiles autoportantes** (étape 35 → `llm/` avec `vram.py` + `stream.py` extraits + étape 36b → DI explicite soc.py élimine les 4 `from jarvis import` lazy = cause racine bug UI reload). `jarvis.py` **4814 → 1819 L (−62%)**, devenu ossature qui register 23 Blueprints. Pattern Blueprint+DI validé partout. **−1 honnête** : 5 globals mutables conservés (MODEL, _vram_model, SYSTEM_PROMPT, _welcome_data, _AUTO_PROFILE_MODEL) avec setters lambda — pattern legacy assumé · ~80 L d'aliases backward-compat dans jarvis.py (bruit mais nécessaire pour tests existants). |
-| Tests | **22/25** | **1283 tests pytest · 0 skip · 0 fail · 0 régression** sur les 36+ étapes de refactor (+271 tests sur la journée). Coverage globale **75%** (7360 stmts · 1815 miss). **Gains ciblés** : `tools/local.py` 49→**95%**, `runtime/speak.py` 41→**89%**, `bypass/wrappers.py` 65→**97%**, `terminal/ssh_ws.py` 15→**82%**, `commands/sse.py` 12→**92%**, `llm/vram.py` 40→**100%**, `chat/file_correct.py` 22→**97%**. **Fix critique conftest** : `JARVIS_SKIP_BOOT_THREADS=1` auto-set avant tout import — empêche pytest de démarrer les threads boot. **−3 honnêtes** : Blueprints HTTP testés indirectement par E2E Playwright (`voice/routes` 36%, `settings/routes` 44%, `dev/routes` 27%, `web/routes` 26%) — décision archi assumée. |
+| Architecture | **24/25** | **24 tuiles autoportantes** (étape 35 → `llm/`, étape 36b → DI explicite soc.py élimine les 4 `from jarvis import` lazy = cause racine bug UI reload, étape 37 → `mode/`). `jarvis.py` **4814 → 1821 L (−62%)**, devenu ossature qui register 24 Blueprints. Pattern Blueprint+DI validé partout. **−1 honnête** : 5 globals mutables conservés (MODEL, _vram_model, SYSTEM_PROMPT, _welcome_data, _AUTO_PROFILE_MODEL) avec setters lambda — pattern legacy assumé · ~80 L d'aliases backward-compat dans jarvis.py (bruit mais nécessaire pour tests existants — décision documentée commit `98c9e0c` après audit). |
+| Tests | **22/25** | **1294 tests pytest · 0 skip · 0 fail · 0 régression** sur les 37+ étapes de refactor (+282 tests sur la journée). Coverage globale **76%** (7394 stmts · 1806 miss). **Gains ciblés** : `tools/local.py` 49→**95%**, `runtime/speak.py` 41→**89%**, `bypass/wrappers.py` 65→**97%**, `terminal/ssh_ws.py` 15→**82%**, `commands/sse.py` 12→**92%**, `llm/vram.py` 40→**100%**, `chat/file_correct.py` 22→**97%**, `mode/routes.py` 0→**100%**. **Fix critique conftest** : `JARVIS_SKIP_BOOT_THREADS=1` auto-set avant tout import. **−3 honnêtes** : Blueprints HTTP testés indirectement par E2E Playwright (`voice/routes` 36%, `settings/routes` 44%, `dev/routes` 27%, `web/routes` 26%) — décision archi assumée. |
 | Documentation | 14/15 | CLAUDE.md + BILAN-TECHNIQUE.md (ce doc) + RUNBOOK.md + MEMORY.md + ARCHITECTURE-TUILES.md (schéma 23 tuiles, créé 2026-05-23) + docs/ (7 fichiers) — tous réalignés. Source unique des métriques (§0). −1 : set documentaire volumineux, inhérent au projet. |
-| Lisibilité/Conventions | 23/25 | ruff **0** (un `noqa F401` ajouté sur `psutil` après extraction runtime/gpu_stats) · eslint **0** · pre-commit/pre-push hooks bloquants. −2 : ~135 inline styles JS (HUD temps réel) accepté · aliases backward-compat ajoutent du bruit dans jarvis.py (~80 L). |
+| Lisibilité/Conventions | 24/25 | ruff **0** (2 noqa F401 documentés sur `psutil` + `TOOLS` après extraction runtime/gpu_stats et chat/tool_schemas) · eslint **0** · pre-commit/pre-push hooks bloquants · **audit ruff strict `--select=B,C4,SIM,UP,RUF`** (commit `98c9e0c`) : 84 suggestions évaluées dont 42 noqa légitimes (refusés), 2 modernisations f-string `repr(x) → {x!r}` conservées. −1 : ~135 inline styles JS (HUD temps réel) accepté · aliases backward-compat ajoutent du bruit dans jarvis.py (~80 L, décision archi assumée). |
 | Performance | 10/10 | Circuit breaker Ollama · cache SOC 30s · fix IPv6 systémique · pré-warm Kokoro CUDA + phi4 SOC · pipeline voix invariant AudioContext + découpage TTS · optimisation VRAM · **`JARVIS_SKIP_BOOT_THREADS=1`** (conftest auto-set) · **indicateur visuel `mode-loading`** (étape 36) → pulse cyan + ⏳ sur le bouton mode pendant le swap VRAM (1-3s) → UX explicite quand le LLM est vraiment prêt. |
 | Sécurité | 24/25 | Whitelist SSH stricte 29 patterns bloqués · profil SOC anti-double-ban · règle anti-hallucination phi4 · injection SOC 100% serveur · IPs hardcodées en `.gitignore` · **try/except global sur `/api/tts`** + contexte voix+moteur+texte au crash · **RotatingFileHandler `_log` → `scripts/jarvis.log`** persistant 5MB×7 · **fix idempotence × 3** (handler + threads + boot_id) · **DI explicite soc.py** (étape 36b commit `709049f` : élimine la cause racine du bug UI reload) · **instrumentation JS-DIAG v2** (commit `da7384d`) → `beforeunload` + stack trace capture toute navigation sortante. **−1 honnête** : Marc accepte que l'auto-engine SOC reste silencieux en mode CODE/CR/GENERAL (règle ABSOLUE `feedback_jarvis_no_regression`). |
 
-**Chiffres clés (2026-05-23 post couverture finale)** :
+**Chiffres clés (2026-05-23 post étape 37 + ruff strict cleanup)** :
 
 | Métrique | Valeur |
 |---|---|
-| **Tests pytest** | **1283 pass · 0 skip · 0 fail** (+271 vs début matin) |
-| **Coverage globale** | **75%** (7360 stmts · 1815 miss) |
-| **Tuiles autoportantes** | **23** : `system` `memory` `rag` `files` `ssh` `bypass` `proxmox` `chat` `voice` `vision` `settings` `tasks` `health` `commands` `dev` `web` `bootstrap` `terminal` `runtime` `facts` (+ `inject.py`) `tools` (+ `dispatch.py`) `llm` (+ `vram.py` + `stream.py`) + `blueprints/soc` (existant) |
+| **Tests pytest** | **1294 pass · 0 skip · 0 fail** (+282 vs début matin) |
+| **Coverage globale** | **76%** (7394 stmts · 1806 miss) |
+| **Tuiles autoportantes** | **24** : `system` `memory` `rag` `files` `ssh` `bypass` `proxmox` `chat` `voice` `vision` `settings` `tasks` `health` `commands` `dev` `web` `bootstrap` `terminal` `runtime` `facts` (+ `inject.py`) `tools` (+ `dispatch.py`) `llm` (+ `vram.py` + `stream.py`) `mode` + `blueprints/soc` (existant) |
 | **Sous-modules chat** | `capture` · `dispatcher` · `file_correct` · `generate` · `messages` · `orchestrator` · `pending_bypass` · `routing` · `soc_context` · `soc_inject` · `stream` · `system_prompt` · `tool_calls` · `tool_schemas` |
-| **Couverture clés (≥80%)** | `jarvis.py` 80% · `tools/local.py` **95%** · `runtime/speak.py` 89% · `bypass/wrappers.py` **97%** · `terminal/ssh_ws.py` 82% · `commands/sse.py` **92%** · `llm/vram.py` **100%** · `chat/file_correct.py` **97%** · `facts/routes.py` 87% |
-| **`jarvis.py`** | **1819 L** — ossature qui register 23 Blueprints + glue DI + carrefour boot + 5 setters globaux + `index/favicon/api_debug/api_mode` |
+| **Couverture clés (≥80%)** | `jarvis.py` 80% · `tools/local.py` 95% · `runtime/speak.py` 89% · `bypass/wrappers.py` **97%** · `terminal/ssh_ws.py` 82% · `commands/sse.py` **92%** · `llm/vram.py` **100%** · `chat/file_correct.py` **97%** · `mode/routes.py` **100%** · `facts/routes.py` 87% |
+| **`jarvis.py`** | **1821 L** — ossature qui register 24 Blueprints + glue DI + carrefour boot + 5 setters globaux + `index/favicon/api_debug` |
 | **`blueprints/soc.py`** | 894 stmts (DI explicite 36b) |
 | **`jarvis_main.js`** | 148 L (post-refactor −98,1% depuis 7828L) |
 | **Modules JS totaux** | 21 modules (18 `static/js/` + 3 `static/`) |
@@ -41,7 +41,7 @@
 | **TTS moteurs** | 4 (edge-tts · Kokoro CUDA · Piper · SAPI5) avec fallback chain |
 | **ESLint warnings** | **0** · 0 erreur |
 | **ruff** | 0 erreur (1 `noqa F401` documenté sur `psutil`) |
-| **Pre-commit hooks** | ruff + eslint (commit) · pytest 1283 tests (pre-push) |
+| **Pre-commit hooks** | ruff + eslint (commit) · pytest 1294 tests (pre-push) |
 | **Env flags runtime** | `JARVIS_SKIP_BOOT_THREADS=1` → smoke imports sans threads boot (auto-set par conftest.py) |
 | **Logs persistants** | `scripts/jarvis.log` (5MB×7, _log JARVIS principal) · `scripts/tts.log` (2MB×7, JARVIS.TTS) · `scripts/tts_perf.log` (1MB×3, filtre `[TTS-PERF]`) — total **~52 MB max** plafonnés |
 | **Bug UI reload (15+ jours)** | **résolu cause racine** (étape 36b — DI explicite soc.py) + palliatif `os.environ` boot_id cache + instrumentation JS-DIAG v2 active en permanence |
@@ -125,8 +125,21 @@ ne bronche pas top ».
 - `709049f` — `refactor(jarvis): DI explicite soc.py - elimine les 4 from jarvis import (etape 36b)`
 - `a8a9c5a` — `test(jarvis): +38 tests terminal/ssh_ws + commands/sse (etape B couverture)`
 - `9a2c23b` — `test(jarvis): +31 tests llm/vram (100%) + chat/file_correct (97%) — couverture`
+- `016b058` — `docs(jarvis): MAJ finale session 2026-05-23 (etapes 35-36 + bug UI reload resolu + couverture)`
+- `5215547` — `refactor(jarvis): mode/ - route /api/mode + DI explicite (etape 37)`
+- `b2cd4c4` — `test(jarvis): +11 tests mode/routes (100% coverage)`
+- `98c9e0c` — `chore(jarvis): cleanup ruff strict — f-string modernisation + noqa documentes`
 
-⚠ **Pour atteindre 95+/100** : (a) sortir `api_mode` dans tuile dédiée (~30 min, +0.5 pt) · (b) tests E2E Playwright nettoyés (~2-3h, +1 pt) · (c) réduction des aliases backward-compat dans jarvis.py (~1-2h risqué, +0.5 pt) · (d) doc auto-générée à partir des docstrings (~1h, +0.5 pt).
+### Décisions architecturales documentées (audit final commit `98c9e0c`)
+
+- **Aliases backward-compat dans jarvis.py (~80 L, 120 aliases)** : conservés. Pattern délibéré (les tests pytest existants consomment `jm._X`). Décision après audit explicite — la réduction est risquée (modifie 30+ tests) pour un gain marginal (≤0.5 pt). À reconsidérer si la maintenance devient pénible.
+- **5 globals mutables avec setters lambda** : pattern legacy assumé (MODEL, _vram_model, SYSTEM_PROMPT, _welcome_data, _AUTO_PROFILE_MODEL). Sortir nécessiterait un refactor au niveau d'application Flask (state object au lieu de globals).
+- **Blueprints HTTP sous-couverts (voice/routes 36%, settings/routes 44%, dev/routes 27%, web/routes 26%)** : décision archi — testés indirectement par E2E Playwright. Mocking Flask route ↔ téléchargements + audio + Ollama coûteux pour bénéfice limité.
+- **Lambdas E731 dans `chat/soc_inject.py` (2)** : noms expressifs (`top`, `kvd`) + usage local strict, conversion en `def` alourdirait sans gain.
+- **Try/except: pass (13 SIM105)** : non convertis en `contextlib.suppress` (plus verbeux, pas plus lisible).
+- **`arr + [x]` patterns (8 RUF005)** : non modernisés en `[*arr, x]` (refactor risqué pour gain nul).
+
+⚠ **Pour atteindre 95+/100** : (a) tests E2E Playwright nettoyés (~2-3 h, +1 pt) · (b) doc auto-générée à partir des docstrings (~1 h, +0.5 pt) · (c) réduction des aliases backward-compat (~1-2 h risqué, +0.5 pt — décidé NON aujourd'hui).
 
 ---
 

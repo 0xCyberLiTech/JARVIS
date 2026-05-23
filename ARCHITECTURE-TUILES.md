@@ -1,8 +1,8 @@
-# JARVIS — Architecture par tuiles (2026-05-23 post étape 35)
+# JARVIS — Architecture par tuiles (2026-05-23 post étape 37)
 
-> Schéma de la structure modulaire JARVIS après le refactor 27-35 du
-> 2026-05-23. **23 tuiles autoportantes** + `blueprints/soc.py` (existant
-> pré-refactor). `jarvis.py` réduit à **1819 lignes** (vs 4814 au départ,
+> Schéma de la structure modulaire JARVIS après le refactor 27-37 du
+> 2026-05-23. **24 tuiles autoportantes** + `blueprints/soc.py` (existant
+> pré-refactor). `jarvis.py` réduit à **1821 lignes** (vs 4814 au départ,
 > −62%) — il reste l'ossature : Flask app, config, CORS, registration des
 > tuiles, bloc `__main__` (MCP subprocess + app.run).
 
@@ -31,7 +31,7 @@
 
 ## Les 23 tuiles + blueprints/soc
 
-### Tuiles HTTP (avec Blueprint Flask) — 14
+### Tuiles HTTP (avec Blueprint Flask) — 15
 
 | Tuile | Routes principales | Rôle |
 |---|---|---|
@@ -49,6 +49,9 @@
 | **terminal/** | `/ws/ssh/<host>`, `/ws/dev` (WebSocket PTY SSH) | Terminal interactif xterm.js |
 | **chat/** | `/api/chat`, `/api/history/last` | **Carrefour LLM** — voir détail ci-dessous |
 | **commands/** | (pas de routes — SSE generators consommés par chat) | 6 SSE VM/reboot/update/service |
+| **mode/** ⭐ | `/api/mode` (GET/POST) | Sélection mode JARVIS (soc/general/code/CR) + swap VRAM |
+
+⭐ = créé étape 37 (2026-05-23)
 
 ### Tuiles helpers (sans routes HTTP) — 9
 
@@ -175,18 +178,19 @@ blueprints/soc._soc_llm_call(prompt)
 de saturation possible). Voir
 `~/.claude/.../memory/jarvis_diag_tools_active.md` pour le détail.
 
-## Chiffres post étape 35 (2026-05-23 15:18)
+## Chiffres post étape 37 + ruff strict cleanup (2026-05-23 17:55)
 
 | Métrique | Valeur |
 |---|---|
-| jarvis.py | 1819 L (722 stmts) |
-| Cumul refactor depuis monolithe | **4814 → 1819 = −62 %** |
-| Tuiles autoportantes | **23** |
+| jarvis.py | 1821 L |
+| Cumul refactor depuis monolithe | **4814 → 1821 = −62 %** |
+| Tuiles autoportantes | **24** (+ blueprints/soc) |
 | Sous-modules chat | 14 |
-| Tests pytest | 1214 pass, 0 skip, 0 fail |
-| Coverage globale | 71 % |
-| ruff | 0 erreur |
+| Tests pytest | **1294 pass · 0 skip · 0 fail** |
+| Coverage globale | **76 %** (7394 stmts · 1806 miss) |
+| ruff | 0 erreur (audit strict B/C4/SIM/UP/RUF passé) |
 | eslint | 0 erreur |
 | Pre-commit/pre-push hooks | actifs |
-| Bug UI reload | résolu (validé end-to-end) |
-| Dette restante connue | `from jarvis import` ×4 dans soc.py (palliatif posé, fix long terme via DI à faire) |
+| Bug UI reload | **résolu cause racine** (DI explicite soc.py étape 36b) + validé end-to-end |
+| TODO/FIXME ouverts | **0** dans le code Marc |
+| Dette restante connue | aliases backward-compat (~80 L), décision archi assumée |
