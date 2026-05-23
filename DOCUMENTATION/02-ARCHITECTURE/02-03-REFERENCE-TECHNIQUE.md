@@ -1,3 +1,16 @@
+---
+title: "Référence technique — stack, composants"
+code: "JARVIS-DOC-02-03"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Valide"
+categorie: "Architecture"
+mots_cles: ["reference", "stack", "composants", "flask", "python", "ollama"]
+---
+
 # JARVIS — Référence Technique
 <!-- 2026-05-22 — v2.1 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed-large · refactor JS terminé · fix perf IPv6 · circuit breaker Ollama · pré-warm Kokoro · hook pre-push · métriques courantes (score, lignes, tests, coverage) → ../BILAN-TECHNIQUE.md §0 -->
 

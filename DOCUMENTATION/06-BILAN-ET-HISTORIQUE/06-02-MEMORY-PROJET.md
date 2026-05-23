@@ -1,3 +1,16 @@
+---
+title: "Mémoire projet — historique chronologique des sessions"
+code: "JARVIS-DOC-06-02"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Valide"
+categorie: "Bilan"
+mots_cles: ["memoire", "historique", "sessions", "refactor", "chronologie"]
+---
+
 # JARVIS — Mémoire projet (2026-05-23 — refactor architecture par tuiles complet, 24 tuiles + bug UI reload résolu cause racine + couverture +282 tests + audit ruff strict)
 
 ## Session 2026-05-23 soirée — étape 37 mode/ + audit ruff strict + clôture honnête

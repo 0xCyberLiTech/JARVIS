@@ -1,3 +1,16 @@
+---
+title: "Procédure de réinstallation / recovery"
+code: "JARVIS-DOC-04-02"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Valide"
+categorie: "Déploiement"
+mots_cles: ["reinstallation", "recovery", "disaster-recovery", "dr"]
+---
+
 # JARVIS — Guide de réinstallation Windows
 
 > Document critique — à conserver dans les sauvegardes.

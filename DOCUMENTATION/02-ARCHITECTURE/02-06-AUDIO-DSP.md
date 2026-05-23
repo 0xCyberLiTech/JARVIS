@@ -1,3 +1,16 @@
+---
+title: "Pipeline audio — Web Audio + TTS chain + DSP"
+code: "JARVIS-DOC-02-06"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Valide"
+categorie: "Architecture"
+mots_cles: ["audio", "dsp", "tts", "kokoro", "edge-tts", "web-audio", "deepfilternet"]
+---
+
 # JARVIS — Architecture audio DSP
 
 Référence technique : la chaîne audio JARVIS (TTS → DSP → output) côté navigateur ET côté serveur Python.

@@ -1,3 +1,16 @@
+---
+title: "Présentation détaillée — JARVIS SOC Platform"
+code: "JARVIS-DOC-01-02"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Valide"
+categorie: "Présentation"
+mots_cles: ["jarvis", "soc", "presentation", "platform", "homelab"]
+---
+
 # JARVIS SOC PLATFORM — Architecture IA & Cybersécurité Homelab
 ### Agent autonome local · Surveillance proactive · Contrôle d'infrastructure · LLM on-premise
 <!-- 0xCyberLiTech · v3.3 · 2026-05-22 — routing 4 branches · phi4:14b + qwen3:8b CR + gemma4 + qwen2.5-coder + mxbai-embed · 25 tests E2E Playwright · ESLint 0 · MCP **12 outils** · 32 modules Python · refactor JS terminé · fix perf IPv6 · circuit breaker Ollama 8 call-sites · pré-warm Kokoro CUDA · SSH write ops 4 couches + audit log forensic · Ollama 0.24.0 · métriques courantes (score, lignes, tests, coverage) → BILAN-TECHNIQUE.md §0 -->

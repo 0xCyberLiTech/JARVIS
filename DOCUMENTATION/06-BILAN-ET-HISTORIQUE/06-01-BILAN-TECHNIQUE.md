@@ -1,3 +1,16 @@
+---
+title: "Bilan technique — score dette, métriques, décisions"
+code: "JARVIS-DOC-06-01"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Valide"
+categorie: "Bilan"
+mots_cles: ["bilan", "dette", "metriques", "score", "coverage"]
+---
+
 # BILAN TECHNIQUE — JARVIS 0xCyberLiTech
 ## Assistant IA local v3.3 — 2026-05-23 (refactor architecture par tuiles complet : 24 tuiles, jarvis.py −62% · bug UI reload résolu racine · couverture +282 tests · score 93/100)
 

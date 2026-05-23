@@ -1,3 +1,16 @@
+---
+title: "Procédure de déploiement (production)"
+code: "JARVIS-DOC-04-01"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Valide"
+categorie: "Déploiement"
+mots_cles: ["deploiement", "production", "setup", "install"]
+---
+
 # JARVIS — Procédure de Déploiement, Exploitation & Améliorations
 
 > Version 3.3 — Mai 2026 (mise à jour 2026-05-14 — chantier dette technique)

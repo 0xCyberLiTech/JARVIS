@@ -1,3 +1,16 @@
+---
+title: "MCP server — 12 outils + Claude Desktop"
+code: "JARVIS-DOC-02-07"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Valide"
+categorie: "Architecture"
+mots_cles: ["mcp", "claude", "desktop", "outils", "integration"]
+---
+
 # JARVIS MCP Server — Pont Claude ↔ JARVIS
 
 Le serveur MCP (Model Context Protocol) expose JARVIS comme un set d'**outils** consommables par Claude Desktop, Claude Code et tout client compatible MCP. Permet à Claude (cloud) d'interroger JARVIS (local) sans passer raw data sensible vers Anthropic.

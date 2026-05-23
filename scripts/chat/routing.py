@@ -8,7 +8,7 @@ Aucun side effect, aucun appel réseau, aucun état partagé.
 Dependency injection : `general_model`, `code_model`, `current_mode` passés en argument
 (les valeurs réelles sont dans jarvis.py).
 
-Voir aussi : `docs/ROUTING-JARVIS.md` pour la stratégie de routing complète (4 modes + bypass).
+Voir aussi : `DOCUMENTATION/02-ARCHITECTURE/02-05-ROUTING-JARVIS.md` pour la stratégie de routing complète (4 modes + bypass).
 """
 
 

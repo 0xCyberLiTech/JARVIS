@@ -1,0 +1,102 @@
+---
+title: "Roadmap — prochaines étapes prévues"
+code: "JARVIS-DOC-07-01"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Validé"
+categorie: "Roadmap"
+mots_cles: ["roadmap", "futur", "evolutions", "v3.4", "feature"]
+---
+
+# Roadmap JARVIS
+
+> Document vivant — mis à jour à chaque session de planification.
+> Date dernière revue : **2026-05-23**.
+
+## Court terme (jours / semaines)
+
+### ✅ Fait (2026-05-23)
+
+- ✅ Refactor monolithe `jarvis.py` 4814 L → 1821 L (−62 %)
+- ✅ 24 tuiles autoportantes avec pattern Blueprint+DI
+- ✅ Bug UI reload résolu cause racine (DI explicite `blueprints/soc.py`)
+- ✅ Couverture 62 % → 76 % (1294 tests)
+- ✅ Observabilité complète (jarvis.log + JS-DIAG v2 + try/except enrich)
+- ✅ Base documentaire `DOCUMENTATION/` créée (cette refonte)
+
+### 🔄 Court terme (à venir)
+
+| Priorité | Tâche | Effort | Gain |
+|---|---|---|---|
+| Moyen | Tests E2E Playwright nettoyés (cover Blueprints HTTP voice/settings/dev/web routes) | 2-3 h | +1 pt dette |
+| Bas | Documentation auto-générée à partir des docstrings Python (Sphinx ?) | 1 h | +0.5 pt |
+| Bas | Réduction des aliases backward-compat (~80 L jarvis.py) — *risqué : modif 30+ tests* | 1-2 h | +0.5 pt |
+| Bas | Sortir `stream_llm` + `_think_filter_step` resté dans jarvis.py vers tuile dédiée | 30 min | clean |
+
+## Moyen terme (mois)
+
+### Features fonctionnelles
+
+| Feature | Description | Effort estimé |
+|---|---|---|
+| **Mode multi-utilisateurs** | ACL granulaires (admin / opérateur / lecture seule) | 1 semaine |
+| **Plugin marketplace tuiles** | Tuile communautaire installable (Grafana, Wazuh, Zabbix) | 2 semaines |
+| **Mode voix continue** | Active listening sans wake-word (mode "Iron Man") | 3 jours |
+| **Historique chat persistant DB** | SQLite remplaçant `jarvis_memory.json` simple | 2 jours |
+| **Notifications push mobile** | Alerte SOC critique vers téléphone Marc (Telegram bot ? ntfy.sh ?) | 1 jour |
+| **Dashboard SOC enrichi** | Tile "JARVIS recommandations" sur dashboard srv-ngix | 1 jour |
+| **MCP plus de tools** | Au-delà des 12 actuels (read_logs_remote, ssh_diagnose_perf, etc.) | 1 jour par tool |
+
+### Amélioration architecture
+
+| Amélioration | Effort | Gain |
+|---|---|---|
+| Containerisation Docker (Dockerfile + docker-compose) | 1 jour | Portabilité homelab |
+| CI/CD GitHub Actions (lint + pytest) | 2 h | Validation auto |
+| Coverage 76 % → 90 %+ | 1 semaine | Confiance refactor |
+
+## Long terme (mois / année)
+
+### Vision
+
+> **JARVIS comme produit open source réutilisable** par d'autres homelabs
+> cybersécurité.
+
+| Étape | Description |
+|---|---|
+| 1. **Generalisation pattern par tuiles** | Documenter le pattern Blueprint+DI pour qu'un tiers puisse créer ses propres tuiles |
+| 2. **Anonymisation** | Retirer les références spécifiques homelab Marc (IPs, hostnames) → config externalisée `jarvis.toml` |
+| 3. **Tests E2E complets** | Validation cross-platform Linux/Windows |
+| 4. **License + README public** | Choix MIT/Apache-2.0 (à valider avec Marc) |
+| 5. **Publication GitHub** | Repo public + démo + screencast |
+| 6. **Community building** | Discord / forum / contributors guide |
+
+## Décisions différées (parking)
+
+Ces idées ont été évoquées mais reportées à plus tard ou non décidées :
+
+- **Mode "agent autonome"** (JARVIS prend des décisions seul sans validation) :
+  trop risqué pour l'instant, garde-fou Marc validation.
+- **Intégration Claude API cloud directe depuis JARVIS** : violerait le
+  principe "100 % local" sauf si stricte escalade vers Anthropic.
+- **Interface mobile native** : webapp responsive suffit actuellement.
+
+## Risques techniques connus
+
+| Risque | Mitigation actuelle | Action future |
+|---|---|---|
+| Aliases backward-compat (~80 L) | Documenté + tests les couvrent | Refactor progressif si maintenance pénible |
+| 5 globals mutables (MODEL, _vram_model, etc.) | Setters lambda + DI accesseurs | Refonte state object au niveau app Flask |
+| Blueprints HTTP < 80 % coverage (voice, settings, dev, web) | Tests E2E Playwright (existants partiels) | Nettoyage suite Playwright |
+| Dépendance Edge-TTS (Internet) | Fallback Kokoro/Piper/SAPI5 local | RAS |
+| Dépendance Ollama (process séparé) | Circuit breaker 8 call-sites (refus 1ms) | RAS |
+
+## Comment proposer une nouvelle évolution
+
+1. Créer un fichier `07-02b-PROPOSITION-NOMFEATURE.md` (statut : Brouillon)
+2. Décrire : besoin, alternatives, impact archi, effort estimé
+3. Validation Marc → statut passe à Validé
+4. Implémentation → entrée dans cette roadmap

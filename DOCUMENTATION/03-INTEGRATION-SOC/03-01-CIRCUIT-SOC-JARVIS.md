@@ -1,3 +1,16 @@
+---
+title: "Circuit d'intégration SOC ↔ JARVIS"
+code: "JARVIS-DOC-03-01"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Valide"
+categorie: "Intégration"
+mots_cles: ["soc", "jarvis", "integration", "circuit", "defense-chain"]
+---
+
 ﻿# Circuit logique SOC + JARVIS — 0xCyberLiTech
 **Date : 2026-05-22 — v2.7** · routing 4 branches (soc/general/code/code_reasoning) · MCP **12 outils** · 32 modules Python · jarvis.css → 8 fichiers · git local + pre-commit + pre-push pytest · métriques courantes (score, lignes, tests, coverage) → [BILAN-TECHNIQUE.md §0](BILAN-TECHNIQUE.md)
 

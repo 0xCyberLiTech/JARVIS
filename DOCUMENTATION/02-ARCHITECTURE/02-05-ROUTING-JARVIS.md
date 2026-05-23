@@ -1,3 +1,16 @@
+---
+title: "Routing JARVIS — 4 modes + bypass Python + sécurité"
+code: "JARVIS-DOC-02-05"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Valide"
+categorie: "Architecture"
+mots_cles: ["routing", "modes", "bypass", "securite", "rfc1918"]
+---
+
 # JARVIS — Routing automatique des requêtes
 
 Référence technique : comment JARVIS décide quoi faire d'une requête utilisateur.

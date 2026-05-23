@@ -1,3 +1,16 @@
+---
+title: "Architecture par tuiles (24 tuiles, post étape 37)"
+code: "JARVIS-DOC-02-02"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Valide"
+categorie: "Architecture"
+mots_cles: ["jarvis", "tuiles", "refactor", "blueprint", "di"]
+---
+
 # JARVIS — Architecture par tuiles (2026-05-23 post étape 37)
 
 > Schéma de la structure modulaire JARVIS après le refactor 27-37 du

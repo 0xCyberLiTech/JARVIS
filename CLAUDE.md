@@ -11,21 +11,31 @@
 
 - Version : **v3.3** (interface holographique)
 - Refactor JS : **terminé** (`jarvis_main.js` −98,1%, 18 modules extraits)
-- 📊 Score dette, lignes, tests, coverage → **source unique : [`BILAN-TECHNIQUE.md` §0](BILAN-TECHNIQUE.md)** (ne pas recopier ces chiffres ailleurs)
+- 📊 Score dette, lignes, tests, coverage → **source unique : [`DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md`](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md) §0** (ne pas recopier ces chiffres ailleurs)
 
-## Sources de vérité (ordre de priorité)
+## Base documentaire
 
-1. **`MEMORY.md`** — historique complet par session · décisions · commits SHA
-2. **`BILAN-TECHNIQUE.md`** — état technique structuré · chiffres · décomposition score
-3. **`RUNBOOK.md`** — reconstruction DR · secrets · vérifs
-4. **`docs/`** — 7 fichiers de référence :
-   - `AUDIO-DSP.md` — Web Audio graph (4 BiquadFilter + 2 Comp + Convolver) · TTS chain · DeepFilterNet CUDA · Voice Lab
-   - `MCP-SERVER.md` — 12 outils · config Claude Desktop · watchdog · port 5010
-   - `REFERENCE-TECHNIQUE.md` — architecture globale
-   - `ROUTING-JARVIS.md` — 4 modes · 9 bypass Python · sécurité (RFC1918, `_BLOCKED_SSH`, whitelists)
-   - `DEPLOIEMENT.md` — setup prod
-   - `REINSTALLATION.md` — recovery
-   - `SUPPORT-INFOGERANCE.md` — SLA support
+📚 **Tout vit dans `DOCUMENTATION/`** (refonte 2026-05-23 — remplace l'ancien dossier `docs/` + fichiers racine éparpillés). Voir l'**[INDEX général](DOCUMENTATION/00-INDEX.md)** pour la navigation complète des 25 documents organisés en 8 catégories numérotées.
+
+### Sources de vérité prioritaires
+
+1. **[`DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-02-MEMORY-PROJET.md`](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-02-MEMORY-PROJET.md)** — historique complet par session · décisions · commits SHA
+2. **[`DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md`](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md)** — état technique structuré · chiffres · décomposition score
+3. **[`DOCUMENTATION/05-EXPLOITATION/05-01-RUNBOOK.md`](DOCUMENTATION/05-EXPLOITATION/05-01-RUNBOOK.md)** — reconstruction DR · secrets · vérifs
+4. **[`DOCUMENTATION/02-ARCHITECTURE/`](DOCUMENTATION/02-ARCHITECTURE/)** — 7 docs référence technique :
+   - `02-01-ARCHITECTURE-GLOBALE.md` — vue ensemble JARVIS
+   - `02-02-ARCHITECTURE-TUILES.md` — schéma 24 tuiles + flux requêtes
+   - `02-03-REFERENCE-TECHNIQUE.md` — stack, composants détaillés
+   - `02-04-SCHEMA-IA-LOCAL.md` — Ollama + modèles + RAG
+   - `02-05-ROUTING-JARVIS.md` — 4 modes · 9 bypass Python · sécurité (RFC1918, `_BLOCKED_SSH`, whitelists)
+   - `02-06-AUDIO-DSP.md` — Web Audio graph · TTS chain · DeepFilterNet · Voice Lab
+   - `02-07-MCP-SERVER.md` — 12 outils · config Claude Desktop · port 5010
+
+### Autres docs critiques
+
+- [`DOCUMENTATION/05-EXPLOITATION/05-03-OBSERVABILITE-LOGS.md`](DOCUMENTATION/05-EXPLOITATION/05-03-OBSERVABILITE-LOGS.md) — jarvis.log + JS-DIAG + garde-fous idempotence
+- [`DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-03-HISTORIQUE-INCIDENTS.md`](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-03-HISTORIQUE-INCIDENTS.md) — post-mortems (bug UI reload, etc.)
+- [`DOCUMENTATION/07-ROADMAP/07-01-ROADMAP.md`](DOCUMENTATION/07-ROADMAP/07-01-ROADMAP.md) — prochaines étapes
 
 ## Stack
 

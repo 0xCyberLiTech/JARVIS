@@ -1,3 +1,16 @@
+---
+title: "Schéma IA locale (Ollama, modèles, RAG)"
+code: "JARVIS-DOC-02-04"
+version: "1.0"
+date_creation: "2026-05-23"
+date_revision: "2026-05-23"
+auteur: "Marc Sabater (0xCyberLiTech)"
+contributeurs: ["Claude (Anthropic)"]
+statut: "Valide"
+categorie: "Architecture"
+mots_cles: ["ia", "ollama", "modeles", "rag", "phi4", "gemma4"]
+---
+
 # SCHÉMA — ARCHITECTURE IA LOCALE 0xCyberLiTech
 <!-- Mise à jour : 2026-05-22 — v9 — routing 4 branches SOC/GÉNÉRAL/CODE/CR · phi4:14b + qwen3:8b · mxbai-embed · refactor JS terminé · métriques courantes (score, lignes, tests, coverage) → BILAN-TECHNIQUE.md §0 -->
 

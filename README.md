@@ -1,219 +1,120 @@
 # JARVIS — Assistant IA Personnel v3.3
 
-Interface web locale type Iron Man : chat IA, terminal intégré, monitoring GPU/CPU, explorateur de fichiers, gestionnaire de tâches, DSP audio stéréo hardware-style, éditeur audio IA, Voice Lab, STT local.
+Interface web locale type Iron Man : chat IA, terminal intégré, monitoring GPU/CPU, explorateur de fichiers, gestionnaire de tâches, DSP audio stéréo, éditeur audio IA, Voice Lab, STT local.
 
-> Créateur interface : **0xcyberlitech**
+> **Créateur** : Marc Sabater (0xcyberlitech)
+> **Version** : v3.3 (interface holographique)
 
-## Stack
+---
 
-| Composant | Technologie |
-|-----------|-------------|
-| Backend   | Python 3.11 + Flask (port 5000, loopback only) — jarvis.py orchestrateur · ~150 routes · 33 modules Python extraits |
-| LLM SOC   | Ollama — phi4:14b (SOC défaut · 9.1 GB · full VRAM · zéro swap) |
-| LLM GÉNÉRAL | gemma4:latest (GÉNÉRAL + VOCAL + vision multimodal) |
-| LLM CODE  | qwen2.5-coder:14b (mode CODE · dev srv-dev-1 · 9.0 GB) |
-| LLM cloud | — (non configuré) |
-| TTS défaut | edge-tts fr-CA-AntoineNeural → fallback auto Kokoro ff_siwis si internet KO |
-| TTS neural local | Kokoro neural (CUDA) · XTTS v2 coqui-tts 0.27.5 (58 voix + voice prints) |
-| TTS hors-ligne | Piper neural (fr_FR-upmc-medium.onnx) + SAPI5 pyttsx3 |
-| STT local | faster-whisper `large-v3-turbo` FR, VAD filter, CUDA · initial_prompt vocabulaire SOC |
-| RAG | mxbai-embed-large · 1024 dims · seuil 0.35 · TTL 300s · MEMORY.md + CIRCUIT_SOC_JARVIS + RUNBOOK |
-| DSP audio | numpy/scipy — EQ biquad 5 bandes, compresseur, Haas stéréo, DeepFilterNet GPU |
-| GPU stats | pynvml RTX 5080 Blackwell — P-state, PCIe, VRAM, watts |
-| Frontend  | HTML/CSS/JS — thème JARVIS holographique · sources chargées directement (`?v={{ boot_id }}`) |
-| Audio Web | Web Audio API — EQ+Compresseur live, waveform, analyseur spectral stéréo |
+## 📚 Documentation
 
-## Lancement
+> **Toute la documentation projet vit dans [`DOCUMENTATION/`](DOCUMENTATION/00-INDEX.md)** — base documentaire structurée (25 docs, 8 catégories numérotées, frontmatter YAML).
+
+| Pour | Aller à |
+|---|---|
+| **Vue d'ensemble projet** | [01-PRESENTATION/01-01-VISION-PROJET.md](DOCUMENTATION/01-PRESENTATION/01-01-VISION-PROJET.md) |
+| **Architecture technique** | [02-ARCHITECTURE/](DOCUMENTATION/02-ARCHITECTURE/) (7 docs) |
+| **Installation / déploiement** | [04-DEPLOIEMENT/04-01-DEPLOIEMENT.md](DOCUMENTATION/04-DEPLOIEMENT/04-01-DEPLOIEMENT.md) |
+| **Procédures opérationnelles** | [05-EXPLOITATION/05-01-RUNBOOK.md](DOCUMENTATION/05-EXPLOITATION/05-01-RUNBOOK.md) |
+| **État technique actuel** | [06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md) |
+| **Index complet** | [`DOCUMENTATION/00-INDEX.md`](DOCUMENTATION/00-INDEX.md) |
+| **Briefing IA Claude** | [`CLAUDE.md`](CLAUDE.md) |
+
+---
+
+## 🚀 Lancement rapide
 
 ```bat
 start_dashboard.bat
 ```
 
-Gère automatiquement : venv, démarrage Ollama, ouverture navigateur → `http://localhost:5000`
+Démarre venv + Ollama + ouvre `http://localhost:5000`.
 
-Arrêt : `stop_jarvis.bat` ou raccourci `JARVIS - Arrêt.lnk` sur le bureau.
+Arrêt : `stop_jarvis.bat` ou raccourci bureau `JARVIS - Arrêt.lnk`.
 
-## Structure
+---
+
+## 🧠 Stack résumée
+
+| Couche | Technologie |
+|---|---|
+| Backend | Python 3.11 + Flask (port 5000) — **24 tuiles autoportantes** + `blueprints/soc.py` |
+| LLM local | Ollama — 5 modèles : phi4:14b (SOC) · gemma4 (GENERAL+vision) · qwen2.5-coder:14b (CODE) · qwen3:8b (CR) · mxbai-embed-large (RAG) |
+| TTS chain | edge-tts → Kokoro CUDA → Piper → SAPI5 (fallback auto) |
+| STT | faster-whisper `large-v3-turbo` CUDA |
+| Frontend | Vanilla JS · 21 modules · Web Audio API · xterm.js · Monaco Editor |
+| MCP | 12 outils exposés à Claude Desktop (port 5010) |
+| Tests | pytest **1294 pass** · ruff 0 · eslint 0 · coverage **76 %** |
+
+Détails complets : [`DOCUMENTATION/02-ARCHITECTURE/`](DOCUMENTATION/02-ARCHITECTURE/).
+
+---
+
+## 📁 Structure du projet
 
 ```
 JARVIS/
-├── scripts/
-│   ├── jarvis.py                      ← serveur Flask principal (orchestrateur · ~150 routes · 33 modules satellites)
-│   ├── 31 modules dédiés/             ← Phase 3 : audio (5) + bypass (8) + infra (2) + chat/LLM (15) + audio_dsp.py (chantier 2026-05-14) — voir docs/ROUTING-JARVIS.md
-│   ├── blueprints/
-│   │   └── soc.py                     ← Blueprint SOC (auto-engine · SSH 4 hôtes)
-│   ├── jarvis_mcp_server.py           ← MCP bridge Claude Code ↔ JARVIS (12 outils (+jarvis_ioc_status Sprint 18d 2026-05-16))
-│   ├── templates/
-│   │   ├── jarvis.html                ← UI shell Jinja2 (204 lignes · 0 handler inline)
-│   │   ├── tabs/                      ← 8 onglets inclus
-│   │   └── partials/modals.html       ← modaux globaux
-│   ├── static/
-│   │   ├── jarvis_main.js             ← point d'entrée JS (refactor JS terminé · 18 modules)
-│   │   ├── jarvis_mixing.js           ← DSP mixer stéréo (1375 lignes)
-│   │   ├── recorder.js                ← DAT RECORDER R-1 IIFE (660 lignes)
-│   │   ├── voice_print.js             ← Voice Print v2 IIFE (852 lignes)
-│   │   ├── js/                        ← 18 modules JS extraits (audio_viz·chat_core·chat_ui·boot_init·settings_llm·… — voir docs/ROUTING-JARVIS.md)
-│   │   └── css/                       ← 8 fichiers CSS par secteur (chantier 2026-05-14 · ex-jarvis.css 5270L)
-│   ├── jarvis_rag/                    ← base de connaissances locale
-│   │   ├── meta.json                  ← 599 chunks (MEMORY.md×2 + CIRCUIT_SOC + RUNBOOK)
-│   │   └── embeddings.npy             ← vecteurs mxbai-embed-large float32 1024-dim
-│   ├── jarvis_llm_params.json         ← paramètres LLM persistés
-│   ├── jarvis_model.json              ← modèle actif Ollama
-│   ├── jarvis_dsp_params.json         ← paramètres DSP audio + moteur TTS
-│   ├── jarvis_memory.json             ← mémoire contextuelle JARVIS
-│   ├── jarvis_memory_summary.json     ← résumés sessions inter-redémarrages
-│   ├── jarvis_welcome.json            ← texte preloader d'accueil
-│   ├── jarvis_system_prompt.txt       ← prompt système (override)
-│   ├── jarvis_prompt_profiles.json    ← profils prompt sauvegardés
-│   ├── start_dashboard.bat            ← démarrage complet
-│   ├── stop_jarvis.bat                ← arrêt du serveur
-│   ├── voices/                        ← modèles Piper TTS hors-ligne
-│   │   └── fr_FR-upmc-medium.onnx    ← 74 MB
-│   └── models/                        ← XTTS v2 (coqui-tts)
-│       └── tts_models/multilingual/multi-dataset/xtts_v2
-├── docs/
-│   ├── DEPLOIEMENT.md                 ← exploitation, API, dépannage
-│   ├── REINSTALLATION.md              ← réinstallation Windows complète
-│   ├── AUDIT_JARVIS.md                ← audit sécurité (10/10)
-│   └── REFERENCE-TECHNIQUE.md         ← référence technique complète (architecture · historique)
-├── README.md
-└── MEMORY.md
+├── DOCUMENTATION/          ← Base documentaire (25 docs, 8 catégories)
+│   ├── 00-INDEX.md
+│   ├── 01-PRESENTATION/    ← Vision, présentation, équipe
+│   ├── 02-ARCHITECTURE/    ← 7 docs techniques (tuiles, routing, audio, MCP, ...)
+│   ├── 03-INTEGRATION-SOC/ ← Circuit SOC ↔ JARVIS
+│   ├── 04-DEPLOIEMENT/     ← Installation + recovery
+│   ├── 05-EXPLOITATION/    ← Runbook + support + observabilité
+│   ├── 06-BILAN-ET-HISTORIQUE/  ← Bilan technique + mémoire + incidents
+│   ├── 07-ROADMAP/         ← Évolutions prévues + dette restante
+│   └── 08-ANNEXES/         ← Glossaire + conventions code
+├── scripts/                ← Code source Python + JS + CSS + templates
+│   ├── jarvis.py           ← Ossature Flask (1821 L, register 24 Blueprints)
+│   ├── 24 tuiles/          ← Modules autoportants (chat, voice, soc, ...)
+│   ├── blueprints/soc.py   ← Blueprint SOC (auto-engine + 24 routes)
+│   ├── jarvis_mcp_server.py ← MCP bridge (12 outils Claude Desktop)
+│   ├── static/             ← JS (21 modules) + CSS (8 fichiers) + templates HTML (10)
+│   ├── jarvis_rag/         ← RAG mxbai-embed-large (599 chunks)
+│   ├── *.log               ← jarvis.log + tts.log + tts_perf.log (rotation auto, ~52 MB max)
+│   ├── start_dashboard.bat
+│   └── stop_jarvis.bat
+├── tests/                  ← pytest (1294 tests, 76 % coverage)
+├── tools/                  ← profile_tts.py et autres outils dev
+├── CLAUDE.md               ← Briefing IA Claude (collaboration développement)
+└── README.md               ← Ce fichier
 ```
 
-## Onglets UI
+---
 
-| Onglet | Fonctionnalité |
-|--------|---------------|
-| Chat IA | Conversation LLM streaming, TTS auto, tool calling, recherche web DDG, STT mic |
-| Settings | LLM params (temp/top_p/num_ctx), profils prompt, provider IA, préréglages |
-| ◈ DSP AUDIO | AI AUDIO RACK — EQ 5 bandes, compresseur, DeepFilter, Haas stéréo, analyseur spectral, VU-meter JARVIS, moteur TTS |
-| ✂ AUDIO EDITOR | Éditeur audio IA — waveform L/R, transport, EQ paramétrique 5 bandes (live+offline), compresseur live, fade in/out, denoise, export multi-bitdepth |
-| Voice Lab | Synthèse vocale — moteur TTS, paramètres voix, EQ, presets, comparateur A/B |
-| Monitor | Stats temps réel CPU/RAM/GPU/RTX 5080 (P-state, PCIe, throttle, watts) |
-| Terminal | Shell intégré (cmd/PowerShell), historique cd, taille police ajustable |
-| Fichiers | Explorateur lecteurs auto-détectés, breadcrumb, éditeur code, analyse IA |
-| Tâches | Tâches automatisées avec scheduling |
-| Preloader | Écran d'accueil JARVIS — boot sequence animée, frame alu brossé, décos HUD |
+## 🛡️ Sécurité (règles ABSOLUES)
 
-## Moteurs TTS
+- **RFC1918 immuable** — 192.168.x / 10.x / 172.16-31.x / 127.x JAMAIS bannies
+- **`_BLOCKED_SSH` 29 patterns** — whitelist SSH read-only
+- **`_ALLOWED_SOC_RESTART_SVCS`** — source unique, immutable sans validation
+- **Injection SOC = 100 % serveur** — JAMAIS dans l'historique chat
+- **Auto-engine SOC** — actif UNIQUEMENT en mode `soc`
+- **Zéro raw data vers cloud LLM** — JARVIS filtre/agrège en local, escalade rare
 
-| Moteur | Connexion | Config |
-|--------|-----------|--------|
-| `edge` (défaut) | En ligne | fr-CA-AntoineNeural · fallback auto Kokoro si internet KO |
-| `kokoro` | Hors-ligne CUDA | ff_siwis FR · speed 0.5×–2.0× · préchargé au démarrage |
-| `xtts` | Hors-ligne CUDA | coqui-tts 0.27.5 · 58 voix multilingues + voice prints |
-| `piper` | Hors-ligne | fr_FR-upmc-medium.onnx (74 MB) |
-| `sapi` | Hors-ligne | Microsoft Hortense FR (inclus Windows) |
+Détails : [`DOCUMENTATION/02-ARCHITECTURE/02-05-ROUTING-JARVIS.md`](DOCUMENTATION/02-ARCHITECTURE/02-05-ROUTING-JARVIS.md).
 
-Changement via UI DSP ou `jarvis_dsp_params.json` → `"tts_engine": "edge"|"kokoro"|"xtts"|"piper"|"sapi"`.
+---
 
-Chaîne fallback automatique : edge → Kokoro (si internet KO) → Piper → SAPI5.
+## 🔧 Qualité
 
-## Modèles Ollama actifs
+- **Tests** : pytest 1294 / coverage 76 % (pre-push hook bloquant)
+- **Linter Python** : ruff 0 erreur (config `ruff.toml`)
+- **Linter JS** : eslint 0 erreur (config `eslint.config.js`)
+- **Pre-commit hooks** : ruff + eslint bloquants
+- **Pre-push hook** : pytest 1294 tests bloquant
+- **Observabilité** : `jarvis.log` persistant 5 MB × 7 + JS-DIAG v2 + try/except enrich + 6 garde-fous idempotence
 
-| Modèle | VRAM | Rôle |
-|--------|------|------|
-| phi4:14b | ~9.1 GB | SOC · full VRAM · zéro swap |
-| gemma4:latest | ~9.6 GB | GÉNÉRAL + VOCAL + vision (multimodal) |
-| qwen2.5-coder:14b | ~9.0 GB | CODE · multi-fichiers · dev srv-dev-1 |
-| mxbai-embed-large | ~0.7 GB | RAG embeddings · 1024 dims · keep_alive 10m (dé-épinglé 2026-05-20) |
+Score honnête actuel : **93/100** — décomposition dans [`DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md`](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md) §0 (source unique des métriques).
 
-## Paramètres LLM (`jarvis_llm_params.json`)
+---
 
-| Paramètre | Valeur active |
-|-----------|--------------|
-| temperature | 0.5 |
-| num_predict | 4096 |
-| top_k | 40 |
-| num_ctx | 8192 (adaptatif : SOC=8192 · court=4096) — SOC 16384→8192 le 2026-05-20 (optimisation VRAM) |
+## 🤝 Contribuer
 
-## Provider IA
+Voir [`DOCUMENTATION/08-ANNEXES/08-02-CONVENTIONS-CODE.md`](DOCUMENTATION/08-ANNEXES/08-02-CONVENTIONS-CODE.md) pour les conventions Python/JS/Git.
 
-- `ollama` (local, défaut) — 3 branches de routing :
-  - **phi4:14b** (mode SOC défaut · 9.1 GB · full VRAM · zéro swap)
-  - **gemma4:latest** (mode GÉNÉRAL+VOCAL+vision multimodal)
-  - **qwen2.5-coder:14b** (mode CODE · boucle dev srv-dev-1)
-  - **mxbai-embed-large** (RAG embeddings · 1024 dims · obligatoire)
-- ⚠️ Supprimés : phi4-reasoning:plus · qwen2.5:14b · deepseek-r1:14b · llava-phi3:latest · nomic-embed-text
+---
 
-## Machine cible
+## 📜 License
 
-- GPU : **RTX 5080** (Blackwell, CUDA 12, 16 GB GDDR7)
-- OS : Windows 11 Pro
-- Python : 3.11
-
-## Intégration SOC Dashboard
-
-JARVIS est intégré dans le dashboard SOC (`monitoring-index.html` v3.97.157) — **optionnel,
-le SOC reste 100% opérationnel si JARVIS est éteint.**
-
-| Élément | Description |
-|---------|-------------|
-| Tuile JARVIS | Dans la grille INFRASTRUCTURE — statut, modèle LLM, compteurs session |
-| Panel JARVIS | FAB bas-droite + badge header — chat, quick prompts (14), historique |
-| Auto-engine | Analyse auto déclenchée à chaque refresh 60s si JARVIS ONLINE |
-| TTS | Lecture vocale via `edge-tts` (localhost:5000) |
-
-**Démarrer JARVIS pour le SOC :**
-```bat
-cd C:\Users\mmsab\Documents\0xCyberLiTech\JARVIS\scripts
-python jarvis.py
-```
-→ Ouvrir le dashboard SOC : http://192.168.1.50:8080/ (LAN)
-→ JARVIS se connecte automatiquement depuis le navigateur via `http://localhost:5000`
-
-## Documentation
-
-| Fichier | Contenu |
-|---------|---------|
-| [`docs/DEPLOIEMENT.md`](docs/DEPLOIEMENT.md) | Exploitation, routes API, dépannage |
-| [`docs/REINSTALLATION.md`](docs/REINSTALLATION.md) | Réinstallation Windows complète |
-| [`docs/ROUTING-JARVIS.md`](docs/ROUTING-JARVIS.md) | **Routing automatique** : 4 modes · 9 bypass Python · sécurité (RFC1918, _BLOCKED_SSH, whitelists) |
-| [`docs/MCP-SERVER.md`](docs/MCP-SERVER.md) | **MCP server** : pont Claude ↔ JARVIS · **12 outils (+jarvis_ioc_status Sprint 18d 2026-05-16)** détaillés (+`jarvis_defense_24h` 2026-05-16) · config Claude Desktop · watchdog |
-| [`docs/AUDIO-DSP.md`](docs/AUDIO-DSP.md) | **Audio DSP** : Web Audio graph (EQ+Comp+Limiter+FX) · 4 engines TTS · STT large-v3-turbo · DeepFilterNet CUDA · Voice Lab |
-| [`docs/AUDIT_JARVIS.md`](docs/AUDIT_JARVIS.md) | Audit sécurité — 10/10 — v2.6 — 0 gap |
-| [`docs/REFERENCE-TECHNIQUE.md`](docs/REFERENCE-TECHNIQUE.md) | Référence technique complète — architecture, historique des versions, qualité |
-| [`BILAN-TECHNIQUE.md`](BILAN-TECHNIQUE.md) | **Source unique des métriques courantes** — score dette, lignes, tests, coverage (§0) |
-| [`docs/ROADMAP-V33.md`](docs/ROADMAP-V33.md) | Fonctionnalités v3.3 planifiées |
-| [`MEMORY.md`](MEMORY.md) | État projet, stack, historique corrections |
-
-## Qualité — chantier dette technique 2026-05-14/15
-
-Audit honnête et chantier de dette technique — **score dette, tests et coverage : voir [`BILAN-TECHNIQUE.md` §0](BILAN-TECHNIQUE.md)** (source unique). Travaux du chantier :
-- **Dépôt git LOCAL** initialisé (100% local, aucun remote — règle « rien sur le web ») · commits atomiques
-- **Outillage qualité** : `ruff.toml` (Python, baseline 98 → 0 erreurs · 2 vrais bugs F821 corrigés) · `eslint.config.js` (JS, 0 erreur) · `.pre-commit-config.yaml` (hooks bloquants ruff + eslint, 100% locaux)
-- **Architecture modulaire** : 31 modules Python extraits de `jarvis.py` (ex-monolithe) · `audio_dsp.py` (bloc DSP) · `jarvis.css` éclaté en 8 fichiers `static/css/` · **refactor JS terminé** : `jarvis_main.js` −98,1%, **18 modules** extraits dans `static/js/`
-- **Tests E2E** : 25 tests Playwright (dont 2 smoke tests LLM `/api/chat`)
-
-| Commande | Rôle | Pré-requis |
-|----------|------|------------|
-| `npm test` | Suite Playwright E2E (25 tests · ~1m48s) | JARVIS up sur :5000 |
-| `npm run test:headed` | Tests E2E avec navigateur visible | JARVIS up |
-| `npm run test:ui` | Mode UI interactif Playwright | JARVIS up |
-| `npm run lint:js` | ESLint sur les fichiers JS applicatifs | — |
-| `npm run lint:py` | Ruff sur `scripts/` | — |
-| `ruff check scripts/` | Lint Python (config `ruff.toml`) | — |
-
-### Pre-commit hooks (bloquants)
-
-Depuis le chantier dette 2026-05-14, un hook `pre-commit` **bloque tout commit**
-qui ne passe pas les linters. Configuration `.pre-commit-config.yaml` — hooks
-100% locaux (aucun téléchargement réseau) :
-- **ruff-check** : lint Python sur les `*.py` modifiés
-- **eslint** : lint JS sur les fichiers applicatifs `static/`
-
-Installation après un clone / une réinstallation : `pre-commit install`
-Bypass exceptionnel (commit urgent) : `git commit --no-verify`
-
-Tests E2E couverts (`tests/e2e/` · **25 tests** · 11 fichiers spec) :
-- **boot** · page charge sans erreur console · 7 tabs rendus
-- **api** · `/api/health` · `/api/mode` GET · cycle mode soc↔general (REST)
-- **tabs** · navigation Monitor / SETTINGS / DSP AUDIO
-- **chat-ui** · tab JARVIS AI actif par défaut · `#user-input` éditable
-- **soc-tab** · compteurs (ban/fail/ok/ids) · actions list · chart day
-- **dsp-voicelab** · DAT player buttons · 4 engines TTS · A/B slots
-- **settings-tasks** · facts list + prompt badge · task creation form
-- **mode-ui** · clic boutons #btn-mode-general/soc → propagation `/api/mode` (UI ↔ backend)
-- **modals** · DAT/MIXER modals open/close cycle complet
-- **dsp-interactive** · sliders EQ low/high/air → labels mis à jour en temps réel
-- **chat-llm-smoke** · 2 smoke tests LLM — flux SSE réel `/api/chat` (tokens + done:true) + capture historique
+À définir — candidat MIT pour publication future. Pour l'instant : usage privé Marc Sabater (0xCyberLiTech).
