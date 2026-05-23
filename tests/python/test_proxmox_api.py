@@ -2,7 +2,7 @@
 import json
 from unittest.mock import MagicMock
 
-import proxmox_api
+from proxmox import api as proxmox_api
 
 
 def _reset_cache():

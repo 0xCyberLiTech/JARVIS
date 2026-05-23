@@ -22,7 +22,8 @@ import requests
 _log = logging.getLogger("jarvis.proxmox_api")
 
 # ── Constantes ────────────────────────────────────────────────
-PVE_CONFIG_PATH = Path(__file__).parent / "jarvis_pve.json"
+# Module dans scripts/proxmox/ → .parent.parent pour atteindre scripts/.
+PVE_CONFIG_PATH = Path(__file__).parent.parent / "jarvis_pve.json"
 PVE_CACHE_TTL = 30  # secondes
 
 # Mots-clés déclenchant l'injection PVE dans le system prompt

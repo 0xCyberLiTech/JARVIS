@@ -555,7 +555,7 @@ import deferred_speak as _deferred_speak
 import files as _files
 import llm_opts as _llm_opts_mod
 import memory as _memory
-import proxmox_api as _pve_api
+from proxmox import api as _pve_api
 import rag as _rag
 import rag_live as _rag_live_mod
 import security_whitelists as _sec
