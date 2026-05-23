@@ -1,13 +1,14 @@
 """Diagnostics système — GPU/CPU/RAM/disque/Ollama + compteur mémoire.
 
-Extrait de jarvis.py le 2026-05-23 (refactor incrémental jarvis.py étape 1).
-Cluster consommé uniquement par la route `/api/sysdiag` (et le polling de
-santé). Side-effect free, sauf `_diag_ollama` qui peut déclencher une alerte
-vocale via `_speak` injecté quand Ollama passe d'OK à DOWN.
+Tuile `system` — brique de bas niveau (lectures hardware/OS/Ollama).
+Consommée par `routes.api_sysdiag`. Side-effect free sauf `_diag_ollama`
+qui peut déclencher une alerte vocale via `_speak` injecté quand Ollama
+passe d'OK à DOWN.
 
-Dépendances injectées par `init()` : speak, ollama_url, memory_file.
 État interne `_ollama_prev_ok` : anti-spam de l'alerte vocale (un seul TTS
 sur la transition OK→DOWN, pas à chaque sondage).
+
+Dépendances injectées par `init()` : speak, ollama_url, memory_file.
 """
 import json
 import time
@@ -19,7 +20,7 @@ import requests as req
 _GB_BYTES = 1 << 30
 _OLLAMA_DIAG_TIMEOUT_S = 3
 
-# Dépendances injectées par init() — depuis jarvis.py
+# Dépendances injectées par init() — depuis l'ossature (jarvis.py).
 _speak       = None
 _ollama_url  = None
 _memory_file = None
@@ -28,7 +29,7 @@ _memory_file = None
 _ollama_prev_ok: bool | None = None
 
 
-def init(speak, ollama_url, memory_file) -> None:
+def init(*, speak, ollama_url, memory_file) -> None:
     """Injecte les dépendances (TTS speak + URL Ollama + chemin mémoire)."""
     global _speak, _ollama_url, _memory_file
     _speak       = speak

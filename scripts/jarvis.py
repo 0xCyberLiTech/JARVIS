@@ -8,7 +8,6 @@ import json
 import logging
 import logging.handlers
 import os
-import platform
 import re
 import shlex
 import subprocess
@@ -562,7 +561,7 @@ import sse_helpers as _sse
 import ssh_terminal as _ssh_term
 import stream_tokens as _stream_tokens_mod
 import stt as _stt
-import sys_diag as _sys_diag
+import system as _system
 import tts_cleaner as _tts_cleaner
 import tts_dedup as _tts_dedup
 import tts_engines as _tts_eng
@@ -2582,75 +2581,26 @@ def api_welcome_evolve():
         return Response(json.dumps({"ok": False, "error": str(e)}), mimetype="application/json")
     return Response('{"ok":false,"error":"parse failed"}', mimetype="application/json")
 
-# ── Diagnostic Système ────────────────────────────────────────
-# Cluster diagnostics système (_diag_gpu/_diag_ollama/_diag_cpu_temp/
-# _diag_memory_count/_diag_cpu_ram_disk) extrait dans sys_diag.py — refactor
-# incrémental jarvis.py étape 1 (2026-05-23). État _ollama_prev_ok déplacé
-# dans le module. DI : speak via lambda (préserve les monkeypatch de test) +
-# OLLAMA_URL + MEMORY_FILE. Alias légers → la route /api/sysdiag inchangée.
-_sys_diag.init(
-    speak=lambda *a, **k: speak(*a, **k),
-    ollama_url=OLLAMA_URL,
-    memory_file=MEMORY_FILE,
+# ── Tuile system — diagnostics matériel/OS/LLM /api/sysdiag ───────────────
+# Refactor jarvis.py étape 3 (2026-05-23) : passage à l'architecture par
+# tuiles. La route, les fonctions _diag_* et l'agrégation transverse vivent
+# désormais dans scripts/system/ (tuile autoportante, zéro import vers
+# jarvis). Ici, l'ossature se contente d'injecter les dépendances + enregistrer
+# le Blueprint.
+_system.init(
+    speak          = lambda *a, **k: speak(*a, **k),
+    limiter        = limiter,
+    ollama_url     = OLLAMA_URL,
+    memory_file    = MEMORY_FILE,
+    nvml_handle    = _nvml_handle,
+    memory_limit   = MEMORY_LIMIT,
+    get_model      = lambda: MODEL,
+    get_voice      = lambda: VOICE,
+    get_dsp_avail  = lambda: _DSP_AVAILABLE,
+    get_dsp_params = lambda: DSP_PARAMS,
+    get_df_status  = _df.get_status,
 )
-_diag_gpu          = _sys_diag._diag_gpu
-_diag_ollama       = _sys_diag._diag_ollama
-_diag_cpu_temp     = _sys_diag._diag_cpu_temp
-_diag_memory_count = _sys_diag._diag_memory_count
-_diag_cpu_ram_disk = _sys_diag._diag_cpu_ram_disk
-
-
-@limiter.limit("30 per minute")
-@app.route("/api/sysdiag")
-def api_sysdiag():
-    data = _diag_cpu_ram_disk()
-
-    # GPU
-    data.update(_diag_gpu(_nvml_handle))
-
-    # Réseau
-    net = psutil.net_io_counters()
-    data["net_sent"] = round(net.bytes_sent / 1048576, 1)
-    data["net_recv"] = round(net.bytes_recv / 1048576, 1)
-
-    # Système
-    uptime_s = int(time.time() - psutil.boot_time())
-    h_, r = divmod(uptime_s, 3600); m_, _ = divmod(r, 60)
-    data["uptime"]   = f"{h_}h{m_:02d}m"
-    data["platform"] = platform.system() + " " + platform.version().split(".")[0]
-    data["hostname"] = platform.node()
-
-    # LLM
-    data["llm_model"]    = MODEL
-    data["llm_provider"] = "ollama"
-    data["llm_voice"]    = VOICE
-
-    # Ollama connectivity + latency
-    data.update(_diag_ollama())
-
-    # DSP + DeepFilterNet
-    data["dsp_available"] = _DSP_AVAILABLE
-    data["dsp_enabled"]   = DSP_PARAMS.get("enabled", False)
-    data["dsp_params"]    = {k: v for k, v in DSP_PARAMS.items()}
-    _df_avail, _df_sample_rate = _df.get_status()
-    data["df_available"]  = _df_avail
-    data["df_enabled"]    = DSP_PARAMS.get("df_enabled", False)
-    data["df_sr"]         = _df_sample_rate
-
-    # CPU temperature
-    data["cpu_temp"] = _diag_cpu_temp()
-
-    # SWAP
-    swap = psutil.swap_memory()
-    data["swap_total"] = round(swap.total / _GB_BYTES, 1)
-    data["swap_used"]  = round(swap.used  / _GB_BYTES, 1)
-    data["swap_pct"]   = swap.percent
-
-    # Mémoire conversations
-    data["memory_exchanges"] = _diag_memory_count()
-    data["memory_limit"]     = MEMORY_LIMIT
-
-    return Response(json.dumps(data, ensure_ascii=False), mimetype="application/json")
+app.register_blueprint(_system.bp)
 
 TERMINAL_CWD  = [str(Path(__file__).parent)]  # liste pour mutabilité — utilisé par tâches planifiées
 TASKS_FILE    = Path(__file__).parent / "jarvis_tasks.json"
