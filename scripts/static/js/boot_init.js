@@ -53,25 +53,23 @@
       reason && reason.stack ? String(reason.stack).slice(0, 500) : '');
   });
 
-  // 3. Override location.reload pour tracer qui l'appelle (avec stack)
-  // location étant non-writable, on monkey-patch via Object.defineProperty
-  // sur location.reload (writable: true → on peut le remplacer).
-  try {
-    var _origReload = location.reload.bind(location);
-    Object.defineProperty(location, 'reload', {
-      value: function() {
-        var st = new Error('location.reload() called').stack || '';
-        _diagPost('location.reload', 'TRIGGERED', st.slice(0, 800));
-        // Send-and-forget : on laisse 50ms à sendBeacon avant de reload pour vrai
-        setTimeout(function() { _origReload.apply(location, arguments); }, 50);
-      },
-      writable: true, configurable: true,
-    });
-  } catch (e) {
-    _diagPost('jsdiag.setup', 'reload monkey-patch failed: ' + e.message, '');
-  }
+  // 3. Capture tout navigateur sortant (reload, fermeture, navigation)
+  // via beforeunload — les navigateurs modernes refusent Object.defineProperty
+  // sur location.reload (non-configurable). beforeunload capte autant : on
+  // ne distinguera pas un reload d'une fermeture d'onglet, mais on aura la
+  // stack en cours d'exécution si c'est JS qui le déclenche.
+  // Note : sendBeacon est OBLIGATOIRE ici (fetch keepalive peut être tué).
+  window.addEventListener('beforeunload', function() {
+    var st = new Error('beforeunload triggered').stack || '';
+    _diagPost('beforeunload', 'UNLOAD/RELOAD', st.slice(0, 800));
+  });
 
-  _diagPost('jsdiag.ready', 'JS-DIAG hooks active', '');
+  // 4. Capture les changements de visibilité (utile si le bug = onglet caché)
+  document.addEventListener('visibilitychange', function() {
+    _diagPost('visibility', document.visibilityState, '');
+  });
+
+  _diagPost('jsdiag.ready', 'JS-DIAG hooks active (v2 — beforeunload + visibility)', '');
 })();
 
 // ── Message vocal d'introduction ────────────────────────────────
