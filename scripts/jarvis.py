@@ -565,7 +565,7 @@ import ssh_terminal as _ssh_term
 import stream_tokens as _stream_tokens_mod
 import system as _system
 import vision as _vision
-from voice import stt as _stt
+import voice as _voice
 from voice import tts_cleaner as _tts_cleaner
 from voice import tts_dedup as _tts_dedup
 from voice import tts_engines as _tts_eng
@@ -2230,49 +2230,10 @@ TERMINAL_CWD  = [str(Path(__file__).parent)]  # liste pour mutabilité — utili
 TASKS_FILE    = Path(__file__).parent / "jarvis_tasks.json"
 
 # ── STT — Transcription vocale locale (Whisper) ───────────────
-# Logique métier dans `stt.py` (Phase 3 split monolithe · session 33)
-@limiter.limit("10 per minute")
-@app.route("/api/stt", methods=["POST"])
-def api_stt():
-    """Transcription audio → texte via Whisper local (hors-ligne)."""
-    if request.content_length and request.content_length > _stt.get_max_bytes():
-        return Response(json.dumps({"error": "Fichier trop volumineux (max 25 MB)"}), status=413, mimetype="application/json")
-    if _stt.is_available() is False:
-        return Response(json.dumps({"error": "faster-whisper non installé. Lancez: pip install faster-whisper"}),
-                        status=503, mimetype="application/json")
-    f = request.files.get("audio")
-    if not f:
-        return Response(json.dumps({"error": "Aucun fichier audio"}), status=400, mimetype="application/json")
-    lang = request.form.get("lang", "fr")
-    raw_ext = f.filename.rsplit(".", 1)[-1].lower() if "." in f.filename else "webm"
-    suffix = "." + (raw_ext if raw_ext in _stt.get_allowed_ext() else "webm")
-    tmp_fd, tmp_path = tempfile.mkstemp(suffix=suffix)
-    try:
-        os.close(tmp_fd)
-        f.save(tmp_path)
-        text, language = _stt.transcribe(tmp_path, lang=lang)
-        return Response(json.dumps({"text": text, "language": language}, ensure_ascii=False),
-                        mimetype="application/json")
-    except RuntimeError as e:
-        return Response(json.dumps({"error": str(e)}), status=503, mimetype="application/json")
-    except Exception as e:
-        _log.error(f"[STT] Erreur: {e}")
-        return Response(json.dumps({"error": "Erreur interne serveur"}), status=500, mimetype="application/json")
-    finally:
-        try:
-            os.unlink(tmp_path)
-        except OSError:
-            pass  # fichier temporaire déjà supprimé ou accès refusé — non bloquant
-
-@limiter.limit("60 per minute")
-@app.route("/api/stt/status")
-def api_stt_status():
-    """État du module STT."""
-    return Response(json.dumps({
-        "available": _stt.is_available(),
-        "loaded": _stt.is_loaded(),
-        "model": _stt.get_model_size() if _stt.is_available() else None
-    }), mimetype="application/json")
+# Routes /api/stt + /api/stt/status déménagées dans la tuile voice/routes.py
+# (refactor jarvis.py étape 13 — Phase B1 voice tuile, 2026-05-23).
+_voice.init(limiter=limiter, log=_log)
+app.register_blueprint(_voice.bp)
 
 # ── Vision — logique métier dans `vision.py` (Phase 3 module 5) ──────────────
 @limiter.limit("5 per minute")

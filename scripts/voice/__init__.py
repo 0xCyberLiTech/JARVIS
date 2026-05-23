@@ -19,13 +19,37 @@ Sous-modules (regroupés ici, pas modifiés sur le fond) :
 Pas de fonction `init()` à ce niveau : chaque sous-module gère ses propres
 dépendances via signatures de fonctions (DI per-call, pas global state).
 """
-from . import (  # noqa: F401
+from flask import Blueprint
+
+bp = Blueprint("voice", __name__)
+
+from . import (  # noqa: E402,F401
     audio_dsp,
     deepfilter,
     deferred_speak,
+    routes,
     stt,
     tts_cleaner,
     tts_dedup,
     tts_engines,
     voice_lab,
 )
+
+# Rate limits par route (appliqués dans init() après injection du limiter).
+_ROUTE_LIMITS = {
+    "api_stt":        "10 per minute",
+    "api_stt_status": "60 per minute",
+}
+
+
+def init(*, limiter, log) -> None:
+    """Injecte les dépendances communes + applique les rate limits.
+
+    Phase B1 (étape 13) : STT routes seulement. Les routes TTS/speak/voice_lab
+    seront ajoutées par init_routes_tts/init_routes_voicelab (étapes 14-16).
+    """
+    routes.init_routes(log=log)
+    for fn_name, limit_str in _ROUTE_LIMITS.items():
+        fn = getattr(routes, fn_name, None)
+        if fn is not None:
+            limiter.limit(limit_str)(fn)
