@@ -1,4 +1,4 @@
-"""Tuile **bypass** — 5 modules de bypass routing (LLM contourné).
+"""Tuile **bypass** — 6 modules de bypass routing (LLM contourné).
 
 Architecture par tuiles (refactor jarvis.py étape 8, 2026-05-23) — 6ème tuile.
 **Pas de routes HTTP** — les fonctions sont consommées par le dispatcher de
@@ -17,8 +17,11 @@ Sous-modules :
 - `filesystem` : édition fichier guidée (FEDIT/FADD)
 - `proxmox`    : VM start/stop, reboot/update hôte, restart service
 - `simple`     : datetime SSE, autres bypass triviaux
+- `wrappers`   : 11 wrappers DI couplés jarvis (étape 27, 2026-05-23) —
+                 injectent les fns SSH locales + tables/regex couplées et
+                 délèguent aux sous-modules purs ci-dessus
 
-Pas de fonction `init()` à ce niveau : chaque sous-module gère ses propres
-dépendances via ses signatures (ex: `proxmox.detect_vm_command(text, vms_api)`).
+La fonction `init()` du sous-module `wrappers` reçoit toutes les deps couplées
+(5 SSH fns + 3 modules bypass + pve_fetch_state + sse_tok + log + dicts mutables).
 """
-from . import backup, code, filesystem, proxmox, simple  # noqa: F401
+from . import backup, code, filesystem, proxmox, simple, wrappers  # noqa: F401

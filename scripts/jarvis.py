@@ -1676,72 +1676,17 @@ _code_reasoning_gen  = _chat_orch._code_reasoning_gen
 _chat_stream_inner   = _chat_orch._chat_stream_inner
 
 # ── Détection commandes VM Proxmox (bypass LLM) ───────────────
-# Lookup dynamique via API Proxmox — plus de liste hardcodée
-# ── Bypass Proxmox/VM/reboot/update — logique dans bypass_proxmox.py (Phase 3 module 8) ──
-# Mappings COUPLÉS aux fonctions SSH (restent ici)
+# Wrappers DI + tables/regex couplées _ssh_* déménagés dans bypass/wrappers.py
+# (étape 27, 2026-05-23). Init en fin de fichier (nécessite _pve_fetch_state +
+# _sse_tok définis tard). Aliases backward-compat conservés ici.
 _pending_reboot: dict = {}  # {host, ssh_fn, is_proxmox, ts} — reboot différé après upgrade
 
-# Mapping VMID → (host_label, ssh_fn) pour vérification post-start (couplage _ssh_*)
-_VM_START_SSH_MAP: dict[int, tuple] = {
-    101: ("srv-dev-1", _ssh_dev1),
-    106: ("srv-clt",   _ssh_clt),
-    107: ("srv-pa85",  _ssh_pa85),
-    108: ("srv-ngix",  _ssh_ngix),
-}
-
-# Hôtes pour update/reboot — couplé _ssh_*
-_UPDATE_REBOOT_HOSTS = [
-    (["srv-nginx", "srv-ngix"],          "srv-ngix",  _ssh_ngix,    False),
-    (["srv-clt",  "clt"],                "srv-clt",   _ssh_clt,     False),
-    (["srv-pa85", "pa85"],               "srv-pa85",  _ssh_pa85,    False),
-    (["srv-dev-1", "srv-dev", "dev-1"],  "srv-dev-1", _ssh_dev1,    False),
-    (["proxmox",  "pve", "hyperviseur"], "proxmox",   _ssh_proxmox, True),
-]
-
-# Regex restart service — construite avec _SVC_BOUNCER local
-_SVC_RESTART_RE = _bypass_pve.make_svc_restart_re(_SVC_BOUNCER)
-
-def _detect_service_restart(text):
-    """Retourne (host_label, ssh_func, svc_name) si restart service détecté, sinon None.
-    Couplage _ssh_* → reste dans jarvis.py."""
-    m = _SVC_RESTART_RE.search(text)
-    if not m:
-        return None
-    svc_raw = m.group(2).lower()
-    if svc_raw == "nginx":
-        return ("srv-ngix", _ssh_ngix, "nginx")
-    if svc_raw == "crowdsec":
-        return ("srv-ngix", _ssh_ngix, "crowdsec")
-    if svc_raw == _SVC_BOUNCER:
-        return ("srv-ngix", _ssh_ngix, _SVC_BOUNCER)
-    if svc_raw == "suricata":
-        return ("srv-ngix", _ssh_ngix, "suricata")
-    if svc_raw == "fail2ban":
-        return ("srv-ngix", _ssh_ngix, "fail2ban")
-    # apache / apache2 / php — host requis
-    svc_name = "php" if svc_raw == "php" else "apache2"
-    if re.search(r'\bclt\b', text, re.I):
-        return ("clt", _ssh_clt, svc_name)
-    if re.search(r'\bpa85\b', text, re.I):
-        return ("pa85", _ssh_pa85, svc_name)
-    return ("ambiguous", None, svc_name)
-
-
-def _detect_vm_command(text):
-    """Wrapper qui injecte vms_api depuis _pve_fetch_state() puis délègue."""
-    state = _pve_fetch_state()
-    vms_api = state.get("vms", []) if state else []
-    return _bypass_pve.detect_vm_command(text, vms_api)
-
-
-def _detect_reboot_command(text: str):
-    """Wrapper qui injecte _UPDATE_REBOOT_HOSTS puis délègue."""
-    return _bypass_pve.detect_reboot_command(text, _UPDATE_REBOOT_HOSTS)
-
-
-def _detect_update_command(text: str):
-    """Wrapper qui injecte _UPDATE_REBOOT_HOSTS puis délègue."""
-    return _bypass_pve.detect_update_command(text, _UPDATE_REBOOT_HOSTS)
+# Aliases backward-compat — pointeurs vers bypass/wrappers (rempli par init() tardif)
+from bypass import wrappers as _bypass_wrap  # noqa: E402
+_detect_service_restart = _bypass_wrap.detect_service_restart
+_detect_vm_command      = _bypass_wrap.detect_vm_command
+_detect_reboot_command  = _bypass_wrap.detect_reboot_command
+_detect_update_command  = _bypass_wrap.detect_update_command
 
 
 # 6 générateurs SSE commandes infra déplacés dans commands/sse.py (étape 20).
@@ -1825,64 +1770,18 @@ _SSH_TERMINAL_RE = _ssh_term.TERMINAL_RE
 _ssh_terminal_sse = _ssh_term.terminal_sse
 
 
-# Wrappers DI vers bypass_code.py
-def _detect_code_command(text: str):
-    """Wrapper — délègue au module bypass_code."""
-    return _bypass_code.detect_code_command(text)
-
-def _code_scp_exec_sse(filename: str, exec_it: bool):
-    """Wrapper — injecte _ssh_dev1 puis délègue au module bypass_code."""
-    yield from _bypass_code.code_scp_exec_sse(filename, exec_it, _ssh_dev1)
-
-
-# ── Bypass sauvegarde — logique dans bypass_backup.py (Phase 3 module 9) ──
-# Wrappers DI : injectent _ALLOWED_SCRIPTS (couplé _WORKSPACE_ROOT)
-
-def _detect_backup_command(text: str):
-    """Wrapper — délègue au module bypass_backup."""
-    return _bypass_bk.detect_backup_command(text)
-
-def _backup_sse(script_key: str):
-    """Wrapper — résout script_path depuis _ALLOWED_SCRIPTS puis délègue."""
-    script_path = _ALLOWED_SCRIPTS.get(script_key, "")
-    yield from _bypass_bk.backup_sse(script_path, script_key)
-
-def _jarvis_backup_log_sse():
-    """Wrapper — délègue au module (lit Desktop\\jarvis-backup.log)."""
-    yield from _bypass_bk.jarvis_backup_log_sse()
-
-def _jarvis_backup_sse():
-    """Wrapper — résout script_path puis délègue."""
-    script_path = _ALLOWED_SCRIPTS.get("backup-jarvis", "")
-    yield from _bypass_bk.jarvis_backup_sse(script_path)
-
+# Wrappers code/backup + apt_upgrade SSE déménagés dans bypass/wrappers.py
+# (étape 27, 2026-05-23). Aliases backward-compat ci-dessous (pointeurs vers
+# fonctions du module wrappers — valides dès l'import, init() tardif).
+_detect_code_command     = _bypass_wrap.detect_code_command
+_code_scp_exec_sse       = _bypass_wrap.code_scp_exec_sse
+_detect_backup_command   = _bypass_wrap.detect_backup_command
+_backup_sse              = _bypass_wrap.backup_sse
+_jarvis_backup_log_sse   = _bypass_wrap.jarvis_backup_log_sse
+_jarvis_backup_sse       = _bypass_wrap.jarvis_backup_sse
+_apt_upgrade_bypass_sse  = _bypass_wrap.apt_upgrade_bypass_sse
 
 # _datetime_bypass_sse déplacé dans bypass_simple.py → utiliser _bypass_simple.datetime_sse()
-
-
-def _apt_upgrade_bypass_sse(pending: dict):
-    """Exécute l'apt upgrade en attente via SSH direct — zéro LLM."""
-    host    = pending["host"]
-    ssh_fn  = pending["ssh_fn"]
-    pkgs    = pending["packages"]
-    _pending_infra_cmd.clear()
-    pkg_str = " ".join(pkgs)
-    cmd     = f"DEBIAN_FRONTEND=noninteractive apt-get upgrade -y {pkg_str}"
-    yield _sse_tok(f"Mise à jour de {len(pkgs)} paquet(s) sur **{host}** :\n")
-    for p in pkgs:
-        yield _sse_tok(f"  → {p}\n")
-    yield _sse_tok("\n")
-    _log.info(f"[BYPASS_APT] {host} → {cmd}")
-    ok, output = ssh_fn(cmd, timeout=_SSH_APT_TIMEOUT_S)
-    if ok:
-        updated = sum(1 for ln in output.splitlines() if "Paramétrage de" in ln or "Setting up" in ln)
-        yield _sse_tok(f"✓ {updated} paquet(s) mis à jour sur **{host}**.")
-        tts_msg = f"Mise à jour Apache réussie sur {host}, {updated} paquets installés."
-    else:
-        yield _sse_tok(f"✗ Erreur sur **{host}** :\n{output[:400]}")
-        tts_msg = f"Erreur lors de la mise à jour sur {host}."
-    yield _sse_tok("", done=True)
-    yield "data: " + json.dumps({"type": "speak", "text": tts_msg}) + "\n\n"
 
 
 # _dev_exec_sse + _dev_cwd + _STATS_CMD + _dev_stats_cache déménagés
@@ -2284,6 +2183,28 @@ _dev.init(
 )
 app.register_blueprint(_dev.bp)
 
+# ── Init tuile bypass/wrappers (étape 27, 2026-05-23) — placé ici avant ──
+# _commands.init (qui consomme VM_START_SSH_MAP) et avant _chat_orch.init
+# (qui consomme _apt_upgrade_bypass_sse). DI : 5 SSH fns + 3 modules bypass +
+# _pve_fetch_state + _sse_tok + _log + dicts mutables.
+_bypass_wrap.init(
+    ssh_ngix          = _ssh_ngix,
+    ssh_proxmox       = _ssh_proxmox,
+    ssh_clt           = _ssh_clt,
+    ssh_pa85          = _ssh_pa85,
+    ssh_dev1          = _ssh_dev1,
+    bypass_pve        = _bypass_pve,
+    bypass_code       = _bypass_code,
+    bypass_bk         = _bypass_bk,
+    pve_fetch_state   = _pve_fetch_state,
+    sse_tok           = _sse_tok,
+    log               = _log,
+    pending_infra_cmd = _pending_infra_cmd,
+    allowed_scripts   = _ALLOWED_SCRIPTS,
+    ssh_apt_timeout_s = _SSH_APT_TIMEOUT_S,
+    svc_bouncer       = _SVC_BOUNCER,
+)
+
 # ── Init tuile commands (étape 20, 2026-05-23) — placé tard car nécessite ──
 # _pve_fetch_state (alias chat orchestrator) + _sse_tok (sse helpers alias).
 _commands.init(
@@ -2295,7 +2216,7 @@ _commands.init(
     systemctl_status_timeout_s   = _SYSTEMCTL_STATUS_TIMEOUT_S,
     pve_fetch_state              = _pve_fetch_state,
     bypass_pve                   = _bypass_pve,
-    vm_start_ssh_map             = _VM_START_SSH_MAP,
+    vm_start_ssh_map             = _bypass_wrap.VM_START_SSH_MAP,
     pending_reboot               = _pending_reboot,
     sse_tok                      = _sse_tok,
     log                          = _log,
