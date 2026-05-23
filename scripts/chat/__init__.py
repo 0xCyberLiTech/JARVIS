@@ -31,4 +31,5 @@ from . import (  # noqa: F401
     stream,
     system_prompt,
     tool_calls,
+    tool_schemas,
 )
