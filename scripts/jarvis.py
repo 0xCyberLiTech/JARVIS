@@ -312,9 +312,9 @@ except ImportError:
     install("nvidia-ml-py"); import pynvml
 
 try:
-    import psutil
+    import psutil  # noqa: F401 — utilisé indirectement par runtime/gpu_stats + import local _psutil
 except ImportError:
-    install("psutil"); import psutil
+    install("psutil"); import psutil  # noqa: F401
 
 try:
     import requests as req
@@ -697,9 +697,8 @@ def add_cors_headers(response):
     return response
 
 # ── GPU stats ────────────────────────────────────────────────
-_net_prev    = {"t": time.time(), "s": psutil.net_io_counters()}
-_disk_prev   = {"t": time.time(), "d": psutil.disk_io_counters()}
-_STATS_LOCK  = threading.Lock()
+# _net_prev + _disk_prev + _STATS_LOCK + 3 fonctions GPU déménagés dans
+# runtime/gpu_stats.py (étape 31, 2026-05-23). Init en fin de fichier.
 _stats_cache = {"data": None, "ts": 0.0}
 _STATS_TTL   = 5.0  # secondes — évite les appels pynvml concurrents (stats GPU changent lentement)
 # Tracker état Ollama pour alerte vocale au changement d'état (J34)
@@ -714,188 +713,38 @@ try:
 except Exception as _e:
     _log.info(f"[NVML] Init échouée: {_e}")
 
-def _gpu_cuda_procs(handle):
-    """Retourne (count, label) des processus CUDA en cours sur le GPU."""
-    try:
-        procs = pynvml.nvmlDeviceGetComputeRunningProcesses(handle)
-        _names = []
-        for p in procs:
-            try:
-                import psutil as _ps2
-                _names.append(f"{_ps2.Process(p.pid).name()} ({round(p.usedGpuMemory/1024**2)}MB)")
-            except Exception:
-                _names.append(f"PID {p.pid}")
-        return len(procs), " | ".join(_names[:3]) if _names else "—"
-    except Exception:
-        return 0, "—"
+# 3 fonctions GPU stats déménagées dans runtime/gpu_stats.py (étape 31).
+# init() inline ici : pynvml, _nvml_handle, _GPU_TEMP_WARN tous déjà définis ;
+# MODEL est lu via getter lambda pour rester en phase avec _set_model_global.
+from runtime import gpu_stats as _runtime_stats  # noqa: E402
+_runtime_stats.init(
+    pynvml=pynvml,
+    nvml_handle=_nvml_handle,
+    get_model=lambda: MODEL,
+    gpu_temp_warn=_GPU_TEMP_WARN,
+)
+_gpu_cuda_procs      = _runtime_stats._gpu_cuda_procs
+_gpu_extended_stats  = _runtime_stats._gpu_extended_stats
+get_stats            = _runtime_stats.get_stats
+_STATS_LOCK          = _runtime_stats._STATS_LOCK  # re-export pour code legacy
 
-
-def _gpu_extended_stats(handle):
-    try:    fan = pynvml.nvmlDeviceGetFanSpeed(handle)
-    except Exception: fan = None
-    try:
-        clk_gpu = pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_GRAPHICS)
-        clk_mem = pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_MEM)
-    except Exception: clk_gpu = clk_mem = 0
-    try:
-        enc_util = pynvml.nvmlDeviceGetEncoderUtilization(handle)[0]
-        dec_util = pynvml.nvmlDeviceGetDecoderUtilization(handle)[0]
-    except Exception: enc_util = dec_util = 0
-    try:
-        p_state = int(pynvml.nvmlDeviceGetPerformanceState(handle))
-    except Exception: p_state = None
-    try:
-        throttle = pynvml.nvmlDeviceGetCurrentClocksThrottleReasons(handle)
-        throttle_active = bool(throttle & ~0x3)  # masque idle(1)+appclocks(2)
-    except Exception: throttle_active = False
-    try:
-        pcie_gen   = pynvml.nvmlDeviceGetCurrPcieLinkGeneration(handle)
-        pcie_width = pynvml.nvmlDeviceGetCurrPcieLinkWidth(handle)
-    except Exception: pcie_gen = pcie_width = None
-    try:
-        cv = pynvml.nvmlSystemGetCudaDriverVersion()
-        cuda_ver = f"{cv // 1000}.{(cv % 1000) // 10}"
-    except Exception: cuda_ver = "N/A"
-    try:
-        dv = pynvml.nvmlSystemGetDriverVersion()
-        driver_ver = dv.decode() if isinstance(dv, bytes) else dv
-    except Exception: driver_ver = "N/A"
-    try:
-        max_clk_gpu = pynvml.nvmlDeviceGetMaxClockInfo(handle, pynvml.NVML_CLOCK_GRAPHICS)
-        max_clk_mem = pynvml.nvmlDeviceGetMaxClockInfo(handle, pynvml.NVML_CLOCK_MEM)
-    except Exception: max_clk_gpu = max_clk_mem = None
-    try:
-        temp_slow = pynvml.nvmlDeviceGetTemperatureThreshold(handle, 1)  # SLOWDOWN
-        temp_shut = pynvml.nvmlDeviceGetTemperatureThreshold(handle, 0)  # SHUTDOWN
-    except Exception: temp_slow = temp_shut = None
-    try:
-        traw = pynvml.nvmlDeviceGetCurrentClocksThrottleReasons(handle)
-        _tr = [(0x1,"IDLE"),(0x2,"APPCLOCKS"),(0x4,"SYNC"),(0x8,"POWER"),
-               (0x10,"THERMAL"),(0x20,"RELIABILITY"),(0x40,"HW_LIMIT"),(0x100,"DISPLAY")]
-        reasons = [label for mask, label in _tr if traw & mask]
-        throttle_reason = ", ".join(reasons) if reasons else "NONE"
-    except Exception: throttle_reason = None
-    cuda_proc_count, cuda_procs_str = _gpu_cuda_procs(handle)
-    return {
-        "fan": fan, "clk_gpu": clk_gpu, "clk_mem": clk_mem,
-        "enc_util": enc_util, "dec_util": dec_util,
-        "p_state": p_state, "throttle": throttle_active,
-        "pcie_gen": pcie_gen, "pcie_width": pcie_width,
-        "cuda_ver": cuda_ver, "driver_ver": driver_ver,
-        "max_clk_gpu": max_clk_gpu, "max_clk_mem": max_clk_mem,
-        "temp_slow": temp_slow, "temp_shut": temp_shut,
-        "throttle_reason": throttle_reason,
-        "cuda_proc_count": cuda_proc_count, "cuda_procs": cuda_procs_str,
-    }
-
-def get_stats():
-    global _net_prev, _disk_prev
-    if _nvml_handle is None:
-        raise RuntimeError("NVML non disponible")
-    handle = _nvml_handle
-    name       = pynvml.nvmlDeviceGetName(handle)
-    temp       = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
-    util       = pynvml.nvmlDeviceGetUtilizationRates(handle)
-    mem        = pynvml.nvmlDeviceGetMemoryInfo(handle)
-    power_draw = pynvml.nvmlDeviceGetPowerUsage(handle) / 1000
-    power_lim  = pynvml.nvmlDeviceGetPowerManagementLimit(handle) / 1000
-    ext = _gpu_extended_stats(handle)
-
-    ram = psutil.virtual_memory()
-    with _STATS_LOCK:
-        net_now  = psutil.net_io_counters()
-        net_t    = time.time()
-        dt       = max(net_t - _net_prev["t"], 0.001)
-        net_up   = (net_now.bytes_sent - _net_prev["s"].bytes_sent) / dt / 1024**2
-        net_dn   = (net_now.bytes_recv - _net_prev["s"].bytes_recv) / dt / 1024**2
-        _net_prev = {"t": net_t, "s": net_now}
-        disk_now = psutil.disk_io_counters()
-        disk_t   = time.time()
-        dt2      = max(disk_t - _disk_prev["t"], 0.001)
-        disk_r   = (disk_now.read_bytes  - _disk_prev["d"].read_bytes)  / dt2 / 1024**2
-        disk_w   = (disk_now.write_bytes - _disk_prev["d"].write_bytes) / dt2 / 1024**2
-        _disk_prev = {"t": disk_t, "d": disk_now}
-
-    uptime_s = int(time.time() - psutil.boot_time())
-    h, r = divmod(uptime_s, 3600); m, s = divmod(r, 60)
-    cpu_freq = psutil.cpu_freq()
-
-    return {
-        "name": name if isinstance(name, str) else name.decode(),
-        "temp": temp, "gpu_util": util.gpu, "mem_util": util.memory,
-        "mem_used": mem.used/1024**3, "mem_total": mem.total/1024**3, "mem_free": mem.free/1024**3,
-        "power_draw": power_draw, "power_limit": power_lim,
-        **ext,
-        "temp_warn": _GPU_TEMP_WARN,
-        "cpu": psutil.cpu_percent(interval=None),
-        "cpu_count": psutil.cpu_count(logical=True),
-        "cpu_freq": int(cpu_freq.current) if cpu_freq else 0,
-        "ram_used": ram.used/1024**3, "ram_total": ram.total/1024**3,
-        "net_up": round(net_up, 2), "net_dn": round(net_dn, 2),
-        "disk_r": round(disk_r, 2), "disk_w": round(disk_w, 2),
-        "uptime": f"{h}h {m:02d}m {s:02d}s",
-        "model": MODEL,
-    }
-
-# ── TTS ──────────────────────────────────────────────────────
-import queue as _queue_mod
-
-_speak_queue    = _queue_mod.Queue(maxsize=8)  # textes en attente → browser joue via Web Audio
-# Guard anti double-flux : quand un stream SSE chatbot est actif, les speak() background
-# sont différés dans _speak_deferred et rejoués via SSE après le dernier token.
-# Évite la superposition audio chatbot + autoban/monitoring.
-_chat_stream_active = threading.Event()          # set() pendant generate()
-_speak_deferred     = _queue_mod.Queue(maxsize=8) # messages en attente du stream
-# Dedup guard : évite de rejouer le même texte deux fois en moins de 3s (race condition
-# entre _speak_deferred → SSE et _speak_queue → polling)
-_speak_last_text: str   = ''
-_speak_last_time: float = 0.0
-# Dedup global cross-source déplacé dans tts_dedup.py (Phase 3 sous-module 19)
-# Utiliser _tts_dedup.check_and_register(text, time.monotonic())
-
-# _ip_octet, _replace_ips, _clean_for_tts déplacés dans tts_cleaner.py — alias backward-compat
+# ── TTS — speak() + état Queues déménagés dans runtime/speak.py (étape 31) ──
+# _clean_for_tts garde son alias jarvis.py (consommateurs internes : chat orch).
 _clean_for_tts = _tts_cleaner.clean_for_tts
 
-def speak(text, blocking=False):
-    """Enfile le texte dans _speak_queue — le browser le récupère via GET /api/speak/queue
-    et le joue via queueSpeech() → Web Audio (fader JARVIS + DSP + mixer).
-    Si un stream SSE chatbot est actif (_chat_stream_active), le message est différé dans
-    _speak_deferred et sera injecté comme événement SSE à la fin du stream → playback séquentiel."""
-    global _speak_last_text, _speak_last_time
-    text = _clean_for_tts(text)
-    if not text:
-        return
-    # Dedup : même texte répété en moins de 3s → ignoré (race condition deferred↔queue)
-    now = time.monotonic()
-    if text == _speak_last_text and (now - _speak_last_time) < 3.0:
-        _log.debug(f"[TTS] Dedup skip (même texte < 3s) : {text[:80]}")
-        return
-    _speak_last_text = text
-    _speak_last_time = now
-    # Dedup global cross-source (60s) — bloque le doublon JS si Python parle en premier
-    if _tts_dedup.check_and_register(text, now):
-        _log.debug(f"[TTS] Dedup global skip (python-speak, même texte < {_TTS_DEDUP_S}s) : {text[:80]}")
-        return
-    preview = text[:_TTS_LOG_PREVIEW].replace("\n", " ")
-    suffix  = "..." if len(text) > _TTS_LOG_PREVIEW else ""
-    _tts_logger.info("source=%-20s | %s%s", "python-speak", preview, suffix)
-    try:
-        if _chat_stream_active.is_set():
-            # Stream chatbot actif → différer pour éviter superposition audio
-            # Si queue pleine : drop le plus ancien (alerte récente = plus pertinente)
-            if _speak_deferred.full():
-                try: _speak_deferred.get_nowait()
-                except _queue_mod.Empty: pass  # get_nowait() raises Empty when queue is drained — expected
-            _speak_deferred.put_nowait(text)
-            _log.info(f"[TTS] Différé (stream SSE actif) : {text[:80]}")
-        else:
-            # Si queue pleine : drop le plus ancien (alerte récente = plus pertinente)
-            if _speak_queue.full():
-                try: _speak_queue.get_nowait()
-                except _queue_mod.Empty: pass  # get_nowait() raises Empty when queue is drained — expected
-            _speak_queue.put_nowait(text)
-    except _queue_mod.Full:
-        _log.info(f"[TTS] Queue pleine — message ignoré : {text[:80]}")
+from runtime import speak as _runtime_speak  # noqa: E402
+_runtime_speak.init(
+    log=_log,
+    tts_logger=_tts_logger,
+    clean_for_tts=_clean_for_tts,
+    tts_dedup=_tts_dedup,
+    tts_dedup_s=_TTS_DEDUP_S,
+    tts_log_preview=_TTS_LOG_PREVIEW,
+)
+speak               = _runtime_speak.speak
+_speak_queue        = _runtime_speak._speak_queue
+_chat_stream_active = _runtime_speak._chat_stream_active
+_speak_deferred     = _runtime_speak._speak_deferred
 
 def _load_welcome():
     if WELCOME_FILE.exists():
