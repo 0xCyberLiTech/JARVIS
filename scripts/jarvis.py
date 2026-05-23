@@ -1434,122 +1434,14 @@ def api_mode():
 # api_dev_exec + dev_stats déménagées dans dev/routes.py (étape 22)
 
 
-def _ws_ssh_reader(channel, out_queue, data_ready, running):
-    """Lit le channel SSH et pousse dans la queue (thread dédié)."""
-    import select as _sel
-    while running[0]:
-        try:
-            r, _, _ = _sel.select([channel], [], [], 0.1)
-            if r:
-                data = channel.recv(4096)
-                if not data:
-                    running[0] = False
-                    break
-                out_queue.put(data.decode("utf-8", errors="replace"))
-                data_ready.set()
-        except Exception:
-            running[0] = False
-            break
-
-
-def _ws_ssh_connect(cfg: dict):
-    """Établit une connexion SSH PTY — retourne (client, channel, None) ou (None, None, err_msg)."""
-    import paramiko as _pm
-    client = _pm.SSHClient()
-    client.set_missing_host_key_policy(_pm.AutoAddPolicy())
-    try:
-        client.connect(
-            hostname     = cfg["ip"],
-            port         = cfg["port"],
-            username     = cfg.get("user", "root"),
-            key_filename = cfg["key"],
-            timeout      = 10,
-            look_for_keys= False,
-            allow_agent  = False,
-        )
-    except Exception as exc:
-        return None, None, str(exc)
-    channel = client.invoke_shell(term="xterm-256color", width=220, height=50)
-    channel.setblocking(False)
-    return client, channel, None
-
-
-def _ws_ssh_handler(ws, cfg: dict):
-    """Corps commun WebSocket PTY SSH — terminal interactif (xterm.js)."""
-    import queue as _queue
-    import threading as _wth
-
-    client, channel, err = _ws_ssh_connect(cfg)
-    if err:
-        try:
-            ws.send(f"\r\n\x1b[31m✗ SSH {cfg['label']} impossible : {err}\x1b[0m\r\n")
-        except Exception:
-            pass  # WebSocket déjà fermé côté client
-        return
-
-    running    = [True]
-    out_queue  = _queue.Queue()
-    data_ready = _wth.Event()
-
-    _wth.Thread(target=_ws_ssh_reader, args=(channel, out_queue, data_ready, running), daemon=True).start()
-
-    try:
-        while running[0]:
-            while not out_queue.empty():
-                try:
-                    ws.send(out_queue.get_nowait())
-                except Exception:
-                    running[0] = False
-                    break
-            if not running[0]:
-                break
-            data_ready.clear()
-            try:
-                msg = ws.receive(timeout=0.3)
-            except Exception:
-                tr = channel.get_transport()
-                if not tr or not tr.is_active() or not running[0]:
-                    break
-                data_ready.wait(timeout=0.05)
-                continue
-            if msg is None:
-                continue
-            if isinstance(msg, str) and msg.startswith('{"type":"resize"'):
-                try:
-                    _r = json.loads(msg)
-                    channel.resize_pty(width=int(_r["cols"]), height=int(_r["rows"]))
-                except Exception:
-                    pass  # channel déjà fermé ou PTY non supporté
-            else:
-                try:
-                    channel.sendall(msg if isinstance(msg, bytes) else msg.encode())
-                except Exception:
-                    break
-    finally:
-        running[0] = False
-        try: channel.close()
-        except Exception: pass  # channel may already be closed — ignore
-        try: client.close()
-        except Exception: pass  # client may already be closed — ignore
-
-
-@sock.route("/ws/ssh/<host>")
-def ws_ssh_host(ws, host):
-    """WebSocket PTY SSH — terminal interactif générique vers n'importe quel hôte de _SSH_TERMINAL_MAP."""
-    cfg = _SSH_TERMINAL_MAP.get(host)
-    if cfg is None:
-        try:
-            ws.send(f"\r\n\x1b[31m✗ Hôte inconnu : {host}\x1b[0m\r\n")
-        except Exception:
-            pass  # WebSocket déjà fermé côté client
-        return
-    _ws_ssh_handler(ws, cfg)
-
-
-@sock.route("/ws/dev")
-def ws_dev(ws):
-    """WebSocket PTY SSH — terminal CODE srv-dev-1 (alias de /ws/ssh/dev1)."""
-    _ws_ssh_handler(ws, _SSH_TERMINAL_MAP["dev1"])
+# WS PTY SSH (ws_ssh_host + ws_dev + 3 helpers) déménagés dans
+# terminal/ssh_ws.py (étape 30, 2026-05-23). init() différé en fin de fichier
+# (nécessite _SSH_TERMINAL_MAP défini plus bas via _ssh_term.TERMINAL_MAP).
+from terminal import ssh_ws as _term_ws  # noqa: E402
+# Aliases backward-compat pour tests éventuels :
+_ws_ssh_reader  = _term_ws._ssh_reader
+_ws_ssh_connect = _term_ws._ssh_connect
+_ws_ssh_handler = _term_ws._ssh_handler
 
 # api_save_code déménagée dans dev/routes.py (étape 22)
 
@@ -1760,6 +1652,9 @@ _CODE_REMOTE_DIR = _bypass_code.CODE_REMOTE_DIR
 
 # Carte SSH terminal déplacée dans ssh_terminal.py — alias backward-compat (utilisée par _ws_ssh_handler)
 _SSH_TERMINAL_MAP = _ssh_term.TERMINAL_MAP
+
+# Init tuile terminal (étape 30, 2026-05-23) — enregistre /ws/ssh/<host> + /ws/dev
+_term_ws.init(sock=sock, ssh_terminal_map=_SSH_TERMINAL_MAP)
 # _dev_stats_cache + _STATS_CMD déplacés dans dev/routes.py (étape 22).
 
 # Regex/helpers code déplacés dans bypass_code.py (Phase 3 module 10)
