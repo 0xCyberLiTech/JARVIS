@@ -553,7 +553,7 @@ import chat_tool_calls as _chat_tools
 import code_reasoning as _cr_mod
 import deferred_speak as _deferred_speak
 import llm_opts as _llm_opts_mod
-import memory_store as _memory_store
+import memory as _memory
 import proxmox_api as _pve_api
 import rag_live as _rag_live_mod
 import security_whitelists as _sec
@@ -766,19 +766,17 @@ load_llm_params()
 _MODEL_LOCK  = threading.Lock()
 _CONFIG_LOCK = threading.Lock()
 
-# Cluster mémoire conversationnelle (load_memory + save_memory +
-# _summarize_messages + _background_summarize + _append_memory_summary +
-# _load_memory_summary) extrait dans memory_store.py — refactor incrémental
-# jarvis.py étape 2 (2026-05-23). Alias légers ici ; init() différé plus bas
-# (après la déclaration de _GENERAL_MODEL/_CODE_MODEL/_jarvis_mode), avec DI
-# par lambdas pour les valeurs réassignées au runtime ET monkeypatchées par
-# les tests.
-load_memory             = _memory_store.load_memory
-save_memory             = _memory_store.save_memory
-_summarize_messages     = _memory_store._summarize_messages
-_append_memory_summary  = _memory_store._append_memory_summary
-_load_memory_summary    = _memory_store._load_memory_summary
-_background_summarize   = _memory_store._background_summarize
+# Tuile mémoire conversationnelle (refactor jarvis.py étape 4, 2026-05-23) :
+# le store + les 6 routes /api/memory* vivent dans scripts/memory/. L'ossature
+# expose ici des alias légers vers les fonctions du store pour les consommateurs
+# internes (_facts_inject, _chat_*). init() de la tuile + register Blueprint
+# sont différés plus bas (après _GENERAL_MODEL/_CODE_MODEL/_jarvis_mode).
+load_memory             = _memory.store.load_memory
+save_memory             = _memory.store.save_memory
+_summarize_messages     = _memory.store._summarize_messages
+_append_memory_summary  = _memory.store._append_memory_summary
+_load_memory_summary    = _memory.store._load_memory_summary
+_background_summarize   = _memory.store._background_summarize
 
 # ── RAG — Retrieval Augmented Generation local ────────────────────────────────
 
@@ -1281,9 +1279,14 @@ _CODE_MODEL:                    str = "qwen2.5-coder:14b"
 _CODE_REASONING_ANALYSIS_MODEL: str = "qwen3:8b"              # reasoning natif · ~5 GB VRAM · thinking tokens <think>
 _CODE_REASONING_MODE                = "code_reasoning"         # single-pass qwen3:8b streaming (thinking masqué)
 _jarvis_mode:   str = "soc"
-# Init différé du cluster mémoire conversationnelle (refactor jarvis.py étape 2).
-# Placé ici car nécessite _GENERAL_MODEL/_CODE_MODEL/_jarvis_mode déclarés au-dessus.
-_memory_store.init(
+# Init différé de la tuile memory + register Blueprint (refactor jarvis.py
+# étape 4). Placé ici car nécessite _GENERAL_MODEL/_CODE_MODEL/_jarvis_mode
+# déclarés au-dessus.
+_memory.init(
+    limiter          = limiter,
+    ollama_url       = OLLAMA_URL,
+    ollama_circuit   = _ollama_circuit,
+    log              = _log,
     get_memory_file  = lambda: MEMORY_FILE,
     get_summary_file = lambda: SUMMARY_FILE,
     get_model        = lambda: MODEL,
@@ -1293,10 +1296,8 @@ _memory_store.init(
     summary_min_msgs = _SUMMARY_MIN_MSGS,
     general_model    = _GENERAL_MODEL,
     code_model       = _CODE_MODEL,
-    ollama_url       = OLLAMA_URL,
-    ollama_circuit   = _ollama_circuit,
-    log              = _log,
 )
+app.register_blueprint(_memory.bp)
 _vram_model:    str | None = None   # modèle actuellement chargé en VRAM (tracké par JARVIS)
 _last_toks_per_sec: float = 0.0     # vitesse dernière génération (tok/s)
 _dev_cwd:       str = "/root"   # répertoire courant de la session terminal DEV (srv-dev-1)
@@ -1961,27 +1962,9 @@ def api_stats():
     _stats_cache["ts"] = now
     return Response(json.dumps(data), mimetype="application/json")
 
-@limiter.limit("60 per minute")
-@app.route("/api/memory", methods=["GET"])
-def api_memory_get():
-    return Response(json.dumps(load_memory(), ensure_ascii=False), mimetype="application/json")
-
-@limiter.limit("30 per minute")
-@app.route("/api/memory", methods=["POST"])
-def api_memory_save():
-    history = (request.json or {}).get("history", [])
-    save_memory(history)
-    return Response('{"ok":true}', mimetype="application/json")
-
-@limiter.limit("10 per minute")
-@app.route("/api/memory", methods=["DELETE"])
-def api_memory_clear():
-    try:
-        if MEMORY_FILE.exists():
-            MEMORY_FILE.unlink()
-    except Exception as e:
-        _log.warning(f"[JARVIS] WARNING clear_memory: {e}")
-    return Response('{"ok":true}', mimetype="application/json")
+# Routes /api/memory* + /api/memory-summary* + /api/memory/summarize-session
+# déménagées dans la tuile scripts/memory/routes.py (étape 4).
+# /api/facts reste ici — la tuile « facts » sera son propre Blueprint plus tard.
 
 @limiter.limit("60 per minute")
 @app.route("/api/facts", methods=["GET"])
@@ -1991,49 +1974,6 @@ def api_facts_get():
     except Exception:
         data = {"facts": []}
     return Response(json.dumps(data, ensure_ascii=False), mimetype="application/json")
-
-@limiter.limit("60 per minute")
-@app.route("/api/memory-summary", methods=["GET"])
-def api_memory_summary_get():
-    try:
-        data = json.loads(SUMMARY_FILE.read_text(encoding="utf-8")) if SUMMARY_FILE.exists() else {"summaries": []}
-    except Exception:
-        data = {"summaries": []}
-    return Response(json.dumps(data, ensure_ascii=False), mimetype="application/json")
-
-@limiter.limit("5 per minute")
-@app.route("/api/memory-summary", methods=["DELETE"])
-def api_memory_summary_clear():
-    try:
-        if SUMMARY_FILE.exists():
-            SUMMARY_FILE.unlink()
-    except Exception as e:
-        _log.warning(f"[SUMMARY] Erreur suppression: {e}")
-    return Response('{"ok":true}', mimetype="application/json")
-
-@limiter.limit("10 per minute")
-@app.route("/api/memory/summarize-session", methods=["POST"])
-def api_memory_summarize_session():
-    """Résume la session courante et l'appende à jarvis_memory_summary.json.
-    Appelé par stop_jarvis.bat avant taskkill — garantit la mémoire longue."""
-    messages = load_memory()
-    if len(messages) < _SUMMARY_MIN_MSGS:
-        return Response(
-            json.dumps({"ok": False, "reason": "not_enough_messages", "count": len(messages)}),
-            mimetype="application/json")
-    summary = _summarize_messages(messages)
-    if not summary:
-        # Fallback : extrait brut des derniers échanges si Ollama ne répond pas
-        lines = []
-        for m in messages[-10:]:
-            role = "Marc" if m["role"] == "user" else "JARVIS"
-            lines.append(f"• {role}: {m['content'][:200]}")
-        summary = "[Résumé brut — LLM indisponible]\n" + "\n".join(lines)
-        _log.warning("[SUMMARY] LLM timeout — fallback extrait brut sauvegardé")
-    _append_memory_summary(summary)
-    _log.info(f"[SUMMARY] Résumé session — {len(messages)} messages → {len(summary)} chars")
-    return Response(json.dumps({"ok": True, "messages": len(messages), "chars": len(summary)}),
-                    mimetype="application/json")
 
 @limiter.limit("60 per minute")
 @app.route("/api/rag/status", methods=["GET"])
