@@ -555,6 +555,7 @@ import deferred_speak as _deferred_speak
 import llm_opts as _llm_opts_mod
 import memory as _memory
 import proxmox_api as _pve_api
+import rag as _rag
 import rag_live as _rag_live_mod
 import security_whitelists as _sec
 import sse_helpers as _sse
@@ -780,173 +781,25 @@ _background_summarize   = _memory.store._background_summarize
 
 # ── RAG — Retrieval Augmented Generation local ────────────────────────────────
 
-def _rag_embed(text: str) -> list | None:
-    """Embedding via Ollama (mxbai-embed-large). Retourne None si indisponible."""
-    try:
-        r = _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/embeddings",
-                     json={"model": RAG_EMBED_MODEL, "prompt": text[:2000], "keep_alive": "10m"},
-                     timeout=_RAG_EMBED_TIMEOUT_S)
-        if r.ok:
-            return r.json().get("embedding")
-    except Exception as e:
-        _log.warning(f"[RAG] Erreur embedding: {e}")
-    return None
-
-def _rag_chunk(text: str, source: str) -> list:
-    """Découpe un texte en chunks avec overlap."""
-    chunks, start = [], 0
-    while start < len(text):
-        end = min(start + RAG_CHUNK_SIZE, len(text))
-        if end < len(text):
-            last_nl = text.rfind('\n', start, end)
-            if last_nl > start + RAG_CHUNK_SIZE // 2:
-                end = last_nl + 1
-        content = text[start:end].strip()
-        if len(content) > 50:
-            chunks.append({"source": source, "content": content})
-        start = end - RAG_CHUNK_OVER if end < len(text) else end
-    return chunks
-
-_rag_mem_cache: dict  = {"meta": None, "emb": None, "ts": 0.0}
-_bm25_obj_cache: dict = {"bm25": None, "meta_len": 0, "ts": 0.0}
-_RAG_CACHE_TTL = 300.0  # 5 min — invalide automatiquement après indexation
-
-def _get_bm25_cached(meta: list):
-    """Retourne l'objet BM25Okapi mis en cache (TTL = _RAG_CACHE_TTL)."""
-    now = time.monotonic()
-    if (_bm25_obj_cache["bm25"] is not None
-            and _bm25_obj_cache["meta_len"] == len(meta)
-            and (now - _bm25_obj_cache["ts"]) < _RAG_CACHE_TTL):
-        return _bm25_obj_cache["bm25"]
-    from rank_bm25 import BM25Okapi
-    corpus = [m.get("text", m.get("content", "")).lower().split() for m in meta]
-    bm25 = BM25Okapi(corpus)
-    _bm25_obj_cache.update({"bm25": bm25, "meta_len": len(meta), "ts": now})
-    return bm25
-
-def _rag_load():
-    """Retourne (meta_list, embeddings_ndarray_or_None). Cache mémoire TTL 5 min."""
-    try:
-        import numpy as np
-        now = time.monotonic()
-        if _rag_mem_cache["meta"] is not None and (now - _rag_mem_cache["ts"]) < _RAG_CACHE_TTL:
-            return _rag_mem_cache["meta"], _rag_mem_cache["emb"]
-        meta = json.loads(RAG_META_FILE.read_text(encoding="utf-8")) if RAG_META_FILE.exists() else []
-        emb  = np.load(str(RAG_EMB_FILE)).astype(np.float32) if RAG_EMB_FILE.exists() else None
-        _rag_mem_cache["meta"] = meta
-        _rag_mem_cache["emb"]  = emb
-        _rag_mem_cache["ts"]   = now
-        return meta, emb
-    except Exception as e:
-        _log.warning(f"[RAG] Erreur chargement index: {e}")
-        return [], None
-
-def _rag_save(meta: list, emb_list: list) -> bool:
-    try:
-        import numpy as np
-        RAG_DIR.mkdir(exist_ok=True)
-        RAG_META_FILE.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
-        np.save(str(RAG_EMB_FILE), np.array(emb_list, dtype=np.float32))
-        _rag_mem_cache["ts"] = 0.0  # invalide le cache → prochain _rag_load recharge depuis disque
-        return True
-    except Exception as e:
-        _log.error(f"[RAG] Erreur sauvegarde index: {e}")
-        return False
-
-def _rag_index_text(text: str, source: str) -> int:
-    """Indexe un texte : chunk → embed → ajout à l'index. Retourne le nb de chunks ajoutés."""
-    import hashlib
-    chunks = _rag_chunk(text, source)
-    if not chunks:
-        return 0
-    meta, embs = _rag_load()
-    embs_list  = embs.tolist() if embs is not None else []
-    existing   = {m.get("id") for m in meta}
-    added = 0
-    for chunk in chunks:
-        cid = hashlib.md5(chunk["content"].encode()).hexdigest()[:12]
-        if cid in existing:
-            continue
-        vec = _rag_embed(chunk["content"])
-        if vec:
-            meta.append({"id": cid, "source": source, "content": chunk["content"]})
-            embs_list.append(vec)
-            existing.add(cid)
-            added += 1
-    if added:
-        _rag_save(meta, embs_list)
-    _log.info(f"[RAG] Indexé '{source}' → {added} chunks ajoutés ({len(meta)} total)")
-    return added
-
-# ── RAG LIVE — Index en mémoire pour les logs SOC temps réel ─────────────────
-# State RAG live déplacé dans rag_live.py (Phase 3 module 13)
-_rag_live_cache: list = []          # conservé pour compatibilité
-# Wrappers DI vers rag_live.py (Phase 3 module 13)
-def _rag_live_refresh():
-    """Wrapper — injecte _ssh_ngix puis délègue."""
-    _rag_live_mod.refresh(_ssh_ngix, timeout=_SSH_LOG_TIMEOUT_S)
-
-def _rag_live_prewarm():
-    """Wrapper — injecte _ssh_ngix puis délègue."""
-    _rag_live_mod.prewarm(_ssh_ngix, timeout=_SSH_LOG_TIMEOUT_S)
-
-def _rag_query(query: str) -> list:
-    """Recherche hybride BM25 + vecteur. Retourne les top-N chunks pertinents."""
-    try:
-        import numpy as np
-        meta, embs = _rag_load()
-        if embs is None or len(meta) == 0:
-            return []
-
-        # ── Score vectoriel (cosine) ───────────────────────────────────────
-        q_vec = _rag_embed(query)
-        if q_vec:
-            q = np.array(q_vec, dtype=np.float32)
-            q /= (np.linalg.norm(q) + 1e-9)
-            E = embs / (np.linalg.norm(embs, axis=1, keepdims=True) + 1e-9)
-            vec_scores = E @ q                 # shape (N,)
-        else:
-            vec_scores = np.zeros(len(meta), dtype=np.float32)
-
-        # ── Score BM25 (term matching) — objet mis en cache ──────────────────
-        try:
-            bm25 = _get_bm25_cached(meta)
-            raw_bm25  = bm25.get_scores(query.lower().split())
-            bm25_max  = raw_bm25.max() + 1e-9
-            bm25_scores = raw_bm25 / bm25_max
-        except Exception:
-            bm25_scores = np.zeros(len(meta), dtype=np.float32)
-
-        # ── Score hybride 60% vector + 40% BM25 ───────────────────────────
-        hybrid = 0.6 * vec_scores + 0.4 * bm25_scores
-        top_idx = np.argsort(hybrid)[::-1][:RAG_TOP_N]
-        return [
-            {**meta[i], "score": float(hybrid[i])}
-            for i in top_idx if hybrid[i] >= RAG_THRESHOLD
-        ]
-    except Exception as e:
-        _log.warning(f"[RAG] Erreur requête: {e}")
-        return []
-
-def _rag_inject(system: str, query: str) -> str:
-    """Injecte les chunks pertinents (statiques + live SOC) dans le system prompt."""
-    if not query or len(query.strip()) < 10:
-        return system
-    # RAG statique (documents indexés)
-    results = _rag_query(query)
-    # RAG live SOC — injection directe du texte brut (sans embedding = sans latence)
-    if _rag_live_mod.should_inject(query):
-        # Refresh async si TTL expiré — on sert toujours le cache existant sans attendre
-        _rag_live_mod.trigger_async_refresh(_ssh_ngix, timeout=_SSH_LOG_TIMEOUT_S)
-        live_txt = _rag_live_mod.get_text()
-        if live_txt:
-            system = system + f"\n\n[LOGS TEMPS RÉEL — srv-ngix]\n{live_txt}\n"
-    if not results:
-        return system
-    block = "\n\n[CONTEXTE DOCUMENTAIRE — sources indexées localement]\n"
-    for r in results:
-        block += f"\n— {r['source']} (score {r['score']:.2f})\n{r['content']}\n"
-    return system + block
+# Tuile RAG (refactor jarvis.py étape 5, 2026-05-23) : moteur + 5 routes
+# /api/rag/* vivent dans scripts/rag/. L'ossature expose ici des alias légers
+# vers les fonctions du moteur (consommateurs internes : _facts_inject,
+# _rag_embed_prewarm, _rag_auto_refresh_loop, _chat_*). init() de la tuile +
+# register Blueprint sont plus bas, après la déclaration de _WORKSPACE_ROOT.
+_rag_mem_cache  = _rag.engine._rag_mem_cache   # alias dict (mutable partagé)
+_bm25_obj_cache = _rag.engine._bm25_obj_cache  # alias dict (mutable partagé)
+_RAG_CACHE_TTL  = _rag.engine._RAG_CACHE_TTL
+_rag_embed         = _rag.engine._rag_embed
+_rag_chunk         = _rag.engine._rag_chunk
+_get_bm25_cached   = _rag.engine._get_bm25_cached
+_rag_load          = _rag.engine._rag_load
+_rag_save          = _rag.engine._rag_save
+_rag_index_text    = _rag.engine._rag_index_text
+_rag_live_refresh  = _rag.engine._rag_live_refresh
+_rag_live_prewarm  = _rag.engine._rag_live_prewarm
+_rag_query         = _rag.engine._rag_query
+_rag_inject        = _rag.engine._rag_inject
+_rag_live_cache: list = []  # conservé pour compatibilité ascendante
 
 def _load_facts() -> list:
     """Charge les faits persistants depuis jarvis_facts.json."""
@@ -1298,6 +1151,35 @@ _memory.init(
     code_model       = _CODE_MODEL,
 )
 app.register_blueprint(_memory.bp)
+
+# Init différé de la tuile rag + register Blueprint (refactor jarvis.py
+# étape 5). _WORKSPACE_ROOT / _claude_memory_root() définis tôt → init OK ici.
+_rag.init(
+    limiter           = limiter,
+    log               = _log,
+    ollama_circuit    = _ollama_circuit,
+    ollama_url        = OLLAMA_URL,
+    embed_model       = RAG_EMBED_MODEL,
+    embed_timeout_s   = _RAG_EMBED_TIMEOUT_S,
+    chunk_size        = RAG_CHUNK_SIZE,
+    chunk_over        = RAG_CHUNK_OVER,
+    top_n             = RAG_TOP_N,
+    threshold         = RAG_THRESHOLD,
+    rag_dir           = RAG_DIR,
+    rag_meta_file     = RAG_META_FILE,
+    rag_emb_file      = RAG_EMB_FILE,
+    live_mod          = _rag_live_mod,
+    ssh_ngix          = _ssh_ngix,
+    ssh_log_timeout_s = _SSH_LOG_TIMEOUT_S,
+    get_refresh_paths = lambda: [
+        str(_WORKSPACE_ROOT / "JARVIS"  / "MEMORY.md"),
+        str(_WORKSPACE_ROOT / "SOC"     / "MEMORY.md"),
+        str(_WORKSPACE_ROOT / "PROXMOX" / "MEMORY.md"),
+        str(_WORKSPACE_ROOT / "NGINX"   / "MEMORY.md"),
+        str(_claude_memory_root() / "MEMORY.md"),
+    ],
+)
+app.register_blueprint(_rag.bp)
 _vram_model:    str | None = None   # modèle actuellement chargé en VRAM (tracké par JARVIS)
 _last_toks_per_sec: float = 0.0     # vitesse dernière génération (tok/s)
 _dev_cwd:       str = "/root"   # répertoire courant de la session terminal DEV (srv-dev-1)
@@ -1975,50 +1857,7 @@ def api_facts_get():
         data = {"facts": []}
     return Response(json.dumps(data, ensure_ascii=False), mimetype="application/json")
 
-@limiter.limit("60 per minute")
-@app.route("/api/rag/status", methods=["GET"])
-def api_rag_status():
-    meta, _ = _rag_load()
-    sources  = list({m.get("source", "?") for m in meta})
-    return Response(json.dumps({"chunks": len(meta), "sources": sources, "embed_model": RAG_EMBED_MODEL}, ensure_ascii=False), mimetype="application/json")
-
-@limiter.limit("10 per minute")
-@app.route("/api/rag/note", methods=["POST"])
-def api_rag_add_note():
-    data    = request.json or {}
-    content = data.get("content", "").strip()
-    if not content:
-        return Response('{"error":"content required"}', status=400, mimetype="application/json")
-    source = data.get("source", f"note/{datetime.date.today().isoformat()}")
-    added  = _rag_index_text(content, source)
-    return Response(json.dumps({"ok": True, "chunks_added": added}), mimetype="application/json")
-
-@limiter.limit("5 per minute")
-@app.route("/api/rag/index-file", methods=["POST"])
-def api_rag_index_file():
-    data = request.json or {}
-    path = data.get("path", "")
-    if not path:
-        return Response('{"error":"path required"}', status=400, mimetype="application/json")
-    try:
-        p = Path(path)
-        if not p.exists() or not p.is_file():
-            return Response('{"error":"file not found"}', status=404, mimetype="application/json")
-        text  = p.read_text(encoding="utf-8", errors="ignore")
-        added = _rag_index_text(text, p.name)
-        return Response(json.dumps({"ok": True, "chunks_added": added, "file": p.name}), mimetype="application/json")
-    except Exception as e:
-        return Response(json.dumps({"error": str(e)}), status=500, mimetype="application/json")
-
-@limiter.limit("5 per minute")
-@app.route("/api/rag/clear", methods=["DELETE"])
-def api_rag_clear():
-    try:
-        if RAG_META_FILE.exists(): RAG_META_FILE.unlink()
-        if RAG_EMB_FILE.exists():  RAG_EMB_FILE.unlink()
-    except Exception as e:
-        return Response(json.dumps({"error": str(e)}), status=500, mimetype="application/json")
-    return Response('{"ok":true}', mimetype="application/json")
+# Routes /api/rag/* déménagées dans la tuile scripts/rag/routes.py (étape 5).
 
 @limiter.limit("10 per minute")
 @app.route("/api/code/exec", methods=["POST"])
@@ -2043,30 +1882,7 @@ def api_code_exec():
             pass  # PermissionError ou race — non bloquant
     return _sse_response(_gen_and_cleanup())
 
-@limiter.limit("3 per minute")
-@app.route("/api/rag/refresh", methods=["POST"])
-def api_rag_refresh():
-    """Re-indexe les MEMORY.md du workspace. MD5 déduplique — safe à appeler plusieurs fois."""
-    _REFRESH_PATHS = [
-        str(_WORKSPACE_ROOT / "JARVIS"   / "MEMORY.md"),
-        str(_WORKSPACE_ROOT / "SOC"      / "MEMORY.md"),
-        str(_WORKSPACE_ROOT / "PROXMOX"  / "MEMORY.md"),
-        str(_WORKSPACE_ROOT / "NGINX"    / "MEMORY.md"),
-        str(_claude_memory_root() / "MEMORY.md"),
-    ]
-    total, refreshed = 0, []
-    for path_str in _REFRESH_PATHS:
-        p = Path(path_str)
-        if p.exists():
-            try:
-                n = _rag_index_text(p.read_text(encoding="utf-8", errors="ignore"), p.name)
-                total += n
-                if n > 0:
-                    refreshed.append(f"{p.name}(+{n})")
-            except Exception as e:
-                _log.warning(f"[RAG] refresh {p.name}: {e}")
-    return Response(json.dumps({"ok": True, "chunks_added": total, "refreshed": refreshed}),
-                    mimetype="application/json")
+# Route /api/rag/refresh déménagée dans la tuile scripts/rag/routes.py (étape 5).
 
 @limiter.limit("30 per minute")
 @app.route("/api/facts", methods=["POST"])
