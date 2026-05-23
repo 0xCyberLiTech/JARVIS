@@ -54,7 +54,7 @@ def test_module_logger():
 
 def test_stream_direct_yield_tokens_puis_speak():
     mock_resp = _make_mock_response(["bonjour ", "Marc"])
-    with patch("vision.requests.post", return_value=mock_resp):
+    with patch("vision.llava.requests.post", return_value=mock_resp):
         events = list(stream_direct("http://localhost:11434", "abc", "test", timeout=10))
     # 2 tokens + 1 speak
     assert len(events) == 3
@@ -76,7 +76,7 @@ def test_stream_direct_skip_lignes_vides():
     ])
     mock_resp.__enter__ = MagicMock(return_value=mock_resp)
     mock_resp.__exit__ = MagicMock(return_value=False)
-    with patch("vision.requests.post", return_value=mock_resp):
+    with patch("vision.llava.requests.post", return_value=mock_resp):
         events = list(stream_direct("u", "img", "p", timeout=5))
     # 1 token + 1 speak (lignes vides skip)
     assert len(events) == 2
@@ -85,7 +85,7 @@ def test_stream_direct_skip_lignes_vides():
 def test_stream_direct_token_vide_pas_yield():
     """`if token:` → empty content skip."""
     mock_resp = _make_mock_response(["", "ok"])  # 1er token vide
-    with patch("vision.requests.post", return_value=mock_resp):
+    with patch("vision.llava.requests.post", return_value=mock_resp):
         events = list(stream_direct("u", "img", "p", timeout=5))
     # 1 token (le vide skip) + 1 speak
     assert len(events) == 2
@@ -99,7 +99,7 @@ def test_stream_direct_prompt_vide_utilise_default():
         captured["payload"] = json
         return _make_mock_response(["x"])
 
-    with patch("vision.requests.post", side_effect=fake_post):
+    with patch("vision.llava.requests.post", side_effect=fake_post):
         list(stream_direct("u", "img", "", timeout=5))
     user_msg = captured["payload"]["messages"][0]
     assert user_msg["role"] == "user"
@@ -114,7 +114,7 @@ def test_stream_direct_payload_contient_modele_et_options():
         captured["payload"] = json
         return _make_mock_response(["x"])
 
-    with patch("vision.requests.post", side_effect=fake_post):
+    with patch("vision.llava.requests.post", side_effect=fake_post):
         list(stream_direct("u", "img", "test", timeout=5))
     assert captured["payload"]["model"] == "gemma4:latest"
     assert captured["payload"]["stream"] is True
@@ -126,7 +126,7 @@ def test_stream_direct_payload_contient_modele_et_options():
 
 def test_stream_direct_connexion_ollama_echoue_yield_erreur():
     """requests.post lève → token d'erreur "Erreur connexion Ollama"."""
-    with patch("vision.requests.post", side_effect=ConnectionError("refused")):
+    with patch("vision.llava.requests.post", side_effect=ConnectionError("refused")):
         events = list(stream_direct("u", "img", "p", timeout=5))
     assert len(events) == 1
     p = json.loads(events[0].replace("data: ", "").strip())
@@ -142,7 +142,7 @@ def test_stream_direct_streaming_ligne_invalide_yield_erreur():
     mock_resp.iter_lines.return_value = iter([b"not-json"])
     mock_resp.__enter__ = MagicMock(return_value=mock_resp)
     mock_resp.__exit__ = MagicMock(return_value=False)
-    with patch("vision.requests.post", return_value=mock_resp):
+    with patch("vision.llava.requests.post", return_value=mock_resp):
         events = list(stream_direct("u", "img", "p", timeout=5))
     assert any("Erreur gemma4 vision" in e for e in events)
 
@@ -151,7 +151,7 @@ def test_stream_direct_pas_de_speak_si_full_text_vide():
     """Si aucun token reçu → pas de speak final."""
     mock_resp = _make_mock_response([])  # aucun chunk
     mock_resp.iter_lines.return_value = iter([])  # override pour vraiment vide
-    with patch("vision.requests.post", return_value=mock_resp):
+    with patch("vision.llava.requests.post", return_value=mock_resp):
         events = list(stream_direct("u", "img", "p", timeout=5))
     assert events == []
 
@@ -160,7 +160,7 @@ def test_stream_direct_speak_tronque_a_500_chars():
     """full_text[:500] → tronqué à 500."""
     long = "X" * 1000
     mock_resp = _make_mock_response([long])
-    with patch("vision.requests.post", return_value=mock_resp):
+    with patch("vision.llava.requests.post", return_value=mock_resp):
         events = list(stream_direct("u", "img", "p", timeout=5))
     speak = json.loads(events[-1].replace("data: ", "").strip())
     assert len(speak["text"]) == 500
@@ -176,7 +176,7 @@ def test_stream_pipeline_inclut_system_et_user_messages():
         captured["payload"] = json
         return _make_mock_response(["x"])
 
-    with patch("vision.requests.post", side_effect=fake_post):
+    with patch("vision.llava.requests.post", side_effect=fake_post):
         list(stream_pipeline("u", "img", "SYSTEM_TEXT", "ma question", timeout=5))
     msgs = captured["payload"]["messages"]
     assert msgs[0] == {"role": "system", "content": "SYSTEM_TEXT"}
@@ -189,14 +189,14 @@ def test_stream_pipeline_speak_tronque_a_600_chars():
     """Pipeline tronque à 600 (au lieu de 500 pour direct)."""
     long = "Y" * 1000
     mock_resp = _make_mock_response([long])
-    with patch("vision.requests.post", return_value=mock_resp):
+    with patch("vision.llava.requests.post", return_value=mock_resp):
         events = list(stream_pipeline("u", "img", "SYS", "q", timeout=5))
     speak = json.loads(events[-1].replace("data: ", "").strip())
     assert len(speak["text"]) == 600
 
 
 def test_stream_pipeline_erreur_connexion():
-    with patch("vision.requests.post", side_effect=ConnectionError("down")):
+    with patch("vision.llava.requests.post", side_effect=ConnectionError("down")):
         events = list(stream_pipeline("u", "img", "SYS", "q", timeout=5))
     p = json.loads(events[0].replace("data: ", "").strip())
     assert "Erreur pipeline vision" in p["token"]
@@ -210,6 +210,6 @@ def test_stream_pipeline_endpoint_api_chat():
         captured["url"] = url
         return _make_mock_response(["x"])
 
-    with patch("vision.requests.post", side_effect=fake_post):
+    with patch("vision.llava.requests.post", side_effect=fake_post):
         list(stream_pipeline("http://ollama-host", "img", "S", "Q", timeout=5))
     assert captured["url"] == "http://ollama-host/api/chat"

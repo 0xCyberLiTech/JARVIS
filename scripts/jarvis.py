@@ -2230,31 +2230,15 @@ TASKS_FILE    = Path(__file__).parent / "jarvis_tasks.json"
 # (refactor jarvis.py étapes 13-14 — Phases B1+B2 voice tuile, 2026-05-23).
 # Init différé plus bas : nécessite _tts_internet_was_up défini tard.
 
-# ── Vision — logique métier dans `vision.py` (Phase 3 module 5) ──────────────
-@limiter.limit("5 per minute")
-@app.route("/api/vision", methods=["POST"])
-def api_vision():
-    """Pipeline vision gemma4 multimodal — analyse image en un seul passage.
-    Body: {image_b64, prompt, pipeline=true}.
-    pipeline=false : mode direct (prompt simple)."""
-    data      = request.json or {}
-    image_b64 = data.get("image_b64", "")
-    prompt    = data.get("prompt", "").strip()
-    pipeline  = data.get("pipeline", True)
-    if not image_b64:
-        return Response(json.dumps({"error": "image_b64 manquante"}), status=400, mimetype="application/json")
-    if "," in image_b64:
-        header, image_b64 = image_b64.split(",", 1)
-        allowed_mime = ("image/jpeg", "image/png", "image/gif", "image/webp", "image/bmp")
-        if not any(m in header for m in allowed_mime):
-            return Response(json.dumps({"error": "Format image non supporté (jpeg/png/gif/webp/bmp)"}), status=400, mimetype="application/json")
-    if pipeline:
-        user_q = prompt or "Analyse cette image et donne tes observations détaillées."
-        system = _rag_inject(_vision.DEFAULT_PIPELINE_SYSTEM, user_q)
-        gen = _vision.stream_pipeline(OLLAMA_URL, image_b64, system, user_q, _OLLAMA_VISION_TIMEOUT_S)
-    else:
-        gen = _vision.stream_direct(OLLAMA_URL, image_b64, prompt, _OLLAMA_VISION_TIMEOUT_S)
-    return Response(gen, mimetype="text/event-stream", headers=_SSE_HEADERS)
+# Route /api/vision déménagée dans vision/routes.py (étape 16, 2026-05-23).
+_vision.init(
+    limiter          = limiter,
+    ollama_url       = OLLAMA_URL,
+    vision_timeout_s = _OLLAMA_VISION_TIMEOUT_S,
+    sse_headers      = _SSE_HEADERS,
+    rag_inject_fn    = _rag_inject,
+)
+app.register_blueprint(_vision.bp)
 
 # ── CODE REASONING — endpoint polling ────────────────────────
 @app.route("/api/cr-poll/<task_id>")
