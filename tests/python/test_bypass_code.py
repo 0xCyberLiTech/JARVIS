@@ -3,8 +3,8 @@ import json
 import subprocess
 from pathlib import Path
 
-import bypass_code
-from bypass_code import (
+from bypass import code as bypass_code
+from bypass.code import (
     CODE_DEV_IP,
     CODE_DEV_KEY,
     CODE_DEV_PORT,
@@ -139,7 +139,7 @@ def test_find_local_code_file_trouve_fichier_dans_scripts(tmp_path, monkeypatch)
     # On override LOCAL_SEARCH_DIRS pour ne chercher que dans tmp_path
     fake_file = tmp_path / "test_unique.py"
     fake_file.write_text("print('hello')")
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [tmp_path])
 
     found = find_local_code_file("test_unique.py")
     assert found is not None
@@ -147,7 +147,7 @@ def test_find_local_code_file_trouve_fichier_dans_scripts(tmp_path, monkeypatch)
 
 
 def test_find_local_code_file_retourne_none_si_introuvable(tmp_path, monkeypatch):
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [tmp_path])
     assert find_local_code_file("introuvable_xyz.py") is None
 
 
@@ -160,7 +160,7 @@ def test_find_local_code_file_priorite_premier_dir(tmp_path, monkeypatch):
     (dir1 / "x.py").write_text("# first")
     (dir2 / "x.py").write_text("# second")
 
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [dir1, dir2])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [dir1, dir2])
     assert find_local_code_file("x.py") == dir1 / "x.py"
 
 
@@ -171,13 +171,13 @@ def test_find_local_code_file_skip_dir_inexistant(tmp_path, monkeypatch):
     real_dir.mkdir()
     (real_dir / "ok.py").write_text("x")
 
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [nonexistent, real_dir])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [nonexistent, real_dir])
     assert find_local_code_file("ok.py") == real_dir / "ok.py"
 
 
 def test_find_local_code_file_skip_si_path_est_un_dir(tmp_path, monkeypatch):
     """Si `filename` correspond à un DIR (pas file), retourne None."""
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [tmp_path])
     (tmp_path / "subdir").mkdir()
     assert find_local_code_file("subdir") is None
 
@@ -254,7 +254,7 @@ def _parse_sse(sse_str: str) -> list:
 
 def test_scp_exec_sse_fichier_introuvable(tmp_path, monkeypatch):
     """Fichier inexistant → 1 event SSE done=True avec message d'erreur."""
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [tmp_path])
     events = list(code_scp_exec_sse("inexistant.py", exec_it=True, ssh_dev1_fn=lambda c, timeout=None: (True, "")))
     payloads = [_parse_sse(e)[0] for e in events]
     assert len(payloads) == 1
@@ -267,7 +267,7 @@ def test_scp_exec_sse_scp_succes_et_exec_python(tmp_path, monkeypatch):
     """SCP OK + exec=True sur .py → python3 utilisé pour l'exec."""
     fake_file = tmp_path / "myscript.py"
     fake_file.write_text("print('hi')")
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [tmp_path])
     monkeypatch.setattr(bypass_code.subprocess, "run",
                          lambda *a, **kw: _FakeCompletedProcess(returncode=0, stdout="ok"))
 
@@ -294,7 +294,7 @@ def test_scp_exec_sse_scp_succes_et_exec_bash(tmp_path, monkeypatch):
     """SCP OK + exec=True sur .sh → bash utilisé pour l'exec."""
     fake_file = tmp_path / "deploy.sh"
     fake_file.write_text("echo hi")
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [tmp_path])
     monkeypatch.setattr(bypass_code.subprocess, "run",
                          lambda *a, **kw: _FakeCompletedProcess(returncode=0))
 
@@ -313,7 +313,7 @@ def test_scp_exec_sse_send_only_pas_d_exec(tmp_path, monkeypatch):
     """exec_it=False → SCP fait, pas d'exec lancé."""
     fake_file = tmp_path / "x.py"
     fake_file.write_text("x")
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [tmp_path])
     monkeypatch.setattr(bypass_code.subprocess, "run",
                          lambda *a, **kw: _FakeCompletedProcess(returncode=0))
 
@@ -335,7 +335,7 @@ def test_scp_exec_sse_scp_echoue_returncode_non_zero(tmp_path, monkeypatch):
     """subprocess.run renvoie returncode != 0 → message d'erreur SCP, pas d'exec."""
     fake_file = tmp_path / "x.py"
     fake_file.write_text("x")
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [tmp_path])
     monkeypatch.setattr(bypass_code.subprocess, "run",
                          lambda *a, **kw: _FakeCompletedProcess(returncode=1, stderr="permission denied"))
 
@@ -359,7 +359,7 @@ def test_scp_exec_sse_subprocess_leve_exception(tmp_path, monkeypatch):
     """subprocess.run lève (timeout, OSError…) → message d'erreur clair."""
     fake_file = tmp_path / "x.py"
     fake_file.write_text("x")
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [tmp_path])
 
     def boom(*a, **kw):
         raise subprocess.TimeoutExpired(cmd="scp", timeout=20)
@@ -376,7 +376,7 @@ def test_scp_exec_sse_ssh_exec_echoue(tmp_path, monkeypatch):
     """ssh_dev1_fn retourne ok=False pendant exec → message d'erreur SSH."""
     fake_file = tmp_path / "x.py"
     fake_file.write_text("x")
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [tmp_path])
     monkeypatch.setattr(bypass_code.subprocess, "run",
                          lambda *a, **kw: _FakeCompletedProcess(returncode=0))
 
@@ -399,7 +399,7 @@ def test_scp_exec_sse_exec_sortie_vide(tmp_path, monkeypatch):
     """exec OK mais output vide → '(pas de sortie)'."""
     fake_file = tmp_path / "x.py"
     fake_file.write_text("x")
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [tmp_path])
     monkeypatch.setattr(bypass_code.subprocess, "run",
                          lambda *a, **kw: _FakeCompletedProcess(returncode=0))
 
@@ -413,7 +413,7 @@ def test_scp_exec_sse_construit_la_bonne_commande_scp(tmp_path, monkeypatch):
     """La commande SCP utilise CODE_DEV_IP, CODE_DEV_PORT, CODE_DEV_KEY, CODE_REMOTE_DIR."""
     fake_file = tmp_path / "test.py"
     fake_file.write_text("x")
-    monkeypatch.setattr("bypass_code.LOCAL_SEARCH_DIRS", [tmp_path])
+    monkeypatch.setattr("bypass.code.LOCAL_SEARCH_DIRS", [tmp_path])
 
     captured = {"cmd": None}
 

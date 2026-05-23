@@ -16,7 +16,7 @@ import json
 import re
 from pathlib import Path
 
-import bypass_code
+from bypass import code as bypass_code
 
 # ── Mapping SSH terminal (4 hôtes — retiré 2026-05-17)
 TERMINAL_MAP = {

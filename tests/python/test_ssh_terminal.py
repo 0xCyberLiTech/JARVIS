@@ -13,7 +13,7 @@ def test_terminal_map_couvre_4_hotes():
 
 def test_terminal_map_dev1_pointe_sur_srv_dev_1():
     """dev1 réutilise les constantes de bypass_code (CODE_DEV_IP/PORT/KEY)."""
-    import bypass_code
+    from bypass import code as bypass_code
     entry = ssh_terminal.TERMINAL_MAP["dev1"]
     assert entry["ip"] == bypass_code.CODE_DEV_IP
     assert entry["port"] == bypass_code.CODE_DEV_PORT

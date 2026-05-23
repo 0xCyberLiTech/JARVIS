@@ -536,11 +536,11 @@ except ImportError:
     install("requests"); import requests as req
 
 # ── Modules dédiés (Phase 3 split monolithe · session 33) ────────────────────
-import bypass_backup as _bypass_bk
-import bypass_code as _bypass_code
-import bypass_filesystem as _bypass_fs
-import bypass_proxmox as _bypass_pve
-import bypass_simple as _bypass_simple
+from bypass import backup as _bypass_bk
+from bypass import code as _bypass_code
+from bypass import filesystem as _bypass_fs
+from bypass import proxmox as _bypass_pve
+from bypass import simple as _bypass_simple
 import chat_capture as _chat_capture
 import chat_generate as _chat_gen_mod
 import chat_messages as _chat_msg

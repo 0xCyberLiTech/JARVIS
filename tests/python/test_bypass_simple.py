@@ -3,7 +3,7 @@ import json
 from datetime import datetime
 from unittest.mock import patch
 
-from bypass_simple import _JOURS, _MOIS, DATETIME_RE, datetime_sse
+from bypass.simple import _JOURS, _MOIS, DATETIME_RE, datetime_sse
 
 # ── DATETIME_RE — détection regex ────────────────────────────────────────
 
@@ -99,7 +99,7 @@ def test_datetime_sse_token_et_speak_sont_identiques():
 def test_datetime_sse_format_attendu_avec_date_fixe():
     """Mock datetime.now() pour vérifier le format exact."""
     fake = datetime(2026, 5, 15, 14, 7)  # vendredi 15 mai 2026 à 14h07
-    with patch("bypass_simple.datetime") as mock_dt:
+    with patch("bypass.simple.datetime") as mock_dt:
         mock_dt.now.return_value = fake
         events = list(datetime_sse())
     payload = json.loads(events[0].replace("data: ", "").strip())
@@ -109,7 +109,7 @@ def test_datetime_sse_format_attendu_avec_date_fixe():
 def test_datetime_sse_padding_zero_minute():
     """3 minutes → '03', pas '3'."""
     fake = datetime(2026, 1, 1, 9, 3)
-    with patch("bypass_simple.datetime") as mock_dt:
+    with patch("bypass.simple.datetime") as mock_dt:
         mock_dt.now.return_value = fake
         events = list(datetime_sse())
     payload = json.loads(events[0].replace("data: ", "").strip())
@@ -119,7 +119,7 @@ def test_datetime_sse_padding_zero_minute():
 def test_datetime_sse_padding_zero_heure():
     """0h05 → '00h05'."""
     fake = datetime(2026, 1, 1, 0, 5)
-    with patch("bypass_simple.datetime") as mock_dt:
+    with patch("bypass.simple.datetime") as mock_dt:
         mock_dt.now.return_value = fake
         events = list(datetime_sse())
     payload = json.loads(events[0].replace("data: ", "").strip())
@@ -129,7 +129,7 @@ def test_datetime_sse_padding_zero_heure():
 def test_datetime_sse_dimanche():
     """weekday() → dimanche = 6."""
     fake = datetime(2026, 5, 17, 12, 0)  # dimanche 17 mai 2026
-    with patch("bypass_simple.datetime") as mock_dt:
+    with patch("bypass.simple.datetime") as mock_dt:
         mock_dt.now.return_value = fake
         events = list(datetime_sse())
     payload = json.loads(events[0].replace("data: ", "").strip())

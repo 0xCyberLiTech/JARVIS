@@ -47,10 +47,11 @@ CODE_FILE_RE = re.compile(
     r'\b([\w][\w\-]*\.(?:py|sh|js|ts|rb|go|rs|php|sql|pl))\b',
 )
 
-# Chemins de recherche locale (priorité scripts/ → JARVIS/ → Documents/Downloads/Desktop)
+# Chemins de recherche locale (priorité scripts/ → JARVIS/ → Documents/Downloads/Desktop).
+# Le module vit dans scripts/bypass/ → 2 .parent pour atteindre scripts/.
 LOCAL_SEARCH_DIRS = [
-    Path(__file__).parent,           # JARVIS/scripts/
-    Path(__file__).parent.parent,    # JARVIS/
+    Path(__file__).parent.parent,            # JARVIS/scripts/
+    Path(__file__).parent.parent.parent,     # JARVIS/
     Path.home() / "Documents",
     Path.home() / "Downloads",
     Path.home() / "Desktop",

@@ -2,7 +2,7 @@
 import json
 from unittest.mock import MagicMock
 
-import bypass_backup
+from bypass import backup as bypass_backup
 
 # ── Constantes / Regex ──────────────────────────────────────────────────
 

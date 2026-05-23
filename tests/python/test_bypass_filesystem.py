@@ -1,7 +1,7 @@
 """Tests bypass_filesystem — détection regex + SSE génération (DI ssh_fn mockable)."""
 import json
 
-from bypass_filesystem import (
+from bypass.filesystem import (
     FADD_RE,
     FCORR_RE,
     FEDIT_RE,

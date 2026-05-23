@@ -1,7 +1,7 @@
 """Tests bypass_proxmox — détection commandes VM/reboot/update (DI complet, 0 I/O)."""
 import re
 
-from bypass_proxmox import (
+from bypass.proxmox import (
     PVE_STOP_BLACKLIST,
     REBOOT_DEFER_RE,
     REBOOT_MACHINE_RE,
