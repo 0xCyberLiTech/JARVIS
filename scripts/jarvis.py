@@ -3,7 +3,6 @@ JARVIS — Core
 Relie Ollama (LLM) + edge-tts (voix) + Flask (interface web)
 """
 
-import datetime
 import json
 import logging
 import logging.handlers
@@ -557,6 +556,7 @@ from proxmox import api as _pve_api
 import rag as _rag
 import rag_live as _rag_live_mod
 import security_whitelists as _sec
+import settings as _settings
 import ssh as _ssh
 import sse_helpers as _sse
 import ssh_terminal as _ssh_term
@@ -1758,36 +1758,8 @@ def api_facts_save():
         return Response(json.dumps({"error": str(e)}), status=500, mimetype="application/json")
     return Response('{"ok":true}', mimetype="application/json")
 
-@limiter.limit("60 per minute")
-@app.route("/api/llm-params", methods=["GET"])
-def api_llm_params_get():
-    return Response(json.dumps({"params": LLM_PARAMS, "defaults": _LLM_DEFAULTS,
-                                "system_prompt": SYSTEM_PROMPT}),
-                    mimetype="application/json")
-
-@limiter.limit("20 per minute")
-@app.route("/api/llm-params", methods=["POST"])
-def api_llm_params_set():
-    global LLM_PARAMS, SYSTEM_PROMPT
-    data = request.json or {}
-    if "params" in data:
-        for k, v in data["params"].items():
-            if k in LLM_PARAMS:
-                LLM_PARAMS[k] = v
-        LLM_PARAMS_FILE.write_text(json.dumps(LLM_PARAMS, indent=2), encoding="utf-8")
-    if "system_prompt" in data:
-        SYSTEM_PROMPT = data["system_prompt"]
-        PROMPT_FILE.write_text(SYSTEM_PROMPT, encoding="utf-8")
-    return Response('{"ok":true}', mimetype="application/json")
-
-@limiter.limit("10 per minute")
-@app.route("/api/llm-params/reset-prompt", methods=["POST"])
-def api_reset_prompt():
-    global SYSTEM_PROMPT
-    SYSTEM_PROMPT = DEFAULT_SYSTEM_PROMPT
-    PROMPT_FILE.write_text(SYSTEM_PROMPT, encoding="utf-8")
-    return Response(json.dumps({"ok": True, "system_prompt": SYSTEM_PROMPT}),
-                    mimetype="application/json")
+# Routes /api/llm-params + /api/llm-params/reset-prompt déménagées dans
+# settings/routes.py (étape 17, 2026-05-23).
 
 def _ensure_vram(next_model: str):
     """Décharge le modèle actuellement en VRAM si différent du prochain.
@@ -2103,104 +2075,7 @@ def api_vram():
                                     "vram_total_bytes": vram_cap, "active_model": MODEL, "error": str(e)}),
                         mimetype="application/json")
 
-@limiter.limit("60 per minute")
-@app.route("/api/prompt-profiles", methods=["GET"])
-def api_prompt_profiles_get():
-    try:
-        profiles = json.loads(PROMPT_PROFILES_FILE.read_text(encoding="utf-8-sig")) if PROMPT_PROFILES_FILE.exists() else {}
-    except (OSError, ValueError):
-        profiles = {}
-    return Response(json.dumps(profiles), mimetype="application/json")
-
-@limiter.limit("20 per minute")
-@app.route("/api/prompt-profiles", methods=["POST"])
-def api_prompt_profiles_save():
-    data = request.json or {}
-    name    = data.get("name", "").strip()
-    content = data.get("content", "")
-    if not name:
-        return Response('{"error":"name required"}', status=400, mimetype="application/json")
-    try:
-        profiles = json.loads(PROMPT_PROFILES_FILE.read_text(encoding="utf-8-sig")) if PROMPT_PROFILES_FILE.exists() else {}
-    except (OSError, ValueError):
-        profiles = {}
-    entry = {"content": content, "saved_at": time.strftime("%Y-%m-%d %H:%M")}
-    locked = data.get("locked_provider", "")
-    if locked:
-        entry["locked_provider"] = locked
-    profiles[name] = entry
-    PROMPT_PROFILES_FILE.write_text(json.dumps(profiles, indent=2, ensure_ascii=False), encoding="utf-8")
-    return Response('{"ok":true}', mimetype="application/json")
-
-@limiter.limit("10 per minute")
-@app.route("/api/prompt-profiles/<name>", methods=["DELETE"])
-def api_prompt_profiles_delete(name):
-    try:
-        profiles = json.loads(PROMPT_PROFILES_FILE.read_text(encoding="utf-8-sig")) if PROMPT_PROFILES_FILE.exists() else {}
-        profiles.pop(name, None)
-        PROMPT_PROFILES_FILE.write_text(json.dumps(profiles, indent=2, ensure_ascii=False), encoding="utf-8")
-    except Exception as e:
-        _log.warning(f"[JARVIS] WARNING delete_prompt_profile: {e}")
-    return Response('{"ok":true}', mimetype="application/json")
-
-# ── Message de bienvenue ──────────────────────────────────────
-@limiter.limit("60 per minute")
-@app.route("/api/welcome", methods=["GET"])
-def api_welcome_get():
-    global _welcome_data
-    _welcome_data = _load_welcome()
-    return Response(json.dumps(_welcome_data, ensure_ascii=False), mimetype="application/json")
-
-@limiter.limit("20 per minute")
-@app.route("/api/welcome", methods=["POST"])
-def api_welcome_post():
-    global _welcome_data
-    data = request.get_json(force=True)
-    _welcome_data.update(data)
-    _welcome_data["last_updated"] = datetime.date.today().isoformat()
-    WELCOME_FILE.write_text(json.dumps(_welcome_data, indent=2, ensure_ascii=False), encoding="utf-8")
-    return Response('{"ok":true}', mimetype="application/json")
-
-@limiter.limit("10 per minute")
-@app.route("/api/welcome/reset", methods=["POST"])
-def api_welcome_reset():
-    global _welcome_data
-    _welcome_data = dict(DEFAULT_WELCOME)
-    WELCOME_FILE.write_text(json.dumps(_welcome_data, indent=2, ensure_ascii=False), encoding="utf-8")
-    return Response('{"ok":true}', mimetype="application/json")
-
-@limiter.limit("5 per minute")
-@app.route("/api/welcome/evolve", methods=["POST"])
-def api_welcome_evolve():
-    """Demande à l'IA d'enrichir le message en fonction des nouveautés."""
-    global _welcome_data
-    data = request.get_json(force=True)
-    context = data.get("context", "")
-    current = "\n".join(_welcome_data.get("lines", []))
-    prompt = (
-        f"Tu es JARVIS, IA personnelle de Marc. "
-        f"Voici le message d'accueil actuel:\n{current}\n\n"
-        f"Nouveauté à intégrer: {context}\n\n"
-        f"Réécris le message d'accueil en JSON avec la clé 'lines' (liste de strings). "
-        f"Garde le ton JARVIS: sobre, technique, immersif, en français. "
-        f"Max 15 lignes. Réponds UNIQUEMENT avec le JSON."
-    )
-    try:
-        resp = _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/generate",
-                        json={"model": MODEL, "prompt": prompt, "stream": False, "keep_alive": 0},
-                        timeout=60)
-        text = resp.json().get("response", "")
-        m = re.search(r'\{[\s\S]*"lines"[\s\S]*\}', text)
-        if m:
-            parsed = json.loads(m.group())
-            _welcome_data["lines"] = parsed["lines"]
-            _welcome_data["last_updated"] = datetime.date.today().isoformat()
-            _welcome_data["updated_by"] = "IA"
-            WELCOME_FILE.write_text(json.dumps(_welcome_data, indent=2, ensure_ascii=False), encoding="utf-8")
-            return Response(json.dumps({"ok": True, "data": _welcome_data}, ensure_ascii=False), mimetype="application/json")
-    except Exception as e:
-        return Response(json.dumps({"ok": False, "error": str(e)}), mimetype="application/json")
-    return Response('{"ok":false,"error":"parse failed"}', mimetype="application/json")
+# Routes /api/prompt-profiles* + /api/welcome* déménagées dans settings/routes.py (étape 17).
 
 # ── Tuile system — diagnostics matériel/OS/LLM /api/sysdiag ───────────────
 # Refactor jarvis.py étape 3 (2026-05-23) : passage à l'architecture par
@@ -3327,23 +3202,7 @@ def api_security_clear():
         _SEC_EVENTS.clear()
     return Response('{"ok":true}', mimetype="application/json")
 
-@limiter.limit("30 per minute")
-@app.route("/api/dsp/process-audio", methods=["POST"])
-def api_dsp_process_audio():
-    """Reçoit bytes audio (WAV/MP3/OGG), applique la chaîne DSP+FX complète, retourne audio traité."""
-    cl = request.content_length or 0
-    if cl > _DSP_MAX_BYTES:
-        return Response('{"error":"audio trop volumineux (max 50 MB)"}', status=413, mimetype="application/json")
-    audio_bytes = request.data
-    if not audio_bytes:
-        return Response('{"error":"no data"}', status=400, mimetype="application/json")
-    try:
-        result, mime = apply_dsp_to_mp3(audio_bytes)
-        return Response(result, mimetype=mime)
-    except Exception as e:
-        _log.error(f"[DSP/process-audio] Erreur: {e}")
-        return Response(audio_bytes, mimetype="audio/wav")
-
+# api_dsp_process_audio déménagée dans settings/routes.py (étape 17).
 # api_speak déménagée dans voice/routes.py (étape 14).
 @limiter.limit("20 per minute")
 @app.route("/api/ping", methods=["POST"])
@@ -3372,120 +3231,7 @@ def api_ping():
 # voice/routes.py (étape 14, 2026-05-23). _tts_wav_response,
 # _tts_local_response, _tts_edge_fallback sont des helpers internes au tuile.
 
-@limiter.limit("60 per minute")
-@app.route("/api/dsp-params", methods=["GET"])
-def api_get_dsp_params():
-    return Response(json.dumps(DSP_PARAMS), mimetype="application/json")
-
-@limiter.limit("20 per minute")
-@app.route("/api/dsp-params", methods=["POST"])
-def api_set_dsp_params():
-    data = request.json or {}
-    _DSP_SAFE_STR = {
-        "tts_engine":         {"edge", "kokoro", "piper", "sapi"},
-        "tts_default_engine": {"edge", "kokoro", "piper", "sapi"},
-        "fx_type":            {"reverb", "delay", "chorus", "flanger", "echo", "phaser", "exciter"},
-        "fx_preset":          {"room", "studio", "concert", "cathedral", "plate", "cave", "spring"},
-    }
-    # Bornes physiques par clé — remplace le générique ±9999
-    _DSP_BOUNDS = {
-        "eq_low": (-24.0, 24.0), "eq_mid": (-24.0, 24.0), "eq_high": (-24.0, 24.0), "eq_air": (-24.0, 24.0),
-        "comp_threshold": (-60.0, 0.0), "comp_ratio": (1.0, 20.0),
-        "comp_attack": (0.001, 1.0), "comp_release": (0.01, 5.0),
-        "gain": (-20.0, 20.0),
-        "stereo_width": (0.0, 1.0), "haas_delay_ms": (0.0, 30.0),
-        "df_atten_lim": (0.0, 100.0),
-        "fx_wet": (0.0, 1.0), "fx_decay": (0.05, 10.0), "fx_predelay_ms": (0.0, 100.0),
-        "fx_diffusion": (0.0, 1.0), "fx_delay_ms": (1.0, 2000.0), "fx_delay_feedback": (0.0, 0.98),
-        "fx_delay_filter": (200.0, 20000.0), "fx_chorus_rate": (0.01, 10.0),
-        "fx_chorus_depth": (0.001, 0.1), "fx_chorus_feedback": (0.0, 0.9),
-        "fx_flanger_rate": (0.01, 5.0), "fx_flanger_depth": (0.0005, 0.02), "fx_flanger_feedback": (0.0, 0.95),
-        "fx_echo_left_ms": (1.0, 2000.0), "fx_echo_right_ms": (1.0, 2000.0), "fx_echo_feedback": (0.0, 0.95),
-        "fx_phaser_stages": (2, 12), "fx_phaser_rate": (0.01, 5.0), "fx_phaser_depth": (0.0, 1.0),
-        "fx_exciter_drive": (0.0, 24.0), "fx_exciter_tone": (500.0, 16000.0), "fx_exciter_warmth": (0.0, 1.0),
-        "enrich_drive": (0.0, 12.0), "enrich_tone": (200.0, 8000.0),
-        "enrich_mix": (0.0, 0.5), "enrich_warmth": (0.0, 0.3),
-        "tts_kokoro_speed": (0.5, 2.0),
-    }
-    sanitized = {}
-    for k, v in data.items():
-        if k not in DSP_PARAMS:
-            continue
-        orig = DSP_PARAMS[k]
-        if k in _DSP_SAFE_STR:
-            if isinstance(v, str) and v in _DSP_SAFE_STR[k]:
-                sanitized[k] = v
-        elif isinstance(orig, bool):
-            sanitized[k] = bool(v)
-        elif isinstance(orig, (int, float)) and isinstance(v, (int, float)):
-            lo, hi = _DSP_BOUNDS.get(k, (-9999, 9999))
-            clamped = max(lo, min(hi, v))
-            sanitized[k] = int(round(clamped)) if isinstance(orig, int) else round(float(clamped), 6)
-        elif isinstance(orig, str):
-            sanitized[k] = str(v)[:128]
-    DSP_PARAMS.update(sanitized)
-    try:
-        DSP_PARAMS_FILE.write_text(json.dumps(DSP_PARAMS, indent=2), encoding="utf-8")
-    except Exception as e:
-        _log.warning(f"[JARVIS] WARNING save_dsp_params: {e}")
-    return Response(json.dumps({"ok": True}), mimetype="application/json")
-
-@limiter.limit("30 per minute")
-@app.route("/api/models", methods=["GET"])
-def api_models():
-    global MODELS
-    MODELS = _fetch_ollama_models()
-    return Response(json.dumps({"models": MODELS, "current": MODEL}), mimetype="application/json")
-
-@limiter.limit("5 per minute")
-@app.route("/api/models/test", methods=["POST"])
-def api_model_test():
-    """Teste le modèle LLM actif avec une requête minimale et mesure la latence."""
-    model = (request.json or {}).get("model", MODEL)
-    if model not in MODELS:
-        return Response(json.dumps({"ok": False, "error": "Modèle inconnu"}), status=400, mimetype="application/json")
-    try:
-        t0 = time.time()
-        r = _ollama_circuit.call(req.post,
-            f"{OLLAMA_URL}/api/chat",
-            json={"model": model, "messages": [{"role": "user", "content": "Réponds uniquement: OK"}],
-                  "stream": False, "options": {"num_predict": 5, "temperature": 0}},
-            timeout=_OLLAMA_TOOL_DETECT_TIMEOUT_S
-        )
-        latency = round((time.time() - t0) * 1000)
-        if r.status_code == 200:
-            reply = r.json().get("message", {}).get("content", "").strip()
-            return Response(json.dumps({"ok": True, "model": model, "latency_ms": latency, "reply": reply}),
-                            mimetype="application/json")
-        return Response(json.dumps({"ok": False, "model": model, "error": f"HTTP {r.status_code}"}),
-                        mimetype="application/json")
-    except Exception as e:
-        return Response(json.dumps({"ok": False, "model": model, "error": str(e)}), mimetype="application/json")
-
-@limiter.limit("20 per minute")
-@app.route("/api/models", methods=["POST"])
-def api_set_model():
-    global MODEL, SYSTEM_PROMPT, _AUTO_PROFILE_MODEL
-    model = (request.json or {}).get("model", "")
-    if model in MODELS:
-        with _MODEL_LOCK:
-            MODEL = model
-            _save_model()
-        profile_name, profile_content = _get_model_profile(model)
-        if profile_content is not None:
-            # Nouveau modèle a un profil lié → l'appliquer
-            SYSTEM_PROMPT = profile_content
-            PROMPT_FILE.write_text(SYSTEM_PROMPT, encoding="utf-8")
-            _AUTO_PROFILE_MODEL = model
-        elif _AUTO_PROFILE_MODEL is not None:
-            # On quitte un modèle avec auto-profil → restaurer le prompt par défaut
-            SYSTEM_PROMPT = DEFAULT_SYSTEM_PROMPT
-            PROMPT_FILE.write_text(SYSTEM_PROMPT, encoding="utf-8")
-            _AUTO_PROFILE_MODEL = None
-            profile_name = None
-        return Response(json.dumps({"ok": True, "model": MODEL, "auto_profile": profile_name}),
-                        mimetype="application/json")
-    return Response(json.dumps({"ok": False}), mimetype="application/json", status=400)
+# Routes /api/dsp-params + /api/models* déménagées dans settings/routes.py (étape 17).
 
 # Routes /api/voices + /api/voice/* déménagées dans voice/routes.py (étape 15).
 
@@ -3696,6 +3442,87 @@ threading.Thread(target=_rag_auto_refresh_loop, daemon=True, name="rag-auto-refr
 
 # ── Init différé de la tuile voice (refactor étapes 13-14, 2026-05-23) ──
 # Placé ici car _tts_internet_was_up est défini tard (ligne ~3896).
+# ── Init tuile settings (étape 17) — setters pour les mutables jarvis.py ──
+def _set_system_prompt_global(v: str) -> None:
+    global SYSTEM_PROMPT
+    SYSTEM_PROMPT = v
+
+def _set_model_global(v: str) -> None:
+    global MODEL
+    MODEL = v
+
+def _reset_welcome_global() -> None:
+    global _welcome_data
+    _welcome_data = dict(DEFAULT_WELCOME)
+
+def _set_auto_profile_model_global(v) -> None:
+    global _AUTO_PROFILE_MODEL
+    _AUTO_PROFILE_MODEL = v
+
+_SETTINGS_DSP_SAFE_STR = {
+    "tts_engine":         {"edge", "kokoro", "piper", "sapi"},
+    "tts_default_engine": {"edge", "kokoro", "piper", "sapi"},
+    "fx_type":             {"reverb", "delay", "chorus", "flanger", "echo", "phaser", "exciter"},
+    "fx_preset":           {"room", "studio", "concert", "cathedral", "plate", "cave", "spring"},
+}
+_SETTINGS_DSP_BOUNDS = {
+    "eq_low": (-24.0, 24.0), "eq_mid": (-24.0, 24.0), "eq_high": (-24.0, 24.0), "eq_air": (-24.0, 24.0),
+    "comp_threshold": (-60.0, 0.0), "comp_ratio": (1.0, 20.0),
+    "comp_attack": (0.001, 1.0), "comp_release": (0.01, 5.0),
+    "gain": (-20.0, 20.0),
+    "stereo_width": (0.0, 1.0), "haas_delay_ms": (0.0, 30.0),
+    "df_atten_lim": (0.0, 100.0),
+    "fx_wet": (0.0, 1.0), "fx_decay": (0.05, 10.0), "fx_predelay_ms": (0.0, 100.0),
+    "fx_diffusion": (0.0, 1.0), "fx_delay_ms": (1.0, 2000.0), "fx_delay_feedback": (0.0, 0.98),
+    "fx_delay_filter": (200.0, 20000.0), "fx_chorus_rate": (0.01, 10.0),
+    "fx_chorus_depth": (0.001, 0.1), "fx_chorus_feedback": (0.0, 0.9),
+    "fx_flanger_rate": (0.01, 5.0), "fx_flanger_depth": (0.0005, 0.02), "fx_flanger_feedback": (0.0, 0.95),
+    "fx_echo_left_ms": (1.0, 2000.0), "fx_echo_right_ms": (1.0, 2000.0), "fx_echo_feedback": (0.0, 0.95),
+    "fx_phaser_stages": (2, 12), "fx_phaser_rate": (0.01, 5.0), "fx_phaser_depth": (0.0, 1.0),
+    "fx_exciter_drive": (0.0, 24.0), "fx_exciter_tone": (500.0, 16000.0), "fx_exciter_warmth": (0.0, 1.0),
+    "enrich_drive": (0.0, 12.0), "enrich_tone": (200.0, 8000.0),
+    "enrich_mix": (0.0, 0.5), "enrich_warmth": (0.0, 0.3),
+    "tts_kokoro_speed": (0.5, 2.0),
+}
+
+_settings.init(
+    limiter = limiter,
+    log = _log,
+    ollama_circuit = _ollama_circuit,
+    ollama_url = OLLAMA_URL,
+    ollama_tool_detect_timeout_s = _OLLAMA_TOOL_DETECT_TIMEOUT_S,
+    dsp_max_bytes = _DSP_MAX_BYTES,
+    get_llm_params = lambda: LLM_PARAMS,
+    get_system_prompt = lambda: SYSTEM_PROMPT,
+    get_model = lambda: MODEL,
+    get_models = lambda: MODELS,
+    get_dsp_params = lambda: DSP_PARAMS,
+    get_welcome_data = lambda: _welcome_data,
+    get_auto_profile_model = lambda: _AUTO_PROFILE_MODEL,
+    set_system_prompt = _set_system_prompt_global,
+    set_model = _set_model_global,
+    set_dsp_params = lambda d: DSP_PARAMS.update(d),  # mutation in-place
+    set_welcome_data = lambda d: _welcome_data.update(d),  # mutation in-place
+    reset_welcome = _reset_welcome_global,
+    save_model_fn = _save_model,
+    set_auto_profile_model = _set_auto_profile_model_global,
+    llm_defaults = _LLM_DEFAULTS,
+    default_system_prompt = DEFAULT_SYSTEM_PROMPT,
+    llm_params_file = LLM_PARAMS_FILE,
+    prompt_file = PROMPT_FILE,
+    prompt_profiles_file = PROMPT_PROFILES_FILE,
+    welcome_file = WELCOME_FILE,
+    default_welcome = DEFAULT_WELCOME,
+    dsp_params_file = DSP_PARAMS_FILE,
+    dsp_safe_str = _SETTINGS_DSP_SAFE_STR,
+    dsp_bounds = _SETTINGS_DSP_BOUNDS,
+    model_lock = _MODEL_LOCK,
+    get_model_profile_fn = _get_model_profile,
+    fetch_ollama_models_fn = _fetch_ollama_models,
+    apply_dsp_to_mp3_fn = apply_dsp_to_mp3,
+)
+app.register_blueprint(_settings.bp)
+
 _voice.init(
     limiter            = limiter,
     log                = _log,
