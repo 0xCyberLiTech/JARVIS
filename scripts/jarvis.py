@@ -1183,6 +1183,7 @@ _rag.init(
 )
 app.register_blueprint(_rag.bp)
 _vram_model:    str | None = None   # modèle actuellement chargé en VRAM (tracké par JARVIS)
+_VRAM_LOCK = threading.Lock()       # protège _vram_model + _ollama_swap (anti-race multi-requête)
 _last_toks_per_sec: float = 0.0     # vitesse dernière génération (tok/s)
 _dev_cwd:       str = "/root"   # répertoire courant de la session terminal DEV (srv-dev-1)
 
@@ -1793,13 +1794,18 @@ def api_reset_prompt():
 
 def _ensure_vram(next_model: str):
     """Décharge le modèle actuellement en VRAM si différent du prochain.
-    Évite les collisions VRAM lors du routing automatique inter-modes."""
+    Évite les collisions VRAM lors du routing automatique inter-modes.
+
+    Protégé par `_VRAM_LOCK` (Improvement #1, 2026-05-23) : sérialise le
+    check + swap + mutation pour éliminer la race condition multi-requête
+    (ex: /api/chat user A + /api/sysdiag _diag_ollama en parallèle)."""
     global _vram_model
     effective = next_model or MODEL
-    if _vram_model and _vram_model != effective:
-        _log.info(f"[VRAM] Routing switch : {_vram_model} → {effective} — unload forcé")
-        _ollama_swap(_vram_model, effective)
-    _vram_model = effective
+    with _VRAM_LOCK:
+        if _vram_model and _vram_model != effective:
+            _log.info(f"[VRAM] Routing switch : {_vram_model} → {effective} — unload forcé")
+            _ollama_swap(_vram_model, effective)
+        _vram_model = effective
 
 
 def _ollama_swap(unload_model: str, load_model: str):
@@ -1848,11 +1854,11 @@ def api_mode():
         if new_mode != prev_mode:
             _jarvis_mode = new_mode
             _log.info(f"[JARVIS] Mode {prev_mode} → {new_mode}")
-            _model_prev = {"soc": MODEL, "general": _GENERAL_MODEL, "code": _CODE_MODEL, "code_reasoning": _CODE_REASONING_ANALYSIS_MODEL}.get(prev_mode, MODEL)
             _model_next = {"soc": MODEL, "general": _GENERAL_MODEL, "code": _CODE_MODEL, "code_reasoning": _CODE_REASONING_ANALYSIS_MODEL}.get(new_mode, MODEL)
-            if _model_prev != _model_next:
-                _ollama_swap(_model_prev, _model_next)
-                global _vram_model; _vram_model = _model_next
+            # _ensure_vram() est protégé par _VRAM_LOCK (Improvement #1) :
+            # sérialise check + swap + mutation. Plus de chemin direct vers
+            # _ollama_swap qui contournerait le lock.
+            _ensure_vram(_model_next)
     _model_map = {"soc": MODEL, "general": _GENERAL_MODEL, "code": _CODE_MODEL, "code_reasoning": _CODE_REASONING_ANALYSIS_MODEL}
     return Response(json.dumps({"mode": _jarvis_mode, "model": _model_map.get(_jarvis_mode, MODEL)}),
                     mimetype="application/json")
@@ -4098,6 +4104,45 @@ def _rag_auto_refresh_loop():
         _log.info("[RAG] Auto-refresh 6h terminé.")
 
 threading.Thread(target=_rag_auto_refresh_loop, daemon=True, name="rag-auto-refresh").start()
+
+
+def _vram_sync_loop():
+    """Sync _vram_model avec l'état réel d'Ollama toutes les 60s.
+
+    Improvement #2 (2026-05-23) : élimine la divergence entre la vue JARVIS et
+    l'état réel quand Ollama décharge un modèle sans qu'on le sache (TTL
+    keep_alive expiré, pression mémoire, etc.). Sans ça, le prochain appel sur
+    ce modèle déclenche un cold start « surprise » (~3 s), invisible au log.
+
+    Sync sur /api/ps Ollama. Ignore l'embed RAG (autre cycle de vie : TTL 10m
+    géré séparément). Mutation de _vram_model sous _VRAM_LOCK (cohérent avec
+    _ensure_vram).
+    """
+    global _vram_model
+    while True:
+        time.sleep(60)
+        try:
+            r = req.get(f"{OLLAMA_URL}/api/ps", timeout=5)
+            if not r.ok:
+                continue
+            loaded = [m.get("name", "") for m in (r.json().get("models") or [])]
+            embed_base = RAG_EMBED_MODEL.split(":")[0]
+            # Filtre l'embed : on ne tracke que les LLM chat
+            chat_loaded = [m for m in loaded if m.split(":")[0] != embed_base]
+            with _VRAM_LOCK:
+                if not chat_loaded:
+                    if _vram_model is not None:
+                        _log.info(f"[VRAM-SYNC] Ollama a déchargé {_vram_model} (TTL/mémoire) — _vram_model reset")
+                        _vram_model = None
+                elif _vram_model not in chat_loaded:
+                    # Désynchro : Ollama a un LLM chargé différent de ce qu'on pense
+                    actual = chat_loaded[0]
+                    _log.info(f"[VRAM-SYNC] désynchro : interne={_vram_model} → réel={actual}")
+                    _vram_model = actual
+        except Exception as e:
+            _log.debug(f"[VRAM-SYNC] {e}")
+
+threading.Thread(target=_vram_sync_loop, daemon=True, name="vram-sync").start()
 
 # ── Init différé de la tuile chat (refactor jarvis.py étape 12, 2026-05-23) ──
 # Placé ici car les SSE generators (_apt_upgrade_bypass_sse, _reboot_machine_sse)
