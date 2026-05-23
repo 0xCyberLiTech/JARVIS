@@ -1298,31 +1298,10 @@ _TOOL_DISPATCH = {
     "executer_script_windows":  lambda args: _tool_executer_script_windows(args),
 }
 
-def execute_tool(name, args):
-    """Exécute un outil fichier et retourne le résultat."""
-    try:
-        handler = _TOOL_DISPATCH.get(name)
-        if handler is None:
-            return f"Outil inconnu : {name}"
-        return handler(args)
-    except Exception as e:
-        return f"Erreur lors de l'exécution : {e}"
-
-def call_llm_with_tools(messages, model_override=None):
-    """Appel non-streamé pour détecter les tool calls (Ollama)."""
-    payload = {
-        "model": model_override or MODEL,
-        "messages": messages,
-        "tools": TOOLS,
-        "stream": False,
-        "options": {
-            "temperature": _LLM_DEFAULTS["temperature"],
-            "num_predict": 256,   # limité : on détecte juste les tool calls, pas de réponse complète
-            "num_ctx": max(LLM_PARAMS.get("num_ctx", _LLM_DEFAULTS["num_ctx"]), 8192),
-        }
-    }
-    resp = _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/chat", json=payload, timeout=_OLLAMA_TOOL_DETECT_TIMEOUT_S)
-    return resp.json()
+# execute_tool + call_llm_with_tools déménagés dans chat/orchestrator.py (étape 25).
+# Aliases pour les consommateurs externes (MCP server qui passe par /api/chat) :
+execute_tool         = _chat_orch.execute_tool
+call_llm_with_tools  = _chat_orch.call_llm_with_tools
 
 def _think_filter_step(tbuf: str, in_think: bool):
     """Un pas du filtre <think>…</think> sur le buffer courant.
@@ -2608,6 +2587,7 @@ threading.Thread(target=_vram_sync_loop, daemon=True, name="vram-sync").start()
 _chat_orch.init(
     log                            = _log,
     security                       = _sec,
+    ollama_circuit                 = _ollama_circuit,
     llm_opts_mod                   = _llm_opts_mod,
     stream_tokens_mod              = _stream_tokens_mod,
     voice_deferred_speak           = _deferred_speak,
@@ -2616,8 +2596,6 @@ _chat_orch.init(
     fetch_monitoring               = _fetch_monitoring,
     build_monitoring_context       = _build_monitoring_context,
     fetch_defense                  = _fetch_defense,
-    call_llm_with_tools            = call_llm_with_tools,
-    execute_tool                   = execute_tool,
     ensure_vram                    = _ensure_vram,
     stream_llm                     = stream_llm,
     clean_for_tts                  = _clean_for_tts,
@@ -2644,6 +2622,7 @@ _chat_orch.init(
     code_system_suffix             = _CODE_SYSTEM_SUFFIX,
     ollama_url                     = OLLAMA_URL,
     llm_params                     = LLM_PARAMS,
+    llm_defaults                   = _LLM_DEFAULTS,
     soc_temperature                = _SOC_TEMPERATURE,
     soc_num_ctx                    = _SOC_NUM_CTX,
     num_ctx_short                  = _NUM_CTX_SHORT,
@@ -2651,6 +2630,7 @@ _chat_orch.init(
     tts_phrase_min                 = _TTS_PHRASE_MIN,
     tool_call_max                  = _TOOL_CALL_MAX,
     tool_result_trunc              = _TOOL_RESULT_TRUNC,
+    ollama_tool_detect_timeout_s   = _OLLAMA_TOOL_DETECT_TIMEOUT_S,
     pending_apt_ttl_s              = _PENDING_APT_TTL_S,
     confirm_re                     = _CONFIRM_RE,
     cancel_re                      = _CANCEL_RE,

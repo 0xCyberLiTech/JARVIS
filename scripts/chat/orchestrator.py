@@ -21,6 +21,8 @@ Public surface :
 """
 from collections import deque, namedtuple
 
+import requests as req
+
 from . import (
     capture,
     generate,
@@ -30,6 +32,7 @@ from . import (
     stream,
     system_prompt,
     tool_calls,
+    tool_schemas,
 )
 
 LlmCtx = namedtuple('LlmCtx', ['messages', 'model', 'np_override', 'soc_ctx', 'soc_trigger'])
@@ -39,6 +42,7 @@ _LAST_EXCHANGES: deque = deque(maxlen=10)
 # Modules / services / loggers
 _log = None
 _security = None
+_ollama_circuit = None
 _llm_opts_mod = None
 _stream_tokens_mod = None
 _voice_deferred_speak = None
@@ -49,8 +53,6 @@ _bypass_pve = None
 _fetch_monitoring_fn = None
 _build_monitoring_context_fn = None
 _fetch_defense_fn = None
-_call_llm_with_tools_fn = None
-_execute_tool_fn = None
 _ensure_vram_fn = None
 _stream_llm_fn = None
 _clean_for_tts_fn = None
@@ -83,6 +85,7 @@ _code_reasoning_analysis_model = ""
 _code_system_suffix = ""
 _ollama_url = ""
 _llm_params = None
+_llm_defaults = None
 _soc_temperature = 0.0
 _soc_num_ctx = 0
 _num_ctx_short = 0
@@ -90,6 +93,7 @@ _reasoning_np_min = 0
 _tts_phrase_min = 0
 _tool_call_max = 0
 _tool_result_trunc = 0
+_ollama_tool_detect_timeout_s = 15
 _pending_apt_ttl_s = 0
 _confirm_re = None
 _cancel_re = None
@@ -98,11 +102,11 @@ _rag_relevant_kw = None
 
 def init(*,
          # services / modules
-         log, security, llm_opts_mod, stream_tokens_mod, voice_deferred_speak,
-         code_reasoning_mod, bypass_pve,
+         log, security, ollama_circuit, llm_opts_mod, stream_tokens_mod,
+         voice_deferred_speak, code_reasoning_mod, bypass_pve,
          # fonctions
          fetch_monitoring, build_monitoring_context, fetch_defense,
-         call_llm_with_tools, execute_tool, ensure_vram, stream_llm,
+         ensure_vram, stream_llm,
          clean_for_tts, facts_inject, rag_inject, web_search, chat_inject_pve,
          apt_upgrade_sse, reboot_machine_sse, sse_response, sse_tok,
          # états mutables
@@ -112,15 +116,16 @@ def init(*,
          get_system_prompt, get_model, get_mode,
          # constantes
          general_model, code_model, code_reasoning_analysis_model,
-         code_system_suffix, ollama_url, llm_params,
+         code_system_suffix, ollama_url, llm_params, llm_defaults,
          soc_temperature, soc_num_ctx, num_ctx_short, reasoning_np_min,
          tts_phrase_min, tool_call_max, tool_result_trunc,
+         ollama_tool_detect_timeout_s,
          pending_apt_ttl_s, confirm_re, cancel_re, rag_relevant_kw) -> None:
     """Injecte les ~30 dépendances runtime nécessaires aux wrappers."""
-    global _log, _security, _llm_opts_mod, _stream_tokens_mod, _voice_deferred_speak
+    global _log, _security, _ollama_circuit, _llm_opts_mod, _stream_tokens_mod, _voice_deferred_speak
     global _code_reasoning_mod, _bypass_pve
     global _fetch_monitoring_fn, _build_monitoring_context_fn, _fetch_defense_fn
-    global _call_llm_with_tools_fn, _execute_tool_fn, _ensure_vram_fn
+    global _ensure_vram_fn
     global _stream_llm_fn, _clean_for_tts_fn, _facts_inject_fn, _rag_inject_fn
     global _web_search_fn, _chat_inject_pve_fn
     global _apt_upgrade_sse_fn, _reboot_machine_sse_fn, _sse_response_fn, _sse_tok_fn
@@ -128,13 +133,15 @@ def init(*,
     global _speak_deferred, _chat_stream_active
     global _get_system_prompt, _get_model, _get_mode
     global _general_model, _code_model, _code_reasoning_analysis_model
-    global _code_system_suffix, _ollama_url, _llm_params
+    global _code_system_suffix, _ollama_url, _llm_params, _llm_defaults
     global _soc_temperature, _soc_num_ctx, _num_ctx_short, _reasoning_np_min
     global _tts_phrase_min, _tool_call_max, _tool_result_trunc
+    global _ollama_tool_detect_timeout_s
     global _pending_apt_ttl_s, _confirm_re, _cancel_re, _rag_relevant_kw
 
     _log = log
     _security = security
+    _ollama_circuit = ollama_circuit
     _llm_opts_mod = llm_opts_mod
     _stream_tokens_mod = stream_tokens_mod
     _voice_deferred_speak = voice_deferred_speak
@@ -143,8 +150,6 @@ def init(*,
     _fetch_monitoring_fn = fetch_monitoring
     _build_monitoring_context_fn = build_monitoring_context
     _fetch_defense_fn = fetch_defense
-    _call_llm_with_tools_fn = call_llm_with_tools
-    _execute_tool_fn = execute_tool
     _ensure_vram_fn = ensure_vram
     _stream_llm_fn = stream_llm
     _clean_for_tts_fn = clean_for_tts
@@ -171,6 +176,8 @@ def init(*,
     _code_system_suffix = code_system_suffix
     _ollama_url = ollama_url
     _llm_params = llm_params
+    _llm_defaults = llm_defaults
+    _ollama_tool_detect_timeout_s = ollama_tool_detect_timeout_s
     _soc_temperature = soc_temperature
     _soc_num_ctx = soc_num_ctx
     _num_ctx_short = num_ctx_short
@@ -189,6 +196,40 @@ def init(*,
 # ────────────────────────────────────────────────────────────────────────────
 
 
+# ────────────────────────────────────────────────────────────────────────
+# execute_tool + call_llm_with_tools — migré depuis jarvis.py étape 25
+# (2026-05-23). Le dispatch _tool_dispatch est déjà injecté par init().
+# ────────────────────────────────────────────────────────────────────────
+
+
+def execute_tool(name, args):
+    """Exécute un outil fichier et retourne le résultat (lookup dans _tool_dispatch)."""
+    try:
+        handler = _tool_dispatch.get(name)
+        if handler is None:
+            return f"Outil inconnu : {name}"
+        return handler(args)
+    except Exception as e:
+        return f"Erreur lors de l'exécution : {e}"
+
+
+def call_llm_with_tools(messages, model_override=None):
+    """Appel non-streamé pour détecter les tool calls (Ollama)."""
+    payload = {
+        "model": model_override or _get_model(),
+        "messages": messages,
+        "tools": tool_schemas.TOOLS,
+        "stream": False,
+        "options": {
+            "temperature": _llm_defaults["temperature"],
+            "num_predict": 256,   # limité : on détecte juste les tool calls, pas de réponse complète
+            "num_ctx": max(_llm_params.get("num_ctx", _llm_defaults["num_ctx"]), 8192),
+        }
+    }
+    resp = _ollama_circuit.call(req.post, f"{_ollama_url}/api/chat", json=payload, timeout=_ollama_tool_detect_timeout_s)
+    return resp.json()
+
+
 def _chat_inject_soc(system, last_user, is_vocal, soc_ctx_injected, force_soc=False):
     """Délègue à chat.soc_inject.inject() avec les helpers monitoring + defense_24h."""
     return soc_inject.inject(
@@ -204,8 +245,8 @@ def _run_tool_calls(messages: list, active_model):
     import time
     yield from tool_calls.run_tool_calls(
         messages, active_model,
-        call_llm_with_tools_fn=_call_llm_with_tools_fn,
-        execute_tool_fn=_execute_tool_fn,
+        call_llm_with_tools_fn=call_llm_with_tools,
+        execute_tool_fn=execute_tool,
         tool_dispatch=_tool_dispatch,
         apt_host_map=_apt_host_map,
         pending_infra_cmd=_pending_infra_cmd,
