@@ -297,13 +297,31 @@ def _tts_edge_fallback(text, local_voice):
 def api_tts():
     """Wrapper sécurité : try/except global garantit qu'aucune exception
     silencieuse ne remonte au navigateur (sinon 500 sans log → debug aveugle).
-    Le corps réel est dans `_api_tts_impl()`."""
+    Le corps réel est dans `_api_tts_impl()`.
+
+    Au crash, log enrichi avec : voix active, moteur TTS courant, longueur du
+    texte reçu, preview 80 chars. Diagnostic ciblé du bug « switch voix Edge
+    qui relance l'UI » (2026-05-23) — révélera quelle voix + quel texte ont
+    provoqué l'exception."""
     try:
         return _api_tts_impl()
     except Exception as e:
         tb = traceback.format_exc()
-        _log.error(f"[TTS] /api/tts EXCEPTION GLOBALE ({type(e).__name__}: {e})\n{tb}")
-        _tts_logger.error(f"[GLOBAL-CRASH] /api/tts {type(e).__name__}: {e}")
+        # Snapshot du contexte au moment du crash
+        try:
+            data = request.get_json(silent=True) or {}
+            text = data.get("text", "")
+            preview = text[:80].replace("\n", " ") + ("..." if len(text) > 80 else "")
+            ctx = {
+                "voice":   _get_voice() if _get_voice else "?",
+                "engine":  _get_dsp_params().get("tts_engine", "?") if _get_dsp_params else "?",
+                "len":     len(text),
+                "preview": preview,
+            }
+        except Exception:
+            ctx = {"voice": "?", "engine": "?", "len": 0, "preview": "(snapshot KO)"}
+        _log.error(f"[TTS] /api/tts EXCEPTION GLOBALE ({type(e).__name__}: {e}) | ctx={ctx}\n{tb}")
+        _tts_logger.error(f"[GLOBAL-CRASH] /api/tts {type(e).__name__}: {e} | voice={ctx['voice']} engine={ctx['engine']} len={ctx['len']} preview={ctx['preview']!r}")
         return Response(
             json.dumps({"ok": False, "error": f"{type(e).__name__}: {e}"}, ensure_ascii=False),
             mimetype="application/json", status=500,

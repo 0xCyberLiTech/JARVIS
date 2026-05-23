@@ -23,6 +23,22 @@ logging.basicConfig(
 )
 _log = logging.getLogger("JARVIS")
 
+# ── JARVIS log rotatif persistant — capture les WARNING/ERROR/INFO + tracebacks ──
+# Le bug intermittent « UI reload sur switch voix Edge » (2026-05-23) montre que
+# basicConfig stdout seul n'est pas suffisant : si la console PowerShell est fermée
+# ou que le scrollback est dépassé, le traceback est perdu. Ce FileHandler garantit
+# la persistance sur disque avec rotation 5 MB × 7 backups.
+_JARVIS_LOG_PATH = Path(__file__).parent / "jarvis.log"
+_jarvis_log_handler = logging.handlers.RotatingFileHandler(
+    _JARVIS_LOG_PATH, maxBytes=5_000_000, backupCount=7, encoding="utf-8"
+)
+_jarvis_log_handler.setFormatter(
+    logging.Formatter("%(asctime)s [%(levelname)-8s] %(name)s | %(message)s",
+                      datefmt="%Y-%m-%d %H:%M:%S")
+)
+_jarvis_log_handler.setLevel(logging.INFO)
+_log.addHandler(_jarvis_log_handler)
+
 # ── Racine du workspace — toutes les références de chemins s'appuient sur cette constante ──
 _WORKSPACE_ROOT = Path(__file__).parent.parent.parent  # 0xCyberLiTech/
 
