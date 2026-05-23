@@ -554,6 +554,7 @@ import chat_tool_calls as _chat_tools
 import code_reasoning as _cr_mod
 import deferred_speak as _deferred_speak
 import llm_opts as _llm_opts_mod
+import memory_store as _memory_store
 import proxmox_api as _pve_api
 import rag_live as _rag_live_mod
 import security_whitelists as _sec
@@ -766,81 +767,19 @@ load_llm_params()
 _MODEL_LOCK  = threading.Lock()
 _CONFIG_LOCK = threading.Lock()
 
-def load_memory():
-    try:
-        if MEMORY_FILE.exists():
-            return json.loads(MEMORY_FILE.read_text(encoding="utf-8"))
-    except Exception as e:
-        _log.warning(f"[JARVIS] WARNING load_memory: {e}")
-    return []
-
-def save_memory(history):
-    try:
-        clean = [m for m in history if m.get("role") in ("user", "assistant") and isinstance(m.get("content"), str)]
-        to_summarize = []
-        if len(clean) > MEMORY_LIMIT:
-            to_summarize = clean[:-MEMORY_LIMIT]
-            clean = clean[-MEMORY_LIMIT:]
-        MEMORY_FILE.write_text(json.dumps(clean, ensure_ascii=False, indent=2), encoding="utf-8")
-        if len(to_summarize) >= _SUMMARY_MIN_MSGS:
-            threading.Thread(target=_background_summarize, args=(to_summarize,), daemon=True).start()
-    except Exception as e:
-        _log.error(f"[MEMORY] Erreur sauvegarde: {e}")
-
-def _summarize_messages(messages: list) -> str:
-    """Appelle Ollama pour résumer un lot de messages en points clés."""
-    lines = []
-    for m in messages:
-        role = "Marc" if m["role"] == "user" else "JARVIS"
-        lines.append(f"{role}: {m['content'][:400]}")
-    prompt = (
-        "Résume en 5 à 8 points clés (format: • fait) les informations importantes "
-        "de cet historique. Sois concis, factuel, pas de markdown superflu.\n\n"
-        + "\n".join(lines)
-    )
-    try:
-        _mode_model = {"soc": MODEL, "general": _GENERAL_MODEL, "code": _CODE_MODEL}.get(_jarvis_mode, MODEL)
-        r = _ollama_circuit.call(req.post, f"{OLLAMA_URL}/api/generate", json={
-            "model": _mode_model,
-            "prompt": prompt,
-            "keep_alive": 0,
-            "options": {"num_predict": 350, "num_ctx": 2048, "temperature": 0.3},
-            "stream": False
-        }, timeout=80)
-        if r.ok:
-            return r.json().get("response", "").strip()
-    except Exception as e:
-        _log.warning(f"[SUMMARY] Erreur résumé mémoire: {e}")
-    return ""
-
-def _append_memory_summary(new_summary: str):
-    try:
-        data = json.loads(SUMMARY_FILE.read_text(encoding="utf-8")) if SUMMARY_FILE.exists() else {}
-        summaries = data.get("summaries", [])
-        summaries.append({"date": datetime.date.today().isoformat(), "content": new_summary})
-        if len(summaries) > _SUMMARY_KEEP:
-            summaries = summaries[-_SUMMARY_KEEP:]
-        SUMMARY_FILE.write_text(json.dumps({"summaries": summaries}, ensure_ascii=False, indent=2), encoding="utf-8")
-        _log.info(f"[SUMMARY] Résumé sauvegardé ({len(new_summary)} chars)")
-    except Exception as e:
-        _log.error(f"[SUMMARY] Erreur sauvegarde: {e}")
-
-def _load_memory_summary() -> str:
-    try:
-        if SUMMARY_FILE.exists():
-            data = json.loads(SUMMARY_FILE.read_text(encoding="utf-8"))
-            summaries = data.get("summaries", [])
-            if summaries:
-                parts = [f"[{s.get('date','?')}]\n{s['content']}" for s in summaries[-3:]]
-                return "\n\n---\n".join(parts)
-    except Exception:
-        pass  # fichier absent ou malformé — retourne chaîne vide
-    return ""
-
-def _background_summarize(messages: list):
-    summary = _summarize_messages(messages)
-    if summary:
-        _append_memory_summary(summary)
+# Cluster mémoire conversationnelle (load_memory + save_memory +
+# _summarize_messages + _background_summarize + _append_memory_summary +
+# _load_memory_summary) extrait dans memory_store.py — refactor incrémental
+# jarvis.py étape 2 (2026-05-23). Alias légers ici ; init() différé plus bas
+# (après la déclaration de _GENERAL_MODEL/_CODE_MODEL/_jarvis_mode), avec DI
+# par lambdas pour les valeurs réassignées au runtime ET monkeypatchées par
+# les tests.
+load_memory             = _memory_store.load_memory
+save_memory             = _memory_store.save_memory
+_summarize_messages     = _memory_store._summarize_messages
+_append_memory_summary  = _memory_store._append_memory_summary
+_load_memory_summary    = _memory_store._load_memory_summary
+_background_summarize   = _memory_store._background_summarize
 
 # ── RAG — Retrieval Augmented Generation local ────────────────────────────────
 
@@ -1343,6 +1282,22 @@ _CODE_MODEL:                    str = "qwen2.5-coder:14b"
 _CODE_REASONING_ANALYSIS_MODEL: str = "qwen3:8b"              # reasoning natif · ~5 GB VRAM · thinking tokens <think>
 _CODE_REASONING_MODE                = "code_reasoning"         # single-pass qwen3:8b streaming (thinking masqué)
 _jarvis_mode:   str = "soc"
+# Init différé du cluster mémoire conversationnelle (refactor jarvis.py étape 2).
+# Placé ici car nécessite _GENERAL_MODEL/_CODE_MODEL/_jarvis_mode déclarés au-dessus.
+_memory_store.init(
+    get_memory_file  = lambda: MEMORY_FILE,
+    get_summary_file = lambda: SUMMARY_FILE,
+    get_model        = lambda: MODEL,
+    get_mode         = lambda: _jarvis_mode,
+    memory_limit     = MEMORY_LIMIT,
+    summary_keep     = _SUMMARY_KEEP,
+    summary_min_msgs = _SUMMARY_MIN_MSGS,
+    general_model    = _GENERAL_MODEL,
+    code_model       = _CODE_MODEL,
+    ollama_url       = OLLAMA_URL,
+    ollama_circuit   = _ollama_circuit,
+    log              = _log,
+)
 _vram_model:    str | None = None   # modèle actuellement chargé en VRAM (tracké par JARVIS)
 _last_toks_per_sec: float = 0.0     # vitesse dernière génération (tok/s)
 _dev_cwd:       str = "/root"   # répertoire courant de la session terminal DEV (srv-dev-1)
