@@ -1,7 +1,7 @@
 """Tests stt — wrappers Whisper (faster-whisper) avec mock complet."""
 import importlib
 
-import stt
+from voice import stt
 
 
 def _reset_state():

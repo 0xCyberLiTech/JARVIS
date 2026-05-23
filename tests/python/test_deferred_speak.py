@@ -2,7 +2,7 @@
 import json
 import queue
 
-from deferred_speak import flush_deferred_speak
+from voice.deferred_speak import flush_deferred_speak
 
 
 def test_queue_vide_yield_rien():

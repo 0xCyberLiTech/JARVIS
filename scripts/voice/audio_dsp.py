@@ -17,8 +17,9 @@ import io as _io
 import logging
 import struct as _struct
 
-import deepfilter as _df  # module dédié DeepFilterNet (Phase 3 module 4)
 import numpy as np
+
+from . import deepfilter as _df  # module dédié DeepFilterNet (même tuile voice)
 
 _log = logging.getLogger("jarvis.audio_dsp")
 

@@ -551,7 +551,7 @@ from chat import stream as _chat_stream_mod
 from chat import system_prompt as _chat_sp
 from chat import tool_calls as _chat_tools
 import code_reasoning as _cr_mod
-import deferred_speak as _deferred_speak
+from voice import deferred_speak as _deferred_speak
 import files as _files
 import llm_opts as _llm_opts_mod
 import memory as _memory
@@ -563,13 +563,13 @@ import ssh as _ssh
 import sse_helpers as _sse
 import ssh_terminal as _ssh_term
 import stream_tokens as _stream_tokens_mod
-import stt as _stt
 import system as _system
-import tts_cleaner as _tts_cleaner
-import tts_dedup as _tts_dedup
-import tts_engines as _tts_eng
 import vision as _vision
-import voice_lab as _voice_lab
+from voice import stt as _stt
+from voice import tts_cleaner as _tts_cleaner
+from voice import tts_dedup as _tts_dedup
+from voice import tts_engines as _tts_eng
+from voice import voice_lab as _voice_lab
 from ollama_circuit import circuit as _ollama_circuit, OllamaUnavailable
 
 # ── Config ──────────────────────────────────────────────────
@@ -745,8 +745,8 @@ load_dsp_params()
 # ── Moteur DSP audio — extrait dans audio_dsp.py (chantier dette 2026-05-14) ──
 # Note : numpy n'est plus importé globalement ici (le bloc DSP était son seul
 # consommateur module-level). Les 3 fonctions RAG gardent leur import local.
-import deepfilter as _df          # NDT: aussi consommé hors DSP (/api/sysdiag)
-import audio_dsp as _audio_dsp
+from voice import deepfilter as _df          # NDT: aussi consommé hors DSP (/api/sysdiag)
+from voice import audio_dsp as _audio_dsp
 _DSP_AVAILABLE = _audio_dsp.DSP_AVAILABLE
 
 

@@ -6,10 +6,10 @@ en bypass, et constantes.
 """
 import struct
 
-import audio_dsp
 import numpy as np
 import pytest
-from audio_dsp import (
+from voice import audio_dsp
+from voice.audio_dsp import (
     _FX_IR_CACHE,
     _INT16_MAX,
     _INT16_MIN,

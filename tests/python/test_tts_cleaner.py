@@ -1,5 +1,5 @@
 """Tests tts_cleaner — markdown → texte parlable + IP chiffre par chiffre."""
-from tts_cleaner import _DIGITS_FR, _ip_octet, clean_for_tts, replace_ips
+from voice.tts_cleaner import _DIGITS_FR, _ip_octet, clean_for_tts, replace_ips
 
 # ── Helper _ip_octet ──────────────────────────────────────────────────────
 

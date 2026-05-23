@@ -3,7 +3,7 @@ import importlib
 from collections import OrderedDict
 from unittest.mock import MagicMock
 
-import tts_engines
+from voice import tts_engines
 
 
 def _reset_state():

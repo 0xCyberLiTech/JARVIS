@@ -16,8 +16,8 @@ from pathlib import Path
 _log = logging.getLogger("jarvis.voice_lab")
 
 # ── Paths ─────────────────────────────────────────────────────
-_VP_DIR      = Path(__file__).parent / "voice_prints"
-_SAMPLES_DIR = Path(__file__).parent / "static" / "voice_samples"
+_VP_DIR      = Path(__file__).parent.parent / "voice_prints"
+_SAMPLES_DIR = Path(__file__).parent.parent / "static" / "voice_samples"
 
 # ── Helpers privés ────────────────────────────────────────────
 

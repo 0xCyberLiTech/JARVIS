@@ -1,8 +1,8 @@
 """Tests deepfilter — DeepFilterNet wrappers (mock torch + df.enhance)."""
 import importlib
 
-import deepfilter
 import numpy as np
+from voice import deepfilter
 
 
 def _reset_state():

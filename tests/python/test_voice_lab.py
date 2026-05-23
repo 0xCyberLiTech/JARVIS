@@ -1,7 +1,7 @@
 """Tests voice_lab — analyse acoustique + voice prints CRUD (mock librosa, tmp_path FS)."""
 import wave
 
-import voice_lab
+from voice import voice_lab
 
 # ── _safe_print_name ────────────────────────────────────────────────────
 

@@ -1,7 +1,7 @@
 """Tests tts_dedup — fenêtre 60s anti-doublon TTS cross-source (python-speak ↔ /api/tts)."""
 import importlib
 
-import tts_dedup
+from voice import tts_dedup
 
 
 def _reset_module_state():
