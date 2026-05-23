@@ -562,6 +562,7 @@ import sse_helpers as _sse
 import ssh_terminal as _ssh_term
 import stream_tokens as _stream_tokens_mod
 import system as _system
+import tasks as _tasks
 import vision as _vision
 import voice as _voice
 from voice import tts_cleaner as _tts_cleaner
@@ -2115,102 +2116,19 @@ _vision.init(
 )
 app.register_blueprint(_vision.bp)
 
-# ── CODE REASONING — endpoint polling ────────────────────────
-@app.route("/api/cr-poll/<task_id>")
-@limiter.limit("120 per minute")
-def cr_poll(task_id):
-    task = _cr_tasks.get(task_id)
-    if not task:
-        return Response('{"error":"not found"}', status=404, mimetype="application/json")
-    return Response(json.dumps({"status": task["status"], "text": task["text"]}),
-                    mimetype="application/json")
-
-# ── Gestionnaire de tâches ────────────────────────────────────
-import uuid as _uuid
-
-
-def _load_tasks():
-    try:
-        if TASKS_FILE.exists():
-            return json.loads(TASKS_FILE.read_text(encoding="utf-8"))
-    except Exception as e:
-        _log.warning(f"[JARVIS] WARNING load_tasks: {e}")
-    return []
-
-def _save_tasks(tasks):
-    TASKS_FILE.write_text(json.dumps(tasks, indent=2, ensure_ascii=False), encoding="utf-8")
-
-@limiter.limit("60 per minute")
-@app.route("/api/tasks", methods=["GET"])
-def api_tasks_get():
-    return Response(json.dumps(_load_tasks(), ensure_ascii=False), mimetype="application/json")
-
-@limiter.limit("30 per minute")
-@app.route("/api/tasks", methods=["POST"])
-def api_tasks_post():
-    data  = request.json or {}
-    tasks = _load_tasks()
-    tid   = data.get("id") or str(_uuid.uuid4())[:8]
-    # Limiter la longueur du cmd et supprimer les null bytes (protection injection)
-    raw_cmd = str(data.get("cmd", "")).replace('\x00', '').strip()[:500]
-    if "cmd" in data and not raw_cmd:
-        return Response('{"error":"Commande vide"}', status=400, mimetype="application/json")
-    task  = next((t for t in tasks if t["id"] == tid), None)
-    if task:
-        if "cmd" in data:
-            data["cmd"] = raw_cmd
-        task.update({k: v for k, v in data.items() if k != "id"})
-    else:
-        tasks.append({
-            "id":       tid,
-            "name":     data.get("name", "Tâche"),
-            "cmd":      raw_cmd,
-            "schedule": data.get("schedule", ""),  # "*/5 * * * *" ou "manual"
-            "enabled":  data.get("enabled", True),
-            "notify":   data.get("notify", True),  # notifier dans le chat
-            "last_run": None,
-            "last_out": "",
-            "last_err": "",
-            "status":   "idle",
-        })
-    _save_tasks(tasks)
-    return Response(json.dumps({"ok": True, "id": tid}), mimetype="application/json")
-
-@limiter.limit("20 per minute")
-@app.route("/api/tasks/<tid>", methods=["DELETE"])
-def api_tasks_delete(tid):
-    tasks = [t for t in _load_tasks() if t["id"] != tid]
-    _save_tasks(tasks)
-    return Response('{"ok":true}', mimetype="application/json")
-
-@limiter.limit("10 per minute")
-@app.route("/api/tasks/<tid>/run", methods=["POST"])
-def api_tasks_run(tid):
-    tasks = _load_tasks()
-    task  = next((t for t in tasks if t["id"] == tid), None)
-    if not task:
-        return Response('{"error":"Tâche introuvable"}', status=404, mimetype="application/json")
-    cmd = task.get("cmd", "").strip()
-    if not cmd:
-        return Response('{"error":"Commande vide"}', status=400, mimetype="application/json")
-    task["status"]   = "running"
-    task["last_run"] = time.strftime("%Y-%m-%d %H:%M:%S")
-    _save_tasks(tasks)
-    try:
-        # shell=True intentionnel : les commandes utilisateur peuvent contenir pipes/redirections
-        r = subprocess.run(cmd, shell=True, capture_output=True, text=True,
-                           cwd=TERMINAL_CWD[0], timeout=_TERMINAL_TIMEOUT_S, encoding="utf-8", errors="replace")
-        task["last_out"] = r.stdout[:4000]
-        task["last_err"] = r.stderr[:2000]
-        if r.returncode != 0:
-            _log.error(f"[JARVIS] tasks_run '{task.get('name',tid)}' — returncode={r.returncode} err={r.stderr[:200]!r}")
-        task["status"]   = "ok" if r.returncode == 0 else "error"
-    except Exception as e:
-        _log.error(f"[JARVIS] tasks_run error: {e}")
-        task["last_err"] = "Erreur d'exécution"
-        task["status"]   = "error"
-    _save_tasks(tasks)
-    return Response(json.dumps({"ok": True, "output": task["last_out"], "error": task["last_err"], "status": task["status"]}, ensure_ascii=False), mimetype="application/json")
+# Routes /api/cr-poll + /api/tasks* déménagées dans tasks/routes.py (étape 18, 2026-05-23).
+_tasks.init(
+    limiter            = limiter,
+    log                = _log,
+    get_tasks_file     = lambda: TASKS_FILE,   # lambda pour suivre les monkeypatch de test
+    terminal_cwd       = TERMINAL_CWD,
+    terminal_timeout_s = _TERMINAL_TIMEOUT_S,
+    cr_tasks           = _cr_mod.tasks,
+)
+app.register_blueprint(_tasks.bp)
+# Aliases backward-compat pour les tests (jm._load_tasks, jm._save_tasks)
+_load_tasks = _tasks.routes._load_tasks
+_save_tasks = _tasks.routes._save_tasks
 
 # ── Web Search (DuckDuckGo HTML) ──────────────────────────────
 _WEB_HEADERS = {
