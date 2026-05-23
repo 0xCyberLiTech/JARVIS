@@ -276,9 +276,9 @@ def install(pkg):
     subprocess.check_call([sys.executable, "-m", "pip", "install", pkg, "-q"])
 
 try:
-    from flask import Flask, Response, render_template, request, stream_with_context
+    from flask import Flask, Response, render_template, request
 except ImportError:
-    install("flask"); from flask import Flask, Response, request, stream_with_context, render_template
+    install("flask"); from flask import Flask, Response, request, render_template
 
 try:
     from flask_limiter import Limiter
@@ -1792,151 +1792,17 @@ _apt_upgrade_bypass_sse  = _bypass_wrap.apt_upgrade_bypass_sse
 _chat_resolve_pending_bypass = _chat_orch._chat_resolve_pending_bypass
 
 
-def _chat_try_bypass(orig_last: str, is_vocal: bool):
-    """Retourne une Response SSE si un bypass LLM est applicable, sinon None."""
-    pending = _chat_resolve_pending_bypass(orig_last)
-    if pending:
-        return pending
-    # Datetime — bypass instantané même en vocal
-    if _bypass_simple.DATETIME_RE.search(orig_last):
-        _log.info("[BYPASS] datetime → réponse directe (zéro LLM)")
-        return _sse_response(_bypass_simple.datetime_sse())
-    if is_vocal:
-        return None
-    backup_cmd = _detect_backup_command(orig_last)
-    if backup_cmd:
-        if backup_cmd == "backup-jarvis":
-            return _sse_response(_jarvis_backup_sse())
-        if backup_cmd == "backup-jarvis-log":
-            return _sse_response(_jarvis_backup_log_sse())
-        return _sse_response(_backup_sse(backup_cmd))
-    vm_cmd = _detect_vm_command(orig_last)
-    if vm_cmd:
-        action, vm_list = vm_cmd
-        return _sse_response(_vm_command_sse(action, vm_list))
-    reboot_cmd = _detect_reboot_command(orig_last)
-    if reboot_cmd:
-        host_label, ssh_fn, is_proxmox = reboot_cmd
-        _log.info(f"[BYPASS_REBOOT_DIRECT] reboot {host_label}")
-        pending = {"host": host_label, "ssh_fn": ssh_fn, "is_proxmox": is_proxmox, "ts": time.time()}
-        return _sse_response(_reboot_machine_sse(pending))
-    upd_cmd = _detect_update_command(orig_last)
-    if upd_cmd:
-        host_label, ssh_fn, is_proxmox = upd_cmd
-        _log.info(f"[BYPASS_UPDATE] mise à jour {host_label}")
-        return _sse_response(_update_machine_sse(host_label, ssh_fn, is_proxmox))
-    svc_cmd = _detect_service_restart(orig_last)
-    if svc_cmd:
-        host_label, ssh_func, svc_name = svc_cmd
-        if host_label != "ambiguous":
-            return _sse_response(_service_restart_sse(host_label, ssh_func, svc_name))
-    file_cmd = _bypass_fs.detect_file_command(orig_last, _FILE_VM_SSH)
-    if file_cmd:
-        f_action, f_vm, f_ssh_fn, f_path = file_cmd
-        # Si lecture + intention correction → pas de bypass (mode "lis+corrige en un shot")
-        if f_action == "read" and not _FCORR_RE.search(orig_last):
-            return _sse_response(_bypass_fs.file_command_sse(f_action, f_vm, f_ssh_fn, f_path))
-    code_cmd = _detect_code_command(orig_last)
-    if code_cmd:
-        action, filename = code_cmd
-        exec_it = (action == "exec")
-        _log.info(f"[BYPASS_CODE] {action} `{filename}` → {_CODE_DEV_VM}")
-        return _sse_response(_code_scp_exec_sse(filename, exec_it))
-    for _hkey, _hrx in _SSH_TERMINAL_RE.items():
-        if _hrx.search(orig_last):
-            _hcfg  = _SSH_TERMINAL_MAP[_hkey]
-            _hlabel = _hcfg["label"]
-            _huser  = _hcfg.get("user", "root")
-            _log.info(f"[BYPASS_SSH_{_hkey.upper()}] connexion {_hlabel} → open_ssh_terminal")
-            return _sse_response(_ssh_terminal_sse(_hkey, _hlabel, _huser))
-    return None
-
+# _chat_try_bypass + _detect_file_corrections + api_chat déménagés dans
+# chat/dispatcher.py (étape 28, 2026-05-23). Aliases backward-compat ci-dessous
+# et register_blueprint + init() tardif en fin de fichier.
+from chat import dispatcher as _chat_dispatch  # noqa: E402
+_chat_try_bypass         = _chat_dispatch.chat_try_bypass
+_detect_file_corrections = _chat_dispatch.detect_file_corrections
 
 # 3 derniers wrappers chat déplacés dans chat/orchestrator.py (étape 12).
 _chat_generate            = _chat_orch._chat_generate
 _chat_build_system_prompt = _chat_orch._chat_build_system_prompt
 _chat_resolve_model       = _chat_orch._chat_resolve_model
-
-
-def _detect_file_corrections(orig_last, is_vocal):
-    """Détecte les commandes mono/multi fichier + correction LLM."""
-    file_corr_cmd = file_corr_multi = None
-    if not is_vocal:
-        _fmc = _bypass_fs.detect_multi_file_command(orig_last, _FILE_VM_SSH)
-        if _fmc and _FCORR_RE.search(orig_last):
-            file_corr_multi = _fmc
-        else:
-            _fc = _bypass_fs.detect_file_command(orig_last, _FILE_VM_SSH)
-            if _fc and _fc[0] == "read" and _FCORR_RE.search(orig_last):
-                file_corr_cmd = _fc
-    return file_corr_cmd, file_corr_multi
-
-
-@limiter.limit("60 per minute")
-@app.route("/api/chat", methods=["POST"])
-def api_chat():
-    data             = request.json or {}
-    history          = data.get("history", [])
-    web_enabled      = data.get("web_search", False)
-    soc_ctx_injected = data.get("soc_ctx_injected", False)
-    np_override      = data.get("num_predict")
-    no_tools         = data.get("no_tools", False)
-    model_override   = data.get("model_override")   # 'soc' | 'general' | None
-
-    last_user  = next((m["content"] for m in reversed(history) if m.get("role") == "user"), "")
-    is_vocal   = last_user.startswith("[VOCAL]")
-    # Message original avant injection SOC — évite la contamination des mots-clés routing
-    _orig_last = last_user.split("\n\n", 1)[-1] if soc_ctx_injected and "\n\n" in last_user else last_user
-
-    # ── 1. Bypass instantané — AVANT tout calcul coûteux ─────────────────────
-    bypass = _chat_try_bypass(_orig_last, is_vocal)
-    if bypass:
-        return bypass
-
-    # ── 1b. Détection "lis + corrige" mono ou multi-fichiers ─────────────────
-    _file_corr_cmd, _file_corr_multi = _detect_file_corrections(_orig_last, is_vocal)
-
-    # ── 2. Routing C·R — sortie anticipée avant injection SOC/PVE ────────────
-    if _jarvis_mode == _CODE_REASONING_MODE:
-        messages = _chat_build_messages(_facts_inject(SYSTEM_PROMPT), history, is_vocal)
-        _log.info(f"[ROUTE] CODE-REASONING | q={repr(_orig_last[:80])}")
-        return Response(
-            stream_with_context(_capture_gen(_code_reasoning_gen(messages, np_override), _orig_last)),
-            mimetype="text/event-stream", headers=_SSE_HEADERS)
-
-    # ── 3. System prompt + RAG + web + SOC/PVE live ───────────────────────────
-    # model_override='soc' (chat du dashboard SOC) → injection SOC forcée même
-    # sans mot-clé : chaque message y est une question SOC par nature.
-    system, soc_trigger = _chat_build_system_prompt(
-        last_user, web_enabled, soc_ctx_injected, is_vocal,
-        force_soc=(model_override == "soc"))
-
-    # ── 4. Routing modèle ─────────────────────────────────────────────────────
-    active_model, route = _chat_resolve_model(is_vocal, no_tools, model_override)
-    if active_model == _CODE_MODEL:
-        system += _CODE_SYSTEM_SUFFIX
-    _log.info(f"[ROUTE] {route}/{active_model or MODEL} | soc={soc_trigger} | q={repr(_orig_last[:80])}")
-
-    messages = _chat_build_messages(system, history, is_vocal)
-
-    # ── 5. Dispatch "lis + corrige" mono ou multi-fichiers ───────────────────
-    _llm_ctx = LlmCtx(messages, active_model, np_override, soc_ctx_injected, soc_trigger)
-    if _file_corr_multi:
-        _, f_vm, f_ssh_fn, f_paths = _file_corr_multi
-        _log.info(f"[FILE_CORRECT_MULTI] {f_vm}:{f_paths} → LLM {active_model or MODEL}")
-        return Response(
-            stream_with_context(_capture_gen(_file_correct_multi_gen(f_vm, f_ssh_fn, f_paths, _llm_ctx), _orig_last)),
-            mimetype="text/event-stream", headers=_SSE_HEADERS)
-    if _file_corr_cmd:
-        _, f_vm, f_ssh_fn, f_path = _file_corr_cmd
-        _log.info(f"[FILE_CORRECT] {f_vm}:{f_path} → LLM {active_model or MODEL}")
-        return Response(
-            stream_with_context(_capture_gen(_file_correct_gen(f_vm, f_ssh_fn, f_path, _llm_ctx), _orig_last)),
-            mimetype="text/event-stream", headers=_SSE_HEADERS)
-
-    return Response(
-        stream_with_context(_capture_gen(_chat_generate(_llm_ctx, no_tools), _orig_last)),
-        mimetype="text/event-stream", headers=_SSE_HEADERS)
 
 @app.route("/api/history/last", methods=["GET"])
 def api_history_last():
@@ -2419,6 +2285,49 @@ _chat_orch.init(
     cancel_re                      = _CANCEL_RE,
     rag_relevant_kw                = _RAG_RELEVANT_KW,
 )
+
+# ── Init tuile chat/dispatcher (étape 28, 2026-05-23) — placé tard car ──
+# consomme les helpers chat_orch (_chat_generate / _chat_build_system_prompt /
+# _chat_resolve_model / _code_reasoning_gen) qui n'existent qu'après l'init
+# de _chat_orch ci-dessus. La route /api/chat est portée par bp dispatcher.
+_chat_dispatch.init(
+    log                          = _log,
+    limiter                      = limiter,
+    bypass_simple                = _bypass_simple,
+    bypass_fs                    = _bypass_fs,
+    bypass_wrap                  = _bypass_wrap,
+    chat_orch                    = _chat_orch,
+    sse_response                 = _sse_response,
+    capture_gen                  = _capture_gen,
+    vm_command_sse               = _vm_command_sse,
+    reboot_machine_sse           = _reboot_machine_sse,
+    update_machine_sse           = _update_machine_sse,
+    service_restart_sse          = _service_restart_sse,
+    ssh_terminal_sse             = _ssh_terminal_sse,
+    chat_resolve_pending_bypass  = _chat_resolve_pending_bypass,
+    chat_build_system_prompt     = _chat_build_system_prompt,
+    chat_resolve_model           = _chat_resolve_model,
+    chat_generate                = _chat_generate,
+    code_reasoning_gen           = _code_reasoning_gen,
+    chat_build_messages          = _chat_build_messages,
+    facts_inject                 = _facts_inject,
+    file_correct_gen             = _file_correct_gen,
+    file_correct_multi_gen       = _file_correct_multi_gen,
+    file_vm_ssh                  = _FILE_VM_SSH,
+    fcorr_re                     = _FCORR_RE,
+    ssh_terminal_re              = _SSH_TERMINAL_RE,
+    ssh_terminal_map             = _SSH_TERMINAL_MAP,
+    code_dev_vm                  = _CODE_DEV_VM,
+    sse_headers                  = _SSE_HEADERS,
+    code_reasoning_mode          = _CODE_REASONING_MODE,
+    code_model                   = _CODE_MODEL,
+    code_system_suffix           = _CODE_SYSTEM_SUFFIX,
+    llm_ctx_cls                  = LlmCtx,
+    get_system_prompt            = lambda: SYSTEM_PROMPT,
+    get_model                    = lambda: MODEL,
+    get_mode                     = lambda: _jarvis_mode,
+)
+app.register_blueprint(_chat_dispatch.bp)
 
 if __name__ == "__main__":
     # Filtre les TimeoutError Werkzeug (connexions keep-alive fermées par le navigateur — pas de vraies erreurs)

@@ -21,6 +21,7 @@ dépendances via signatures de fonctions (DI per-call, pas global state).
 """
 from . import (  # noqa: F401
     capture,
+    dispatcher,
     file_correct,
     generate,
     messages,
