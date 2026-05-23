@@ -12,4 +12,4 @@ Sous-modules :
 
 DI via `init(...)` au câblage côté jarvis.py — chaque sous-module gère ses deps.
 """
-from . import local  # noqa: F401
+from . import dispatch, local  # noqa: F401

@@ -971,22 +971,25 @@ _ALLOWED_SCRIPTS = {
 _tools_local._allowed_scripts = _ALLOWED_SCRIPTS
 _tool_executer_script_windows  = _tools_local.executer_script_windows
 
-_TOOL_DISPATCH = {
-    "lire_fichier":             lambda args: _tool_lire_fichier(args),
-    "ecrire_fichier":           lambda args: _tool_ecrire_fichier(args),
-    "modifier_fichier":         lambda args: _tool_modifier_fichier(args),
-    "lister_dossier":           lambda args: _tool_lister_dossier(args),
-    "arborescence_projet":      lambda args: _tool_arborescence_projet(args),
-    "lire_plusieurs_fichiers":  lambda args: _tool_lire_plusieurs_fichiers(args),
-    "executer_code":            lambda args: _tool_executer_code(args),
-    "rechercher_dans_fichiers": lambda args: _tool_rechercher_dans_fichiers(args),
-    "soc_status":               lambda args: _tool_soc_status(),
-    "commande_ssh_ngix":        lambda args: _tool_commande_ssh_ngix(args),
-    "commande_ssh_proxmox":     lambda args: _tool_commande_ssh_proxmox(args),
-    "commande_ssh_clt":         lambda args: _tool_commande_ssh_clt(args),
-    "commande_ssh_pa85":        lambda args: _tool_commande_ssh_pa85(args),
-    "executer_script_windows":  lambda args: _tool_executer_script_windows(args),
-}
+# _TOOL_DISPATCH construit dans tools/dispatch.py (étape 34a, 2026-05-23).
+# Tous les handlers (14 outils, 4 tuiles) sont injectes en DI explicite.
+from tools import dispatch as _tools_dispatch  # noqa: E402
+_TOOL_DISPATCH = _tools_dispatch.build(
+    lire_fichier             = _tool_lire_fichier,
+    ecrire_fichier           = _tool_ecrire_fichier,
+    modifier_fichier         = _tool_modifier_fichier,
+    lister_dossier           = _tool_lister_dossier,
+    arborescence_projet      = _tool_arborescence_projet,
+    lire_plusieurs_fichiers  = _tool_lire_plusieurs_fichiers,
+    executer_code            = _tool_executer_code,
+    rechercher_dans_fichiers = _tool_rechercher_dans_fichiers,
+    soc_status               = _tool_soc_status,
+    commande_ssh_ngix        = _tool_commande_ssh_ngix,
+    commande_ssh_proxmox     = _tool_commande_ssh_proxmox,
+    commande_ssh_clt         = _tool_commande_ssh_clt,
+    commande_ssh_pa85        = _tool_commande_ssh_pa85,
+    executer_script_windows  = _tool_executer_script_windows,
+)
 
 # execute_tool + call_llm_with_tools déménagés dans chat/orchestrator.py (étape 25).
 # Aliases pour les consommateurs externes (MCP server qui passe par /api/chat) :
