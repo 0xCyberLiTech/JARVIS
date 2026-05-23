@@ -114,20 +114,22 @@ voix Edge si reproduit avec le diagnostic enrichi.
 7. **14:51:37** — **Bug reproduit à nouveau**. Preuve dans log : 2 occurrences de `[JS-DIAG] jsdiag.ready` espacées de 93s = **VRAI reload de la page** (tous les scripts rechargés). Aucun `window.error` ni `unhandledrejection` capturé → **confirme que le bug est un `location.reload()` direct JS** (pas une exception backend, pas une exception JS non catchée).
 8. **14:53** — Commit `da7384d` fix JS-DIAG v2 (beforeunload event qui capte tout). Marc redémarre + Ctrl+F5.
 9. **14:54:44** — Log montre `[JS-DIAG] kind=jsdiag.ready msg=JS-DIAG hooks active (v2 — beforeunload + visibility)`. v2 actif.
+10. **14:56:17** — **Bug reproduit avec JS-DIAG v2 actif**. La stack capturée pointe EXACTEMENT vers `boot_init.js:870` = `if (d.boot_id && d.boot_id !== stored) location.reload();` dans `_pollBootId`. **Confirmation 100%** : c'est le mécanisme normal de détection de redémarrage serveur qui se déclenche à tort.
+11. **15:00** — **VRAIE racine identifiée** : `_JARVIS_BOOT_ID = str(int(time.time()))` au top-level de jarvis.py est régénéré à chaque ré-import (cause : `from jarvis import` dans `blueprints/soc.py` exécuté par les fonctions thread `_soc_llm_call` etc.). Lambda `get_boot_id` renvoie nouveau timestamp → `/api/boot-id` retourne valeur différente → sessionStorage JS désynchrone → reload.
+12. **Commit `8e3d518`** — fix `_JARVIS_BOOT_ID` mis en cache dans `os.environ['_JARVIS_BOOT_ID_CACHE']` partagé entre tous les ré-imports. Smoke test isolé : 2 imports successifs → boot_id identique.
+13. **15:03 — Validation Marc end-to-end** : « l'ui ne bronche pas top » après test stress (switch modes, EQ, voix). **Bug résolu définitivement.**
 
-### Conclusion partielle
+### Pourquoi le bug paraissait aléatoire
 
-- ✅ **Doublons log + interférence threads boot** : résolu par fix idempotence
-- ✅ **Cause du bug UI reload** : confirmée frontend pur (`location.reload()` direct, pas exception)
-- ⏳ **Identification du caller JS** : en attente de la prochaine occurrence avec JS-DIAG v2 (la stack trace de `beforeunload` pointera la fonction responsable)
+Le déclencheur n'était PAS une action utilisateur (slider EQ, switch mode, voix Edge — qui semblaient être la cause par coïncidence), mais le **PREMIER appel** d'une fonction thread `_soc_llm_call` (auto-engine SOC) qui faisait `from jarvis import` — moment imprévisible. Une seule fois par session (après c'est en cache `sys.modules`). D'où le caractère intermittent + impossible à reproduire sur action précise pendant des semaines.
 
-### Action requise au prochain bug
+### Outils d'investigation laissés actifs (décision Marc 2026-05-23)
 
-```bash
-grep '\[JS-DIAG\]' scripts/jarvis.log | tail -20
-```
+Voir `~/.claude/.../memory/jarvis_diag_tools_active.md`. Volumétrie max disque : **52 MB plafonnée par RotatingFileHandler** (jarvis.log 35 + tts.log 14 + tts_perf.log 3). Aucun risque de saturation.
 
-Chercher la ligne `kind=beforeunload msg=UNLOAD/RELOAD` — le champ `src=<stack>` pointera vers la fonction JS appelant `location.reload` (ou autre forme de navigation sortante).
+### À FAIRE long terme (non urgent)
+
+Remplacer les 4 `from jarvis import X` dans `blueprints/soc.py` (lignes 1149/1153/1154/1463) par des accesseurs DI passés à `init_soc()`. Le fix `8e3d518` couvre le symptôme (boot_id stable) mais le re-import jarvis.py existe toujours techniquement. Plus invasif → reporté.
 
 ---
 
