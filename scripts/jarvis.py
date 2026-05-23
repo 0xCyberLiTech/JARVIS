@@ -550,6 +550,7 @@ _LAST_EXCHANGES = _chat_orch._LAST_EXCHANGES
 import code_reasoning as _cr_mod
 from voice import deferred_speak as _deferred_speak
 import files as _files
+import health as _health
 import llm_opts as _llm_opts_mod
 import memory as _memory
 from proxmox import api as _pve_api
@@ -1633,10 +1634,7 @@ def index():
 def favicon():
     return Response("", status=204)
 
-@limiter.limit("60 per minute")
-@app.route("/api/boot-id")
-def api_boot_id():
-    return Response(json.dumps({"boot_id": _JARVIS_BOOT_ID}), mimetype="application/json")
+# api_boot_id déménagée dans health/routes.py (étape 19).
 
 @limiter.limit("5 per minute")
 @app.route("/api/debug/inject-pending", methods=["POST"])
@@ -1656,15 +1654,7 @@ def api_debug_inject_pending():
     return Response(json.dumps({"ok": True, "pending": "clt → __test-bypass__"}),
                     mimetype="application/json")
 
-@limiter.limit("120 per minute")
-@app.route("/api/health", methods=["GET"])
-def api_health():
-    """Health check léger — répond en <10ms, sans appel Ollama. Utilisé par watchdog et MCP."""
-    return Response(json.dumps({
-        "status": "ok",
-        "model": MODEL,
-        "ts": __import__("datetime").datetime.utcnow().isoformat() + "Z"
-    }), mimetype="application/json")
+# api_health déménagée dans health/routes.py (étape 19).
 
 @limiter.limit("30 per minute")
 @app.route("/api/soc/context", methods=["GET"])
@@ -1694,16 +1684,7 @@ def api_status():
         "alerts_24h":         soc["alerts_24h"],
     }), mimetype="application/json")
 
-@limiter.limit("60 per minute")
-@app.route("/api/stats")
-def api_stats():
-    now = time.time()
-    if _stats_cache["data"] is not None and (now - _stats_cache["ts"]) < _STATS_TTL:
-        return Response(json.dumps(_stats_cache["data"]), mimetype="application/json")
-    data = get_stats()
-    _stats_cache["data"] = data
-    _stats_cache["ts"] = now
-    return Response(json.dumps(data), mimetype="application/json")
+# api_stats déménagée dans health/routes.py (étape 19).
 
 # Routes /api/memory* + /api/memory-summary* + /api/memory/summarize-session
 # déménagées dans la tuile scripts/memory/routes.py (étape 4).
@@ -2004,77 +1985,7 @@ def api_save_code():
     _log.info(f"[CODE] Fichier sauvegardé : {filepath}")
     return Response(json.dumps({"saved": str(filepath)}), mimetype="application/json")
 
-@limiter.limit("60 per minute")
-@app.route("/api/ollama-status", methods=["GET"])
-def api_ollama_status():
-    import urllib.request as _ur
-    try:
-        with _ur.urlopen("http://127.0.0.1:11434/api/tags", timeout=_OLLAMA_STATUS_TIMEOUT_S) as r:
-            running = r.status == 200
-    except Exception:
-        running = False
-    # Enrichi avec l'état du circuit breaker (closed/open/half_open + retry_in_s)
-    circuit_status = _ollama_circuit.get_status()
-    return Response(json.dumps({"running": running, **circuit_status}), mimetype="application/json")
-
-@limiter.limit("30 per minute")
-@app.route("/api/vram", methods=["GET"])
-def api_vram():
-    """Retourne les modèles Ollama chargés en VRAM via /api/ps."""
-    import urllib.request as _ur
-    # VRAM totale réelle via pynvml
-    try:
-        import pynvml as _nv
-        _nv.nvmlInit()
-        _h = _nv.nvmlDeviceGetHandleByIndex(0)
-        vram_cap = _nv.nvmlDeviceGetMemoryInfo(_h).total
-    except Exception:
-        vram_cap = 0
-    try:
-        with _ur.urlopen("http://127.0.0.1:11434/api/ps", timeout=3) as r:
-            data = json.loads(r.read())
-        models = []
-        total_vram = 0
-        total_swap = 0
-        for m in data.get("models", []):
-            sv       = m.get("size_vram", 0)
-            st       = m.get("size", 0)
-            swap     = max(0, st - sv)
-            name     = m.get("name", "?")
-            nl       = name.lower()
-            is_embed = "embed" in nl
-            details  = m.get("details", {})
-            quant    = details.get("quantization_level", "")
-            params   = details.get("parameter_size", "")
-            expires  = m.get("expires_at", "")
-            if is_embed:
-                role = "RAG"
-            elif _CODE_REASONING_ANALYSIS_MODEL.lower().split(":")[0] in nl:
-                role = "C·R"
-            elif _CODE_MODEL.lower().split(":")[0] in nl:
-                role = "CODE"
-            elif _GENERAL_MODEL.lower().split(":")[0] in nl:
-                role = "GÉNÉRAL"
-            else:
-                role = "SOC"
-            pct = round(sv / vram_cap * 100, 1) if vram_cap else 0
-            total_vram += sv
-            if not is_embed:
-                total_swap += swap
-            models.append({"name": name, "size_vram": sv, "size_swap": swap,
-                           "is_embed": is_embed, "role": role,
-                           "pct": pct, "quant": quant, "params": params, "expires_at": expires})
-        return Response(json.dumps({
-            "models": models, "total_vram": total_vram,
-            "total_swap": total_swap, "vram_total_bytes": vram_cap,
-            "active_model": MODEL,
-            "tokens_per_sec": _last_toks_per_sec,
-            "num_ctx": LLM_PARAMS.get("num_ctx", 0),
-        }), mimetype="application/json")
-    except Exception as e:
-        return Response(json.dumps({"models": [], "total_vram": 0, "total_swap": 0,
-                                    "vram_total_bytes": vram_cap, "active_model": MODEL, "error": str(e)}),
-                        mimetype="application/json")
+# api_ollama_status + api_vram déménagées dans health/routes.py (étape 19).
 
 # Routes /api/prompt-profiles* + /api/welcome* déménagées dans settings/routes.py (étape 17).
 
@@ -2129,6 +2040,28 @@ app.register_blueprint(_tasks.bp)
 # Aliases backward-compat pour les tests (jm._load_tasks, jm._save_tasks)
 _load_tasks = _tasks.routes._load_tasks
 _save_tasks = _tasks.routes._save_tasks
+
+# ── Init tuile health (étape 19, 2026-05-23) ──
+_health.init(
+    limiter                    = limiter,
+    log                        = _log,
+    ollama_circuit             = _ollama_circuit,
+    ollama_status_timeout_s    = _OLLAMA_STATUS_TIMEOUT_S,
+    ssh_proxmox_cmd_timeout_s  = _SSH_PROXMOX_CMD_TIMEOUT_S,
+    stats_cache                = _stats_cache,
+    stats_ttl                  = _STATS_TTL,
+    sec_events                 = _SEC_EVENTS,
+    sec_lock                   = _SEC_LOCK,
+    get_boot_id                = lambda: _JARVIS_BOOT_ID,
+    get_stats_fn               = get_stats,
+    get_model                  = lambda: MODEL,
+    get_last_toks_per_sec      = lambda: _last_toks_per_sec,
+    get_llm_params             = lambda: LLM_PARAMS,
+    code_reasoning_model       = _CODE_REASONING_ANALYSIS_MODEL,
+    code_model                 = _CODE_MODEL,
+    general_model              = _GENERAL_MODEL,
+)
+app.register_blueprint(_health.bp)
 
 # ── Web Search (DuckDuckGo HTML) ──────────────────────────────
 _WEB_HEADERS = {
@@ -3095,55 +3028,11 @@ def api_history_last():
                     mimetype="application/json")
 
 
-@limiter.limit("60 per minute")
-@app.route("/api/security", methods=["GET"])
-def api_security():
-    """Journal sécurité — tentatives bloquées depuis le démarrage."""
-    with _SEC_LOCK:
-        total  = len(_SEC_EVENTS)
-        by_lvl = {"hard": 0, "args": 0, "terminal": 0}
-        for e in _SEC_EVENTS:
-            by_lvl[e["level"]] = by_lvl.get(e["level"], 0) + 1
-        snapshot = _SEC_EVENTS[-10:][::-1]
-    return Response(json.dumps({
-        "total":         total,
-        "by_level":      by_lvl,
-        "last":          snapshot,
-        "uptime_events": total,
-    }, ensure_ascii=False), mimetype="application/json")
-
-@limiter.limit("10 per minute")
-@app.route("/api/security/clear", methods=["POST"])
-def api_security_clear():
-    """Vide le journal sécurité."""
-    with _SEC_LOCK:
-        _SEC_EVENTS.clear()
-    return Response('{"ok":true}', mimetype="application/json")
+# api_security + api_security_clear déménagées dans health/routes.py (étape 19).
 
 # api_dsp_process_audio déménagée dans settings/routes.py (étape 17).
 # api_speak déménagée dans voice/routes.py (étape 14).
-@limiter.limit("20 per minute")
-@app.route("/api/ping", methods=["POST"])
-def api_ping():
-    """Ping une IP/host depuis la machine Windows et retourne le résultat."""
-    host = (request.json or {}).get("host", "")
-    if not host or not re.match(r'^[a-zA-Z0-9.\-_]+$', host):
-        return Response('{"error":"host invalide"}', mimetype="application/json", status=400)
-    try:
-        result = subprocess.run(
-            ["ping", "-n", "4", host],
-            capture_output=True, text=True, timeout=_SSH_PROXMOX_CMD_TIMEOUT_S, encoding="cp850", errors="replace"
-        )
-        output = result.stdout or result.stderr or ""
-        # Extraire les stats clés
-        lines  = [ln.strip() for ln in output.splitlines() if ln.strip()]
-        ok     = result.returncode == 0
-        return Response(
-            json.dumps({"ok": ok, "host": host, "output": output, "lines": lines}, ensure_ascii=False),
-            mimetype="application/json"
-        )
-    except Exception as e:
-        return Response(json.dumps({"ok": False, "host": host, "error": str(e)}), mimetype="application/json")
+# api_ping déménagée dans health/routes.py (étape 19).
 
 # Routes speak/tts/tts_log/tts_status/tts_local_* déménagées dans
 # voice/routes.py (étape 14, 2026-05-23). _tts_wav_response,
