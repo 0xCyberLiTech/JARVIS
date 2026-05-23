@@ -105,6 +105,63 @@ retourne immédiatement avec log `[BOOTSTRAP] ... SHUNTÉS`.
 
 ---
 
+## 2026-05-23 — Drift phi4 SOC : recommandations hallucinées malgré system prompt strict
+
+### Symptômes observés
+
+Marc soumet à Claude une analyse SOC produite par JARVIS mode SOC (phi4:14b)
+qui recommandait 4 actions correctives sur l'infrastructure :
+
+1. Bannir l'IP `177.141.47.123` via CrowdSec
+2. Réactiver ModSec sur les serveurs Apache (qualifié de « désactivé »)
+3. Vérifier AppArmor (qualifié d'« inaccessible »)
+4. Appliquer « 17 mises à jour de sécurité en attente »
+
+### Vérifications croisées en live (SSH read-only sur clt, pa85, srv-ngix)
+
+| Recommandation phi4 | Réalité vérifiée | Verdict |
+|---|---|---|
+| Bannir 177.141.47.123 | `cscli decisions list -i 177.141.47.123` → **déjà bannie** (`fail2ban-nginx-cve`, expire ~24h) | ❌ phi4 a violé sa propre RÈGLE ABSOLUE « IPs DÉJÀ NEUTRALISÉES » |
+| ModSec désactivé Apache | `apache2ctl -M` → `security2_module (shared)` actif sur clt **ET** pa85 | ❌ Hallucination pure |
+| AppArmor inaccessible | `aa-status` → 127 profils chargés / 7 enforce (clt) · 106 / 7 (pa85) | ❌ Hallucination pure |
+| 17 updates sécurité | `apt list --upgradable` → **0** sur clt, pa85, srv-ngix | ❌ Chiffre inventé |
+
+**4/4 recommandations hallucinées.** L'attaque réelle (`/cgi-bin/%2e%2e/.../bin/sh` payload `libredtail-http` depuis 177.141.47.123) avait été détectée par Suricata, escaladée par fail2ban-nginx-cve et bannie automatiquement par CrowdSec **sans intervention humaine** — la chaîne défensive a fonctionné.
+
+### Cause racine
+
+phi4 a produit une **« checklist générique SOC »** issue de ses connaissances de pré-entraînement plutôt que de s'appuyer sur l'état live qui lui était injecté dans le contexte SOC (snapshot `monitoring.json`).
+
+Le system prompt contenait déjà :
+- `RÈGLE ABSOLUE — FIDÉLITÉ SOC` (utiliser uniquement les données du contexte)
+- `RÈGLE ABSOLUE — IPs DÉJÀ NEUTRALISÉES` (ne jamais re-bannir)
+- `RÈGLE ABSOLUE — RECOMMANDATION DE BAN PROPORTIONNÉE`
+
+Mais ces règles étaient **toutes ciblées sur les recommandations de ban d'IP**. Aucune règle ne couvrait explicitement les recommandations sur **les services (ModSec, AppArmor, WAF) ou les mises à jour système**. Le modèle a comblé le silence par une checklist générique.
+
+### Fix
+
+Commit `<next>` : alignement du prompt SOC dans `scripts/jarvis_prompt_profiles.json` profil `Phi4 — Analyse Avancée` :
+
+1. **Généralisation de la règle FIDÉLITÉ SOC** : étendue des IPs/scores aux **services, configurations, mises à jour** — interdiction d'extrapoler l'état d'un service non mentionné dans le contexte.
+2. **Nouvelle RÈGLE ABSOLUE — ANTI-CHECKLIST GÉNÉRIQUE** : interdit explicitement les recommandations issues de connaissances générales (« réactiver le WAF », « appliquer les mises à jour ») sans support d'une donnée présente dans le contexte SOC injecté.
+3. **Renforcement de la règle IPs DÉJÀ NEUTRALISÉES** : ajout d'une étape de vérification **OBLIGATOIRE** avant toute recommandation de ban (« Si tu envisages de recommander un ban, tu DOIS d'abord vérifier que l'IP n'apparaît pas dans la section "IPs DÉJÀ BANNIES" du contexte. Cette vérification doit être explicite dans ton raisonnement »).
+
+### Leçons apprises
+
+1. **Un prompt strict ne suffit pas à empêcher le drift sur les zones non couvertes explicitement.** Si la règle anti-hallucination ne mentionne que les IPs, le modèle hallucine sur les services. Il faut une règle générique (« anti-checklist ») en plus des règles ciblées.
+2. **Vérification croisée systématique avant toute action sur la prod.** Même quand phi4 propose une action plausible et conforme à son rôle, valider chaque pré-condition en live (SSH read-only). Ce cas est l'illustration parfaite de pourquoi la règle ABSOLUE `feedback_jarvis_no_regression` (Marc) existe.
+3. **L'auto-engine SOC a déjà fait son travail.** Les recommandations conversationnelles de phi4 doivent être pensées comme **un complément** à l'automatisation déjà en place, pas comme une checklist d'audit indépendante.
+4. **Les recommandations type « réactiver le WAF / appliquer les mises à jour » sont des smells.** Si phi4 les produit alors que le contexte SOC ne les supporte pas, c'est un drift à corriger côté prompt.
+
+### Validation
+
+- Plan d'action proposé à Marc : **rien à faire sur l'infra**, l'attaque a été automatiquement neutralisée.
+- Alignement prompt SOC validé par Marc puis appliqué (commit `<next>`).
+- À surveiller : les prochaines analyses SOC phi4 — vérifier que les recommandations restent ancrées dans le contexte injecté.
+
+---
+
 ## Template pour futurs incidents
 
 ```markdown
