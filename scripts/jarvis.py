@@ -28,16 +28,28 @@ _log = logging.getLogger("JARVIS")
 # basicConfig stdout seul n'est pas suffisant : si la console PowerShell est fermée
 # ou que le scrollback est dépassé, le traceback est perdu. Ce FileHandler garantit
 # la persistance sur disque avec rotation 5 MB × 7 backups.
+#
+# ⚠ IDEMPOTENCE OBLIGATOIRE : blueprints/soc.py contient des `from jarvis import X`
+# dans des fonctions thread (`_soc_llm_call`, etc.) qui ré-importent jarvis.py comme
+# module `jarvis` (Python ne le voit pas dans sys.modules car c'est `__main__`).
+# Sans la garde, le handler serait ajouté à chaque ré-import → logs écrits 2x, 3x…
+# Le nom de logger est unique (« JARVIS »), on filtre sur ce nom dans les handlers
+# déjà attachés. (Fix 2026-05-23 — bug reproduit par Marc à 14:30 lecture audio + EQ).
 _JARVIS_LOG_PATH = Path(__file__).parent / "jarvis.log"
-_jarvis_log_handler = logging.handlers.RotatingFileHandler(
-    _JARVIS_LOG_PATH, maxBytes=5_000_000, backupCount=7, encoding="utf-8"
-)
-_jarvis_log_handler.setFormatter(
-    logging.Formatter("%(asctime)s [%(levelname)-8s] %(name)s | %(message)s",
-                      datefmt="%Y-%m-%d %H:%M:%S")
-)
-_jarvis_log_handler.setLevel(logging.INFO)
-_log.addHandler(_jarvis_log_handler)
+if not any(
+    isinstance(h, logging.handlers.RotatingFileHandler)
+    and getattr(h, "baseFilename", None) == str(_JARVIS_LOG_PATH)
+    for h in _log.handlers
+):
+    _jarvis_log_handler = logging.handlers.RotatingFileHandler(
+        _JARVIS_LOG_PATH, maxBytes=5_000_000, backupCount=7, encoding="utf-8"
+    )
+    _jarvis_log_handler.setFormatter(
+        logging.Formatter("%(asctime)s [%(levelname)-8s] %(name)s | %(message)s",
+                          datefmt="%Y-%m-%d %H:%M:%S")
+    )
+    _jarvis_log_handler.setLevel(logging.INFO)
+    _log.addHandler(_jarvis_log_handler)
 
 # ── Racine du workspace — toutes les références de chemins s'appuient sur cette constante ──
 _WORKSPACE_ROOT = Path(__file__).parent.parent.parent  # 0xCyberLiTech/

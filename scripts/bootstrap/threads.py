@@ -71,6 +71,15 @@ _rag_refresh_stop_evt = threading.Event()
 # État externalisé du switch TTS auto (None = inconnu → premier cycle force le switch)
 _tts_internet_was_up: bool | None = None
 
+# Garde anti-double-démarrage : blueprints/soc.py contient `from jarvis import X`
+# dans des fonctions thread qui ré-importent jarvis.py comme module (Python ne le
+# voit pas dans sys.modules car il tourne en __main__) et ré-exécutent tout le
+# top-level → start_all() rappelé → 10 threads boot relancés une 2ème fois →
+# kokoro_preload synthétise à nouveau "JARVIS opérationnel.", boot_vram_cleanup
+# décharge des modèles, prewarm phi4 force la VRAM → interférence avec la session
+# utilisateur (bug reproduit par Marc 2026-05-23 14:30 lecture audio + slider EQ).
+_threads_started = False
+
 
 def init(
     *,
@@ -320,14 +329,22 @@ def vram_sync_loop() -> None:
 def start_all() -> None:
     """Démarre les 10 threads daemon dans l'ordre attendu par le boot.
 
-    Garde-fou JARVIS_SKIP_BOOT_THREADS : si la variable d'env est définie
-    (toute valeur non vide), aucun thread n'est démarré. Utile pour les
-    smoke tests `python -c "import jarvis"` qui n'ont pas à toucher la
-    VRAM, déclencher de synthèse Kokoro, ni interférer avec une instance
-    JARVIS déjà en service sur la même machine (Ollama + VRAM partagés)."""
+    Garde-fous (2 niveaux) :
+    1. `JARVIS_SKIP_BOOT_THREADS` env flag : aucun thread démarré (smoke imports).
+    2. `_threads_started` idempotence : si start_all() est rappelé (cas
+       blueprints/soc.py `from jarvis import X` dans une fonction thread qui
+       ré-exécute le top-level de jarvis.py), on ne relance PAS les threads.
+       Sans ça, kokoro_preload synthétise à nouveau, boot_vram_cleanup décharge
+       des modèles Ollama actifs, prewarm phi4 force la VRAM → interférence avec
+       la session utilisateur (bug Marc 2026-05-23 14:30)."""
+    global _threads_started
     if os.environ.get("JARVIS_SKIP_BOOT_THREADS"):
         _log.info("[BOOTSTRAP] JARVIS_SKIP_BOOT_THREADS défini — threads boot SHUNTÉS (smoke import)")
         return
+    if _threads_started:
+        _log.info("[BOOTSTRAP] start_all() déjà appelé — threads boot SHUNTÉS (anti-double-import)")
+        return
+    _threads_started = True
     threading.Thread(target=kokoro_preload,        daemon=True, name="kokoro-preload").start()
     threading.Thread(target=tts_connectivity_loop, daemon=True).start()
     threading.Thread(target=gpu_temp_monitor_loop, daemon=True).start()
