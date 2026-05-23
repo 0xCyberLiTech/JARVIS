@@ -105,7 +105,7 @@ Détails : [`DOCUMENTATION/02-ARCHITECTURE/02-05-ROUTING-JARVIS.md`](DOCUMENTATI
 - **Pre-push hook** : pytest 1294 tests bloquant
 - **Observabilité** : `jarvis.log` persistant 5 MB × 7 + JS-DIAG v2 + try/except enrich + 6 garde-fous idempotence
 
-Score honnête actuel : **93/100** — décomposition dans [`DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md`](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md) §0 (source unique des métriques).
+Score honnête actuel : **94/100** — décomposition dans [`DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md`](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md) §0 (source unique des métriques).
 
 ---
 

@@ -188,7 +188,7 @@ Déplacement            : mv · cp
 
 ⚠ **Distinction critique** :
 - **NDT 100/100** = score script automatisé maison (D1/D2/D6/D13 dans le code Python). Mesure fonction longue, silent pass, magic numbers, params >6. Reste vrai au 2026-05-15.
-- **Score honnête global** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf) — valeur courante : [`BILAN-TECHNIQUE.md` §0](../BILAN-TECHNIQUE.md). Audit dette complet honnête 2026-05-22 (9 findings + 1 écart code/doc corrigés ; le 92/100 auto-affiché était inflaté). Plafond pratique sans CI cloud atteint. Pour 95+ : couverture des routes Flask (faible ROI) ou CI cloud (impossible « rien sur le web »).
+- **Score honnête global** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf) — valeur courante : [`06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md` §0](../06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md) (source unique). Audit dette complet honnête 2026-05-22 (9 findings + 1 écart code/doc corrigés ; le 92/100 auto-affiché était inflaté). Audit 2026-05-23 fin de journée : **94/100** post refonte documentaire complète (DOCUMENTATION/). Pour 95+ : tests E2E Playwright nettoyés (~2-3 h) ou doc auto-générée des docstrings (~1 h).
 
 ### NDT (script automatisé) — 100/100
 

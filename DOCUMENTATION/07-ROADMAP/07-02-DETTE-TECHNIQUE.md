@@ -14,7 +14,7 @@ mots_cles: ["dette-technique", "assumée", "decisions", "audit", "optimisations"
 # Dette technique restante
 
 > Audit dette honnête au **2026-05-23** après les 30 commits de la journée.
-> **Score honnête actuel : 93/100** — détaillé dans
+> **Score honnête actuel : 94/100** (audit re-calibré 2026-05-23 fin de journée post refonte documentaire) — détaillé dans
 > [`../06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md`](../06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md).
 >
 > Cette page liste les éléments qui pourraient être améliorés mais qui sont
