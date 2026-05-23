@@ -2229,11 +2229,9 @@ app.register_blueprint(_system.bp)
 TERMINAL_CWD  = [str(Path(__file__).parent)]  # liste pour mutabilité — utilisé par tâches planifiées
 TASKS_FILE    = Path(__file__).parent / "jarvis_tasks.json"
 
-# ── STT — Transcription vocale locale (Whisper) ───────────────
-# Routes /api/stt + /api/stt/status déménagées dans la tuile voice/routes.py
-# (refactor jarvis.py étape 13 — Phase B1 voice tuile, 2026-05-23).
-_voice.init(limiter=limiter, log=_log)
-app.register_blueprint(_voice.bp)
+# ── Routes voice (STT/TTS/speak) déménagées dans scripts/voice/routes.py ──
+# (refactor jarvis.py étapes 13-14 — Phases B1+B2 voice tuile, 2026-05-23).
+# Init différé plus bas : nécessite _tts_internet_was_up défini tard.
 
 # ── Vision — logique métier dans `vision.py` (Phase 3 module 5) ──────────────
 @limiter.limit("5 per minute")
@@ -3365,19 +3363,7 @@ def api_dsp_process_audio():
         _log.error(f"[DSP/process-audio] Erreur: {e}")
         return Response(audio_bytes, mimetype="audio/wav")
 
-@limiter.limit("20 per minute")
-@app.route("/api/speak", methods=["POST"])
-def api_speak():
-    data = request.json or {}
-    text = data.get("text", "")
-    if text:
-        source = data.get("source", request.headers.get("Referer", "unknown"))
-        preview = text[:_TTS_LOG_PREVIEW].replace("\n", " ")
-        suffix = "..." if len(text) > _TTS_LOG_PREVIEW else ""
-        _tts_logger.info("source=%-20s | %s%s", source, preview, suffix)
-        speak(text, blocking=False)   # retour immédiat — TTS joue en background
-    return Response("{}", mimetype="application/json")
-
+# api_speak déménagée dans voice/routes.py (étape 14).
 @limiter.limit("20 per minute")
 @app.route("/api/ping", methods=["POST"])
 def api_ping():
@@ -3401,238 +3387,9 @@ def api_ping():
     except Exception as e:
         return Response(json.dumps({"ok": False, "host": host, "error": str(e)}), mimetype="application/json")
 
-@limiter.limit("30 per minute")
-@app.route("/api/speak/stop", methods=["POST"])
-def api_speak_stop():
-    """Arrête immédiatement la lecture TTS en cours (WinMM) et vide les queues."""
-    try:
-        import ctypes
-        winmm = ctypes.WinDLL("winmm")
-        winmm.mciSendStringW("stop all", None, 0, None)
-        winmm.mciSendStringW("close all", None, 0, None)
-    except Exception as e:
-        _log.info(f"[TTS-stop] {e}")
-    # Vide les queues pour éviter que le browser rejoue en arrière-plan
-    drained = 0
-    for q in (_speak_queue, _speak_deferred):
-        try:
-            while True:
-                q.get_nowait()
-                drained += 1
-        except _queue_mod.Empty:
-            pass  # get_nowait() raises Empty when queue is drained — expected
-    return Response(json.dumps({"ok": True, "drained": drained}), mimetype="application/json")
-
-@limiter.limit("60 per minute")
-@app.route("/api/speak/status", methods=["GET"])
-def api_speak_status():
-    """État complet TTS : queue principale, deferred et stream SSE actif."""
-    queued   = _speak_queue.qsize()
-    deferred = _speak_deferred.qsize()
-    streaming = _chat_stream_active.is_set()
-    return Response(json.dumps({
-        "speaking":       queued > 0 or deferred > 0 or streaming,
-        "queued":         queued,
-        "deferred":       deferred,
-        "stream_active":  streaming,
-    }), mimetype="application/json")
-
-@limiter.limit("60 per minute")
-@app.route("/api/speak/queue", methods=["GET"])
-def api_speak_queue():
-    """Retourne et vide la queue TTS Python — le browser joue chaque item via queueSpeech."""
-    items = []
-    try:
-        while True:
-            items.append(_speak_queue.get_nowait())
-    except _queue_mod.Empty:
-        pass  # get_nowait() raises Empty when queue is drained — expected
-    return Response(json.dumps({"items": items}), mimetype="application/json")
-
-@limiter.limit("60 per minute")
-@app.route("/api/tts-log", methods=["GET"])
-def api_tts_log():
-    """Retourne les N dernières lignes du log TTS rotatif."""
-    try:
-        n = min(int(request.args.get("n", 50)), 500)
-    except (ValueError, TypeError):
-        n = 50
-    lines = []
-    if _TTS_LOG_PATH.exists():
-        try:
-            with open(_TTS_LOG_PATH, encoding="utf-8") as f:
-                lines = f.readlines()
-        except OSError:
-            pass  # log TTS absent — retourne liste vide
-    tail = [ln.rstrip("\n") for ln in lines[-n:]]
-    return Response(json.dumps({"lines": tail, "total": len(lines), "file": str(_TTS_LOG_PATH)}, ensure_ascii=False), mimetype="application/json")
-
-@app.route("/api/tts/status", methods=["GET"])
-def api_tts_status():
-    """État opérationnel de chaque moteur TTS — dérivé des variables runtime, aucun hardcode."""
-    _kok = _tts_eng.is_kokoro_available()
-    _pip = _tts_eng.is_piper_available()
-    _sap = _tts_eng.is_sapi_available()
-    return Response(json.dumps({
-        "edge":   {"ok": bool(_tts_internet_was_up), "label": "EN SERVICE" if _tts_internet_was_up else "ARRÊTÉ"},
-        "kokoro": {"ok": _kok is True, "label": "EN SERVICE" if _kok is True else ("CHARGEMENT" if _kok is None else "ARRÊTÉ")},
-        "piper":  {"ok": bool(_pip), "label": "EN SERVICE" if _pip else "ARRÊTÉ"},
-        "sapi":   {"ok": bool(_sap), "label": "EN SERVICE" if _sap else "ARRÊTÉ"},
-    }, ensure_ascii=False), mimetype="application/json")
-
-def _tts_wav_response(wav, mime):
-    return Response(wav, mimetype=mime,
-                    headers={"Content-Length": str(len(wav)), "Cache-Control": "no-cache"})
-
-def _tts_local_response(engine, text, local_voice):
-    """Tente un moteur TTS local. Retourne Response ou None si moteur indisponible."""
-    try:
-        if engine == "kokoro" and _tts_eng.is_kokoro_available() is not False:
-            _spd = float(DSP_PARAMS.get("tts_kokoro_speed", 1.0))
-            try:
-                wav, mime = apply_dsp_to_mp3(_tts_eng.kokoro_synth(text, local_voice, _spd))
-                return _tts_wav_response(wav, mime)
-            except Exception as ke:
-                _log.warning(f"[Kokoro] Echec synthese ({type(ke).__name__}: {ke}) — fallback edge-tts")
-                return None
-        if engine == "piper" and _tts_eng.is_piper_available():
-            wav, mime = apply_dsp_to_mp3(_tts_eng.piper_synth(text, local_voice or None))
-            return _tts_wav_response(wav, mime)
-        if engine == "sapi" and _tts_eng.is_sapi_available():
-            wav, mime = apply_dsp_to_mp3(_tts_eng.sapi5_synth(text, local_voice or None))
-            return _tts_wav_response(wav, mime)
-    except Exception as e:
-        _log.error(f"[JARVIS] Erreur interne: {e}")
-        return Response(json.dumps({"error": "Erreur interne serveur"}), status=500, mimetype="application/json")
-    return None
-
-def _tts_edge_fallback(text, local_voice):
-    """Chaîne de fallback après échec edge-tts : Kokoro → Piper → SAPI5 → erreur 503."""
-    if _tts_eng.is_kokoro_available() is not False:
-        try:
-            _spd = float(DSP_PARAMS.get("tts_kokoro_speed", 1.0))
-            wav, mime = apply_dsp_to_mp3(_tts_eng.kokoro_synth(text, local_voice, _spd))
-            _tts_logger.warning("[FALLBACK] Kokoro utilisé à la place de edge-tts (internet KO)")
-            return _tts_wav_response(wav, mime)
-        except Exception as ke:
-            _log.info(f"[JARVIS] Kokoro fallback échoué: {ke}")
-    if _tts_eng.is_piper_available():
-        try:
-            wav, mime = apply_dsp_to_mp3(_tts_eng.piper_synth(text, local_voice or None))
-            _tts_logger.warning("[FALLBACK] Piper utilisé à la place de edge-tts")
-            return _tts_wav_response(wav, mime)
-        except Exception as pe:
-            _log.info(f"[JARVIS] Piper fallback échoué: {pe}")
-    if _tts_eng.is_sapi_available():
-        try:
-            wav, mime = apply_dsp_to_mp3(_tts_eng.sapi5_synth(text, None))
-            _tts_logger.warning("[FALLBACK] SAPI5 (Microsoft) utilisé à la place de edge-tts")
-            return _tts_wav_response(wav, mime)
-        except Exception as se:
-            _log.info(f"[JARVIS] SAPI5 fallback échoué: {se}")
-    return Response(
-        json.dumps({"error": "TTS indisponible — edge-tts hors ligne, aucun moteur local actif"}),
-        status=503, mimetype="application/json"
-    )
-
-@limiter.limit("20 per minute")
-@app.route("/api/tts", methods=["POST"])
-def api_tts():
-    _perf_t0 = time.monotonic()
-    data = request.json or {}
-    text = _clean_for_tts(data.get("text", ""))
-    if not text:
-        return Response("{}", mimetype="application/json", status=400)
-    source = data.get("source", request.headers.get("Referer", "unknown"))
-    # Dedup global cross-source (60s) — évite superposition avec python-speak SOC engine
-    now = time.monotonic()
-    if _tts_dedup.check_and_register(text, now):
-        _log.debug(f"[TTS] Dedup global skip (/api/tts, même texte < {_TTS_DEDUP_S}s) : {text[:80]}")
-        return Response('{"dedup":true}', mimetype="application/json", status=200)
-    preview = text[:_TTS_LOG_PREVIEW].replace("\n", " ")
-    _tts_logger.info("source=%-20s | %s%s", source, preview, "..." if len(text) > _TTS_LOG_PREVIEW else "")
-    engine      = DSP_PARAMS.get("tts_engine", "edge")
-    local_voice = DSP_PARAMS.get("tts_local_voice", "")
-
-    # Moteurs locaux (hors-ligne)
-    local_resp = _tts_local_response(engine, text, local_voice)
-    if local_resp is not None:
-        _log.info(f"[TTS-PERF] /api/tts engine={engine} (local) total={time.monotonic() - _perf_t0:.2f}s chars={len(text)}")
-        return local_resp
-
-    # Moteur edge-tts (cloud) — avec retry + fallback
-    try:
-        _t_edge = time.monotonic()
-        tmp_path = _tts_eng.edge_generate_mp3(text, VOICE)
-        _perf_edge = time.monotonic() - _t_edge
-        with open(tmp_path, "rb") as f:
-            audio_data = f.read()
-        try:
-            os.unlink(tmp_path)
-        except OSError:
-            pass  # fichier temporaire déjà supprimé — non bloquant
-        _t_dsp = time.monotonic()
-        audio_data, mime = apply_dsp_to_mp3(audio_data)
-        _perf_dsp = time.monotonic() - _t_dsp
-        _log.info(f"[TTS-PERF] /api/tts engine=edge edge_gen={_perf_edge:.2f}s dsp={_perf_dsp:.2f}s total={time.monotonic() - _perf_t0:.2f}s chars={len(text)}")
-        return _tts_wav_response(audio_data, mime)
-    except Exception as edge_err:
-        _log.warning(f"[JARVIS] edge-tts indisponible ({type(edge_err).__name__}: {edge_err}) — bascule TTS local")
-        _tts_logger.warning(f"[FALLBACK] edge-tts échec ({type(edge_err).__name__}) — tentative moteur local")
-        _fallback_resp = _tts_edge_fallback(text, local_voice)
-        _log.info(f"[TTS-PERF] /api/tts engine=edge→fallback-local total={time.monotonic() - _perf_t0:.2f}s chars={len(text)}")
-        return _fallback_resp
-
-@limiter.limit("30 per minute")
-@app.route("/api/tts/local/voices")
-def api_tts_local_voices():
-    """Liste les moteurs TTS locaux et voix disponibles."""
-    _kok = _tts_eng.is_kokoro_available()
-    _pip = _tts_eng.is_piper_available()
-    _sap = _tts_eng.is_sapi_available()
-    result = {
-        "kokoro": {"available": _kok, "voices": [
-            {"id": "ff_siwis", "name": "Siwis (FR féminine) — très haute qualité"},
-        ] if _kok else []},
-        "piper": {"available": _pip, "models": _tts_eng.list_piper_models() if _pip else []},
-        "sapi":  {"available": _sap, "voices": _tts_eng.list_sapi_voices()},
-        "current_engine": DSP_PARAMS.get("tts_engine", "kokoro"),
-        "current_voice":  DSP_PARAMS.get("tts_local_voice", "ff_siwis"),
-    }
-    return Response(json.dumps(result, ensure_ascii=False), mimetype="application/json")
-
-@limiter.limit("5 per minute")
-@app.route("/api/tts/local/download", methods=["POST"])
-def api_tts_local_download():
-    """Télécharge un modèle Piper depuis HuggingFace (internet requis une seule fois)."""
-    data = request.json or {}
-    voice_name = data.get("voice", "fr_FR-upmc-medium")
-    try:
-        import shutil as _shutil
-
-        from huggingface_hub import hf_hub_download
-        # Mapping nom → chemin HF
-        _HF_MAP = {
-            "fr_FR-upmc-medium":   "fr/fr_FR/upmc/medium",
-            "fr_FR-siwis-medium":  "fr/fr_FR/siwis/medium",
-            "fr_FR-mls-medium":    "fr/fr_FR/mls/medium",
-            "fr_FR-mls_1840-low":  "fr/fr_FR/mls_1840/low",
-        }
-        hf_subdir = _HF_MAP.get(voice_name)
-        if not hf_subdir:
-            return Response(json.dumps({"error": f"Voix inconnue: {voice_name}. Choisir parmi: {list(_HF_MAP.keys())}"}),
-                            status=400, mimetype="application/json")
-        downloaded = []
-        for fname in [f"{voice_name}.onnx", f"{voice_name}.onnx.json"]:
-            path = hf_hub_download(repo_id="rhasspy/piper-voices",
-                                   filename=f"{hf_subdir}/{fname}")
-            dest = _tts_eng.VOICES_DIR / fname
-            if str(path) != str(dest):
-                _shutil.copy2(path, dest)
-            downloaded.append(str(dest))
-        return Response(json.dumps({"ok": True, "model": voice_name, "files": downloaded}), mimetype="application/json")
-    except Exception as e:
-        _log.error(f"[JARVIS] Erreur interne: {e}"); return Response(json.dumps({"error": "Erreur interne serveur"}), status=500, mimetype="application/json")
+# Routes speak/tts/tts_log/tts_status/tts_local_* déménagées dans
+# voice/routes.py (étape 14, 2026-05-23). _tts_wav_response,
+# _tts_local_response, _tts_edge_fallback sont des helpers internes au tuile.
 
 @limiter.limit("60 per minute")
 @app.route("/api/dsp-params", methods=["GET"])
@@ -4065,6 +3822,26 @@ def _rag_auto_refresh_loop():
         _log.info("[RAG] Auto-refresh 6h terminé.")
 
 threading.Thread(target=_rag_auto_refresh_loop, daemon=True, name="rag-auto-refresh").start()
+
+# ── Init différé de la tuile voice (refactor étapes 13-14, 2026-05-23) ──
+# Placé ici car _tts_internet_was_up est défini tard (ligne ~3896).
+_voice.init(
+    limiter            = limiter,
+    log                = _log,
+    tts_logger         = _tts_logger,
+    speak_fn           = speak,
+    speak_queue        = _speak_queue,
+    speak_deferred     = _speak_deferred,
+    chat_stream_active = _chat_stream_active,
+    tts_log_path       = _TTS_LOG_PATH,
+    get_dsp_params     = lambda: DSP_PARAMS,
+    get_voice          = lambda: VOICE,
+    get_internet_up    = lambda: _tts_internet_was_up,
+    clean_for_tts      = _clean_for_tts,
+    tts_log_preview    = _TTS_LOG_PREVIEW,
+    tts_dedup_s        = _TTS_DEDUP_S,
+)
+app.register_blueprint(_voice.bp)
 
 
 def _vram_sync_loop():

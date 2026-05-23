@@ -37,18 +37,53 @@ from . import (  # noqa: E402,F401
 
 # Rate limits par route (appliqués dans init() après injection du limiter).
 _ROUTE_LIMITS = {
-    "api_stt":        "10 per minute",
-    "api_stt_status": "60 per minute",
+    "api_stt":               "10 per minute",
+    "api_stt_status":        "60 per minute",
+    "api_speak":             "20 per minute",
+    "api_speak_stop":        "30 per minute",
+    "api_speak_status":      "60 per minute",
+    "api_speak_queue":       "60 per minute",
+    "api_tts_log":           "60 per minute",
+    # api_tts_status : pas de rate limit dans l'original
+    "api_tts":               "20 per minute",
+    "api_tts_local_voices":  "30 per minute",
+    "api_tts_local_download":"5 per minute",
 }
 
 
-def init(*, limiter, log) -> None:
-    """Injecte les dépendances communes + applique les rate limits.
+def init(*, limiter, log,
+         tts_logger=None,
+         speak_fn=None,
+         speak_queue=None,
+         speak_deferred=None,
+         chat_stream_active=None,
+         tts_log_path=None,
+         get_dsp_params=None,
+         get_voice=None,
+         get_internet_up=None,
+         clean_for_tts=None,
+         tts_log_preview=200,
+         tts_dedup_s=60) -> None:
+    """Injecte les dépendances de la tuile et applique les rate limits.
 
-    Phase B1 (étape 13) : STT routes seulement. Les routes TTS/speak/voice_lab
-    seront ajoutées par init_routes_tts/init_routes_voicelab (étapes 14-16).
+    Phases B1 + B2 (étapes 13-14) : STT + TTS + speak routes. Voice_lab/voice
+    routes en étape 15.
     """
-    routes.init_routes(log=log)
+    routes.init_routes(
+        log               = log,
+        tts_logger        = tts_logger,
+        speak_fn          = speak_fn,
+        speak_queue       = speak_queue,
+        speak_deferred    = speak_deferred,
+        chat_stream_active= chat_stream_active,
+        tts_log_path      = tts_log_path,
+        get_dsp_params    = get_dsp_params,
+        get_voice         = get_voice,
+        get_internet_up   = get_internet_up,
+        clean_for_tts     = clean_for_tts,
+        tts_log_preview   = tts_log_preview,
+        tts_dedup_s       = tts_dedup_s,
+    )
     for fn_name, limit_str in _ROUTE_LIMITS.items():
         fn = getattr(routes, fn_name, None)
         if fn is not None:
