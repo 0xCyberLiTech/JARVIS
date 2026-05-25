@@ -5,26 +5,39 @@ texte injecté dans le system prompt phi4 quand un mot-clé SOC est détecté,
 à partir du dict monitoring.json parsé.
 
 Composants :
-- `_INFRA_IPS`              : liste des IPs internes (jamais à bannir)
+- `_INFRA_IPS`              : liste descriptive des IPs internes (jamais à bannir)
 - `_KC_BAN_SIGNAL_MIN_HITS` : seuil au-delà duquel un SCAN/RECON devient FORT
 - `kc_ban_signal(ip_e)`     : force du signal pour reco de ban (FORT/faible)
 - `pve_context_lines(pve)`  : formatage Proxmox VE pour le contexte
 - `build_monitoring_context(d)` : construit tout le texte SOC à injecter
+  → Filtre les IPs protégées (LAN + DNS publics + WAN Freebox) depuis
+    `active_ips` AVANT envoi à phi4 via `security_whitelists.is_protected_ip()`
+    (source unique, ajout 2026-05-25 — comble le trou identifié par l'audit
+    Marc : phi4 voyait `192.168.1.110` et `192.168.1.50` dans les top_ips
+    et les classait à tort comme menaces).
 
 Dépendance : `init(net_spike_window_s)` — seuil temporel pics réseau récents.
 """
 import time
 
+from security_whitelists import is_protected_ip  # source unique whitelist IPs
+
 _KC_BAN_SIGNAL_MIN_HITS = 10
 
+# Listing descriptif (rôles par IP) — utilisé dans le bloc INFRASTRUCTURE SOC
+# affiché à phi4 pour qu'il identifie chaque IP interne par son rôle dans ses
+# analyses. Doit rester synchronisé avec `INTERNAL_IPS` dans
+# `security_whitelists.py` (source maître). Toute évolution = MAJ ici + grep.
 _INFRA_IPS = (
     ("192.168.1.20",  "Proxmox VE — hyperviseur"),
     ("192.168.1.50",  "srv-ngix — hôte du SOC lui-même (nginx + CrowdSec + monitoring_gen)"),
     ("192.168.1.12",  "clt — VM Apache site CLT"),
     ("192.168.1.13",  "pa85 — VM Apache site PA85"),
     ("192.168.1.21",  "srv-dev-1 — VM Debian dev/test"),
-    ("192.168.1.110", "Windows/JARVIS via routeur ASUS — trafic NATé du poste de travail (cette IA elle-même)"),
+    ("192.168.1.110", "WAN routeur ASUS — NAT sortant du LAN ASUS (poste Windows/JARVIS)"),
     ("192.168.1.254", "Freebox — gateway LAN"),
+    ("192.168.50.1",  "Routeur ASUS ROG BE-19000 AI — gateway LAN ASUS"),
+    ("192.168.50.90", "Windows/JARVIS — poste Marc (IP fixe LAN ASUS)"),
 )
 
 _net_spike_window_s = 3600
@@ -106,11 +119,20 @@ def build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS R
             lines.append(f"  {ip} — scénario={meta.get('scenario','?')} | maillon-KC={_neut_stage.get(ip) or '?'}")
         if len(cs_banned) > len(shown):
             lines.append(f"  … et {len(cs_banned) - len(shown)} autre(s) IP(s) déjà bannie(s) non listée(s) — TOUTE IP non listée ci-dessus PEUT être déjà bannie, vérifier le total ({len(cs_banned)}) avant d'en recommander une.")
-    active_ips = kc.get("active_ips", [])
+    # Filtre source unique 2026-05-25 (Marc audit whitelist) — exclut les IPs
+    # internes LAN + externes protégées (DNS publics, WAN Freebox) AVANT envoi
+    # à phi4. Comble le trou identifié : `active_ips` pouvait contenir des IPs
+    # internes via certains chemins de collecte SOC, phi4 les classait à tort
+    # comme menaces. La whitelist est consultée via `is_protected_ip()` (source
+    # unique dans `security_whitelists.py`).
+    active_ips_raw = kc.get("active_ips", [])
+    active_ips = [ip_e for ip_e in active_ips_raw if not is_protected_ip(ip_e.get("ip", ""))]
+    filtered_internal = len(active_ips_raw) - len(active_ips)
     if active_ips:
         exploit_unblocked = sum(1 for ip in active_ips if ip.get("stage") == "EXPLOIT" and not ip.get("cs_decision"))
         exploit_total     = sum(1 for ip in active_ips if ip.get("stage") == "EXPLOIT")
-        lines.append(f"IPs actives (Kill Chain) : {len(active_ips)} | EXPLOIT total: {exploit_total} | EXPLOIT non bloquées: {exploit_unblocked}")
+        filtered_note = f" | {filtered_internal} IP(s) interne(s) filtrée(s)" if filtered_internal > 0 else ""
+        lines.append(f"IPs actives (Kill Chain) : {len(active_ips)} | EXPLOIT total: {exploit_total} | EXPLOIT non bloquées: {exploit_unblocked}{filtered_note}")
         for ip_e in active_ips[:10]:
             cs_status = "BLOQUÉE-CS" if ip_e.get("cs_decision") else "⚠ NON-BLOQUÉE"
             spoof = f" ⚠UA-USURPÉ:{ip_e['spoofed_bot']}" if ip_e.get("spoofed_bot") else ""
