@@ -67,7 +67,7 @@ def refresh(ssh_fn, timeout: int = 18):
     """Rafraîchit le cache texte brut des logs SOC si TTL expiré.
     Thread-safe, sans embedding.
 
-    `ssh_fn` : fonction `_ssh_ngix(cmd, timeout=N) -> (ok, output)` de jarvis.py.
+    `ssh_fn` : fonction `_ssh_nginx(cmd, timeout=N) -> (ok, output)` de jarvis.py.
     """
     global _last_refresh, _text
     now = time.time()

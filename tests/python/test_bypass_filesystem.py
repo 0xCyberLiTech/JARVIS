@@ -20,11 +20,11 @@ from bypass.filesystem import (
 
 def _vm_map():
     """Map de test : alias → (vm_name, ssh_fn_dummy)."""
-    ssh_ngix = lambda cmd: (True, f"OK: {cmd}")  # noqa: E731
+    ssh_nginx = lambda cmd: (True, f"OK: {cmd}")  # noqa: E731
     ssh_clt = lambda cmd: (True, f"CLT: {cmd}")  # noqa: E731
     return {
-        "ngix": ("srv-nginx", ssh_ngix),
-        "srv-nginx": ("srv-nginx", ssh_ngix),
+        "ngix": ("srv-nginx", ssh_nginx),
+        "srv-nginx": ("srv-nginx", ssh_nginx),
         "clt": ("srv-clt", ssh_clt),
         "srv-clt": ("srv-clt", ssh_clt),
     }

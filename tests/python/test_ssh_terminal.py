@@ -59,7 +59,7 @@ def test_re_dev1_pas_match_sans_verbe():
     assert not ssh_terminal.TERMINAL_RE["dev1"].search("info srv-dev-1")
 
 
-def test_re_ngix_match_ssh_ngix():
+def test_re_ngix_match_ssh_nginx():
     assert ssh_terminal.TERMINAL_RE["ngix"].search("ssh ngix")
 
 

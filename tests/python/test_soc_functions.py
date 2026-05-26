@@ -230,7 +230,7 @@ def test_check_services_service_inconnu_down_signale(monkeypatch):
 def test_check_services_service_whiteliste_down_restart(monkeypatch):
     """Service DOWN ∈ whitelist → tentative de restart SSH (mockée)."""
     monkeypatch.setattr(soc, "_save_cooldowns", lambda: None)
-    monkeypatch.setattr(soc, "_ssh_ngix", lambda cmd, timeout=20: (True, ""))
+    monkeypatch.setattr(soc, "_ssh_nginx", lambda cmd, timeout=20: (True, ""))
     monkeypatch.setattr(soc, "_soc_log", lambda *a, **k: None)
     soc._SOC_MON_COOLDOWNS.pop("svc_nginx", None)
     parts = soc._check_services({"nginx": False})
@@ -329,7 +329,7 @@ def test_check_threat_level_cooldown_bloque(monkeypatch):
 # ── _deep_* — investigation IP approfondie (module soc_ip_deep, SSH mocké) ─
 
 def test_deep_crowdsec_aucune_decision(monkeypatch):
-    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=10: (True, "[]"))
+    monkeypatch.setattr(soc_ip_deep, "_ssh_nginx", lambda cmd, timeout=10: (True, "[]"))
     res = soc_ip_deep._deep_crowdsec("203.0.113.5")
     assert res["banned"] is False
     assert res["count"] == 0
@@ -339,7 +339,7 @@ def test_deep_crowdsec_avec_decision(monkeypatch):
     decisions = ('[{"decisions":[{"id":1,"scenario":"http-probing",'
                  '"duration":"24h","origin":"crowdsec","type":"ban"}]}]')
     monkeypatch.setattr(
-        soc_ip_deep, "_ssh_ngix",
+        soc_ip_deep, "_ssh_nginx",
         lambda cmd, timeout=10: (True, decisions) if "decisions list" in cmd else (True, "[]"))
     res = soc_ip_deep._deep_crowdsec("203.0.113.6")
     assert res["banned"] is True
@@ -372,33 +372,33 @@ def test_deep_autoban_compte_recidive(monkeypatch):
 
 
 def test_deep_nginx_hits_nombre(monkeypatch):
-    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=15: (True, "42\n"))
+    monkeypatch.setattr(soc_ip_deep, "_ssh_nginx", lambda cmd, timeout=15: (True, "42\n"))
     assert soc_ip_deep._deep_nginx_hits("203.0.113.10") == 42
 
 
 def test_deep_nginx_hits_sortie_invalide(monkeypatch):
-    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=15: (True, "erreur"))
+    monkeypatch.setattr(soc_ip_deep, "_ssh_nginx", lambda cmd, timeout=15: (True, "erreur"))
     assert soc_ip_deep._deep_nginx_hits("203.0.113.11") == 0
 
 
 def test_deep_nginx_hits_ssh_ko(monkeypatch):
-    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=15: (False, ""))
+    monkeypatch.setattr(soc_ip_deep, "_ssh_nginx", lambda cmd, timeout=15: (False, ""))
     assert soc_ip_deep._deep_nginx_hits("203.0.113.12") == 0
 
 
 def test_deep_nginx_last_lignes(monkeypatch):
-    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=10: (True, "ligne1\nligne2\n"))
+    monkeypatch.setattr(soc_ip_deep, "_ssh_nginx", lambda cmd, timeout=10: (True, "ligne1\nligne2\n"))
     assert soc_ip_deep._deep_nginx_last("203.0.113.13") == ["ligne1", "ligne2"]
 
 
 def test_deep_nginx_last_ssh_ko(monkeypatch):
-    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=10: (False, ""))
+    monkeypatch.setattr(soc_ip_deep, "_ssh_nginx", lambda cmd, timeout=10: (False, ""))
     assert soc_ip_deep._deep_nginx_last("203.0.113.14") == []
 
 
 def test_deep_rsyslog_agrege_compteurs(monkeypatch):
     out = "/var/log/central/srv-nginx/auth.log:5\n/var/log/central/clt/access.log:3"
-    monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=25: (True, out))
+    monkeypatch.setattr(soc_ip_deep, "_ssh_nginx", lambda cmd, timeout=25: (True, out))
     res = soc_ip_deep._deep_rsyslog("203.0.113.15")
     assert res["total"] == 8
     assert len(res["sources"]) == 2
@@ -701,11 +701,11 @@ def test_load_soc_config_override_partiel(monkeypatch, tmp_path):
 
 # ── Wrappers SSH par hôte — délégation vers _ssh_host ────────────────────
 
-def test_ssh_ngix_delegue_a_ssh_host(monkeypatch):
+def test_ssh_nginx_delegue_a_ssh_host(monkeypatch):
     calls = []
     monkeypatch.setattr(soc, "_ssh_host",
                         lambda arr, cmd, t, r: calls.append((arr, cmd)) or (True, "ok"))
-    ok, out = soc._ssh_ngix("uptime")
+    ok, out = soc._ssh_nginx("uptime")
     assert (ok, out) == (True, "ok")
     assert calls[0][0] is soc._SSH_NGIX and calls[0][1] == "uptime"
 
@@ -747,14 +747,14 @@ def test_ssh_host_timeout_renvoie_message(monkeypatch):
     assert ok is False and "Timeout" in out
 
 
-# ── _ban_ip_ssh — délégation à cscli via _ssh_ngix ───────────────────────
+# ── _ban_ip_ssh — délégation à cscli via _ssh_nginx ───────────────────────
 
 def test_ban_ip_ssh_construit_commande_cscli(monkeypatch):
     captured = {}
     def _fake(cmd, **k):
         captured["cmd"] = cmd
         return True, "Decision added"
-    monkeypatch.setattr(soc, "_ssh_ngix", _fake)
+    monkeypatch.setattr(soc, "_ssh_nginx", _fake)
     ok, out = soc._ban_ip_ssh("203.0.113.7", "test-jarvis", "24h")
     assert ok is True
     assert "cscli decisions add" in captured["cmd"]

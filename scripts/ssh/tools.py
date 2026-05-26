@@ -18,23 +18,23 @@ Audit log : write ops (autorisées OU refusées) tracées dans
 `logs/audit_writeops.jsonl` via `security.audit_writeop()`.
 
 Dépendances injectées par `init()` :
-- `ssh_ngix` / `ssh_proxmox` / `ssh_clt` / `ssh_pa85` : fonctions SSH.
+- `ssh_nginx` / `ssh_proxmox` / `ssh_clt` / `ssh_pa85` : fonctions SSH.
 - `security` : module `security_whitelists` (BLOCKED_SSH_PATTERNS,
   is_known_write_op, check_write_op, audit_writeop).
 """
 
 # Dépendances injectées par init() — depuis l'ossature.
-_ssh_ngix:    object = None
+_ssh_nginx:    object = None
 _ssh_proxmox: object = None
 _ssh_clt:     object = None
 _ssh_pa85:    object = None
 _security:    object = None
 
 
-def init(*, ssh_ngix, ssh_proxmox, ssh_clt, ssh_pa85, security) -> None:
+def init(*, ssh_nginx, ssh_proxmox, ssh_clt, ssh_pa85, security) -> None:
     """Injecte les 4 fonctions SSH + le module security_whitelists."""
-    global _ssh_ngix, _ssh_proxmox, _ssh_clt, _ssh_pa85, _security
-    _ssh_ngix    = ssh_ngix
+    global _ssh_nginx, _ssh_proxmox, _ssh_clt, _ssh_pa85, _security
+    _ssh_nginx    = ssh_nginx
     _ssh_proxmox = ssh_proxmox
     _ssh_clt     = ssh_clt
     _ssh_pa85    = ssh_pa85
@@ -78,7 +78,7 @@ def _tool_commande_ssh_run(ssh_fn, label, args):
     return output[:4000] if output else "(aucune sortie)"
 
 
-def _tool_commande_ssh_ngix(args):    return _tool_commande_ssh_run(_ssh_ngix,    "ngix",    args)
+def _tool_commande_ssh_nginx(args):    return _tool_commande_ssh_run(_ssh_nginx,    "ngix",    args)
 def _tool_commande_ssh_proxmox(args): return _tool_commande_ssh_run(_ssh_proxmox, "proxmox", args)
 def _tool_commande_ssh_clt(args):     return _tool_commande_ssh_run(_ssh_clt,     "clt",     args)
 def _tool_commande_ssh_pa85(args):    return _tool_commande_ssh_run(_ssh_pa85,    "pa85",    args)

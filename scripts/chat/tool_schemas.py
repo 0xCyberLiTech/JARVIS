@@ -147,7 +147,7 @@ TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "commande_ssh_ngix",
+            "name": "commande_ssh_nginx",
             "description": "Exécute une commande shell sur srv-nginx (192.168.1.50) via SSH. Utiliser pour lire des logs, vérifier des services, interroger CrowdSec/fail2ban, etc. Commandes de lecture uniquement.",
             "parameters": {
                 "type": "object",

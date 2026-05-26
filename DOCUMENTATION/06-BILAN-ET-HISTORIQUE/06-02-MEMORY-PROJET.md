@@ -469,7 +469,7 @@ big-bang).
 **Refactor incrémental — étape 1** (2026-05-22) : extraction du cluster
 investigation IP (`_b64py`, `_ssh_json_exec`, `_deep_geoip/crowdsec/fail2ban/
 autoban/nginx_hits/nginx_last/rsyslog`) de `blueprints/soc.py` → nouveau module
-**`scripts/soc_ip_deep.py`** (180 L · 78% cov). Dépendance `_ssh_ngix` injectée
+**`scripts/soc_ip_deep.py`** (180 L · 78% cov). Dépendance `_ssh_nginx` injectée
 via `soc_ip_deep.init()` (pattern DI). `soc.py` garde 7 alias légers → routes
 `/api/soc/ip-history` et `/api/soc/ip-deep` **inchangées**. `soc.py` 1872→**1729 L**
 (−143). Tests `_deep_*` rebranchés sur `soc_ip_deep`. Méthode validée.
@@ -1722,7 +1722,7 @@ Flask port 5000, Windows 11 Pro, RTX 5080 Blackwell (sm_120, PyTorch 2.7.1+cu128
 
 ### SSH write ops — 3 outils restants sécurisés
 
-`_check_write_op()` ajouté aux 3 outils SSH manquants (seul `_tool_commande_ssh_ngix` l'avait) :
+`_check_write_op()` ajouté aux 3 outils SSH manquants (seul `_tool_commande_ssh_nginx` l'avait) :
 - `_tool_commande_ssh_proxmox` — protège Proxmox VE
 - `_tool_commande_ssh_clt` — protège VM clt (Apache)
 - `_tool_commande_ssh_pa85` — protège VM pa85 (Apache)

@@ -301,7 +301,7 @@ mots_cles: ["ia", "ollama", "modeles", "rag", "phi4", "gemma4"]
   │          │                                  │
   │          ▼                                  │
   │   ┌─────────────┐                           │
-  │   │  APPELLE    │  → commande_ssh_ngix()    │
+  │   │  APPELLE    │  → commande_ssh_nginx()    │
   │   │  UN OUTIL   │    commande_ssh_proxmox() │
   │   └──────┬──────┘    commande_ssh_clt()     │
   │          │            commande_ssh_pa85()   │
@@ -345,7 +345,7 @@ mots_cles: ["ia", "ollama", "modeles", "rag", "phi4", "gemma4"]
     │
     ▼ ROUTING mode SOC → phi4:14b (déjà chaud)
     │
-    ▼ phi4 RÉFLÉCHIT → décide d'appeler commande_ssh_ngix()
+    ▼ phi4 RÉFLÉCHIT → décide d'appeler commande_ssh_nginx()
     │
     ▼ SSH srv-nginx 192.168.1.50 : "systemctl status nginx crowdsec"
     │

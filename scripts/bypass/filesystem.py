@@ -6,7 +6,7 @@ Permet à JARVIS de répondre à "lis /etc/nginx/nginx.conf sur srv-nginx" sans
 appeler le LLM : juste détection regex + cat/ls SSH + rendu UI holographique.
 
 Couplage : `vm_ssh_map` est passé en argument (dependency injection) — les
-fonctions SSH `_ssh_ngix`, `_ssh_clt`, etc. restent dans `jarvis.py` car
+fonctions SSH `_ssh_nginx`, `_ssh_clt`, etc. restent dans `jarvis.py` car
 couplées à paramiko + clés SSH système.
 
 Sécurité : protégé par `security_whitelists.BLOCKED_SSH_PATTERNS` au niveau du

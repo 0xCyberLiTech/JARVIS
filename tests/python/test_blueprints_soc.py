@@ -281,7 +281,7 @@ def test_unban_ip_appelle_ssh(client, monkeypatch):
         captured["cmd"] = cmd
         return True, "deleted"
 
-    monkeypatch.setattr(soc_module, "_ssh_ngix", fake_ssh)
+    monkeypatch.setattr(soc_module, "_ssh_nginx", fake_ssh)
     monkeypatch.setattr(soc_module, "_soc_log", lambda *a, **k: None)
     r = client.post("/api/soc/unban-ip", json={"ip": "203.0.113.88"},
                     headers={"X-Requested-With": "XMLHttpRequest"})
@@ -468,7 +468,7 @@ def test_api_soc_ip_deep_ok(client, monkeypatch):
     }
     for fn, val in deep.items():
         monkeypatch.setattr(soc_module, fn, (lambda v: lambda ip: v)(val))
-    monkeypatch.setattr(soc_module, "_ssh_ngix", lambda *a, **k: (True, ""))
+    monkeypatch.setattr(soc_module, "_ssh_nginx", lambda *a, **k: (True, ""))
     r = client.post("/api/soc/ip-deep", json={"ip": "203.0.113.41"})
     assert r.status_code == 200
     body = r.get_json()

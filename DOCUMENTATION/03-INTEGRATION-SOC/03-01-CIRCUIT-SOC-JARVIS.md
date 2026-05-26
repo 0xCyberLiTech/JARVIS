@@ -296,19 +296,19 @@ _soc_monitor_loop()  ──  poll monitoring.json via SSH toutes les 60s
          ├── _soc_autoban(data)
          │     Même logique que JS checkAutoBan()
          │     EXPLOIT / honeypot / BRUTE / Suricata sév.1
-         │     ──▶ _ssh_ngix("cscli decisions add -i IP")
+         │     ──▶ _ssh_nginx("cscli decisions add -i IP")
          │     ──▶ _soc_log("ban_ip", ...) → jarvis_soc_actions.json
          │
          ├── _soc_reqhour_check(data)
          │     spike >500 req/h → ban top 3 IPs kill chain
          │     + Suricata recent_scans IPs comme candidats EXPLOIT
-         │     ──▶ _ssh_ngix("cscli decisions add -i IP")
+         │     ──▶ _ssh_nginx("cscli decisions add -i IP")
          │
          ├── _soc_suricata_check(data)
          │     sév.1 C2/Trojan → ban immédiat
          │     sév.3 NMAP (recent_scans) ≥3 hits → ban 24h
          │     sév.2 recal : >3000/+10pts  >1500/+7pts  >600/+4pts
-         │     ──▶ _ssh_ngix("cscli decisions add -i IP -d 24h")
+         │     ──▶ _ssh_nginx("cscli decisions add -i IP -d 24h")
          │
 ├── _soc_rsyslog_check(data)
          │     C2 outbound cross-hôtes → ban 48h
@@ -317,7 +317,7 @@ _soc_monitor_loop()  ──  poll monitoring.json via SSH toutes les 60s
          │
          └── _soc_service_check(data)
                service DOWN + in _ALLOWED_SERVICES
-               ──▶ _ssh_ngix("systemctl restart <service>")
+               ──▶ _ssh_nginx("systemctl restart <service>")
                cooldown 15min par service
 ```
 
@@ -371,7 +371,7 @@ DÉTECTION
                                ▼
                   JARVIS POST /api/soc/ban-ip  (si dashboard ouvert)
                   OU
-                  _ssh_ngix() direct            (si dashboard fermé)
+                  _ssh_nginx() direct            (si dashboard fermé)
                                │
                                ▼
                   srv-nginx : cscli decisions add -i <IP> [-d <durée>]

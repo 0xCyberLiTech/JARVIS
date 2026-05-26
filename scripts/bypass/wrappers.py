@@ -3,7 +3,7 @@
 Extrait de jarvis.py étape 27 (2026-05-23) — 11 wrappers + 3 constantes
 couplées aux fonctions SSH locales. Ces wrappers existent parce que les
 modules bypass purs (proxmox/code/backup) ne connaissent ni les fonctions
-SSH (`_ssh_ngix`, ...), ni `_pve_fetch_state`, ni le `_pending_infra_cmd`
+SSH (`_ssh_nginx`, ...), ni `_pve_fetch_state`, ni le `_pending_infra_cmd`
 global. Les wrappers servent de glue : ils injectent les deps puis délèguent.
 
 Architecture :
@@ -24,7 +24,7 @@ import json
 import re
 
 # ── Module-level DI placeholders (rempli par init()) ──────────────────────────
-_ssh_ngix = None
+_ssh_nginx = None
 _ssh_proxmox = None
 _ssh_clt = None
 _ssh_pa85 = None
@@ -48,7 +48,7 @@ SVC_RESTART_RE = None
 
 def init(
     *,
-    ssh_ngix,
+    ssh_nginx,
     ssh_proxmox,
     ssh_clt,
     ssh_pa85,
@@ -65,13 +65,13 @@ def init(
     svc_bouncer: str = "crowdsec-firewall-bouncer",
 ) -> None:
     """Injecte les deps couplées à jarvis.py et calcule les tables/regex."""
-    global _ssh_ngix, _ssh_proxmox, _ssh_clt, _ssh_pa85, _ssh_dev1
+    global _ssh_nginx, _ssh_proxmox, _ssh_clt, _ssh_pa85, _ssh_dev1
     global _bypass_pve, _bypass_code, _bypass_bk
     global _pve_fetch_state, _sse_tok, _log
     global _pending_infra_cmd, _allowed_scripts, _ssh_apt_timeout_s, _svc_bouncer
     global VM_START_SSH_MAP, UPDATE_REBOOT_HOSTS, SVC_RESTART_RE
 
-    _ssh_ngix = ssh_ngix
+    _ssh_nginx = ssh_nginx
     _ssh_proxmox = ssh_proxmox
     _ssh_clt = ssh_clt
     _ssh_pa85 = ssh_pa85
@@ -91,10 +91,10 @@ def init(
         101: ("srv-dev-1", _ssh_dev1),
         106: ("srv-clt",   _ssh_clt),
         107: ("srv-pa85",  _ssh_pa85),
-        108: ("srv-nginx",  _ssh_ngix),
+        108: ("srv-nginx",  _ssh_nginx),
     }
     UPDATE_REBOOT_HOSTS = [
-        (["srv-nginx", "srv-ngix"],          "srv-nginx",  _ssh_ngix,    False),
+        (["srv-nginx", "srv-ngix"],          "srv-nginx",  _ssh_nginx,    False),
         (["srv-clt",  "clt"],                "srv-clt",   _ssh_clt,     False),
         (["srv-pa85", "pa85"],               "srv-pa85",  _ssh_pa85,    False),
         (["srv-dev-1", "srv-dev", "dev-1"],  "srv-dev-1", _ssh_dev1,    False),
@@ -112,15 +112,15 @@ def detect_service_restart(text):
         return None
     svc_raw = m.group(2).lower()
     if svc_raw == "nginx":
-        return ("srv-nginx", _ssh_ngix, "nginx")
+        return ("srv-nginx", _ssh_nginx, "nginx")
     if svc_raw == "crowdsec":
-        return ("srv-nginx", _ssh_ngix, "crowdsec")
+        return ("srv-nginx", _ssh_nginx, "crowdsec")
     if svc_raw == _svc_bouncer:
-        return ("srv-nginx", _ssh_ngix, _svc_bouncer)
+        return ("srv-nginx", _ssh_nginx, _svc_bouncer)
     if svc_raw == "suricata":
-        return ("srv-nginx", _ssh_ngix, "suricata")
+        return ("srv-nginx", _ssh_nginx, "suricata")
     if svc_raw == "fail2ban":
-        return ("srv-nginx", _ssh_ngix, "fail2ban")
+        return ("srv-nginx", _ssh_nginx, "fail2ban")
     svc_name = "php" if svc_raw == "php" else "apache2"
     if re.search(r'\bclt\b', text, re.I):
         return ("clt", _ssh_clt, svc_name)

@@ -2,7 +2,7 @@
 
 Extrait de jarvis.py session 33 (2026-05-13) — Phase 3 sous-module 27 (Chat/LLM core).
 
-Le LLM peut décider d'appeler des outils (ex: ssh_ngix, vm_status) en mode SOC.
+Le LLM peut décider d'appeler des outils (ex: ssh_nginx, vm_status) en mode SOC.
 Cette boucle :
 1. Appelle Ollama avec tools registrés
 2. Si pas de tool_calls → break (LLM a répondu directement)

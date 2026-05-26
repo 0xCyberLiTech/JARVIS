@@ -642,7 +642,7 @@ d'abord, refactor ensuite, par extraction incrémentale validée à chaque étap
 
 **Refactor incrémental — étape 1** (2026-05-22) : cluster investigation IP
 (`_b64py`, `_ssh_json_exec`, `_deep_geoip/crowdsec/fail2ban/autoban/nginx/rsyslog`)
-extrait de `soc.py` vers le module dédié **`soc_ip_deep.py`** (DI : `_ssh_ngix`
+extrait de `soc.py` vers le module dédié **`soc_ip_deep.py`** (DI : `_ssh_nginx`
 injecté). `soc.py` 1872→**1729 L** (−143). `soc_ip_deep.py` 78% cov. soc.py garde
 des alias légers → routes `ip-history`/`ip-deep` inchangées. 1091 tests, 0 régression.
 
@@ -884,7 +884,7 @@ Windows 11 (localhost:5000)
 |---|---|---|---|
 | `jarvis.py` | 4814 L (2957 stmts) | 30% | Serveur Flask · ~150 endpoints · routing 4 modes · auto-engine SOC proactif · pré-warm phi4/Kokoro · circuit breaker imports · 8 call-sites Ollama wrappés |
 | `blueprints/soc.py` | 1001 stmts (1687 L) | 57% | Endpoints SOC (`/api/soc/*`) · cache monitoring.json TTL 30s · fallback SSH · IP history 30j · ban/unban CrowdSec · defense_24h · ioc |
-| `soc_ip_deep.py` | 69 stmts (180 L) | 78% | Investigation IP — GeoIP/CrowdSec/Fail2ban/autoban/nginx/rsyslog · extrait de soc.py (refactor incrémental étape 1, 2026-05-22) · DI `_ssh_ngix` |
+| `soc_ip_deep.py` | 69 stmts (180 L) | 78% | Investigation IP — GeoIP/CrowdSec/Fail2ban/autoban/nginx/rsyslog · extrait de soc.py (refactor incrémental étape 1, 2026-05-22) · DI `_ssh_nginx` |
 | `soc_suricata_ban.py` | 57 stmts (82 L) | 96% | Ban auto Suricata — sév.1 / port scans / surge C2 · extrait de soc.py (refactor incrémental étape 2, 2026-05-22) · DI 6 fonctions |
 
 ### Modules satellites — Chat & LLM

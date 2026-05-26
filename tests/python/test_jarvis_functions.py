@@ -205,7 +205,7 @@ def test_cors_origin_inconnue_repli_localhost():
 def test_detect_service_restart_nginx():
     host, ssh, svc = jm._detect_service_restart("redémarre nginx maintenant")
     assert (host, svc) == ("srv-nginx", "nginx")
-    assert ssh is jm._ssh_ngix
+    assert ssh is jm._ssh_nginx
 
 
 def test_detect_service_restart_crowdsec():

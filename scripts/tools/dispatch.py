@@ -14,7 +14,7 @@ Outils exposés (par catégorie) :
                 arborescence_projet, lire_plusieurs_fichiers
 - tools/ (4)  : executer_code, rechercher_dans_fichiers, soc_status,
                 executer_script_windows
-- ssh/ (4)   : commande_ssh_ngix, commande_ssh_proxmox, commande_ssh_clt,
+- ssh/ (4)   : commande_ssh_nginx, commande_ssh_proxmox, commande_ssh_clt,
                 commande_ssh_pa85
 
 Convention : chaque handler reçoit un dict `args` (JSON décodé du tool_call).
@@ -34,7 +34,7 @@ def build(
     executer_code,
     rechercher_dans_fichiers,
     soc_status,
-    commande_ssh_ngix,
+    commande_ssh_nginx,
     commande_ssh_proxmox,
     commande_ssh_clt,
     commande_ssh_pa85,
@@ -56,7 +56,7 @@ def build(
         "executer_code":            executer_code,
         "rechercher_dans_fichiers": rechercher_dans_fichiers,
         "soc_status":               lambda args: soc_status(),
-        "commande_ssh_ngix":        commande_ssh_ngix,
+        "commande_ssh_nginx":        commande_ssh_nginx,
         "commande_ssh_proxmox":     commande_ssh_proxmox,
         "commande_ssh_clt":         commande_ssh_clt,
         "commande_ssh_pa85":        commande_ssh_pa85,

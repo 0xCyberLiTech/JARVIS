@@ -327,7 +327,7 @@ from blueprints.soc import (
     _fetch_monitoring,
     _ssh_clt,
     _ssh_dev1,
-    _ssh_ngix,
+    _ssh_nginx,
     _ssh_pa85,
     _ssh_proxmox,
     get_soc_status,
@@ -851,7 +851,7 @@ _rag.init(
     rag_meta_file     = RAG_META_FILE,
     rag_emb_file      = RAG_EMB_FILE,
     live_mod          = _rag_live_mod,
-    ssh_ngix          = _ssh_ngix,
+    ssh_nginx          = _ssh_nginx,
     ssh_log_timeout_s = _SSH_LOG_TIMEOUT_S,
     get_refresh_paths = lambda: [
         str(_WORKSPACE_ROOT / "JARVIS"  / "MEMORY.md"),
@@ -965,7 +965,7 @@ _SVC_BOUNCER = "crowdsec-firewall-bouncer"  # constante encore utilisée localem
 # dans scripts/ssh/. DI : 4 fonctions SSH (importées de blueprints.soc) +
 # module security_whitelists.
 _ssh.init(
-    ssh_ngix    = _ssh_ngix,
+    ssh_nginx    = _ssh_nginx,
     ssh_proxmox = _ssh_proxmox,
     ssh_clt     = _ssh_clt,
     ssh_pa85    = _ssh_pa85,
@@ -973,7 +973,7 @@ _ssh.init(
 )
 _ssh_timeout               = _ssh._ssh_timeout
 _tool_commande_ssh_run     = _ssh._tool_commande_ssh_run
-_tool_commande_ssh_ngix    = _ssh._tool_commande_ssh_ngix
+_tool_commande_ssh_nginx    = _ssh._tool_commande_ssh_nginx
 _tool_commande_ssh_proxmox = _ssh._tool_commande_ssh_proxmox
 _tool_commande_ssh_clt     = _ssh._tool_commande_ssh_clt
 _tool_commande_ssh_pa85    = _ssh._tool_commande_ssh_pa85
@@ -1003,7 +1003,7 @@ _TOOL_DISPATCH = _tools_dispatch.build(
     executer_code            = _tool_executer_code,
     rechercher_dans_fichiers = _tool_rechercher_dans_fichiers,
     soc_status               = _tool_soc_status,
-    commande_ssh_ngix        = _tool_commande_ssh_ngix,
+    commande_ssh_nginx        = _tool_commande_ssh_nginx,
     commande_ssh_proxmox     = _tool_commande_ssh_proxmox,
     commande_ssh_clt         = _tool_commande_ssh_clt,
     commande_ssh_pa85        = _tool_commande_ssh_pa85,
@@ -1281,7 +1281,7 @@ _chat_build_messages = _chat_msg.build_messages
 _APT_HOST_MAP = {
     "commande_ssh_clt":     ("clt",      _ssh_clt),
     "commande_ssh_pa85":    ("pa85",     _ssh_pa85),
-    "commande_ssh_ngix":    ("srv-nginx", _ssh_ngix),
+    "commande_ssh_nginx":    ("srv-nginx", _ssh_nginx),
     "commande_ssh_proxmox": ("proxmox",  _ssh_proxmox),
 }
 _cr_tasks            = _cr_mod.tasks  # state partagé (utilisé par /api/cr-poll/<task_id>)
@@ -1334,9 +1334,9 @@ _FILE_VM_SSH = {
     "srv-clt":  ("clt",      _ssh_clt),
     "pa85":     ("pa85",     _ssh_pa85),
     "srv-pa85": ("pa85",     _ssh_pa85),
-    "ngix":     ("srv-nginx", _ssh_ngix),
-    "nginx":    ("srv-nginx", _ssh_ngix),
-    "srv-nginx": ("srv-nginx", _ssh_ngix),
+    "ngix":     ("srv-nginx", _ssh_nginx),
+    "nginx":    ("srv-nginx", _ssh_nginx),
+    "srv-nginx": ("srv-nginx", _ssh_nginx),
     "proxmox":  ("proxmox",  _ssh_proxmox),
     "dev":      ("srv-dev-1",_ssh_dev1),
     "dev-1":    ("srv-dev-1",_ssh_dev1),
@@ -1488,7 +1488,7 @@ app.register_blueprint(_dev.bp)
 # (qui consomme _apt_upgrade_bypass_sse). DI : 5 SSH fns + 3 modules bypass +
 # _pve_fetch_state + _sse_tok + _log + dicts mutables.
 _bypass_wrap.init(
-    ssh_ngix          = _ssh_ngix,
+    ssh_nginx          = _ssh_nginx,
     ssh_proxmox       = _ssh_proxmox,
     ssh_clt           = _ssh_clt,
     ssh_pa85          = _ssh_pa85,

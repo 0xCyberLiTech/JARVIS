@@ -5,7 +5,7 @@ Extrait de blueprints/soc.py le 2026-05-22 (refactor incrémental, étape 1 —
 « couverture d'abord, refactor ensuite »). Cluster cohérent et entièrement
 couvert par tests avant extraction.
 
-Dépendance unique injectée par `init()` : la fonction `_ssh_ngix` de soc.py
+Dépendance unique injectée par `init()` : la fonction `_ssh_nginx` de soc.py
 (exécution SSH sur srv-nginx). Aucun couplage en sens inverse.
 
 Consommé par les routes /api/soc/ip-history et /api/soc/ip-deep (soc.py), qui
@@ -17,13 +17,13 @@ import json
 _F2B_HISTORY_LIMIT = 10        # entrées historique fail2ban dans ip-deep
 
 # Injecté par init() — fonction SSH srv-nginx de soc.py. (ssh_arr → (ok, out))
-_ssh_ngix = None
+_ssh_nginx = None
 
 
-def init(ssh_ngix) -> None:
+def init(ssh_nginx) -> None:
     """Injecte la dépendance SSH srv-nginx depuis soc.py."""
-    global _ssh_ngix
-    _ssh_ngix = ssh_ngix
+    global _ssh_nginx
+    _ssh_nginx = ssh_nginx
 
 
 def _b64py(script: str) -> str:
@@ -33,7 +33,7 @@ def _b64py(script: str) -> str:
 
 def _ssh_json_exec(script: str, timeout: int = 10) -> dict:
     """Exécute un script Python via SSH b64, retourne le JSON parsé ou {}."""
-    ok, out = _ssh_ngix(_b64py(script), timeout=timeout)
+    ok, out = _ssh_nginx(_b64py(script), timeout=timeout)
     try:
         return json.loads(out.strip()) if ok and out.strip().startswith('{') else {}
     except Exception:
@@ -55,7 +55,7 @@ def _deep_geoip(ip: str) -> dict:
 
 def _deep_crowdsec(ip: str) -> dict:
     """CrowdSec — décisions actives + alertes 30j."""
-    ok, out = _ssh_ngix(f"cscli decisions list --ip {ip} -o json 2>/dev/null || echo '[]'", timeout=10)
+    ok, out = _ssh_nginx(f"cscli decisions list --ip {ip} -o json 2>/dev/null || echo '[]'", timeout=10)
     try:
         cs_raw = json.loads(out) if ok else []
         if not isinstance(cs_raw, list):
@@ -68,7 +68,7 @@ def _deep_crowdsec(ip: str) -> dict:
     for alert in cs_raw:
         for d in (alert.get("decisions") or []):
             cs_decisions.append(d)
-    ok, out = _ssh_ngix(
+    ok, out = _ssh_nginx(
         f"cscli alerts list --ip {ip} --since 720h -o json 2>/dev/null || echo '[]'", timeout=12
     )
     try:
@@ -144,7 +144,7 @@ def _deep_nginx_hits(ip: str) -> int:
         f"b=$(zcat /var/log/nginx/access.log.*.gz 2>/dev/null | grep -c ' {ip} ' 2>/dev/null || echo 0);"
         "echo $((a+b))"
     )
-    ok, out = _ssh_ngix(cmd, timeout=15)
+    ok, out = _ssh_nginx(cmd, timeout=15)
     try:
         return int(out.strip()) if ok and out.strip().isdigit() else 0
     except Exception:
@@ -153,7 +153,7 @@ def _deep_nginx_hits(ip: str) -> int:
 
 def _deep_nginx_last(ip: str) -> list:
     """nginx — dernières requêtes (aperçu 5 lignes)."""
-    ok, out = _ssh_ngix(
+    ok, out = _ssh_nginx(
         f"grep ' {ip} ' /var/log/nginx/access.log 2>/dev/null | tail -5", timeout=10
     )
     return [ln.strip() for ln in out.split('\n') if ln.strip()] if ok else []
@@ -165,7 +165,7 @@ def _deep_rsyslog(ip: str) -> dict:
         f"grep -r '{ip}' /var/log/central/ --include='*.log' -c 2>/dev/null"
         " | grep -v ':0$' | sort -t: -k2 -rn | head -15"
     )
-    ok, out = _ssh_ngix(cmd, timeout=25)
+    ok, out = _ssh_nginx(cmd, timeout=25)
     counts = {}
     total  = 0
     if ok:

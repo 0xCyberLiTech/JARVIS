@@ -422,7 +422,7 @@ def _fetch_monitoring(timeout=12, force=False):
         _log.warning(f"[fetch_monitoring] HTTP échoué ({e}) — fallback SSH")
         elapsed = time.monotonic() - _t_start
         ssh_timeout = max(3, min(10, 15 - int(elapsed)))  # reste du budget 15s
-        ok, raw = _ssh_ngix("cat /var/www/monitoring/monitoring.json", timeout=ssh_timeout)
+        ok, raw = _ssh_nginx("cat /var/www/monitoring/monitoring.json", timeout=ssh_timeout)
         if ok and raw:
             _monitoring_cache["raw"] = raw
             _monitoring_cache["ts"] = now
@@ -474,7 +474,7 @@ def _ssh_host(ssh_arr, remote_cmd, timeout=20, retries=1):
     return False, last_err
 
 
-def _ssh_ngix(remote_cmd, timeout=20, retries=1):
+def _ssh_nginx(remote_cmd, timeout=20, retries=1):
     """Exécute une commande sur srv-nginx via SSH."""
     return _ssh_host(_SSH_NGIX, remote_cmd, timeout, retries)
 
@@ -526,12 +526,12 @@ def _ban_ip_ssh(ip: str, reason: str, duration: str = "24h") -> tuple:
     cmd = (f"cscli decisions add --ip {shlex.quote(ip)} "
            f"--reason {shlex.quote(reason)} "
            f"--duration {shlex.quote(duration)} --type ban")
-    ok, out = _ssh_ngix(cmd)
+    ok, out = _ssh_nginx(cmd)
     if ok:
         return True, out
     # Vérification post-échec : l'IP est peut-être déjà bannie (doublon gap-check/JS)
     check_cmd = f"cscli decisions list --ip {shlex.quote(ip)} -o json 2>/dev/null | python3 -c \"import sys,json; d=json.load(sys.stdin); print('banned' if d else 'none')\" 2>/dev/null || echo none"
-    _, check_out = _ssh_ngix(check_cmd)
+    _, check_out = _ssh_nginx(check_cmd)
     if check_out.strip() == "banned":
         _log.info(f"[SOC] _ban_ip_ssh {ip} — déjà banni (doublon race) — traité comme succès")
         return True, "already-banned"
@@ -688,7 +688,7 @@ def api_soc_unban_ip():
     except ValueError:
         return Response(json.dumps({"error": "IP invalide"}), status=400, mimetype="application/json")
     cmd = f"cscli decisions delete --ip {shlex.quote(ip)}"
-    ok, out = _ssh_ngix(cmd)
+    ok, out = _ssh_nginx(cmd)
     _soc_log("unban_ip", ip, ok, out)
     return Response(json.dumps({"ok": ok, "ip": ip, "result": out}, ensure_ascii=False), mimetype="application/json")
 
@@ -703,7 +703,7 @@ def api_soc_restart_service():
         return Response(json.dumps({"error": f"Service non autorisé. Autorisés: {sorted(_ALLOWED_SERVICES)}"}),
                         status=403, mimetype="application/json")
     cmd = f"systemctl restart {shlex.quote(svc)}"
-    ok, out = _ssh_ngix(cmd, timeout=20)
+    ok, out = _ssh_nginx(cmd, timeout=20)
     _soc_log("restart_service", svc, ok, out)
     return Response(json.dumps({"ok": ok, "service": svc, "result": out}, ensure_ascii=False), mimetype="application/json")
 
@@ -745,8 +745,8 @@ def api_soc_test():
     """Diagnostic complet mode proactif : API + SSH + TTS."""
     results = {}
     results["jarvis_api"] = {"ok": True, "msg": "JARVIS API opérationnelle"}
-    ok_ssh, out_ssh = _ssh_ngix("echo JARVIS_SOC_TEST_OK", timeout=8)
-    results["ssh_ngix"] = {
+    ok_ssh, out_ssh = _ssh_nginx("echo JARVIS_SOC_TEST_OK", timeout=8)
+    results["ssh_nginx"] = {
         "ok": ok_ssh,
         "msg": ("SSH srv-nginx opérationnel" if ok_ssh else "SSH srv-nginx KO — " + out_ssh[:_SSH_ERR_TRUNCATE])
     }
@@ -755,7 +755,7 @@ def api_soc_test():
         results["tts"] = {"ok": True, "msg": "TTS déclenché"}
     except Exception as e:
         results["tts"] = {"ok": False, "msg": str(e)}
-    results["overall"] = results["jarvis_api"]["ok"] and results["ssh_ngix"]["ok"] and results["tts"]["ok"]
+    results["overall"] = results["jarvis_api"]["ok"] and results["ssh_nginx"]["ok"] and results["tts"]["ok"]
     return Response(json.dumps(results, ensure_ascii=False), mimetype="application/json")
 
 
@@ -933,7 +933,7 @@ def api_soc_context():
 
 # Cluster _deep_* (investigation IP) extrait dans soc_ip_deep.py — refactor
 # incrémental 2026-05-22. Alias légers : routes ip-history/ip-deep inchangées.
-soc_ip_deep.init(_ssh_ngix)
+soc_ip_deep.init(_ssh_nginx)
 _deep_geoip      = soc_ip_deep._deep_geoip
 _deep_crowdsec   = soc_ip_deep._deep_crowdsec
 _deep_fail2ban   = soc_ip_deep._deep_fail2ban
@@ -984,7 +984,7 @@ def api_soc_ip_deep():
     }
 
     # ── WHOIS/ASN ─────────────────────────────────────────────────
-    ok, out = _ssh_ngix(
+    ok, out = _ssh_nginx(
         f"whois {ip} 2>/dev/null"
         r" | grep -iE '^(org-name|netname|descr|country|orgname|owner|route|cidr|org-type):'"
         " | head -12",
@@ -1326,7 +1326,7 @@ def _check_services(svc: dict) -> list:
             up = str(val).lower() in ("up", "true", "1", "running", "ok")
         if not up and _soc_cooldown_ok(f"svc_{name}", minutes=15):
             if name in _ALLOWED_SERVICES:
-                ok_rst, out_rst = _ssh_ngix(f"systemctl restart {shlex.quote(name)}", timeout=30)
+                ok_rst, out_rst = _ssh_nginx(f"systemctl restart {shlex.quote(name)}", timeout=30)
                 _soc_log("restart_service", f"{name} — DOWN détecté, restart auto (dashboard fermé)", ok_rst, out_rst)
                 if ok_rst:
                     parts.append(f"Service {name} était hors ligne. Redémarrage automatique effectué.")

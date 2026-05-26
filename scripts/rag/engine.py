@@ -30,7 +30,7 @@ _rag_dir:             object = None
 _rag_meta_file:       object = None
 _rag_emb_file:        object = None
 _live_mod:            object = None
-_ssh_ngix:            object = None
+_ssh_nginx:            object = None
 _ssh_log_timeout_s:   int = 5
 _log:                 object = None
 
@@ -38,11 +38,11 @@ _log:                 object = None
 def init(*, ollama_circuit, ollama_url, embed_model, embed_timeout_s,
          chunk_size, chunk_over, top_n, threshold,
          rag_dir, rag_meta_file, rag_emb_file,
-         live_mod, ssh_ngix, ssh_log_timeout_s, log) -> None:
+         live_mod, ssh_nginx, ssh_log_timeout_s, log) -> None:
     global _ollama_circuit, _ollama_url, _embed_model, _embed_timeout_s
     global _chunk_size, _chunk_over, _top_n, _threshold
     global _rag_dir, _rag_meta_file, _rag_emb_file
-    global _live_mod, _ssh_ngix, _ssh_log_timeout_s, _log
+    global _live_mod, _ssh_nginx, _ssh_log_timeout_s, _log
     _ollama_circuit    = ollama_circuit
     _ollama_url        = ollama_url
     _embed_model       = embed_model
@@ -55,7 +55,7 @@ def init(*, ollama_circuit, ollama_url, embed_model, embed_timeout_s,
     _rag_meta_file     = rag_meta_file
     _rag_emb_file      = rag_emb_file
     _live_mod          = live_mod
-    _ssh_ngix          = ssh_ngix
+    _ssh_nginx          = ssh_nginx
     _ssh_log_timeout_s = ssh_log_timeout_s
     _log               = log
 
@@ -160,13 +160,13 @@ def _rag_index_text(text: str, source: str) -> int:
 
 
 def _rag_live_refresh():
-    """Wrapper — injecte _ssh_ngix puis délègue."""
-    _live_mod.refresh(_ssh_ngix, timeout=_ssh_log_timeout_s)
+    """Wrapper — injecte _ssh_nginx puis délègue."""
+    _live_mod.refresh(_ssh_nginx, timeout=_ssh_log_timeout_s)
 
 
 def _rag_live_prewarm():
-    """Wrapper — injecte _ssh_ngix puis délègue."""
-    _live_mod.prewarm(_ssh_ngix, timeout=_ssh_log_timeout_s)
+    """Wrapper — injecte _ssh_nginx puis délègue."""
+    _live_mod.prewarm(_ssh_nginx, timeout=_ssh_log_timeout_s)
 
 
 def _rag_query(query: str) -> list:
@@ -217,7 +217,7 @@ def _rag_inject(system: str, query: str) -> str:
     # RAG live SOC — injection directe du texte brut (sans embedding = sans latence)
     if _live_mod.should_inject(query):
         # Refresh async si TTL expiré — on sert toujours le cache existant sans attendre
-        _live_mod.trigger_async_refresh(_ssh_ngix, timeout=_ssh_log_timeout_s)
+        _live_mod.trigger_async_refresh(_ssh_nginx, timeout=_ssh_log_timeout_s)
         live_txt = _live_mod.get_text()
         if live_txt:
             system = system + f"\n\n[LOGS TEMPS RÉEL — srv-nginx]\n{live_txt}\n"

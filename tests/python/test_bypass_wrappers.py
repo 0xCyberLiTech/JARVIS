@@ -18,10 +18,10 @@ def _reinit_wrappers():
     Sans cette restauration, les tests bypass_wrappers contaminent les tests
     suivants (test_jarvis_functions::test_detect_service_restart_*) qui lisent
     `jm._detect_service_restart` (= alias vers `bp_wrap.detect_service_restart`)
-    et s'attendent à la VRAIE fonction _ssh_ngix injectée au boot de jarvis."""
+    et s'attendent à la VRAIE fonction _ssh_nginx injectée au boot de jarvis."""
     # Snapshot état actuel pour restauration en teardown
     saved = {k: getattr(bp_wrap, k) for k in (
-        "_ssh_ngix", "_ssh_proxmox", "_ssh_clt", "_ssh_pa85", "_ssh_dev1",
+        "_ssh_nginx", "_ssh_proxmox", "_ssh_clt", "_ssh_pa85", "_ssh_dev1",
         "_bypass_pve", "_bypass_code", "_bypass_bk",
         "_pve_fetch_state", "_sse_tok", "_log",
         "_pending_infra_cmd", "_allowed_scripts",
@@ -29,7 +29,7 @@ def _reinit_wrappers():
         "VM_START_SSH_MAP", "UPDATE_REBOOT_HOSTS", "SVC_RESTART_RE",
     )}
 
-    ssh_ngix    = MagicMock(name="ssh_ngix",    return_value=(True, ""))
+    ssh_nginx    = MagicMock(name="ssh_nginx",    return_value=(True, ""))
     ssh_proxmox = MagicMock(name="ssh_proxmox", return_value=(True, ""))
     ssh_clt     = MagicMock(name="ssh_clt",     return_value=(True, ""))
     ssh_pa85    = MagicMock(name="ssh_pa85",    return_value=(True, ""))
@@ -51,7 +51,7 @@ def _reinit_wrappers():
         return f"data: {json.dumps({'type':'token','token':txt,'done':done})}\n\n"
 
     bp_wrap.init(
-        ssh_ngix=ssh_ngix,
+        ssh_nginx=ssh_nginx,
         ssh_proxmox=ssh_proxmox,
         ssh_clt=ssh_clt,
         ssh_pa85=ssh_pa85,
@@ -90,12 +90,12 @@ def test_init_calcule_tables_couplees_ssh():
 
 
 def test_detect_service_restart_nginx_route_vers_ngix():
-    """'redémarre nginx' → (srv-nginx, ssh_ngix, nginx)."""
+    """'redémarre nginx' → (srv-nginx, ssh_nginx, nginx)."""
     result = bp_wrap.detect_service_restart("redémarre nginx maintenant")
     assert result is not None
     host, ssh_fn, svc = result
     assert host == "srv-nginx"
-    assert ssh_fn is bp_wrap._ssh_ngix
+    assert ssh_fn is bp_wrap._ssh_nginx
     assert svc == "nginx"
 
 

@@ -21,8 +21,8 @@ def _make_args(**overrides):
     args = dict(
         call_llm_with_tools_fn=lambda msgs, model_override=None: _no_tool_msg(),
         execute_tool_fn=lambda name, args: f"result-of-{name}",
-        tool_dispatch={"ssh_ngix": object(), "vm_status": object()},
-        apt_host_map={"ssh_ngix": ("srv-nginx", lambda: None)},
+        tool_dispatch={"ssh_nginx": object(), "vm_status": object()},
+        apt_host_map={"ssh_nginx": ("srv-nginx", lambda: None)},
         pending_infra_cmd={},
         parse_upgradable_packages_fn=lambda txt: [],
         log_info_fn=lambda msg: None,
@@ -158,7 +158,7 @@ def test_apt_list_capture_dans_pending():
     """`apt list --upgradable` détecté → pending_infra_cmd peuplé."""
     msgs = []
     calls = [
-        _tool_msg("ssh_ngix", {"commande": "apt list --upgradable"}),
+        _tool_msg("ssh_nginx", {"commande": "apt list --upgradable"}),
         _no_tool_msg(),
     ]
     it = iter(calls)
@@ -182,7 +182,7 @@ def test_apt_capture_pas_si_pas_de_paquets_parses():
     """Si parse retourne [] → pas de capture."""
     msgs = []
     calls = [
-        _tool_msg("ssh_ngix", {"commande": "apt list --upgradable"}),
+        _tool_msg("ssh_nginx", {"commande": "apt list --upgradable"}),
         _no_tool_msg(),
     ]
     it = iter(calls)

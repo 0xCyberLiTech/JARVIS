@@ -29,7 +29,7 @@ _ROUTE_LIMITS = {
 def init(*, limiter, log, ollama_circuit, ollama_url, embed_model, embed_timeout_s,
          chunk_size, chunk_over, top_n, threshold,
          rag_dir, rag_meta_file, rag_emb_file,
-         live_mod, ssh_ngix, ssh_log_timeout_s,
+         live_mod, ssh_nginx, ssh_log_timeout_s,
          get_refresh_paths) -> None:
     """Injecte toutes les dépendances de la tuile et applique les rate limits."""
     engine.init(
@@ -45,7 +45,7 @@ def init(*, limiter, log, ollama_circuit, ollama_url, embed_model, embed_timeout
         rag_meta_file     = rag_meta_file,
         rag_emb_file      = rag_emb_file,
         live_mod          = live_mod,
-        ssh_ngix          = ssh_ngix,
+        ssh_nginx          = ssh_nginx,
         ssh_log_timeout_s = ssh_log_timeout_s,
         log               = log,
     )

@@ -323,7 +323,7 @@ jarvis_mcp_server.py (NDT-LONG refactorisé — 0 fonction >80L)
 
 | Outil | Hôte | IP | Port | Clé SSH |
 |---|---|---|---|---|
-| `commande_ssh_ngix` | srv-nginx (VM 108) | 192.168.1.50 | 2272 | `~/.ssh/id_nginx` |
+| `commande_ssh_nginx` | srv-nginx (VM 108) | 192.168.1.50 | 2272 | `~/.ssh/id_nginx` |
 | `commande_ssh_proxmox` | Proxmox VE | 192.168.1.20 | 2272 | `~/.ssh/id_proxmox` |
 | `commande_ssh_clt` | clt (VM 106) | 192.168.1.12 | 2272 | `~/.ssh/id_clt` |
 | `commande_ssh_pa85` | pa85 (VM 107) | 192.168.1.13 | 2272 | `~/.ssh/id_pa85` |
