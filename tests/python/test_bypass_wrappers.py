@@ -82,14 +82,14 @@ def test_init_calcule_tables_couplees_ssh():
     """init() rempli VM_START_SSH_MAP + UPDATE_REBOOT_HOSTS + SVC_RESTART_RE."""
     assert 108 in bp_wrap.VM_START_SSH_MAP
     assert bp_wrap.VM_START_SSH_MAP[108][0] == "srv-nginx"
-    assert len(bp_wrap.UPDATE_REBOOT_HOSTS) == 5  # ngix, clt, pa85, dev-1, proxmox
+    assert len(bp_wrap.UPDATE_REBOOT_HOSTS) == 5  # nginx, clt, pa85, dev-1, proxmox
     assert bp_wrap.SVC_RESTART_RE is not None
 
 
 # ── detect_service_restart ─────────────────────────────────────────────────
 
 
-def test_detect_service_restart_nginx_route_vers_ngix():
+def test_detect_service_restart_nginx_route_vers_nginx():
     """'redémarre nginx' → (srv-nginx, ssh_nginx, nginx)."""
     result = bp_wrap.detect_service_restart("redémarre nginx maintenant")
     assert result is not None
@@ -99,7 +99,7 @@ def test_detect_service_restart_nginx_route_vers_ngix():
     assert svc == "nginx"
 
 
-def test_detect_service_restart_crowdsec_route_vers_ngix():
+def test_detect_service_restart_crowdsec_route_vers_nginx():
     """'restart crowdsec' → srv-nginx."""
     host, _ssh, svc = bp_wrap.detect_service_restart("restart crowdsec")
     assert host == "srv-nginx"

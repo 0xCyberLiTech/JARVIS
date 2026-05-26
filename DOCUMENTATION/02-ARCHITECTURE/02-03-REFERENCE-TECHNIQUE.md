@@ -335,7 +335,7 @@ jarvis_mcp_server.py (NDT-LONG refactorisé — 0 fonction >80L)
 | N°1 | SSH obligatoire AVANT de répondre — jamais de mémoire, jamais d'estimation |
 | N°2 | Valeurs SSH reproduites EXACTES — zéro arrondi, zéro reformulation des chiffres |
 | N°3 | UN seul appel outil par question — pas de boucle |
-| N°4 | `qm/pvesh/pvesm` exclusifs à l'hôte Proxmox — jamais via ngix/clt/pa85 |
+| N°4 | `qm/pvesh/pvesm` exclusifs à l'hôte Proxmox — jamais via nginx/clt/pa85 |
 | N°5 | `systemctl restart` autorisé pour apache2/nginx/crowdsec/fail2ban + vérification `is-active` obligatoire après |
 
 ### 8.3 Opérations autorisées avec confirmation

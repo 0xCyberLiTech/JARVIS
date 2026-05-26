@@ -413,7 +413,7 @@ inflaté → consolidé honnêtement **84/100**, puis **88/100** après correcti
   `ALLOWED_SOC_RESTART_SVCS` : l'auto-engine SOC `_check_services` (déclencheur #10)
   ne pouvait pas le redémarrer faute de whitelist — incohérence pré-existante avec
   `08-JARVIS-DEFENSE.md`, corrigée le jour même.
-- **M1** (MOYEN) — `_SSH_DEV1` hardcodé `192.168.1.21` alors que ngix/clt/pa85/proxmox
+- **M1** (MOYEN) — `_SSH_DEV1` hardcodé `192.168.1.21` alors que nginx/clt/pa85/proxmox
   passaient par `soc_config.json`. Ajout des clés `dev1_*` aux défauts, `_SSH_DEV1`
   dérivé de `_SOC_CFG` comme ses 4 pairs.
 - **M2** (MOYEN) — bloc `[tool.ruff]` mort dans `pyproject.toml` : ruff lit
@@ -735,7 +735,7 @@ La roadmap était simplement **obsolète** (TODO non actualisé après livraison
 
 **Format JSONL** (1 ligne par appel · forensic ciblé) :
 ```json
-{"ts":"2026-05-17T07:13:27Z","host":"ngix","cmd":"systemctl restart nginx","allowed":true,"out_len":27}
+{"ts":"2026-05-17T07:13:27Z","host":"nginx","cmd":"systemctl restart nginx","allowed":true,"out_len":27}
 {"ts":"2026-05-17T07:13:28Z","host":"clt","cmd":"systemctl restart evilsvc","allowed":false,"out_len":51}
 ```
 
@@ -1936,7 +1936,7 @@ Nouveau mécanisme bypass `_pending_infra_cmd` — "oui" après proposition apt 
 | `_CANCEL_RE` | regex `non/annule/cancel/...` — efface le pending |
 | `_apt_upgrade_bypass_sse()` | générateur SSE — SSH direct + TTS résultat |
 | Détection double | `"upgradable" in cmd` OU `/stable` + `pouvant être` dans résultat |
-| `_run_tool_calls` | capture paquets après `commande_ssh_clt/pa85/ngix` |
+| `_run_tool_calls` | capture paquets après `commande_ssh_clt/pa85/nginx` |
 | `/api/debug/inject-pending` | endpoint test — valide le bypass sans vraies MAJ |
 
 **Validé en production** : test "oui" → `✓ 0 paquet(s) mis à jour sur clt` instantané, zéro Ollama.

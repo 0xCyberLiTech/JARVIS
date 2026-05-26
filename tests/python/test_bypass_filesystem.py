@@ -23,7 +23,7 @@ def _vm_map():
     ssh_nginx = lambda cmd: (True, f"OK: {cmd}")  # noqa: E731
     ssh_clt = lambda cmd: (True, f"CLT: {cmd}")  # noqa: E731
     return {
-        "ngix": ("srv-nginx", ssh_nginx),
+        "nginx": ("srv-nginx", ssh_nginx),
         "srv-nginx": ("srv-nginx", ssh_nginx),
         "clt": ("srv-clt", ssh_clt),
         "srv-clt": ("srv-clt", ssh_clt),
@@ -76,8 +76,8 @@ def test_sur_vm_re_match_explicite():
 
 
 def test_sur_vm_re_match_alias_court():
-    m = SUR_VM_RE.search("sur ngix")
-    assert m.group(1).lower() == "ngix"
+    m = SUR_VM_RE.search("sur nginx")
+    assert m.group(1).lower() == "nginx"
 
 
 def test_fpath_re_match_chemin_absolu():
@@ -118,7 +118,7 @@ def test_resolve_path_chemin_relatif_etc_prefixe_par_slash():
 # ── _resolve_vm ──────────────────────────────────────────────────────────
 
 
-def test_resolve_vm_explicite_sur_ngix():
+def test_resolve_vm_explicite_sur_nginx():
     vm_name, _ = _resolve_vm("lis nginx.conf sur srv-nginx", _vm_map())
     assert vm_name == "srv-nginx"
 
@@ -176,7 +176,9 @@ def test_detect_file_command_aucun_path_renvoie_none():
 
 
 def test_detect_file_command_aucune_vm_renvoie_none():
-    assert detect_file_command("lis nginx.conf", _vm_map()) is None
+    # Note 2026-05-26 : 'nginx.conf' matche desormais l'alias 'nginx' (nouveau hostname).
+    # On utilise 'myfile.conf' pour valider l'absence de VM mentionnee.
+    assert detect_file_command("lis myfile.conf", _vm_map()) is None
 
 
 # ── detect_multi_file_command ────────────────────────────────────────────

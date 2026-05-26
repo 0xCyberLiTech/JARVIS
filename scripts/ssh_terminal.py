@@ -3,9 +3,9 @@
 Extrait de jarvis.py session 33 (2026-05-13) — Phase 3 module 11.
 
 Couvre :
-- Mapping des 4 hôtes SSH terminal (dev1/ngix/clt/pa85) — IP/port/user/key/label
+- Mapping des 4 hôtes SSH terminal (dev1/nginx/clt/pa85) — IP/port/user/key/label
   (retiré 2026-05-17)
-- Regex de détection ("ouvre terminal srv-dev-1", "connecte-moi à ngix", etc.)
+- Regex de détection ("ouvre terminal srv-dev-1", "connecte-moi à nginx", etc.)
 - Générateur SSE qui émet `open_ssh_terminal` pour déclencher le PTY xterm.js côté navigateur
 
 Le WebSocket handler PTY (`_ws_ssh_handler`) reste dans jarvis.py car couplé Flask-Sock + paramiko.
@@ -21,7 +21,7 @@ from bypass import code as bypass_code
 # ── Mapping SSH terminal (4 hôtes — retiré 2026-05-17)
 TERMINAL_MAP = {
     "dev1":   {"ip": bypass_code.CODE_DEV_IP,   "port": bypass_code.CODE_DEV_PORT, "user": "root",      "key": bypass_code.CODE_DEV_KEY,                "label": "srv-dev-1"},
-    "ngix":   {"ip": "192.168.1.50",            "port": 2272,                       "user": "root",      "key": str(Path.home() / ".ssh" / "id_nginx"),  "label": "srv-nginx"},
+    "nginx":   {"ip": "192.168.1.50",            "port": 2272,                       "user": "root",      "key": str(Path.home() / ".ssh" / "id_nginx"),  "label": "srv-nginx"},
     "clt":    {"ip": "192.168.1.12",            "port": 2272,                       "user": "root",      "key": str(Path.home() / ".ssh" / "id_clt"),    "label": "clt"},
     "pa85":   {"ip": "192.168.1.13",            "port": 2272,                       "user": "root",      "key": str(Path.home() / ".ssh" / "id_pa85"),   "label": "pa85"},
 }
@@ -34,9 +34,9 @@ TERMINAL_RE = {
         r'|\b(srv[-\s]?dev[-\s]?1|dev[-\s]?1|vm[-\s]?dev)\b.{0,30}\b(connect|ouvre?|terminal|ssh)\b',
         re.I,
     ),
-    "ngix": re.compile(
-        r'\b(connect[e|é][-\s]?moi|ouvre?|lance?|accède?|terminal|ssh)\b.{0,30}\b(srv[-\s]?ngix|ngix|nginx)\b'
-        r'|\b(srv[-\s]?ngix|ngix|nginx)\b.{0,30}\b(connect[e|é][-\s]?moi|ouvre?|terminal|ssh)\b',
+    "nginx": re.compile(
+        r'\b(connect[e|é][-\s]?moi|ouvre?|lance?|accède?|terminal|ssh)\b.{0,30}\b(srv[-\s]?nginx|ngix|nginx)\b'
+        r'|\b(srv[-\s]?nginx|ngix|nginx)\b.{0,30}\b(connect[e|é][-\s]?moi|ouvre?|terminal|ssh)\b',
         re.I,
     ),
     "clt": re.compile(

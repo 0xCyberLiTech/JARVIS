@@ -78,7 +78,7 @@ def _tool_commande_ssh_run(ssh_fn, label, args):
     return output[:4000] if output else "(aucune sortie)"
 
 
-def _tool_commande_ssh_nginx(args):    return _tool_commande_ssh_run(_ssh_nginx,    "ngix",    args)
+def _tool_commande_ssh_nginx(args):    return _tool_commande_ssh_run(_ssh_nginx,    "nginx",    args)
 def _tool_commande_ssh_proxmox(args): return _tool_commande_ssh_run(_ssh_proxmox, "proxmox", args)
 def _tool_commande_ssh_clt(args):     return _tool_commande_ssh_run(_ssh_clt,     "clt",     args)
 def _tool_commande_ssh_pa85(args):    return _tool_commande_ssh_run(_ssh_pa85,    "pa85",    args)

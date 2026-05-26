@@ -177,7 +177,7 @@ def audit_writeop(host: str, cmd: str, allowed: bool, output: str = "",
     Best-effort : un echec d'I/O n'interrompt JAMAIS l'execution de la commande.
 
     Args:
-        host: hote SSH cible (ngix/proxmox/clt/pa85/...)
+        host: hote SSH cible (nginx/proxmox/clt/pa85/...)
         cmd: commande SSH (tronquee a 500 chars dans le log pour limiter taille)
         allowed: True si check_write_op a autorise · False si refusee
         output: sortie commande (uniquement sa longueur est loggee, pas le contenu)

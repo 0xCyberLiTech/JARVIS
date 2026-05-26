@@ -8,7 +8,7 @@ import ssh_terminal
 
 def test_terminal_map_couvre_4_hotes():
     """retiré 2026-05-17"""
-    assert set(ssh_terminal.TERMINAL_MAP.keys()) == {"dev1", "ngix", "clt", "pa85"}
+    assert set(ssh_terminal.TERMINAL_MAP.keys()) == {"dev1", "nginx", "clt", "pa85"}
 
 
 def test_terminal_map_dev1_pointe_sur_srv_dev_1():
@@ -21,9 +21,9 @@ def test_terminal_map_dev1_pointe_sur_srv_dev_1():
     assert entry["label"] == "srv-dev-1"
 
 
-def test_terminal_map_ngix_ip_192_168_1_50():
-    assert ssh_terminal.TERMINAL_MAP["ngix"]["ip"] == "192.168.1.50"
-    assert ssh_terminal.TERMINAL_MAP["ngix"]["port"] == 2272
+def test_terminal_map_nginx_ip_192_168_1_50():
+    assert ssh_terminal.TERMINAL_MAP["nginx"]["ip"] == "192.168.1.50"
+    assert ssh_terminal.TERMINAL_MAP["nginx"]["port"] == 2272
 
 
 def test_terminal_map_clt_ip_192_168_1_12():
@@ -59,13 +59,13 @@ def test_re_dev1_pas_match_sans_verbe():
     assert not ssh_terminal.TERMINAL_RE["dev1"].search("info srv-dev-1")
 
 
-def test_re_ngix_match_ssh_nginx():
-    assert ssh_terminal.TERMINAL_RE["ngix"].search("ssh ngix")
+def test_re_nginx_match_ssh_nginx():
+    assert ssh_terminal.TERMINAL_RE["nginx"].search("ssh nginx")
 
 
-def test_re_ngix_match_terminal_nginx():
+def test_re_nginx_match_terminal_nginx():
     """Alias 'nginx' couvert."""
-    assert ssh_terminal.TERMINAL_RE["ngix"].search("ouvre terminal nginx")
+    assert ssh_terminal.TERMINAL_RE["nginx"].search("ouvre terminal nginx")
 
 
 def test_re_clt_match():
@@ -81,7 +81,7 @@ def test_re_pa85_match():
 
 def test_re_case_insensitive():
     """Les regex sont insensibles à la casse."""
-    assert ssh_terminal.TERMINAL_RE["ngix"].search("OUVRE TERMINAL NGIX")
+    assert ssh_terminal.TERMINAL_RE["nginx"].search("OUVRE TERMINAL NGIX")
 
 
 def test_re_aucun_match_phrase_quelconque():
@@ -108,15 +108,15 @@ def test_sse_tok_done_default_false():
 
 
 def test_terminal_sse_yield_2_events():
-    events = list(ssh_terminal.terminal_sse("ngix", "srv-nginx"))
+    events = list(ssh_terminal.terminal_sse("nginx", "srv-nginx"))
     assert len(events) == 2
 
 
 def test_terminal_sse_premier_event_open_ssh_terminal():
-    events = list(ssh_terminal.terminal_sse("ngix", "srv-nginx", user="root"))
+    events = list(ssh_terminal.terminal_sse("nginx", "srv-nginx", user="root"))
     payload = json.loads(events[0].replace("data: ", "").strip())
     assert payload["type"] == "open_ssh_terminal"
-    assert payload["host"] == "ngix"
+    assert payload["host"] == "nginx"
     assert payload["label"] == "srv-nginx"
     assert payload["user"] == "root"
 

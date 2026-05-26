@@ -689,11 +689,11 @@ def test_load_soc_config_override_partiel(monkeypatch, tmp_path):
     """Un override partiel ne remplace que les clés présentes ET connues."""
     import json as _j
     f = tmp_path / "soc_config.json"
-    f.write_text(_j.dumps({"ngix_host": "10.0.0.99", "cle_inconnue": "ignorée"}),
+    f.write_text(_j.dumps({"nginx_host": "10.0.0.99", "cle_inconnue": "ignorée"}),
                  encoding="utf-8")
     monkeypatch.setattr(soc, "_SOC_CONFIG_PATH", f)
     cfg = soc._load_soc_config()
-    assert cfg["ngix_host"] == "10.0.0.99"
+    assert cfg["nginx_host"] == "10.0.0.99"
     assert "cle_inconnue" not in cfg
     # Les autres clés gardent leurs défauts
     assert cfg["proxmox_host"] == soc._SOC_CONFIG_DEFAULTS["proxmox_host"]

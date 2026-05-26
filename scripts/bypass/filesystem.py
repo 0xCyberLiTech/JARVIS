@@ -70,7 +70,7 @@ FCORR_RE = re.compile(
 
 # VM cible explicite ("sur srv-nginx")
 SUR_VM_RE = re.compile(
-    r'\bsur\s+(clt|srv-clt|pa85|srv-pa85|ngix|nginx|srv-nginx|proxmox|dev|dev-1|srv-dev|srv-dev-1)\b',
+    r'\bsur\s+(clt|srv-clt|pa85|srv-pa85|nginx|nginx|srv-nginx|proxmox|dev|dev-1|srv-dev|srv-dev-1)\b',
     re.I,
 )
 

@@ -7,7 +7,7 @@ Transport : Streamable HTTP (/mcp) + SSE legacy (/sse) — port 5010
   jarvis_soc_status    — état SOC temps réel (menace, bans, services)
   jarvis_soc_ask       — question SOC avec contexte live injecté (monitoring.json)
   jarvis_stats         — statistiques JARVIS (uptime, sessions, TTS, STT)
-  jarvis_infra_status  — état des 4 hôtes SSH (proxmox/ngix/clt/pa85)
+  jarvis_infra_status  — état des 4 hôtes SSH (proxmox/nginx/clt/pa85)
   jarvis_proxmox_vms   — liste et état des VMs Proxmox
   jarvis_read_file     — lit un fichier distant sur une VM via JARVIS
   jarvis_model_switch  — change le modèle Ollama actif
@@ -173,7 +173,7 @@ _TOOLS_DEFS: list[Tool] = [
                       "Utilise quand l'utilisateur veut un aperçu général de la santé du homelab."),
          inputSchema={"type": "object",
                       "properties": {"focus": {"type": "string",
-                                               "description": "Hôte spécifique (optionnel) : 'proxmox', 'ngix', 'clt', 'pa85', ou vide pour tout"}},
+                                               "description": "Hôte spécifique (optionnel) : 'proxmox', 'nginx', 'clt', 'pa85', ou vide pour tout"}},
                       "required": []}),
     Tool(name="jarvis_proxmox_vms",
          description=("Liste les VMs Proxmox avec leur état (running/stopped), RAM, CPU, uptime. "
@@ -185,7 +185,7 @@ _TOOLS_DEFS: list[Tool] = [
                       "Utilise pendant une session de code pour lire nginx.conf, jail.conf, "
                       "un script, un log, etc. sans quitter VSCode."),
          inputSchema={"type": "object",
-                      "properties": {"vm":   {"type": "string", "description": "VM cible : 'ngix', 'clt', 'pa85', 'proxmox', 'srv-dev-1'"},
+                      "properties": {"vm":   {"type": "string", "description": "VM cible : 'nginx', 'clt', 'pa85', 'proxmox', 'srv-dev-1'"},
                                      "path": {"type": "string", "description": "Chemin absolu du fichier sur la VM (ex: /etc/nginx/nginx.conf)"}},
                       "required": ["vm", "path"]}),
     Tool(name="jarvis_model_switch",

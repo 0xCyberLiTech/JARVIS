@@ -170,7 +170,7 @@ mots_cles: ["glossaire", "terminologie", "soc", "jarvis", "definitions"]
 | **SSE** | Server-Sent Events — streaming HTTP unidirectionnel (utilisé pour le chat JARVIS) |
 | **STT** | Speech-to-Text — `faster-whisper large-v3-turbo` CUDA dans JARVIS |
 | **Suricata** | IDS réseau — alerte sur signatures malveillantes (port scan, EXPLOIT, etc.) |
-| **srv-dev-1 / clt / pa85 / ngix** | Hôtes du homelab (VM Proxmox) |
+| **srv-dev-1 / clt / pa85 / nginx** | Hôtes du homelab (VM Proxmox) |
 
 ## T
 

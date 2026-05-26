@@ -239,7 +239,7 @@ Message utilisateur (JS)
                    │                   │                      │
           VM command ?          Bypass direct ?         ROUTING
           arrête/démarre        service restart          3 branches
-          pa85/clt/ngix         backup · fichier         │
+          pa85/clt/nginx         backup · fichier         │
                    │                   │                      │
                    ▼                   ▼                      ▼
           subprocess direct    SSH direct / PS1     _jarvis_mode ?
@@ -365,7 +365,7 @@ _ssh_proxmox(cmd)        ← appelle _ssh_host() avec _SSH_LOCK
       │
       ▼
 with _SSH_LOCK:           ← lock global partagé avec monitoring loop
-    subprocess.run(...)   ← bloqué — monitoring loop occupe le lock (SSH ngix 30s)
+    subprocess.run(...)   ← bloqué — monitoring loop occupe le lock (SSH nginx 30s)
 ```
 
 **Fix :** subprocess direct sans passer par le lock :

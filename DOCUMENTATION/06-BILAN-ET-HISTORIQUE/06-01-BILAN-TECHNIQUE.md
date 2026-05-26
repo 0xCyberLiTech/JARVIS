@@ -1140,7 +1140,7 @@ JARVIS consomme `monitoring.json` (cron srv-nginx 1min) via 3 patterns :
 
 **Format JSONL** (1 ligne par appel) :
 ```json
-{"ts":"2026-05-17T07:13:27Z","host":"ngix","cmd":"systemctl restart nginx","allowed":true,"out_len":27}
+{"ts":"2026-05-17T07:13:27Z","host":"nginx","cmd":"systemctl restart nginx","allowed":true,"out_len":27}
 {"ts":"2026-05-17T07:13:28Z","host":"clt","cmd":"systemctl restart evilsvc","allowed":false,"out_len":51}
 ```
 
@@ -1154,7 +1154,7 @@ JARVIS consomme `monitoring.json` (cron srv-nginx 1min) via 3 patterns :
 
 4 hôtes terminal interactif xterm.js : srv-dev-1 · srv-nginx · clt · pa85. Mode interactif WebSocket PTY (paramiko).
 
-**Hôtes write ops via `_tool_commande_ssh_*`** : 4 wrappers (ngix · proxmox · clt · pa85). Toute commande qui matche un `BLOCKED_SSH_PATTERN` doit passer `check_write_op` → si whitelistée, exécution + audit log.
+**Hôtes write ops via `_tool_commande_ssh_*`** : 4 wrappers (nginx · proxmox · clt · pa85). Toute commande qui matche un `BLOCKED_SSH_PATTERN` doit passer `check_write_op` → si whitelistée, exécution + audit log.
 
 ### 8.3. Profil SOC anti-double-ban (`_SOC_BAN_CONFIG`)
 

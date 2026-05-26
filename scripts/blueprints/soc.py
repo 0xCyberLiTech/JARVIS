@@ -249,10 +249,10 @@ _load_cooldowns()
 # ════════════════════════════════════════════════════════════════
 _SOC_CONFIG_PATH = _SCRIPTS_DIR / "soc_config.json"
 _SOC_CONFIG_DEFAULTS = {
-    "ngix_host":         "192.168.1.50",
-    "ngix_ssh_port":     "2272",
-    "ngix_ssh_user":     "root",
-    "ngix_ssh_key":      str(Path.home() / ".ssh/id_nginx"),
+    "nginx_host":         "192.168.1.50",
+    "nginx_ssh_port":     "2272",
+    "nginx_ssh_user":     "root",
+    "nginx_ssh_key":      str(Path.home() / ".ssh/id_nginx"),
     "monitoring_url":    "http://192.168.1.50:8080/monitoring.json",
     "proxmox_host":      "192.168.1.20",
     "proxmox_ssh_port":  "2272",
@@ -295,7 +295,7 @@ def _ssh_base(user, host, port, key):
             f"{user}@{host}"]
 
 # ── Config SSH — tous les hôtes ───────────────────────────────
-_SSH_NGIX    = _ssh_base(_SOC_CFG["ngix_ssh_user"],    _SOC_CFG["ngix_host"],    _SOC_CFG["ngix_ssh_port"],    _SOC_CFG["ngix_ssh_key"])
+_SSH_NGIX    = _ssh_base(_SOC_CFG["nginx_ssh_user"],    _SOC_CFG["nginx_host"],    _SOC_CFG["nginx_ssh_port"],    _SOC_CFG["nginx_ssh_key"])
 _SSH_PROXMOX = _ssh_base(_SOC_CFG["proxmox_ssh_user"], _SOC_CFG["proxmox_host"], _SOC_CFG["proxmox_ssh_port"], _SOC_CFG["proxmox_ssh_key"])
 _SSH_CLT     = _ssh_base(_SOC_CFG["clt_ssh_user"],     _SOC_CFG["clt_host"],     _SOC_CFG["clt_ssh_port"],     _SOC_CFG["clt_ssh_key"])
 _SSH_PA85    = _ssh_base(_SOC_CFG["pa85_ssh_user"],     _SOC_CFG["pa85_host"],    _SOC_CFG["pa85_ssh_port"],    _SOC_CFG["pa85_ssh_key"])

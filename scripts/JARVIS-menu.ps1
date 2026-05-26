@@ -706,7 +706,7 @@ function Invoke-TestAPI {
         $t = Invoke-RestMethod "$JARVIS_URL/api/soc/test" -TimeoutSec 5
         Write-INFO "Detail SOC test :"
         Write-INFO "  JARVIS API  : $($t.jarvis_api.msg)"
-        Write-INFO "  SSH ngix    : $($t.ssh_nginx.msg)"
+        Write-INFO "  SSH nginx    : $($t.ssh_nginx.msg)"
         Write-INFO "  TTS         : $($t.tts.msg)"
         Write-INFO "  Overall     : $($t.overall)"
     } catch {}

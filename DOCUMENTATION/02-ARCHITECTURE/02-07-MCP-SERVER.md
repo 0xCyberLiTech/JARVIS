@@ -87,7 +87,7 @@ Tous les outils retournent du `TextContent` préfixé par `JARVIS_HEADER` (carto
 
 ### 5. `jarvis_infra_status`
 **Description :** État rapide de toute l'infrastructure — Proxmox VMs, srv-nginx (nginx/CrowdSec), clt (Apache), pa85 (Apache).
-**Params :** `focus: string` (optionnel — `'proxmox'`, `'ngix'`, `'clt'`, `'pa85'`, ou vide pour tout)
+**Params :** `focus: string` (optionnel — `'proxmox'`, `'nginx'`, `'clt'`, `'pa85'`, ou vide pour tout)
 **Endpoint :** `POST /api/chat` (LLM avec contexte infra)
 
 ### 6. `jarvis_proxmox_vms`
@@ -97,7 +97,7 @@ Tous les outils retournent du `TextContent` préfixé par `JARVIS_HEADER` (carto
 
 ### 7. `jarvis_read_file`
 **Description :** Lit le contenu d'un fichier distant sur une VM via SSH JARVIS.
-**Params :** `vm: string` (requis · `'ngix'|'clt'|'pa85'|'proxmox'|'srv-dev-1'`) · `path: string` (requis · chemin absolu)
+**Params :** `vm: string` (requis · `'nginx'|'clt'|'pa85'|'proxmox'|'srv-dev-1'`) · `path: string` (requis · chemin absolu)
 **Usage :** lire `nginx.conf`, `jail.conf`, scripts, logs depuis VSCode sans quitter.
 **Sécurité :** héritée de `_BLOCKED_SSH` JARVIS (fichiers `/etc/passwd`, `/etc/shadow`, etc. bloqués) · lecture seule
 

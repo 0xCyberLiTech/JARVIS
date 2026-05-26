@@ -6,7 +6,7 @@ après `system/`, `memory/`, `rag/`, `files/`. Autoportante : zéro import vers
 `execute_tool()` (LLM tool-calling).
 
 Public surface :
-- `init()` : injection des 4 fonctions SSH (ngix/proxmox/clt/pa85) + module
+- `init()` : injection des 4 fonctions SSH (nginx/proxmox/clt/pa85) + module
   `security_whitelists` (validation des write ops).
 - Fonctions ré-exportées : `_tool_commande_ssh_nginx/proxmox/clt/pa85`,
   `_tool_commande_ssh_run` (mutualisé), `_ssh_timeout` (helper adaptatif).

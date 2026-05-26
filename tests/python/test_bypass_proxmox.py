@@ -28,8 +28,8 @@ def test_pve_stop_blacklist_inclut_opnsense():
     assert 100 in PVE_STOP_BLACKLIST
 
 
-def test_vm_aliases_srv_ngix_resolu_vers_srv_nginx():
-    """Rétrocompat 2026-05-26 : ancien nom 'srv-ngix' → nouveau 'srv-nginx'."""
+def test_vm_aliases_srv_ngix_retrocompat_resolu_vers_srv_nginx():
+    """Rétrocompat 2026-05-26 : ancien nom 'srv-ngix' (typo) → 'srv-nginx'."""
     assert VM_ALIASES["srv-ngix"] == "srv-nginx"
 
 
@@ -94,7 +94,7 @@ def test_vm_all_start_re_match_toutes_les_vms():
 
 
 def test_reboot_machine_re_match_simple():
-    assert REBOOT_MACHINE_RE.search("reboot ngix")
+    assert REBOOT_MACHINE_RE.search("reboot nginx")
 
 
 # ── make_svc_restart_re ──────────────────────────────────────────────────
@@ -145,7 +145,7 @@ def test_detect_vm_par_vmid():
     assert result == ("stop", [(108, "srv-nginx")])
 
 
-def test_detect_vm_alias_srv_nginx_resolu_en_srv_ngix():
+def test_detect_vm_alias_srv_nginx_resolu_en_srv_nginx():
     """L'alias 'srv-nginx' (sans le typo) doit être résolu vers srv-nginx."""
     result = detect_vm_command("arrête srv-nginx", _vms_api())
     assert result == ("stop", [(108, "srv-nginx")])
@@ -206,7 +206,7 @@ def test_detect_vm_pas_de_doublons_dans_resultat():
 def _host_map():
     """host_map stub : 3 hôtes typiques."""
     return [
-        (["ngix", "srv-nginx"], "srv-nginx", lambda c: (True, ""), False),
+        (["nginx", "srv-nginx"], "srv-nginx", lambda c: (True, ""), False),
         (["clt", "srv-clt"], "srv-clt", lambda c: (True, ""), False),
         (["proxmox"], "proxmox", lambda c: (True, ""), True),
     ]
@@ -221,7 +221,7 @@ def test_detect_reboot_simple():
 
 
 def test_detect_reboot_alias_court():
-    result = detect_reboot_command("redémarre ngix", _host_map())
+    result = detect_reboot_command("redémarre nginx", _host_map())
     assert result[0] == "srv-nginx"
 
 
@@ -231,7 +231,7 @@ def test_detect_reboot_proxmox_is_pve_true():
 
 
 def test_detect_reboot_aucun_match_renvoie_none():
-    assert detect_reboot_command("info ngix", _host_map()) is None
+    assert detect_reboot_command("info nginx", _host_map()) is None
 
 
 def test_detect_reboot_verbe_mais_hote_inconnu():
@@ -247,12 +247,12 @@ def test_detect_update_simple():
 
 
 def test_detect_update_match_upgrade():
-    result = detect_update_command("upgrade ngix", _host_map())
+    result = detect_update_command("upgrade nginx", _host_map())
     assert result[0] == "srv-nginx"
 
 
 def test_detect_update_match_maj():
-    result = detect_update_command("maj ngix", _host_map())
+    result = detect_update_command("maj nginx", _host_map())
     assert result[0] == "srv-nginx"
 
 

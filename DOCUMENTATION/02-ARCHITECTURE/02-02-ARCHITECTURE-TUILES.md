@@ -71,7 +71,7 @@ mots_cles: ["jarvis", "tuiles", "refactor", "blueprint", "di"]
 | Tuile | Contenu | Consommée par |
 |---|---|---|
 | **files/** | `_tool_lire_fichier`, `_tool_ecrire_fichier`, `_tool_modifier_fichier`, `_tool_lister_dossier`, `_tool_arborescence_projet`, `_tool_lire_plusieurs_fichiers`, `_tool_rechercher_dans_fichiers` | tools/dispatch |
-| **ssh/** | `_tool_commande_ssh_run` + 4 wrappers (`ngix`, `proxmox`, `clt`, `pa85`) + `_ssh_timeout` | tools/dispatch + chat orchestrator |
+| **ssh/** | `_tool_commande_ssh_run` + 4 wrappers (`nginx`, `proxmox`, `clt`, `pa85`) + `_ssh_timeout` | tools/dispatch + chat orchestrator |
 | **tools/** | `local.py` (3 outils : executer_code, soc_status, executer_script_windows) + `dispatch.py` (build dict _TOOL_DISPATCH) | chat orchestrator |
 | **bypass/** | `proxmox.py`, `code.py`, `backup.py`, `filesystem.py`, `simple.py`, `wrappers.py` (11 wrappers DI couplés jarvis) | chat dispatcher |
 | **proxmox/** | `api.py` (fetch_state + ticket+token + cache 30s) | bootstrap + chat |
