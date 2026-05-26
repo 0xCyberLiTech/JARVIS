@@ -58,7 +58,7 @@ Dashboard SOC (monitoring.json)
     ↓ fetch HTTP (30s)
 JARVIS analyse
     ↓ si menace détectée
-Action SSH sur srv-ngix (ban-IP / restart)
+Action SSH sur srv-nginx (ban-IP / restart)
     ↓
 Alerte vocale TTS
 ```
