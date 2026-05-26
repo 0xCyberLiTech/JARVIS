@@ -97,7 +97,7 @@ mots_cles: ["ia", "ollama", "modeles", "rag", "phi4", "gemma4"]
      │ TOUJOURS CHAUD  │   │                    │   │ → transcrit ta    │
      │                 │   │ CrowdSec           │   │   voix en texte   │
      │ gemma4:latest   │   │ fail2ban           │   │                   │
-     │ ~9.6 GB         │   │ (sur srv-ngix)     │   │ TTS = voix        │
+     │ ~9.6 GB         │   │ (sur srv-nginx)     │   │ TTS = voix        │
      │ GÉNÉRAL + VOCAL │   │                    │   │ edge-tts (défaut) │
      │ + VISION native │   │ Historique IP 30j  │   │ → Kokoro (CUDA)   │
      │ (swap au switch)│   │ /api/soc/          │   │ → Piper           │
@@ -121,7 +121,7 @@ mots_cles: ["ia", "ollama", "modeles", "rag", "phi4", "gemma4"]
           │     BRIQUE 7 — INFRASTRUCTURE LAN (tes serveurs)            │
           │                                                             │
           │  Proxmox       192.168.1.20  ← hyperviseur, héberge les VMs │
-          │    ├── srv-ngix 192.168.1.50  ← nginx, CrowdSec, dashboard  │
+          │    ├── srv-nginx 192.168.1.50  ← nginx, CrowdSec, dashboard  │
           │    ├── clt      192.168.1.12  ← site cybersécurité CLT      │
           │    └── pa85     192.168.1.13  ← site associatif PA85        │
           │                                                             │
@@ -141,9 +141,9 @@ mots_cles: ["ia", "ollama", "modeles", "rag", "phi4", "gemma4"]
   ┌────────────────────────────────────────────────────┐
   │  BYPASS ? (zéro LLM, réponse Python directe)       │
   │  • "quelle heure est-il ?"  → horloge système      │
-  │  • "démarre srv-ngix"       → SSH Proxmox          │
+  │  • "démarre srv-nginx"       → SSH Proxmox          │
   │  • "sauvegarde jarvis"      → script local         │
-  │  • "redémarre nginx"        → SSH srv-ngix         │
+  │  • "redémarre nginx"        → SSH srv-nginx         │
   │  • "lis /etc/nginx.conf"    → SSH + cat            │
   └─────────────────────┬──────────────────────────────┘
                         │ Non → LLM nécessaire
@@ -329,7 +329,7 @@ mots_cles: ["ia", "ollama", "modeles", "rag", "phi4", "gemma4"]
 ## FLUX COMPLET — De ta voix à la réponse
 
 ```
-  SCÉNARIO : "quel est l'état de srv-ngix ?"
+  SCÉNARIO : "quel est l'état de srv-nginx ?"
 
   TOI (voix, mode SOC)
     │
@@ -341,13 +341,13 @@ mots_cles: ["ia", "ollama", "modeles", "rag", "phi4", "gemma4"]
     │
     ▼ facts_inject (date/heure, mémoire)
     │
-    ▼ RAG : "srv-ngix" → chunks pertinents injectés
+    ▼ RAG : "srv-nginx" → chunks pertinents injectés
     │
     ▼ ROUTING mode SOC → phi4:14b (déjà chaud)
     │
     ▼ phi4 RÉFLÉCHIT → décide d'appeler commande_ssh_ngix()
     │
-    ▼ SSH srv-ngix 192.168.1.50 : "systemctl status nginx crowdsec"
+    ▼ SSH srv-nginx 192.168.1.50 : "systemctl status nginx crowdsec"
     │
     ▼ Résultat SSH réel reçu par phi4
     │

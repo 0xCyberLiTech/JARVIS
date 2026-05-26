@@ -42,12 +42,12 @@ mots_cles: ["jarvis", "architecture", "globale", "flask", "blueprint"]
 │  │  + 31 modules Python  │   │                                       │  │
 │  └───────────────────────┘   └───────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────┘
-                  │ Ollama API                          │ SSH (srv-ngix)
+                  │ Ollama API                          │ SSH (srv-nginx)
                   ▼                                     ▼
          ┌────────────────┐                   ┌─────────────────┐
          │  Ollama local  │                   │  monitoring.json│
          │  phi4:14b      │                   │  CrowdSec / F2B │
-         │  (mode SOC)    │                   │  (srv-ngix)     │
+         │  (mode SOC)    │                   │  (srv-nginx)     │
          │  gemma4:latest │                   └─────────────────┘
          │  (mode GÉNÉRAL)│
          └────────────────┘
@@ -390,7 +390,7 @@ indicateur HUD `● OLLAMA`). **Pré-warm Kokoro CUDA au boot** (`_kokoro_prewar
 | `_jarvisInit()` | 1/1 DOMContentLoaded — init complète | jarvis_main.js |
 | `compute_threat_score()` | Score officiel — JAMAIS recalculé ailleurs | monitoring_gen.py |
 | `_soc_monitor_loop()` | Auto-engine Python quand dashboard fermé | soc.py |
-| `_SSH_LOCK` | Toutes les connexions SSH vers srv-ngix | soc.py |
+| `_SSH_LOCK` | Toutes les connexions SSH vers srv-nginx | soc.py |
 | `_SOC_AUTO_BANNED` | Cooldowns ban — persisté JSON | soc.py |
 | `_TTS_LOCK` | Séquencement TTS — évite doublons vocaux | jarvis.py |
 | `data-action` dispatcher | 288 boutons — zéro handler inline | jarvis.html |
@@ -405,7 +405,7 @@ indicateur HUD `● OLLAMA`). **Pré-warm Kokoro CUDA au boot** (`_kokoro_prewar
 |---|---|
 | Appels LLM | ✅ 6/6 via `_buildChatPayload()` |
 | DOMContentLoaded | ✅ 1 seul `_jarvisInit()` |
-| SSH vers srv-ngix | ✅ `_SSH_LOCK` sérialise tout |
+| SSH vers srv-nginx | ✅ `_SSH_LOCK` sérialise tout |
 | Score menace | ✅ `compute_threat_score()` — source unique |
 | Contexte SOC chatbot | ✅ `_monCtxStr()` — même données que dashboard |
 | Chaîne audio voix/musique | ✅ Nœuds compresseur/limiter partagés |

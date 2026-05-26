@@ -3,7 +3,7 @@
 Extrait de jarvis.py session 33 (2026-05-13) — Phase 3 sous-module 22 (Chat/LLM core).
 
 Détecte si la question utilisateur déclenche le besoin de contexte SOC live
-(monitoring.json srv-ngix). Si oui, fetch + injecte dans le system prompt.
+(monitoring.json srv-nginx). Si oui, fetch + injecte dans le system prompt.
 
 Listes de keywords distinctes :
 - `SOC_KW` : mode chat texte (large)
@@ -165,18 +165,18 @@ def inject(
             except Exception as e:
                 soc_ctx = f"Données brutes monitoring.json (parse partiel: {e}):\n{raw[:2000]}"
             system += (
-                "\n\nVoici les données SOC actuelles de srv-ngix récupérées en temps réel :\n"
+                "\n\nVoici les données SOC actuelles de srv-nginx récupérées en temps réel :\n"
                 + soc_ctx
                 + "\n\nUtilise ces données pour répondre précisément à la question."
             )
         else:
-            # srv-ngix injoignable : garde-fou anti-hallucination — le LLM ne
+            # srv-nginx injoignable : garde-fou anti-hallucination — le LLM ne
             # doit JAMAIS inventer un état SOC à partir de rien.
             system += (
-                "\n\n[DONNÉES SOC INDISPONIBLES — srv-ngix non joignable au moment "
+                "\n\n[DONNÉES SOC INDISPONIBLES — srv-nginx non joignable au moment "
                 "de la requête. INTERDICTION ABSOLUE d'analyser, estimer ou inventer "
                 "un état SOC. Répondre uniquement : « Données temps réel SOC non "
-                "disponibles — connexion srv-ngix requise. »]"
+                "disponibles — connexion srv-nginx requise. »]"
             )
         # Bloc compact agrégé 24h (chiffres pré-calculés — répond aux questions
         # « combien de bans ? quel est le pic horaire ? top pays ? » sans calcul)

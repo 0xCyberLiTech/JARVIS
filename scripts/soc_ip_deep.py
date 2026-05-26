@@ -6,7 +6,7 @@ Extrait de blueprints/soc.py le 2026-05-22 (refactor incrémental, étape 1 —
 couvert par tests avant extraction.
 
 Dépendance unique injectée par `init()` : la fonction `_ssh_ngix` de soc.py
-(exécution SSH sur srv-ngix). Aucun couplage en sens inverse.
+(exécution SSH sur srv-nginx). Aucun couplage en sens inverse.
 
 Consommé par les routes /api/soc/ip-history et /api/soc/ip-deep (soc.py), qui
 appellent les `_deep_*` via des alias légers conservés dans soc.py.
@@ -16,12 +16,12 @@ import json
 
 _F2B_HISTORY_LIMIT = 10        # entrées historique fail2ban dans ip-deep
 
-# Injecté par init() — fonction SSH srv-ngix de soc.py. (ssh_arr → (ok, out))
+# Injecté par init() — fonction SSH srv-nginx de soc.py. (ssh_arr → (ok, out))
 _ssh_ngix = None
 
 
 def init(ssh_ngix) -> None:
-    """Injecte la dépendance SSH srv-ngix depuis soc.py."""
+    """Injecte la dépendance SSH srv-nginx depuis soc.py."""
     global _ssh_ngix
     _ssh_ngix = ssh_ngix
 

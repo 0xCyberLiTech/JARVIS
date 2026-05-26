@@ -38,7 +38,7 @@ mots_cles: ["glossaire", "terminologie", "soc", "jarvis", "definitions"]
 | Terme | Définition |
 |---|---|
 | **CR / CODE-REASONING** | 4e mode JARVIS, modèle `qwen3:8b` raisonnement natif streaming |
-| **CrowdSec** | IDS communautaire installé sur srv-ngix — bans coordonnés via consensus |
+| **CrowdSec** | IDS communautaire installé sur srv-nginx — bans coordonnés via consensus |
 | **CSRF** | Cross-Site Request Forgery — token de protection sur les routes POST sensibles |
 | **CUDA** | API NVIDIA pour calcul GPU (12.x sur RTX 5080) |
 
@@ -62,7 +62,7 @@ mots_cles: ["glossaire", "terminologie", "soc", "jarvis", "definitions"]
 
 | Terme | Définition |
 |---|---|
-| **fail2ban** | Outil de ban dynamique basé sur les logs (auth, nginx, ssh) — sur srv-ngix |
+| **fail2ban** | Outil de ban dynamique basé sur les logs (auth, nginx, ssh) — sur srv-nginx |
 | **FCrDNS** | Forward-Confirmed reverse DNS — méthode de vérification des crawlers légitimes (Googlebot, etc.) |
 | **Flask** | Framework web Python (backend JARVIS) |
 | **Flask-Sock** | Extension Flask pour WebSocket (terminal SSH xterm.js) |
@@ -87,7 +87,7 @@ mots_cles: ["glossaire", "terminologie", "soc", "jarvis", "definitions"]
 | Terme | Définition |
 |---|---|
 | **Idempotence** | Propriété d'une opération qu'on peut appeler N fois avec le même résultat (utilisé pour les fix anti-cascade) |
-| **IDS** | Intrusion Detection System — Suricata sur srv-ngix |
+| **IDS** | Intrusion Detection System — Suricata sur srv-nginx |
 
 ## J
 
@@ -141,7 +141,7 @@ mots_cles: ["glossaire", "terminologie", "soc", "jarvis", "definitions"]
 | **phi4:14b** | Modèle Microsoft 9.1 GB — mode SOC JARVIS (défaut) |
 | **Piper** | Moteur TTS local CPU — 3e fallback après Edge et Kokoro |
 | **PTY** | Pseudo-terminal — terminal interactif via WebSocket (paramiko `invoke_shell()`) |
-| **PVE / Proxmox VE** | Hyperviseur sur 192.168.1.20 — héberge srv-ngix + clt + pa85 + srv-dev-1 |
+| **PVE / Proxmox VE** | Hyperviseur sur 192.168.1.20 — héberge srv-nginx + clt + pa85 + srv-dev-1 |
 | **pre-warm** | Préchargement d'un modèle (Kokoro CUDA, phi4 Ollama) au boot pour éviter cold start |
 
 ## Q
@@ -166,7 +166,7 @@ mots_cles: ["glossaire", "terminologie", "soc", "jarvis", "definitions"]
 |---|---|
 | **SAPI5** | Speech API Windows natif — ultime fallback TTS |
 | **SCP** | Secure Copy — déploiement fichiers via SSH (bypass CODE → srv-dev-1) |
-| **SOC** | Security Operations Center — dashboard sur srv-ngix v3.107.3 + intégration JARVIS |
+| **SOC** | Security Operations Center — dashboard sur srv-nginx v3.107.3 + intégration JARVIS |
 | **SSE** | Server-Sent Events — streaming HTTP unidirectionnel (utilisé pour le chat JARVIS) |
 | **STT** | Speech-to-Text — `faster-whisper large-v3-turbo` CUDA dans JARVIS |
 | **Suricata** | IDS réseau — alerte sur signatures malveillantes (port scan, EXPLOIT, etc.) |
@@ -183,7 +183,7 @@ mots_cles: ["glossaire", "terminologie", "soc", "jarvis", "definitions"]
 
 | Terme | Définition |
 |---|---|
-| **UFW** | Uncomplicated Firewall — pare-feu Debian sur srv-ngix |
+| **UFW** | Uncomplicated Firewall — pare-feu Debian sur srv-nginx |
 
 ## V
 
@@ -196,7 +196,7 @@ mots_cles: ["glossaire", "terminologie", "soc", "jarvis", "definitions"]
 
 | Terme | Définition |
 |---|---|
-| **WAF** | Web Application Firewall — CrowdSec AppSec + ModSec sur srv-ngix |
+| **WAF** | Web Application Firewall — CrowdSec AppSec + ModSec sur srv-nginx |
 | **Web Audio API** | API navigateur pour traitement audio temps réel (graph DSP JARVIS) |
 | **whisper** | Modèle OpenAI STT (variante `faster-whisper` CTranslate2 dans JARVIS) |
 

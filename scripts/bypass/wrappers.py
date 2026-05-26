@@ -91,10 +91,10 @@ def init(
         101: ("srv-dev-1", _ssh_dev1),
         106: ("srv-clt",   _ssh_clt),
         107: ("srv-pa85",  _ssh_pa85),
-        108: ("srv-ngix",  _ssh_ngix),
+        108: ("srv-nginx",  _ssh_ngix),
     }
     UPDATE_REBOOT_HOSTS = [
-        (["srv-nginx", "srv-ngix"],          "srv-ngix",  _ssh_ngix,    False),
+        (["srv-nginx", "srv-ngix"],          "srv-nginx",  _ssh_ngix,    False),
         (["srv-clt",  "clt"],                "srv-clt",   _ssh_clt,     False),
         (["srv-pa85", "pa85"],               "srv-pa85",  _ssh_pa85,    False),
         (["srv-dev-1", "srv-dev", "dev-1"],  "srv-dev-1", _ssh_dev1,    False),
@@ -112,15 +112,15 @@ def detect_service_restart(text):
         return None
     svc_raw = m.group(2).lower()
     if svc_raw == "nginx":
-        return ("srv-ngix", _ssh_ngix, "nginx")
+        return ("srv-nginx", _ssh_ngix, "nginx")
     if svc_raw == "crowdsec":
-        return ("srv-ngix", _ssh_ngix, "crowdsec")
+        return ("srv-nginx", _ssh_ngix, "crowdsec")
     if svc_raw == _svc_bouncer:
-        return ("srv-ngix", _ssh_ngix, _svc_bouncer)
+        return ("srv-nginx", _ssh_ngix, _svc_bouncer)
     if svc_raw == "suricata":
-        return ("srv-ngix", _ssh_ngix, "suricata")
+        return ("srv-nginx", _ssh_ngix, "suricata")
     if svc_raw == "fail2ban":
-        return ("srv-ngix", _ssh_ngix, "fail2ban")
+        return ("srv-nginx", _ssh_ngix, "fail2ban")
     svc_name = "php" if svc_raw == "php" else "apache2"
     if re.search(r'\bclt\b', text, re.I):
         return ("clt", _ssh_clt, svc_name)

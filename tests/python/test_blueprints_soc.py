@@ -2,7 +2,7 @@
 
 Stratégie : focus sur les fonctions pures (regex, conversions, whitelist) +
 quelques routes simples avec mock subprocess pour les SSH calls. Évite de
-mocker tout l'écosystème CrowdSec/srv-ngix.
+mocker tout l'écosystème CrowdSec/srv-nginx.
 """
 from unittest.mock import patch
 

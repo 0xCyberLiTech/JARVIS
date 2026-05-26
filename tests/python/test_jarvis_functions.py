@@ -204,13 +204,13 @@ def test_cors_origin_inconnue_repli_localhost():
 
 def test_detect_service_restart_nginx():
     host, ssh, svc = jm._detect_service_restart("redémarre nginx maintenant")
-    assert (host, svc) == ("srv-ngix", "nginx")
+    assert (host, svc) == ("srv-nginx", "nginx")
     assert ssh is jm._ssh_ngix
 
 
 def test_detect_service_restart_crowdsec():
     host, ssh, svc = jm._detect_service_restart("restart crowdsec")
-    assert (host, svc) == ("srv-ngix", "crowdsec")
+    assert (host, svc) == ("srv-nginx", "crowdsec")
 
 
 def test_detect_service_restart_fail2ban():

@@ -23,8 +23,8 @@ def _vm_map():
     ssh_ngix = lambda cmd: (True, f"OK: {cmd}")  # noqa: E731
     ssh_clt = lambda cmd: (True, f"CLT: {cmd}")  # noqa: E731
     return {
-        "ngix": ("srv-ngix", ssh_ngix),
-        "srv-ngix": ("srv-ngix", ssh_ngix),
+        "ngix": ("srv-nginx", ssh_ngix),
+        "srv-nginx": ("srv-nginx", ssh_ngix),
         "clt": ("srv-clt", ssh_clt),
         "srv-clt": ("srv-clt", ssh_clt),
     }
@@ -70,9 +70,9 @@ def test_fcorr_re_match_propose():
 
 
 def test_sur_vm_re_match_explicite():
-    m = SUR_VM_RE.search("sur srv-ngix maintenant")
+    m = SUR_VM_RE.search("sur srv-nginx maintenant")
     assert m is not None
-    assert m.group(1).lower() == "srv-ngix"
+    assert m.group(1).lower() == "srv-nginx"
 
 
 def test_sur_vm_re_match_alias_court():
@@ -119,8 +119,8 @@ def test_resolve_path_chemin_relatif_etc_prefixe_par_slash():
 
 
 def test_resolve_vm_explicite_sur_ngix():
-    vm_name, _ = _resolve_vm("lis nginx.conf sur srv-ngix", _vm_map())
-    assert vm_name == "srv-ngix"
+    vm_name, _ = _resolve_vm("lis nginx.conf sur srv-nginx", _vm_map())
+    assert vm_name == "srv-nginx"
 
 
 def test_resolve_vm_par_nom_dans_le_texte():
@@ -134,45 +134,45 @@ def test_resolve_vm_aucune_match_renvoie_none():
 
 
 def test_resolve_vm_priorite_sur_l_explicite():
-    """Si 'sur srv-ngix' présent, gagne même si srv-clt aussi mentionné ailleurs."""
-    vm_name, _ = _resolve_vm("lis sur srv-ngix le fichier de srv-clt", _vm_map())
-    assert vm_name == "srv-ngix"
+    """Si 'sur srv-nginx' présent, gagne même si srv-clt aussi mentionné ailleurs."""
+    vm_name, _ = _resolve_vm("lis sur srv-nginx le fichier de srv-clt", _vm_map())
+    assert vm_name == "srv-nginx"
 
 
 # ── detect_file_command ──────────────────────────────────────────────────
 
 
 def test_detect_file_command_lecture_complete():
-    result = detect_file_command("lis nginx.conf sur srv-ngix", _vm_map())
+    result = detect_file_command("lis nginx.conf sur srv-nginx", _vm_map())
     assert result is not None
     action, vm, ssh, path = result
     assert action == "read"
-    assert vm == "srv-ngix"
+    assert vm == "srv-nginx"
     assert path == "/etc/nginx.conf"
 
 
 def test_detect_file_command_edition():
-    result = detect_file_command("modifie nginx.conf sur srv-ngix", _vm_map())
+    result = detect_file_command("modifie nginx.conf sur srv-nginx", _vm_map())
     assert result[0] == "edit"
 
 
 def test_detect_file_command_ajout():
-    result = detect_file_command("ajoute une entrée dans hosts sur srv-ngix", _vm_map())
+    result = detect_file_command("ajoute une entrée dans hosts sur srv-nginx", _vm_map())
     assert result[0] == "add"
 
 
 def test_detect_file_command_priorite_add_sur_edit_sur_read():
     """Le code teste add > edit > read."""
-    result = detect_file_command("modifie et ajoute hosts sur srv-ngix", _vm_map())
+    result = detect_file_command("modifie et ajoute hosts sur srv-nginx", _vm_map())
     assert result[0] == "add"  # ajoute gagne
 
 
 def test_detect_file_command_aucun_verbe_renvoie_none():
-    assert detect_file_command("bonjour, nginx.conf sur srv-ngix", _vm_map()) is None
+    assert detect_file_command("bonjour, nginx.conf sur srv-nginx", _vm_map()) is None
 
 
 def test_detect_file_command_aucun_path_renvoie_none():
-    assert detect_file_command("lis sur srv-ngix", _vm_map()) is None
+    assert detect_file_command("lis sur srv-nginx", _vm_map()) is None
 
 
 def test_detect_file_command_aucune_vm_renvoie_none():
@@ -184,26 +184,26 @@ def test_detect_file_command_aucune_vm_renvoie_none():
 
 def test_detect_multi_file_au_moins_2_chemins():
     result = detect_multi_file_command(
-        "corrige /etc/nginx/nginx.conf et /var/log/syslog sur srv-ngix",
+        "corrige /etc/nginx/nginx.conf et /var/log/syslog sur srv-nginx",
         _vm_map(),
     )
     assert result is not None
     action, vm, _, paths = result
     assert action == "read"  # multi = forcé read
-    assert vm == "srv-ngix"
+    assert vm == "srv-nginx"
     assert len(paths) == 2
 
 
 def test_detect_multi_file_un_seul_chemin_renvoie_none():
     """1 seul fichier → pas multi."""
-    result = detect_multi_file_command("corrige /etc/nginx/nginx.conf sur srv-ngix", _vm_map())
+    result = detect_multi_file_command("corrige /etc/nginx/nginx.conf sur srv-nginx", _vm_map())
     assert result is None
 
 
 def test_detect_multi_file_action_edit_devient_read():
     """Multi-fichiers = read seul (jamais edit/add)."""
     result = detect_multi_file_command(
-        "modifie /etc/hosts et /etc/passwd sur srv-ngix",
+        "modifie /etc/hosts et /etc/passwd sur srv-nginx",
         _vm_map(),
     )
     assert result[0] == "read"
@@ -211,7 +211,7 @@ def test_detect_multi_file_action_edit_devient_read():
 
 def test_detect_multi_file_aucun_verbe_renvoie_none():
     result = detect_multi_file_command(
-        "/etc/hosts et /etc/passwd sur srv-ngix",  # pas de verbe
+        "/etc/hosts et /etc/passwd sur srv-nginx",  # pas de verbe
         _vm_map(),
     )
     assert result is None
@@ -239,12 +239,12 @@ def test_file_command_sse_lecture_fichier_succes():
     def ssh_ok(cmd):
         return True, "contenu fichier"
 
-    events = list(file_command_sse("read", "srv-ngix", ssh_ok, "/etc/nginx.conf"))
+    events = list(file_command_sse("read", "srv-nginx", ssh_ok, "/etc/nginx.conf"))
     # 1) ssh_file event, 2) token done, 3) speak
     assert len(events) == 3
     p1 = json.loads(events[0].replace("data: ", "").strip())
     assert p1["type"] == "ssh_file"
-    assert p1["vm"] == "srv-ngix"
+    assert p1["vm"] == "srv-nginx"
     assert p1["path"] == "/etc/nginx.conf"
     assert p1["content"] == "contenu fichier"
 
@@ -253,7 +253,7 @@ def test_file_command_sse_ssh_echec_yield_message_erreur():
     def ssh_fail(cmd):
         return False, ""
 
-    events = list(file_command_sse("read", "srv-ngix", ssh_fail, "/etc/nginx.conf"))
+    events = list(file_command_sse("read", "srv-nginx", ssh_fail, "/etc/nginx.conf"))
     # Un seul event : token erreur
     assert len(events) == 1
     p = json.loads(events[0].replace("data: ", "").strip())
@@ -270,7 +270,7 @@ def test_file_command_sse_repertoire_utilise_ls_la():
         captured["cmd"] = cmd
         return True, "drwxr-xr-x ..."
 
-    list(file_command_sse("read", "srv-ngix", ssh_capture, "/etc/"))
+    list(file_command_sse("read", "srv-nginx", ssh_capture, "/etc/"))
     assert captured["cmd"] == "ls -la /etc/"
 
 
@@ -282,7 +282,7 @@ def test_file_command_sse_basename_sans_extension_traite_comme_repertoire():
         captured["cmd"] = cmd
         return True, "drwxr-xr-x ..."
 
-    list(file_command_sse("read", "srv-ngix", ssh_capture, "/etc"))
+    list(file_command_sse("read", "srv-nginx", ssh_capture, "/etc"))
     assert captured["cmd"] == "ls -la /etc"
 
 
@@ -294,7 +294,7 @@ def test_file_command_sse_fichier_avec_extension_utilise_cat():
         captured["cmd"] = cmd
         return True, "server { ... }"
 
-    list(file_command_sse("read", "srv-ngix", ssh_capture, "/etc/nginx.conf"))
+    list(file_command_sse("read", "srv-nginx", ssh_capture, "/etc/nginx.conf"))
     assert captured["cmd"] == "cat /etc/nginx.conf"
 
 
@@ -302,7 +302,7 @@ def test_file_command_sse_speak_mentionne_le_path():
     def ssh_ok(cmd):
         return True, "x"
 
-    events = list(file_command_sse("read", "srv-ngix", ssh_ok, "/etc/hosts"))
+    events = list(file_command_sse("read", "srv-nginx", ssh_ok, "/etc/hosts"))
     speak = json.loads(events[2].replace("data: ", "").strip())
     assert speak["type"] == "speak"
     assert "/etc/hosts" in speak["text"]

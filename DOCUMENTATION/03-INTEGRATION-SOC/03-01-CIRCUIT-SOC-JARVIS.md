@@ -14,7 +14,7 @@ mots_cles: ["soc", "jarvis", "integration", "circuit", "defense-chain"]
 ﻿# Circuit logique SOC + JARVIS — 0xCyberLiTech
 **Date : 2026-05-22 — v2.7** · routing 4 branches (soc/general/code/code_reasoning) · MCP **12 outils** · 32 modules Python · jarvis.css → 8 fichiers · git local + pre-commit + pre-push pytest · métriques courantes (score, lignes, tests, coverage) → [BILAN-TECHNIQUE.md §0](BILAN-TECHNIQUE.md)
 
-> **À lire en premier** : la nouvelle section [Hiérarchie des appels et autonomie](#hi%C3%A9rarchie-des-appels-et-autonomie) clarifie qui appelle qui (Claude / MCP / JARVIS / srv-ngix) et ce qui tombe si X est éteint. Les autres schémas du document montrent des flux de **données** (ce qui circule), pas des dépendances d'**exécution** (qui a besoin de qui pour vivre).
+> **À lire en premier** : la nouvelle section [Hiérarchie des appels et autonomie](#hi%C3%A9rarchie-des-appels-et-autonomie) clarifie qui appelle qui (Claude / MCP / JARVIS / srv-nginx) et ce qui tombe si X est éteint. Les autres schémas du document montrent des flux de **données** (ce qui circule), pas des dépendances d'**exécution** (qui a besoin de qui pour vivre).
 
 ---
 
@@ -54,7 +54,7 @@ Cette section répond à la question : **« qui appelle qui, et qui tombe si tel
                               │ /api/soc/context                      │
                               ▼                                       ▼
                     ┌─────────────────────────────────────────────────┐
-                    │  srv-ngix :8080                                 │
+                    │  srv-nginx :8080                                 │
                     │  • defense_24h.json (cron 60s)                  │
                     │  • monitoring.json (cron 60s)                   │
                     │  • xdr_events.json / ...                        │
@@ -67,7 +67,7 @@ Cette section répond à la question : **« qui appelle qui, et qui tombe si tel
                     ┌───────────────────────┐
                     │  defense_aggregator.py│
                     │  monitoring_gen.py    │   ← PRODUCTEURS
-                    │  (Python sur srv-ngix)│
+                    │  (Python sur srv-nginx)│
                     └───────────────────────┘
 ```
 
@@ -75,7 +75,7 @@ Cette section répond à la question : **« qui appelle qui, et qui tombe si tel
 
 - **Une flèche pointe dans le sens de l'appel** : `A ──▶ B` signifie « A appelle B » (donc A consomme un service de B).
 - **Aucune flèche ne remonte** dans le schéma : JARVIS n'appelle jamais MCP, MCP n'appelle jamais Claude. Le sens des appels est strictement descendant.
-- **Une exception au flux principal** : le navigateur dashboard SOC court-circuite JARVIS et appelle srv-ngix directement.
+- **Une exception au flux principal** : le navigateur dashboard SOC court-circuite JARVIS et appelle srv-nginx directement.
 
 ### Tableau des dépendances réelles
 
@@ -83,10 +83,10 @@ Cette section répond à la question : **« qui appelle qui, et qui tombe si tel
 |---|---|---|---|---|
 | **Claude** (Desktop/Code) | 5 (sommet) | MCP server | *(rien — sommet humain/IA)* | JARVIS continue à 100 % · MCP continue · tout est intact |
 | **MCP server** :5010 | 4 | JARVIS :5000 | Claude (+ tout client MCP) | Claude perd les 12 outils JARVIS · JARVIS continue à 100 % |
-| **JARVIS** :5000 | 3 | srv-ngix :8080, Ollama, SSH 5 hôtes | MCP, UI JARVIS, dashboard SOC (heartbeat) | MCP perd ses outils SOC · UI HS · auto-engine HS · dashboard SOC continue (lit srv-ngix direct) |
-| **srv-ngix** :8080 | 2 | (sert des fichiers) | JARVIS, navigateur dashboard | JARVIS répond 503 sur `/api/soc/*` · pas de bloc défense injecté · auto-engine SOC silencieux · dashboard SOC vide |
+| **JARVIS** :5000 | 3 | srv-nginx :8080, Ollama, SSH 5 hôtes | MCP, UI JARVIS, dashboard SOC (heartbeat) | MCP perd ses outils SOC · UI HS · auto-engine HS · dashboard SOC continue (lit srv-nginx direct) |
+| **srv-nginx** :8080 | 2 | (sert des fichiers) | JARVIS, navigateur dashboard | JARVIS répond 503 sur `/api/soc/*` · pas de bloc défense injecté · auto-engine SOC silencieux · dashboard SOC vide |
 | **defense_aggregator.py** | 1 (base) | rien (cron) | *(produit les JSON)* | `defense_24h.json` se fige · les chiffres deviennent obsolètes mais restent lisibles |
-| **Navigateur** dashboard | alt. | srv-ngix direct | utilisateur | court-circuit total : tu vois les chiffres sans dépendre de JARVIS ni MCP |
+| **Navigateur** dashboard | alt. | srv-nginx direct | utilisateur | court-circuit total : tu vois les chiffres sans dépendre de JARVIS ni MCP |
 
 ### Scénarios extrêmes — qui tombe vraiment
 
@@ -95,7 +95,7 @@ Cette section répond à la question : **« qui appelle qui, et qui tombe si tel
 | Claude (déconnecte) | ✅ | ✅ | ✅ | ✅ | — |
 | MCP server | ✅ | — | ✅ | ✅ | perd les 12 outils |
 | JARVIS | — | partiel (perd les outils) | ✅ | ✅ | perd accès local |
-| srv-ngix | partiel (perd SOC) | partiel | ❌ | ❌ | — |
+| srv-nginx | partiel (perd SOC) | partiel | ❌ | ❌ | — |
 | Producteur (defense_aggregator) | ✅ (chiffres figés) | ✅ | ✅ (stale) | ✅ (stale) | ✅ |
 
 ### Pourquoi JARVIS est l'**orchestrateur** et pas le **consommateur** du MCP
@@ -112,8 +112,8 @@ JARVIS reste l'autorité locale : c'est lui qui héberge les LLM Ollama, le rout
 
 L'étape 6 ajoute **3 canaux de consommation** d'une même source (`defense_24h.json` produit côté SOC) :
 
-1. **Page web `/defense.html`** : le navigateur lit directement `srv-ngix:8080/defense_24h.json` — court-circuit total, aucun composant intermédiaire
-2. **JARVIS phi4 (mode SOC)** : `chat_soc_inject.py:_format_defense_block()` ajoute un bloc compact (~400 chars) au system prompt phi4, fetché via la route locale `/api/soc/defense` (cache 30 s, fetch HTTP direct vers srv-ngix)
+1. **Page web `/defense.html`** : le navigateur lit directement `srv-nginx:8080/defense_24h.json` — court-circuit total, aucun composant intermédiaire
+2. **JARVIS phi4 (mode SOC)** : `chat_soc_inject.py:_format_defense_block()` ajoute un bloc compact (~400 chars) au system prompt phi4, fetché via la route locale `/api/soc/defense` (cache 30 s, fetch HTTP direct vers srv-nginx)
 3. **Outil MCP `jarvis_defense_24h`** : 11e outil exposé via MCP, qui appelle `/api/soc/defense` sur JARVIS pour servir Claude
 
 **Aucun de ces 3 canaux ne crée une nouvelle dépendance montante**. La règle « MCP autonome de Claude » et « JARVIS autonome du MCP » est intacte.
@@ -130,7 +130,7 @@ L'étape 6 ajoute **3 canaux de consommation** d'une même source (`defense_24h.
 ║      │  trafic entrant                                                           ║
 ║      ▼                                                                           ║
 ║  ┌───────────────────────────────────────────────────────┐                      ║
-║  │              srv-ngix  192.168.1.50                    │                      ║
+║  │              srv-nginx  192.168.1.50                    │                      ║
 ║  │                                                        │                      ║
 ║  │  nginx ◄─── requêtes ──────────────────────────────── │◄── WAN               ║
 ║  │    │                                                   │                      ║
@@ -156,7 +156,7 @@ L'étape 6 ajoute **3 canaux de consommation** d'une même source (`defense_24h.
 ║  │  localhost:5000    │  │  browser        │  │                              │ ║
 ║  │                    │◄─┤                 │  │  fail2ban-monitor-push.sh    │ ║
 ║  │  Flask + Ollama    │  │  35 tuiles      │  │  ufw-monitor-push.sh         │ ║
-║  │  phi4:14b          │  │                 │  │  (cron */5min → srv-ngix)    │ ║
+║  │  phi4:14b          │  │                 │  │  (cron */5min → srv-nginx)    │ ║
 ║  │                    │  │  computeThreat  │  └──────────────────────────────┘ ║
 ║  │  auto-engine       │  │  Score 0-100    │                                   ║
 ║  │  _soc_monitor_loop │  │                 │  ┌──────────────────────────────┐ ║
@@ -177,10 +177,10 @@ L'étape 6 ajoute **3 canaux de consommation** d'une même source (`defense_24h.
 |--------|--------------|
 | `──▶` | Données / commande |
 | `◄──` | Réception / lecture |
-| SSH ban | JARVIS → `cscli decisions add -i IP` sur srv-ngix |
-| SSH restart | JARVIS → `systemctl restart <service>` sur srv-ngix |
+| SSH ban | JARVIS → `cscli decisions add -i IP` sur srv-nginx |
+| SSH restart | JARVIS → `systemctl restart <service>` sur srv-nginx |
 | fetch JSON | Dashboard browser → `monitoring.json` toutes 30s |
-| push JSON | Proxmox/Windows → srv-ngix via SCP/SSH toutes 5min |
+| push JSON | Proxmox/Windows → srv-nginx via SCP/SSH toutes 5min |
 
 ### Règle dashboard ouvert / fermé
 
@@ -206,7 +206,7 @@ Dashboard FERMÉ   ──▶  JARVIS _soc_monitor_loop() prend le relais
                                │
                                ▼
 ┌─────────────────────────────────────────────────────────────────────┐
-│              monitoring_gen.py  (srv-ngix, cron */5min)             │
+│              monitoring_gen.py  (srv-nginx, cron */5min)             │
 │                                                                     │
 │  • Parse nginx access.log → trafic, proto_breakdown, kill_chain     │
 │  • API CrowdSec local → décisions, machines, bouncers               │
@@ -215,7 +215,7 @@ Dashboard FERMÉ   ──▶  JARVIS _soc_monitor_loop() prend le relais
 │  • Suricata eve.json → sév.1/2/3, top IPs, MITRE, recent_scans,    │
 │                         enabled_sources                             │
 │  • API Proxmox HTTPS → CPU/RAM/VMs + SSH sensors température        │
-│  • push windows-disk.json (Windows → srv-ngix)                      │
+│  • push windows-disk.json (Windows → srv-nginx)                      │
 │  • Freebox API locale, GeoIP, CVE/threat feeds, SSL check           │
 │                                                                     │
 │  ──▶  génère  /var/www/monitoring/monitoring.json  (toutes /5min)   │
@@ -233,11 +233,11 @@ Dashboard FERMÉ   ──▶  JARVIS _soc_monitor_loop() prend le relais
 
 ---
 
-## 1. Collecte des données (srv-ngix)
+## 1. Collecte des données (srv-nginx)
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│  srv-ngix 192.168.1.50                               │
+│  srv-nginx 192.168.1.50                               │
 │                                                      │
 │  nginx ──────────────────── access.log               │
 │  CrowdSec ──────────────── /run/crowdsec/sock        │
@@ -374,7 +374,7 @@ DÉTECTION
                   _ssh_ngix() direct            (si dashboard fermé)
                                │
                                ▼
-                  srv-ngix : cscli decisions add -i <IP> [-d <durée>]
+                  srv-nginx : cscli decisions add -i <IP> [-d <durée>]
                                │
                                ▼
                   CrowdSec bouncer nginx → DROP immédiat
@@ -394,10 +394,10 @@ DÉTECTION
 Proxmox VE (192.168.1.20)
       │
       ├── fail2ban-monitor-push.sh  (cron /5min)
-      │     ──▶ SSH srv-ngix → /var/www/monitoring/proxmox-fail2ban.json
+      │     ──▶ SSH srv-nginx → /var/www/monitoring/proxmox-fail2ban.json
       │
       └── ufw-monitor-push.sh       (cron /5min)
-            ──▶ SSH srv-ngix → /var/www/monitoring/proxmox-ufw.json
+            ──▶ SSH srv-nginx → /var/www/monitoring/proxmox-ufw.json
                    │
                    ▼
             monitoring_gen.py lit ces fichiers → intégré dans monitoring.json
@@ -412,7 +412,7 @@ Proxmox VE (192.168.1.20)
 Windows (192.168.1.x — machine locale)
       │
       └── windows-disk-report.ps1  (tâche planifiée ou manuel)
-            ──▶ SCP windows-disk.json → srv-ngix
+            ──▶ SCP windows-disk.json → srv-nginx
                    │
                    ▼
             monitoring_gen.py lit windows-disk.json
@@ -464,10 +464,10 @@ soc-daily-report.py  (cron 08h00 quotidien)
 |---------|---------|------|
 | `jarvis_soc_actions.json` | Journal toutes actions proactives (rotation 30j) | Windows local |
 | `jarvis_soc_autobanned.json` | Cooldowns auto-ban (filtre expiry au boot) | Windows local |
-| `proxmox-cpu-history.json` | Historique CPU Proxmox 48 pts (4h) | srv-ngix |
-| `net-history.json` | Historique RX/TX réseau | srv-ngix |
-| `autoban-log.json` | Journal bans côté serveur | srv-ngix |
-| `monitoring.json` | Snapshot sécurité complet | srv-ngix (toutes /5min) |
+| `proxmox-cpu-history.json` | Historique CPU Proxmox 48 pts (4h) | srv-nginx |
+| `net-history.json` | Historique RX/TX réseau | srv-nginx |
+| `autoban-log.json` | Journal bans côté serveur | srv-nginx |
+| `monitoring.json` | Snapshot sécurité complet | srv-nginx (toutes /5min) |
 
 ---
 
@@ -494,7 +494,7 @@ Le choix de rester en IDS + ban CrowdSec plutôt qu'IPS NFQUEUE est le bon pour 
 
 ### Points de fragilité à surveiller
 
-**Point unique de défaillance : srv-ngix**
+**Point unique de défaillance : srv-nginx**
 Toute la chaîne nginx + CrowdSec + Suricata + monitoring_gen.py est sur une seule VM. Si la VM tombe, plus de protection ni de visibilité. Mitigation actuelle : sauvegardes vzdump hebdomadaires + auto-restart JARVIS des services connus.
 
 **JARVIS dépend de Windows local**

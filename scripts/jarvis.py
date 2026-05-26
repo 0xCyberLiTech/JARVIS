@@ -262,7 +262,7 @@ Méthode d'analyse (applique dans cet ordre avant de répondre) :
 RÈGLE ABSOLUE — IPs LAN/RFC1918 :
 - Les plages 192.168.x.x, 10.x.x.x, 172.16-31.x.x et 127.x.x.x sont des IPs INTERNES — JAMAIS des menaces externes
 - Architecture réseau réelle (2026-05-21) :
-    · LAN serveur Freebox  192.168.1.0/24  → Proxmox=192.168.1.20, srv-ngix=192.168.1.50, clt=192.168.1.12, pa85=192.168.1.13, srv-dev-1=192.168.1.21, Freebox=192.168.1.254
+    · LAN serveur Freebox  192.168.1.0/24  → Proxmox=192.168.1.20, srv-nginx=192.168.1.50, clt=192.168.1.12, pa85=192.168.1.13, srv-dev-1=192.168.1.21, Freebox=192.168.1.254
     · LAN ASUS  192.168.50.0/24  → routeur ASUS=192.168.50.1, Windows/JARVIS=192.168.50.90 (poste derrière le routeur ASUS ; trafic vu en 192.168.1.110 côté serveurs, NAT)
 - Si une IP RFC1918 apparaît dans les données kill_chain, c'est du trafic LAN légitime — ne JAMAIS la signaler comme attaque DDoS, EXPLOIT ou menace
 - Ne JAMAIS recommander de bannir une IP RFC1918 — le ban est techniquement bloqué et serait une erreur grave
@@ -443,7 +443,7 @@ _CODE_SYSTEM_SUFFIX = (
     "  lister_dossier · arborescence_projet\n"
     "  lire_plusieurs_fichiers · executer_code · rechercher_dans_fichiers\n\n"
     "RÈGLE ABSOLUE — SERVEURS ET VMs INTERDITS :\n"
-    "Si l'utilisateur demande une action sur srv-ngix, srv-clt, srv-pa85,\n"
+    "Si l'utilisateur demande une action sur srv-nginx, srv-clt, srv-pa85,\n"
     "srv-dev-1, proxmox, ou tout fichier système (/etc/, /var/, /usr/) :\n"
     "→ Réponds OBLIGATOIREMENT : "
     "\"Cette opération concerne un serveur distant. "
@@ -464,7 +464,7 @@ _DSP_MAX_BYTES = 50_000_000  # 50 MB — traitement DSP/FX (WAV non compressé p
 # ── Timeouts SSH / réseau / terminal ─────────────────────────────────────────
 _SSH_LOG_TIMEOUT_S           = 18  # fetch logs RAG live via SSH
 _RAG_EMBED_TIMEOUT_S         = 20  # embedding mxbai-embed-large via Ollama
-_SSH_SOC_TIMEOUT_S           = 15  # commandes monitoring SOC sur srv-ngix
+_SSH_SOC_TIMEOUT_S           = 15  # commandes monitoring SOC sur srv-nginx
 _SSH_PROXMOX_CMD_TIMEOUT_S   = 15  # qm stop/start sur Proxmox
 _SSH_PROXMOX_STATE_TIMEOUT_S =  8  # qm status sur Proxmox
 _SYSTEMCTL_RESTART_TIMEOUT_S = 15  # systemctl restart service
@@ -1281,7 +1281,7 @@ _chat_build_messages = _chat_msg.build_messages
 _APT_HOST_MAP = {
     "commande_ssh_clt":     ("clt",      _ssh_clt),
     "commande_ssh_pa85":    ("pa85",     _ssh_pa85),
-    "commande_ssh_ngix":    ("srv-ngix", _ssh_ngix),
+    "commande_ssh_ngix":    ("srv-nginx", _ssh_ngix),
     "commande_ssh_proxmox": ("proxmox",  _ssh_proxmox),
 }
 _cr_tasks            = _cr_mod.tasks  # state partagé (utilisé par /api/cr-poll/<task_id>)
@@ -1334,9 +1334,9 @@ _FILE_VM_SSH = {
     "srv-clt":  ("clt",      _ssh_clt),
     "pa85":     ("pa85",     _ssh_pa85),
     "srv-pa85": ("pa85",     _ssh_pa85),
-    "ngix":     ("srv-ngix", _ssh_ngix),
-    "nginx":    ("srv-ngix", _ssh_ngix),
-    "srv-ngix": ("srv-ngix", _ssh_ngix),
+    "ngix":     ("srv-nginx", _ssh_ngix),
+    "nginx":    ("srv-nginx", _ssh_ngix),
+    "srv-nginx": ("srv-nginx", _ssh_ngix),
     "proxmox":  ("proxmox",  _ssh_proxmox),
     "dev":      ("srv-dev-1",_ssh_dev1),
     "dev-1":    ("srv-dev-1",_ssh_dev1),

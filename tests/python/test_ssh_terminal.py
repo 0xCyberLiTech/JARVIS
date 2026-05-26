@@ -108,16 +108,16 @@ def test_sse_tok_done_default_false():
 
 
 def test_terminal_sse_yield_2_events():
-    events = list(ssh_terminal.terminal_sse("ngix", "srv-ngix"))
+    events = list(ssh_terminal.terminal_sse("ngix", "srv-nginx"))
     assert len(events) == 2
 
 
 def test_terminal_sse_premier_event_open_ssh_terminal():
-    events = list(ssh_terminal.terminal_sse("ngix", "srv-ngix", user="root"))
+    events = list(ssh_terminal.terminal_sse("ngix", "srv-nginx", user="root"))
     payload = json.loads(events[0].replace("data: ", "").strip())
     assert payload["type"] == "open_ssh_terminal"
     assert payload["host"] == "ngix"
-    assert payload["label"] == "srv-ngix"
+    assert payload["label"] == "srv-nginx"
     assert payload["user"] == "root"
 
 

@@ -397,7 +397,7 @@ def test_deep_nginx_last_ssh_ko(monkeypatch):
 
 
 def test_deep_rsyslog_agrege_compteurs(monkeypatch):
-    out = "/var/log/central/srv-ngix/auth.log:5\n/var/log/central/clt/access.log:3"
+    out = "/var/log/central/srv-nginx/auth.log:5\n/var/log/central/clt/access.log:3"
     monkeypatch.setattr(soc_ip_deep, "_ssh_ngix", lambda cmd, timeout=25: (True, out))
     res = soc_ip_deep._deep_rsyslog("203.0.113.15")
     assert res["total"] == 8

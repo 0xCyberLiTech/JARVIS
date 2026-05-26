@@ -93,7 +93,7 @@ def soc_status():
     """Snapshot SOC formaté pour injection LLM (header '=== SOC STATUS ===')."""
     ok, raw = _fetch_monitoring(force=True)
     if not ok:
-        return f"Erreur SSH srv-ngix : {raw}"
+        return f"Erreur SSH srv-nginx : {raw}"
     try:
         return _build_monitoring_context(json.loads(raw), header="=== SOC STATUS ===")
     except Exception as e:

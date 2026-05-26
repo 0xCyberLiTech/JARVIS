@@ -137,7 +137,7 @@ def test_fetch_state_succes_remplit_cache(monkeypatch, tmp_path):
         if "/status" in url:
             resp.json.return_value = {"data": {"cpu": 0.42, "memory": {"used": 8 * 1024**3, "total": 16 * 1024**3}, "uptime": 3600}}
         elif "/qemu" in url:
-            resp.json.return_value = {"data": [{"vmid": 108, "name": "srv-ngix", "status": "running"}]}
+            resp.json.return_value = {"data": [{"vmid": 108, "name": "srv-nginx", "status": "running"}]}
         elif "/lxc" in url:
             resp.json.return_value = {"data": []}
         elif "/storage" in url:
@@ -181,11 +181,11 @@ def test_context_summary_avec_node_formate_cpu_ram_uptime():
 
 
 def test_context_summary_vm_running_avec_uptime():
-    state = {"vms": [{"vmid": 108, "name": "srv-ngix", "status": "running",
+    state = {"vms": [{"vmid": 108, "name": "srv-nginx", "status": "running",
                       "cpu": 0.1, "maxmem": 4 * 1024**3, "mem": 2 * 1024**3, "uptime": 86400}]}
     out = proxmox_api.context_summary(state)
     assert "VMs QEMU (1)" in out
-    assert "VM108 srv-ngix" in out
+    assert "VM108 srv-nginx" in out
     assert "running" in out
     assert "▶" in out
 

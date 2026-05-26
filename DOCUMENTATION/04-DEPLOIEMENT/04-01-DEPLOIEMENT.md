@@ -266,7 +266,7 @@ Changer via UI (onglet DSP → panneau voix) ou `jarvis_dsp_params.json` → `tt
 | `/api/ping` | POST | Ping une IP/host distant |
 | `/api/security` | GET | Journal blocklist LLM (garde-fou) |
 | `/api/security/clear` | POST | Vide le journal blocklist LLM |
-| `/api/soc/ban-ip` | POST | Ban une IP via CrowdSec sur srv-ngix |
+| `/api/soc/ban-ip` | POST | Ban une IP via CrowdSec sur srv-nginx |
 | `/api/soc/unban-ip` | POST | Lève le ban d'une IP CrowdSec |
 | `/api/soc/restart-service` | POST | Redémarre un service autorisé (nginx/crowdsec/fail2ban…) |
 | `/api/soc/actions` | GET | Journal des opérations proactives SOC |

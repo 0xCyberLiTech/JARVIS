@@ -47,7 +47,7 @@ mots_cles: ["roadmap", "futur", "evolutions", "v3.4", "feature"]
 | **Mode voix continue** | Active listening sans wake-word (mode "Iron Man") | 3 jours |
 | **Historique chat persistant DB** | SQLite remplaçant `jarvis_memory.json` simple | 2 jours |
 | **Notifications push mobile** | Alerte SOC critique vers téléphone Marc (Telegram bot ? ntfy.sh ?) | 1 jour |
-| **Dashboard SOC enrichi** | Tile "JARVIS recommandations" sur dashboard srv-ngix | 1 jour |
+| **Dashboard SOC enrichi** | Tile "JARVIS recommandations" sur dashboard srv-nginx | 1 jour |
 | **MCP plus de tools** | Au-delà des 12 actuels (read_logs_remote, ssh_diagnose_perf, etc.) | 1 jour par tool |
 
 ### Amélioration architecture

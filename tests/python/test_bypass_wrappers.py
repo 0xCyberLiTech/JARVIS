@@ -45,7 +45,7 @@ def _reinit_wrappers():
     bypass_bk_mod.jarvis_backup_log_sse = MagicMock(return_value=iter([]))
     bypass_bk_mod.jarvis_backup_sse = MagicMock(return_value=iter([]))
 
-    pve_fetch_state = MagicMock(return_value={"vms": [{"vmid": 108, "name": "srv-ngix", "status": "running"}]})
+    pve_fetch_state = MagicMock(return_value={"vms": [{"vmid": 108, "name": "srv-nginx", "status": "running"}]})
 
     def sse_tok(txt, done=False):
         return f"data: {json.dumps({'type':'token','token':txt,'done':done})}\n\n"
@@ -81,7 +81,7 @@ def _reinit_wrappers():
 def test_init_calcule_tables_couplees_ssh():
     """init() rempli VM_START_SSH_MAP + UPDATE_REBOOT_HOSTS + SVC_RESTART_RE."""
     assert 108 in bp_wrap.VM_START_SSH_MAP
-    assert bp_wrap.VM_START_SSH_MAP[108][0] == "srv-ngix"
+    assert bp_wrap.VM_START_SSH_MAP[108][0] == "srv-nginx"
     assert len(bp_wrap.UPDATE_REBOOT_HOSTS) == 5  # ngix, clt, pa85, dev-1, proxmox
     assert bp_wrap.SVC_RESTART_RE is not None
 
@@ -90,19 +90,19 @@ def test_init_calcule_tables_couplees_ssh():
 
 
 def test_detect_service_restart_nginx_route_vers_ngix():
-    """'redémarre nginx' → (srv-ngix, ssh_ngix, nginx)."""
+    """'redémarre nginx' → (srv-nginx, ssh_ngix, nginx)."""
     result = bp_wrap.detect_service_restart("redémarre nginx maintenant")
     assert result is not None
     host, ssh_fn, svc = result
-    assert host == "srv-ngix"
+    assert host == "srv-nginx"
     assert ssh_fn is bp_wrap._ssh_ngix
     assert svc == "nginx"
 
 
 def test_detect_service_restart_crowdsec_route_vers_ngix():
-    """'restart crowdsec' → srv-ngix."""
+    """'restart crowdsec' → srv-nginx."""
     host, _ssh, svc = bp_wrap.detect_service_restart("restart crowdsec")
-    assert host == "srv-ngix"
+    assert host == "srv-nginx"
     assert svc == "crowdsec"
 
 
@@ -131,7 +131,7 @@ def test_detect_service_restart_aucun_match_renvoie_none():
 
 def test_detect_vm_command_appelle_pve_fetch_state():
     """detect_vm_command() appelle pve_fetch_state() pour récupérer vms_api."""
-    bp_wrap.detect_vm_command("démarre srv-ngix")
+    bp_wrap.detect_vm_command("démarre srv-nginx")
     bp_wrap._pve_fetch_state.assert_called_once()
 
 
@@ -148,10 +148,10 @@ def test_detect_vm_command_propage_vms_api_vide_si_state_none():
 
 def test_detect_reboot_command_passe_update_reboot_hosts():
     """detect_reboot_command délègue avec UPDATE_REBOOT_HOSTS."""
-    result = bp_wrap.detect_reboot_command("reboot srv-ngix")
+    result = bp_wrap.detect_reboot_command("reboot srv-nginx")
     assert result is not None
     host, _ssh, _is_pve = result
-    assert host == "srv-ngix"
+    assert host == "srv-nginx"
 
 
 def test_detect_update_command_passe_update_reboot_hosts():

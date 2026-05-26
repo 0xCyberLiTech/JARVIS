@@ -22,7 +22,7 @@ def _make_args(**overrides):
         call_llm_with_tools_fn=lambda msgs, model_override=None: _no_tool_msg(),
         execute_tool_fn=lambda name, args: f"result-of-{name}",
         tool_dispatch={"ssh_ngix": object(), "vm_status": object()},
-        apt_host_map={"ssh_ngix": ("srv-ngix", lambda: None)},
+        apt_host_map={"ssh_ngix": ("srv-nginx", lambda: None)},
         pending_infra_cmd={},
         parse_upgradable_packages_fn=lambda txt: [],
         log_info_fn=lambda msg: None,
@@ -173,7 +173,7 @@ def test_apt_list_capture_dans_pending():
             pending_infra_cmd=pending,
         ),
     ))
-    assert pending["host"] == "srv-ngix"
+    assert pending["host"] == "srv-nginx"
     assert pending["packages"] == ["nginx", "openssl"]
     assert pending["ts"] == 1000.0
 

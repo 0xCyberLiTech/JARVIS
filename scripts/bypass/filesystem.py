@@ -2,7 +2,7 @@
 
 Extrait de jarvis.py session 33 (2026-05-13) — Phase 3 module 7.
 
-Permet à JARVIS de répondre à "lis /etc/nginx/nginx.conf sur srv-ngix" sans
+Permet à JARVIS de répondre à "lis /etc/nginx/nginx.conf sur srv-nginx" sans
 appeler le LLM : juste détection regex + cat/ls SSH + rendu UI holographique.
 
 Couplage : `vm_ssh_map` est passé en argument (dependency injection) — les
@@ -68,9 +68,9 @@ FCORR_RE = re.compile(
     re.I,
 )
 
-# VM cible explicite ("sur srv-ngix")
+# VM cible explicite ("sur srv-nginx")
 SUR_VM_RE = re.compile(
-    r'\bsur\s+(clt|srv-clt|pa85|srv-pa85|ngix|nginx|srv-ngix|proxmox|dev|dev-1|srv-dev|srv-dev-1)\b',
+    r'\bsur\s+(clt|srv-clt|pa85|srv-pa85|ngix|nginx|srv-nginx|proxmox|dev|dev-1|srv-dev|srv-dev-1)\b',
     re.I,
 )
 

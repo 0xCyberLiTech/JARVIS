@@ -28,7 +28,7 @@ def _reinit_commands_sse():
     # Mock du module bypass_pve (juste les 2 attributs utilisés)
     bp = MagicMock()
     bp.PVE_STOP_BLACKLIST = {100}              # opnsense protégé
-    bp.REBOOT_SVC_CHECKS  = {"srv-ngix": ["nginx", "crowdsec"]}
+    bp.REBOOT_SVC_CHECKS  = {"srv-nginx": ["nginx", "crowdsec"]}
 
     def sse_tok(text, done=False):
         return "data: " + json.dumps({"type": "token", "token": text, "done": done}) + "\n\n"
@@ -42,7 +42,7 @@ def _reinit_commands_sse():
         systemctl_status_timeout_s=8,
         pve_fetch_state=MagicMock(return_value={"vms": []}),
         bypass_pve=bp,
-        vm_start_ssh_map={108: ("srv-ngix", MagicMock(return_value=(True, "OK")))},
+        vm_start_ssh_map={108: ("srv-nginx", MagicMock(return_value=(True, "OK")))},
         pending_reboot={},
         sse_tok=sse_tok,
         log=MagicMock(),
@@ -75,9 +75,9 @@ def test_vm_execute_one_succes_renvoie_4tuple():
     proc_action = MagicMock(returncode=0, stdout="", stderr="")
     proc_status = MagicMock(returncode=0, stdout="status: running")
     with patch.object(sse.subprocess, "run", side_effect=[proc_action, proc_status]):
-        ok, msg, verb, state = sse.vm_execute_one("start", 108, "srv-ngix")
+        ok, msg, verb, state = sse.vm_execute_one("start", 108, "srv-nginx")
     assert ok is True
-    assert "srv-ngix" in msg and "108" in msg and "running" in msg
+    assert "srv-nginx" in msg and "108" in msg and "running" in msg
     assert verb == "démarrée"
     assert state == "running"
 
@@ -87,7 +87,7 @@ def test_vm_execute_one_action_stop_verbe_arretee():
     proc_action = MagicMock(returncode=0, stdout="", stderr="")
     proc_status = MagicMock(returncode=0, stdout="status: stopped")
     with patch.object(sse.subprocess, "run", side_effect=[proc_action, proc_status]):
-        _ok, _msg, verb, state = sse.vm_execute_one("stop", 108, "srv-ngix")
+        _ok, _msg, verb, state = sse.vm_execute_one("stop", 108, "srv-nginx")
     assert verb == "arrêtée"
     assert state == "stopped"
 
@@ -106,9 +106,9 @@ def test_vm_execute_one_echec_returncode_non_zero():
 def test_vm_execute_one_timeout_renvoie_false():
     """subprocess.TimeoutExpired propagé en (False, str(exc))."""
     with patch.object(sse.subprocess, "run", side_effect=subprocess.TimeoutExpired("qm", 15)):
-        ok, msg, verb, state = sse.vm_execute_one("start", 108, "srv-ngix")
+        ok, msg, verb, state = sse.vm_execute_one("start", 108, "srv-nginx")
     assert ok is False
-    assert "Erreur SSH srv-ngix" in msg
+    assert "Erreur SSH srv-nginx" in msg
 
 
 # ── vm_command_sse ─────────────────────────────────────────────────────────
@@ -117,11 +117,11 @@ def test_vm_execute_one_timeout_renvoie_false():
 def test_vm_command_sse_liste_explicite_yield_token_par_vm():
     """Liste explicite de VMs → 1 intro + 1 résultat par VM + done + speak."""
     with patch.object(sse, "vm_execute_one", return_value=(True, "VM ok\n", "démarrée", "running")):
-        events = _parse_events(list(sse.vm_command_sse("start", [(108, "srv-ngix"), (107, "srv-pa85")])))
+        events = _parse_events(list(sse.vm_command_sse("start", [(108, "srv-nginx"), (107, "srv-pa85")])))
     tokens = [e for e in events if e.get("type") == "token"]
     speaks = [e for e in events if e.get("type") == "speak"]
     assert len(speaks) == 1
-    assert "srv-ngix" in speaks[0]["text"] and "srv-pa85" in speaks[0]["text"]
+    assert "srv-nginx" in speaks[0]["text"] and "srv-pa85" in speaks[0]["text"]
     # Au moins 4 tokens (2 intro + 2 result)
     assert sum(1 for t in tokens if "Exécution" in t.get("token", "")) == 2
 
@@ -130,14 +130,14 @@ def test_vm_command_sse_dynamic_stop_filtre_running_et_blacklist():
     """action=stop + dynamic → filtre les VMs status=running ET hors PVE_STOP_BLACKLIST."""
     sse._pve_fetch_state = MagicMock(return_value={"vms": [
         {"vmid": 100, "status": "running", "name": "opnsense"},  # blacklist
-        {"vmid": 108, "status": "running", "name": "srv-ngix"},
+        {"vmid": 108, "status": "running", "name": "srv-nginx"},
         {"vmid": 999, "status": "stopped", "name": "off"},        # déjà stopped
     ]})
     with patch.object(sse, "vm_execute_one", return_value=(True, "ok\n", "arrêtée", "stopped")):
         events = _parse_events(list(sse.vm_command_sse("stop", "dynamic")))
     speaks = [e for e in events if e.get("type") == "speak"]
     assert len(speaks) == 1
-    assert "srv-ngix" in speaks[0]["text"]
+    assert "srv-nginx" in speaks[0]["text"]
     assert "opnsense" not in speaks[0]["text"]
 
 
@@ -181,7 +181,7 @@ def test_post_start_verify_sse_ssh_ok_check_services_actifs():
         (True, "active"),                                          # systemctl is-active crowdsec
     ])
     with patch.object(sse.time, "sleep"):
-        events = _parse_events(list(sse.post_start_verify_sse("srv-ngix", ssh)))
+        events = _parse_events(list(sse.post_start_verify_sse("srv-nginx", ssh)))
     full = "".join(e.get("token", "") for e in events)
     assert "accessible" in full
     assert "Tous les services sont actifs" in full
@@ -197,7 +197,7 @@ def test_post_start_verify_sse_service_inactif_message_echec():
         (True, "active"),    # crowdsec OK
     ])
     with patch.object(sse.time, "sleep"):
-        events = _parse_events(list(sse.post_start_verify_sse("srv-ngix", ssh)))
+        events = _parse_events(list(sse.post_start_verify_sse("srv-nginx", ssh)))
     full = "".join(e.get("token", "") for e in events)
     assert "en échec" in full
 
@@ -259,9 +259,9 @@ def test_pve_stop_vms_before_reboot_polling_confirme_stopped():
     proc_status = MagicMock(stdout="status: stopped")
     with patch.object(sse.subprocess, "run", side_effect=[proc_stop, proc_status]), \
          patch.object(sse.time, "sleep"):
-        events = _parse_events(list(sse.pve_stop_vms_before_reboot([(108, "srv-ngix")])))
+        events = _parse_events(list(sse.pve_stop_vms_before_reboot([(108, "srv-nginx")])))
     full = "".join(e.get("token", "") for e in events)
-    assert "srv-ngix" in full
+    assert "srv-nginx" in full
     assert "arrêtée" in full
 
 
@@ -270,9 +270,9 @@ def test_pve_stop_vms_before_reboot_erreur_qm_stop_skip_polling():
     proc_stop = MagicMock(returncode=1, stdout="", stderr="VM is locked")
     with patch.object(sse.subprocess, "run", return_value=proc_stop), \
          patch.object(sse.time, "sleep"):
-        events = _parse_events(list(sse.pve_stop_vms_before_reboot([(108, "srv-ngix")])))
+        events = _parse_events(list(sse.pve_stop_vms_before_reboot([(108, "srv-nginx")])))
     full = "".join(e.get("token", "") for e in events)
-    assert "✗" in full and "srv-ngix" in full
+    assert "✗" in full and "srv-nginx" in full
 
 
 # ── reboot_machine_sse ─────────────────────────────────────────────────────
@@ -296,7 +296,7 @@ def test_reboot_machine_sse_proxmox_arrete_vms_avant():
     ssh = MagicMock(return_value=(True, "OK"))
     pending = {"host": "proxmox", "ssh_fn": ssh, "is_proxmox": True}
     sse._pve_fetch_state = MagicMock(return_value={"vms": [
-        {"vmid": 108, "status": "running", "name": "srv-ngix"},
+        {"vmid": 108, "status": "running", "name": "srv-nginx"},
         {"vmid": 100, "status": "running", "name": "opnsense"},   # blacklist
     ]})
     with patch.object(sse, "pve_stop_vms_before_reboot", return_value=iter([
@@ -329,7 +329,7 @@ def test_service_restart_sse_succes_actif():
         (True, ""),       # systemctl restart
         (True, "active"), # systemctl is-active
     ])
-    events = _parse_events(list(sse.service_restart_sse("srv-ngix", ssh, "nginx")))
+    events = _parse_events(list(sse.service_restart_sse("srv-nginx", ssh, "nginx")))
     full = "".join(e.get("token", "") for e in events)
     speaks = [e for e in events if e.get("type") == "speak"]
     assert "nginx actif" in full
@@ -342,7 +342,7 @@ def test_service_restart_sse_echec_restart_renvoie_etat_inactif():
         (False, "Job failed"),
         (True, "inactive"),
     ])
-    events = _parse_events(list(sse.service_restart_sse("srv-ngix", ssh, "nginx")))
+    events = _parse_events(list(sse.service_restart_sse("srv-nginx", ssh, "nginx")))
     full = "".join(e.get("token", "") for e in events)
     speaks = [e for e in events if e.get("type") == "speak"]
     assert "Échec redémarrage" in full
@@ -352,7 +352,7 @@ def test_service_restart_sse_echec_restart_renvoie_etat_inactif():
 def test_service_restart_sse_exception_ssh_renvoie_erreur():
     """ssh_func lance Exception sur restart → token erreur + speak 'Erreur SSH'."""
     ssh = MagicMock(side_effect=Exception("connection refused"))
-    events = _parse_events(list(sse.service_restart_sse("srv-ngix", ssh, "nginx")))
+    events = _parse_events(list(sse.service_restart_sse("srv-nginx", ssh, "nginx")))
     full = "".join(e.get("token", "") for e in events)
     speaks = [e for e in events if e.get("type") == "speak"]
     assert "Erreur SSH" in full

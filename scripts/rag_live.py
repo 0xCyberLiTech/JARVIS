@@ -4,7 +4,7 @@ Extrait de jarvis.py session 33 (2026-05-13) — Phase 3 module 13.
 
 Différent du RAG statique (vecteurs+BM25 sur jarvis_rag/) :
 - Pas d'embedding → latence quasi-nulle (juste un cache texte)
-- Refresh asynchrone toutes les 5 min via SSH srv-ngix
+- Refresh asynchrone toutes les 5 min via SSH srv-nginx
 - Injection conditionnelle dans system prompt si la question matche `LIVE_KW`
 
 Dependency injection : `ssh_fn` passée en argument à `refresh()` et `prewarm()`.
@@ -80,7 +80,7 @@ def refresh(ssh_fn, timeout: int = 18):
         with _lock:
             _text = output[:3000]  # 3000 chars max → ~600 tokens
         _last_refresh = now
-        _log.info(f"[RAG-LIVE] Cache rafraîchi — {len(output)} chars depuis srv-ngix")
+        _log.info(f"[RAG-LIVE] Cache rafraîchi — {len(output)} chars depuis srv-nginx")
     except Exception as e:
         _log.warning(f"[RAG-LIVE] Erreur refresh: {e}")
 

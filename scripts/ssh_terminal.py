@@ -21,7 +21,7 @@ from bypass import code as bypass_code
 # ── Mapping SSH terminal (4 hôtes — retiré 2026-05-17)
 TERMINAL_MAP = {
     "dev1":   {"ip": bypass_code.CODE_DEV_IP,   "port": bypass_code.CODE_DEV_PORT, "user": "root",      "key": bypass_code.CODE_DEV_KEY,                "label": "srv-dev-1"},
-    "ngix":   {"ip": "192.168.1.50",            "port": 2272,                       "user": "root",      "key": str(Path.home() / ".ssh" / "id_nginx"),  "label": "srv-ngix"},
+    "ngix":   {"ip": "192.168.1.50",            "port": 2272,                       "user": "root",      "key": str(Path.home() / ".ssh" / "id_nginx"),  "label": "srv-nginx"},
     "clt":    {"ip": "192.168.1.12",            "port": 2272,                       "user": "root",      "key": str(Path.home() / ".ssh" / "id_clt"),    "label": "clt"},
     "pa85":   {"ip": "192.168.1.13",            "port": 2272,                       "user": "root",      "key": str(Path.home() / ".ssh" / "id_pa85"),   "label": "pa85"},
 }

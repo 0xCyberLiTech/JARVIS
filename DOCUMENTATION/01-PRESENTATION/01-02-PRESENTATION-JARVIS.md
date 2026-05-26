@@ -62,7 +62,7 @@ Le système repose sur deux niveaux d'intelligence complémentaires :
 |------|----|------|----------------|
 | Windows 11 | localhost | JARVIS · dev · Proxmox client | — |
 | Proxmox VE | 192.168.1.20 | Hyperviseur · ZFS 3.5 To | `~/.ssh/id_proxmox` · 2272 |
-| srv-ngix (VM 108) | 192.168.1.50 | nginx · CrowdSec · SOC dashboard | `~/.ssh/id_nginx` · 2272 |
+| srv-nginx (VM 108) | 192.168.1.50 | nginx · CrowdSec · SOC dashboard | `~/.ssh/id_nginx` · 2272 |
 | clt (VM 106) | 192.168.1.12 | Apache · site CLT | `~/.ssh/id_clt` · 2272 |
 | pa85 (VM 107) | 192.168.1.13 | Apache · site PA85 | `~/.ssh/id_pa85` · 2272 |
 
@@ -81,7 +81,7 @@ Le système repose sur deux niveaux d'intelligence complémentaires :
 |--------|-------------|------|
 | JARVIS | localhost:5000 | ✅ Production · v3.3 · score dette honnête ~90/100 (recalibré post-audit pytest --cov : refactor JS −98,1% + 568 tests pytest sur 27/34 modules avec coverage 35% lignes + fix perf IPv6 + hook pre-push) |
 | SOC Dashboard | 192.168.1.50:8080 | ✅ v3.97.157 · 35 tuiles · LAN uniquement |
-| srv-ngix | 192.168.1.50 | ✅ nginx · CrowdSec · WAF · audit 10/10 |
+| srv-nginx | 192.168.1.50 | ✅ nginx · CrowdSec · WAF · audit 10/10 |
 | CLT | 192.168.1.12 | ✅ Apache · SEO validé GSC |
 | PA85 | 192.168.1.13 | ✅ Apache · PHP · XFF fix |
 | Proxmox backups | local D:\ | ✅ Auto samedi 23h · quota 300 Go |
@@ -152,7 +152,7 @@ JARVIS dispose de 4 canaux SSH permanents. Il agit sur chaque nœud sans interve
 ```
 Windows 11 — JARVIS :5000
 │
-├──► SSH → srv-ngix (192.168.1.50) · port 2272 · id_nginx
+├──► SSH → srv-nginx (192.168.1.50) · port 2272 · id_nginx
 │         ├─ Lire : nginx logs · CrowdSec decisions · fail2ban · Suricata
 │         ├─ Lire : monitoring.json (source SOC temps réel · poll 30s)
 │         ├─ Agir : ban IP   → cscli decisions add --ip X --duration 24h
@@ -163,7 +163,7 @@ Windows 11 — JARVIS :5000
 │         ├─ Lire  : qm list · pvesm status · état VMs
 │         ├─ Agir  : qm stop VMID   (bypass LLM → subprocess direct · 2-3s)
 │         └─ Agir  : qm start VMID  (bypass LLM → subprocess direct · 2-3s)
-│                   VMs gérées : 106 clt · 107 pa85 · 108 srv-ngix
+│                   VMs gérées : 106 clt · 107 pa85 · 108 srv-nginx
 │
 ├──► SSH → clt (192.168.1.12) · port 2272 · id_clt
 │         └─ Lire : df -h · systemctl status apache2 · error.log
@@ -200,7 +200,7 @@ Thread auto-engine SOC (continu)
 └─ Toutes les actions journalisées → onglet ◈ SOC (timestamps · résultat)
 
 Thread rag-live-prewarm (démarrage +15s)
-└─ SSH srv-ngix → cache Suricata fast.log + CrowdSec decisions + fail2ban
+└─ SSH srv-nginx → cache Suricata fast.log + CrowdSec decisions + fail2ban
    TTL 300s · injecté dans le contexte LLM sur questions logs/alertes
 
 Thread gpu-monitor (poll 30s)
@@ -266,10 +266,10 @@ Internet
    │
    ▼
 Freebox (NAT)
-   │  zéro port exposé sauf 80/443 redirigés vers srv-ngix
+   │  zéro port exposé sauf 80/443 redirigés vers srv-nginx
    │
    ▼
-srv-ngix (192.168.1.50)
+srv-nginx (192.168.1.50)
    ├─ UFW                    pare-feu kernel (whitelist ports)
    ├─ GeoIP nginx            restriction géographique → 403
    ├─ CrowdSec bouncer       blacklist comportementale (IPs bannies)
@@ -298,7 +298,7 @@ SOC Dashboard (LAN uniquement)
 | EXPLOIT | Tentative CVE · RCE · injection | Alerte immédiate · ban si non bloqué |
 
 **Score de menace :** 0-29 FAIBLE · 30-49 MOYEN · 50-69 ÉLEVÉ · ≥70 CRITIQUE
-Source unique : `monitoring_gen.py` sur srv-ngix → jamais recalculé par JARVIS.
+Source unique : `monitoring_gen.py` sur srv-nginx → jamais recalculé par JARVIS.
 
 ---
 
@@ -306,7 +306,7 @@ Source unique : `monitoring_gen.py` sur srv-ngix → jamais recalculé par JARVI
 
 ### 5.1 Contexte
 
-Commandes de contrôle VM peu fiables : `arrête pa85`, `démarre srv-ngix` → phi4 générait une analyse SOC au lieu d'exécuter SSH. Lenteur 20-60s. Typos non reconnues. Trois problèmes distincts résolus en cascade.
+Commandes de contrôle VM peu fiables : `arrête pa85`, `démarre srv-nginx` → phi4 générait une analyse SOC au lieu d'exécuter SSH. Lenteur 20-60s. Typos non reconnues. Trois problèmes distincts résolus en cascade.
 
 ---
 
@@ -317,17 +317,17 @@ Commandes de contrôle VM peu fiables : `arrête pa85`, `démarre srv-ngix` → 
 **Cause :**
 
 ```
-"démarre srv-ngix"
+"démarre srv-nginx"
       │
       ▼
 JS : _SOC_CHAT_KW contenait "serveur", "nginx", "ip"…
-     → match sur "srv-ngix"
+     → match sur "srv-nginx"
      → injection monitoring.json en tête du message
      → soc_ctx_injected = true
       │
       ▼
 Python api_chat()
-  last_user = "[CONTEXTE SOC... score: 45 IPs: 3...]\n\nDémarre srv-ngix"
+  last_user = "[CONTEXTE SOC... score: 45 IPs: 3...]\n\nDémarre srv-nginx"
   _INFRA_KW.search(last_user)   ← cherche dans le texte CONTAMINÉ → fail
   soc_trigger = True (mots SOC présents dans le JSON injecté)
       │
@@ -436,7 +436,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 "démarrer pa85"       → qm start 107 → "pa85 démarrée."   ✓  2-3s
 "Démarrer clt + pa85" → qm start 106 + qm start 107       ✓
 "arrêter les vms"     → qm stop 107 (pa85) + qm stop 106 (clt)
-                         srv-ngix (108) exclu — dashboard SOC protégé  ✓
+                         srv-nginx (108) exclu — dashboard SOC protégé  ✓
 ```
 
 ---
@@ -451,7 +451,7 @@ Appliqué dans `_VM_STOP_RE`, `_VM_ALL_STOP_RE`, `_INFRA_KW` (3 occurrences).
 | 2026-05-04 | Résilience Ollama hors ligne | try/except SSE error token — plus de 500 silencieux |
 | 2026-05-04 | Pont Claude ↔ JARVIS | MCP 5 outils initiaux : jarvis_chat · soc_status · stats · soc_ask · infra_status |
 | 2026-05-08 → 2026-05-13 | Extension MCP | **MCP 10 outils** : + jarvis_proxmox_vms · jarvis_read_file · jarvis_model_switch · jarvis_last_response · jarvis_code_exec |
-| 2026-05-04 | RAG logs temps réel | SSH srv-ngix · Suricata/CrowdSec/fail2ban · TTL 300s · pré-chauffe 15s |
+| 2026-05-04 | RAG logs temps réel | SSH srv-nginx · Suricata/CrowdSec/fail2ban · TTL 300s · pré-chauffe 15s |
 | 2026-05-03 | XTTS v2 | coqui-tts 0.27.5 · 58 voix + voice prints · GPU CUDA |
 | 2026-05-03 | Moteur vocal complet | edge-tts → Kokoro → Piper → SAPI5 · fallback auto · LED état |
 | 2026-05-03 | Anti-hallucination SOC | SCORE OFFICIEL · règle FIDÉLITÉ tous profils · `_monCtxStr` aligné |

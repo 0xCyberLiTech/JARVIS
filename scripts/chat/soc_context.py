@@ -30,7 +30,7 @@ _KC_BAN_SIGNAL_MIN_HITS = 10
 # `security_whitelists.py` (source maître). Toute évolution = MAJ ici + grep.
 _INFRA_IPS = (
     ("192.168.1.20",  "Proxmox VE — hyperviseur"),
-    ("192.168.1.50",  "srv-ngix — hôte du SOC lui-même (nginx + CrowdSec + monitoring_gen)"),
+    ("192.168.1.50",  "srv-nginx — hôte du SOC lui-même (nginx + CrowdSec + monitoring_gen)"),
     ("192.168.1.12",  "clt — VM Apache site CLT"),
     ("192.168.1.13",  "pa85 — VM Apache site PA85"),
     ("192.168.1.21",  "srv-dev-1 — VM Debian dev/test"),
@@ -74,7 +74,7 @@ def pve_context_lines(pve: dict) -> list:
     return lines
 
 
-def build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS RÉEL (srv-ngix) ===") -> str:
+def build_monitoring_context(d: dict, header: str = "=== DONNÉES SOC EN TEMPS RÉEL (srv-nginx) ===") -> str:
     """Construit le contexte textuel SOC depuis un dict monitoring.json parsé."""
     cs   = d.get("crowdsec", {})
     f2b  = d.get("fail2ban", {})

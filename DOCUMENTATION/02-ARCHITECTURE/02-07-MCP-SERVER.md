@@ -17,7 +17,7 @@ Le serveur MCP (Model Context Protocol) expose JARVIS comme un set d'**outils** 
 
 **Architecture clé :** JARVIS filtre/agrège/détecte localement → Claude voit uniquement l'escalade ou la synthèse.
 
-> **Hiérarchie des appels et autonomie** : pour le détail de qui appelle qui (Claude → MCP → JARVIS → srv-ngix), qui tombe si X est éteint, et pourquoi le MCP reste autonome de Claude, voir la section dédiée [`CIRCUIT_SOC_JARVIS.md#hiérarchie-des-appels-et-autonomie`](../CIRCUIT_SOC_JARVIS.md#hi%C3%A9rarchie-des-appels-et-autonomie). En résumé : **MCP est un proxy autonome qui sert tout client MCP** (Claude n'est qu'un consommateur parmi d'autres possibles) · **JARVIS pilote le process MCP** (subprocess + watchdog) mais ne dépend jamais ni de Claude ni du MCP pour fonctionner.
+> **Hiérarchie des appels et autonomie** : pour le détail de qui appelle qui (Claude → MCP → JARVIS → srv-nginx), qui tombe si X est éteint, et pourquoi le MCP reste autonome de Claude, voir la section dédiée [`CIRCUIT_SOC_JARVIS.md#hiérarchie-des-appels-et-autonomie`](../CIRCUIT_SOC_JARVIS.md#hi%C3%A9rarchie-des-appels-et-autonomie). En résumé : **MCP est un proxy autonome qui sert tout client MCP** (Claude n'est qu'un consommateur parmi d'autres possibles) · **JARVIS pilote le process MCP** (subprocess + watchdog) mais ne dépend jamais ni de Claude ni du MCP pour fonctionner.
 
 > **Split monolithe — Phase 3 (session 33) + chantier dette (2026-05-14/15) + chantier coverage (2026-05-17)** : le serveur MCP `jarvis_mcp_server.py` n'a **PAS changé fonctionnellement** — il consomme toujours les routes HTTP de `jarvis.py`. Les outils MCP fonctionnent identiquement après extraction de **32 modules** Python (Phase 3 + ajouts ultérieurs `audio_dsp.py` et `ollama_circuit.py`). `jarvis.py` a été allégé (ex-monolithe 6592 lignes), les routes Flask consommées par MCP restent dans jarvis.py via wrappers DI vers les modules. Score dette, tests et coverage → source unique [`../BILAN-TECHNIQUE.md` §0](../BILAN-TECHNIQUE.md) (audit dette complet 2026-05-22 · refactor JS terminé (−98,1%) · fix perf IPv6 -97 % latence interne · circuit breaker Ollama étendu 8 call-sites · pré-warm Kokoro CUDA · hook pre-push pytest · SSH write ops 4 couches + audit log forensic (2026-05-17) · Ollama 0.24.0 · pas de CI cloud — alternative locale OK).
 
@@ -86,7 +86,7 @@ Tous les outils retournent du `TextContent` préfixé par `JARVIS_HEADER` (carto
 **Endpoint :** `GET /api/stats`
 
 ### 5. `jarvis_infra_status`
-**Description :** État rapide de toute l'infrastructure — Proxmox VMs, srv-ngix (nginx/CrowdSec), clt (Apache), pa85 (Apache).
+**Description :** État rapide de toute l'infrastructure — Proxmox VMs, srv-nginx (nginx/CrowdSec), clt (Apache), pa85 (Apache).
 **Params :** `focus: string` (optionnel — `'proxmox'`, `'ngix'`, `'clt'`, `'pa85'`, ou vide pour tout)
 **Endpoint :** `POST /api/chat` (LLM avec contexte infra)
 
@@ -121,14 +121,14 @@ Tous les outils retournent du `TextContent` préfixé par `JARVIS_HEADER` (carto
 **Endpoint :** bypass Python `_detect_code_command` → `_code_scp_exec_sse`
 
 ### 11. `jarvis_defense_24h`
-**Description :** Résumé compact des actions défensives 24h sur srv-ngix — KPI agrégés (bans CrowdSec, blocks WAF CLT/PA85, alertes Suricata sev1/sev2, GeoBlock, fail2ban actifs, UFW), heatmap horaire, top pays/AS/scénarios, timeline rétrochrono. Source pré-calculée par `defense_aggregator.py` côté SOC (cron 60 s) → `defense_24h.json` (16 Ko, **13× plus compact** que monitoring.json).
+**Description :** Résumé compact des actions défensives 24h sur srv-nginx — KPI agrégés (bans CrowdSec, blocks WAF CLT/PA85, alertes Suricata sev1/sev2, GeoBlock, fail2ban actifs, UFW), heatmap horaire, top pays/AS/scénarios, timeline rétrochrono. Source pré-calculée par `defense_aggregator.py` côté SOC (cron 60 s) → `defense_24h.json` (16 Ko, **13× plus compact** que monitoring.json).
 **Params :** aucun
 **Usage :** « combien de bans aujourd'hui ? quel pays attaque le plus ? quelle heure de pointe ? » sans avoir à parser le brut.
 **Endpoint :** `GET /api/soc/defense` (cache 30s côté JARVIS · proxy vers `http://192.168.1.50:8080/defense_24h.json`)
 **Pattern :** Single Source of Truth — même fichier consommé par la page web `/defense.html`, le bloc d'injection phi4 mode SOC, et cet outil MCP.
 
 ### 12. `jarvis_ioc_status` *(Sprint 18d — 2026-05-16)*
-**Description :** Score IoC POST-COMPROMISSION 0-100 + 6 signaux pré-calculés (AIDE drift, C2 outbound Suricata, SSH anomaly, webshells nginx, AppArmor denials, sudo events). Détecte si un attaquant est **DÉJÀ ENTRÉ** dans le SOC homelab (vs détecter les tentatives — couvert par KC). Niveau **OK / WARN / CRIT**. Source pré-calculée par `ioc_collect.py` sur srv-ngix (cron 60s, 95% cov).
+**Description :** Score IoC POST-COMPROMISSION 0-100 + 6 signaux pré-calculés (AIDE drift, C2 outbound Suricata, SSH anomaly, webshells nginx, AppArmor denials, sudo events). Détecte si un attaquant est **DÉJÀ ENTRÉ** dans le SOC homelab (vs détecter les tentatives — couvert par KC). Niveau **OK / WARN / CRIT**. Source pré-calculée par `ioc_collect.py` sur srv-nginx (cron 60s, 95% cov).
 **Params :** aucun
 **Usage :** « quel est le score IoC ? », « y a-t-il une compromission ? », « JARVIS surveille quoi en post-compro ? »
 **Endpoint :** `GET /api/soc/ioc` (cache 30s côté JARVIS · extraction clé `ioc` de `monitoring.json`)

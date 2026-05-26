@@ -155,7 +155,7 @@ fallback).
 ### (b) Documentation auto-générée des docstrings (~1 h, +0.5 pt)
 
 - Sphinx ou pdoc3 sur les 24 tuiles
-- Sortie HTML statique servie par nginx srv-ngix ou dans `DOCUMENTATION/`
+- Sortie HTML statique servie par nginx srv-nginx ou dans `DOCUMENTATION/`
 - Auto-régénérée à chaque commit (CI ou hook)
 
 ### (c) Réduction des aliases backward-compat (~1-2 h, +0.5 pt)

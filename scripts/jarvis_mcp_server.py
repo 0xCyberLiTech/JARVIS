@@ -153,7 +153,7 @@ _TOOLS_DEFS: list[Tool] = [
     Tool(name="jarvis_soc_status",
          description=("Retourne l'état SOC temps réel : niveau de menace, IPs bannies CrowdSec/fail2ban, "
                       "services actifs, auto-engine JARVIS. Utilise quand l'utilisateur pose des questions "
-                      "sur la sécurité du serveur srv-ngix."),
+                      "sur la sécurité du serveur srv-nginx."),
          inputSchema={"type": "object", "properties": {}}),
     Tool(name="jarvis_soc_ask",
          description=("Pose une question SOC à JARVIS avec injection automatique du contexte live "
@@ -169,7 +169,7 @@ _TOOLS_DEFS: list[Tool] = [
          inputSchema={"type": "object", "properties": {}}),
     Tool(name="jarvis_infra_status",
          description=("Demande à JARVIS un état rapide de toute l'infrastructure : Proxmox VMs, "
-                      "srv-ngix (nginx/CrowdSec), clt (Apache), pa85 (Apache). "
+                      "srv-nginx (nginx/CrowdSec), clt (Apache), pa85 (Apache). "
                       "Utilise quand l'utilisateur veut un aperçu général de la santé du homelab."),
          inputSchema={"type": "object",
                       "properties": {"focus": {"type": "string",
@@ -210,7 +210,7 @@ _TOOLS_DEFS: list[Tool] = [
                           "code":     {"type": "string", "description": "Contenu complet du fichier à écrire et exécuter"}},
                       "required": ["filename", "code"]}),
     Tool(name="jarvis_defense_24h",
-         description=("Résumé compact des actions défensives 24h sur srv-ngix : KPI agrégés "
+         description=("Résumé compact des actions défensives 24h sur srv-nginx : KPI agrégés "
                       "(bans CrowdSec, blocks WAF CLT/PA85, alertes Suricata sev1/sev2, GeoBlock, "
                       "fail2ban actifs, UFW), heatmap horaire 24h, top pays/AS/scénarios, timeline "
                       "rétrochrono des derniers événements. Source pré-calculée par "
@@ -224,7 +224,7 @@ _TOOLS_DEFS: list[Tool] = [
                       "(connexions hors heures), webshells (POST PHP suspects nginx), AppArmor "
                       "denials (tentatives escalade), sudo events. Détecte si un attaquant est "
                       "DÉJÀ ENTRÉ dans le SOC homelab — vs détecter les tentatives. Niveau "
-                      "OK / WARN / CRIT. Source pré-calculée par ioc_collect.py sur srv-ngix "
+                      "OK / WARN / CRIT. Source pré-calculée par ioc_collect.py sur srv-nginx "
                       "(cron 60s). À utiliser pour 'quel est le score IoC ?', 'y a-t-il une "
                       "compromission ?', 'JARVIS surveille quoi en post-compro ?'."),
          inputSchema={"type": "object", "properties": {}}),
@@ -294,7 +294,7 @@ async def _handle_jarvis_infra_status(a: dict) -> list[TextContent]:
     question = (f"Vérifie l'état de {focus} et donne-moi un résumé concis (services, ressources, erreurs récentes)."
                 if focus else
                 "Vérifie l'état général de l'infrastructure : "
-                "Proxmox VE (VMs actives, stockage), srv-ngix (nginx, CrowdSec, fail2ban), "
+                "Proxmox VE (VMs actives, stockage), srv-nginx (nginx, CrowdSec, fail2ban), "
                 "clt (Apache, site CLT), pa85 (Apache, site PA85). "
                 "Résumé en 5 points max — signale uniquement ce qui est anormal.")
     payload = {"history": [{"role": "user", "content": question}],

@@ -244,7 +244,7 @@ _load_cooldowns()
 # ════════════════════════════════════════════════════════════════
 # CONFIG CENTRALISÉE — chargée depuis soc_config.json (optionnel)
 # Fallback sur valeurs par défaut si le fichier est absent.
-# Permet de changer IP/port srv-ngix, clé SSH, URL monitoring
+# Permet de changer IP/port srv-nginx, clé SSH, URL monitoring
 # sans modifier le code.
 # ════════════════════════════════════════════════════════════════
 _SOC_CONFIG_PATH = _SCRIPTS_DIR / "soc_config.json"
@@ -402,7 +402,7 @@ _DEFENSE_URL = _MONITORING_URL.rsplit("/", 1)[0] + "/defense_24h.json"
 
 
 def _fetch_monitoring(timeout=12, force=False):
-    """Récupère monitoring.json depuis srv-ngix via HTTP (plus léger que SSH).
+    """Récupère monitoring.json depuis srv-nginx via HTTP (plus léger que SSH).
     Cache TTL 30s pour la boucle de fond. force=True bypasse le cache (appels utilisateur).
     Timeout global partagé HTTP+SSH = max 15s (évite 32s worst-case)."""
     now = time.time()
@@ -430,7 +430,7 @@ def _fetch_monitoring(timeout=12, force=False):
 
 
 def _fetch_defense(timeout=8, force=False):
-    """Récupère defense_24h.json depuis srv-ngix via HTTP. Cache TTL 30s.
+    """Récupère defense_24h.json depuis srv-nginx via HTTP. Cache TTL 30s.
     Pas de fallback SSH — si HTTP échoue on retourne None (la page web est la
     source de vérité, JARVIS s'adapte si elle est temporairement indispo)."""
     now = time.time()
@@ -475,7 +475,7 @@ def _ssh_host(ssh_arr, remote_cmd, timeout=20, retries=1):
 
 
 def _ssh_ngix(remote_cmd, timeout=20, retries=1):
-    """Exécute une commande sur srv-ngix via SSH."""
+    """Exécute une commande sur srv-nginx via SSH."""
     return _ssh_host(_SSH_NGIX, remote_cmd, timeout, retries)
 
 
@@ -520,7 +520,7 @@ def _ip_to_tts(ip: str) -> str:
 
 
 def _ban_ip_ssh(ip: str, reason: str, duration: str = "24h") -> tuple:
-    """Exécute `cscli decisions add` sur srv-ngix. Retourne (ok, output).
+    """Exécute `cscli decisions add` sur srv-nginx. Retourne (ok, output).
     Si la commande échoue (IP déjà bannie en doublon), vérifie via `cscli decisions list`
     et retourne (True, 'already-banned') — évite les faux échecs en race condition."""
     cmd = (f"cscli decisions add --ip {shlex.quote(ip)} "
@@ -654,7 +654,7 @@ def _check_csrf():
 
 @soc_bp.route("/api/soc/ban-ip", methods=["POST"])
 def api_soc_ban_ip():
-    """Ban une IP via CrowdSec sur srv-ngix."""
+    """Ban une IP via CrowdSec sur srv-nginx."""
     err = _check_csrf()
     if err: return err
     data     = request.json or {}
@@ -695,7 +695,7 @@ def api_soc_unban_ip():
 
 @soc_bp.route("/api/soc/restart-service", methods=["POST"])
 def api_soc_restart_service():
-    """Redémarre un service autorisé sur srv-ngix."""
+    """Redémarre un service autorisé sur srv-nginx."""
     err = _check_csrf()
     if err: return err
     svc = (request.json or {}).get("service", "").strip().lower()
@@ -748,7 +748,7 @@ def api_soc_test():
     ok_ssh, out_ssh = _ssh_ngix("echo JARVIS_SOC_TEST_OK", timeout=8)
     results["ssh_ngix"] = {
         "ok": ok_ssh,
-        "msg": ("SSH srv-ngix opérationnel" if ok_ssh else "SSH srv-ngix KO — " + out_ssh[:_SSH_ERR_TRUNCATE])
+        "msg": ("SSH srv-nginx opérationnel" if ok_ssh else "SSH srv-nginx KO — " + out_ssh[:_SSH_ERR_TRUNCATE])
     }
     try:
         _speak("Test JARVIS. Mode proactif nominal. SSH opérationnel. Surveillance active.")
@@ -829,7 +829,7 @@ def api_soc_threat_score():
 def api_soc_defense():
     """Expose defense_24h.json (résumé compact 24h des actions défensives —
     bans, WAF, GeoBlock, IDS, fail2ban, UFW). Source : defense_aggregator.py
-    sur srv-ngix (cron 60s). Sortie 13× plus compacte que monitoring.json."""
+    sur srv-nginx (cron 60s). Sortie 13× plus compacte que monitoring.json."""
     ok, raw = _fetch_defense(timeout=6)
     if not ok or not raw:
         return Response(json.dumps({"ok": False, "error": "defense_24h.json inaccessible"}),
@@ -846,7 +846,7 @@ def api_soc_defense():
 @soc_bp.route("/api/soc/ioc", methods=["GET"])
 def api_soc_ioc():
     """Expose le bloc `ioc` de monitoring.json (Indicateurs de Compromission
-    POST-COMPROMISSION). Source : ioc_collect.py sur srv-ngix (cron 60s).
+    POST-COMPROMISSION). Source : ioc_collect.py sur srv-nginx (cron 60s).
     Lecture seule — pure extraction d'une sous-clé pré-calculée.
 
     Sprint 18d 2026-05-16 : alimente le MCP tool jarvis_ioc_status."""
@@ -1333,7 +1333,7 @@ def _check_services(svc: dict) -> list:
                 else:
                     parts.append(f"Service {name} hors ligne — redémarrage échoué. Intervention requise.")
             else:
-                parts.append(f"Service {name} est hors ligne sur srv-ngix.")
+                parts.append(f"Service {name} est hors ligne sur srv-nginx.")
     return parts
 
 

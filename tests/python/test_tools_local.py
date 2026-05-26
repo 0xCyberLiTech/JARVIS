@@ -89,10 +89,10 @@ def test_soc_status_fetch_ok_renvoie_contexte_formate():
 
 
 def test_soc_status_fetch_ko_renvoie_erreur_ssh():
-    """fetch_monitoring KO → message 'Erreur SSH srv-ngix : <raw>'."""
+    """fetch_monitoring KO → message 'Erreur SSH srv-nginx : <raw>'."""
     tools_local._fetch_monitoring = MagicMock(return_value=(False, "timeout SSH"))
     result = tools_local.soc_status()
-    assert "Erreur SSH srv-ngix" in result
+    assert "Erreur SSH srv-nginx" in result
     assert "timeout SSH" in result
 
 

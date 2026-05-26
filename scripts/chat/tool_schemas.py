@@ -136,7 +136,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "soc_status",
-            "description": "Récupère l'état complet du SOC depuis srv-ngix (monitoring.json) : niveau de menace, IPs bannies CrowdSec/fail2ban, services, CPU/RAM, trafic, erreurs. Utiliser pour toute question sur la sécurité du serveur.",
+            "description": "Récupère l'état complet du SOC depuis srv-nginx (monitoring.json) : niveau de menace, IPs bannies CrowdSec/fail2ban, services, CPU/RAM, trafic, erreurs. Utiliser pour toute question sur la sécurité du serveur.",
             "parameters": {
                 "type": "object",
                 "properties": {},
@@ -148,11 +148,11 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "commande_ssh_ngix",
-            "description": "Exécute une commande shell sur srv-ngix (192.168.1.50) via SSH. Utiliser pour lire des logs, vérifier des services, interroger CrowdSec/fail2ban, etc. Commandes de lecture uniquement.",
+            "description": "Exécute une commande shell sur srv-nginx (192.168.1.50) via SSH. Utiliser pour lire des logs, vérifier des services, interroger CrowdSec/fail2ban, etc. Commandes de lecture uniquement.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "commande": {"type": "string", "description": "Commande shell à exécuter sur srv-ngix (ex: 'tail -20 /var/log/nginx/access.log')"}
+                    "commande": {"type": "string", "description": "Commande shell à exécuter sur srv-nginx (ex: 'tail -20 /var/log/nginx/access.log')"}
                 },
                 "required": ["commande"]
             }
@@ -162,7 +162,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "commande_ssh_proxmox",
-            "description": "Exécute une commande shell sur Proxmox VE (192.168.1.20) via SSH. Utiliser pour : état des VMs (qm list), stockage (pvesm status), ressources (df -h), et gestion des VMs (qm stop <id>, qm start <id>). IDs : pa85=107, clt=106, srv-ngix=108.",
+            "description": "Exécute une commande shell sur Proxmox VE (192.168.1.20) via SSH. Utiliser pour : état des VMs (qm list), stockage (pvesm status), ressources (df -h), et gestion des VMs (qm stop <id>, qm start <id>). IDs : pa85=107, clt=106, srv-nginx=108.",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -204,7 +204,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "executer_script_windows",
-            "description": "Exécute un script PowerShell local sur la machine Windows. Scripts disponibles : 'backup-auto' (sauvegarde automatique des 4 VMs Proxmox : srv-ngix 108 / clt 106 / pa85 107 / srv-dev-1 101 vers D:\\BACKUP-PROXMOX\\auto\\), 'disk-report' (rapport disque/GPU/CPU → dashboard SOC). Utiliser quand l'utilisateur demande de lancer une sauvegarde Proxmox ou un rapport système.",
+            "description": "Exécute un script PowerShell local sur la machine Windows. Scripts disponibles : 'backup-auto' (sauvegarde automatique des 4 VMs Proxmox : srv-nginx 108 / clt 106 / pa85 107 / srv-dev-1 101 vers D:\\BACKUP-PROXMOX\\auto\\), 'disk-report' (rapport disque/GPU/CPU → dashboard SOC). Utiliser quand l'utilisateur demande de lancer une sauvegarde Proxmox ou un rapport système.",
             "parameters": {
                 "type": "object",
                 "properties": {

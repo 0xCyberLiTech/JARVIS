@@ -607,7 +607,7 @@ personnelle de chaque finding sérieux). Score recalibré honnêtement : le
   vs `ALLOWED_RESTART_SVCS` security_whitelists.py) → consolidées dans
   `security_whitelists.py` (nouvelle `ALLOWED_SOC_RESTART_SVCS`, source unique ;
   `soc._ALLOWED_SERVICES` devient un alias). Divergence `php*-fpm` **résolue le
-  jour même par vérification SSH** : aucun hôte ne tourne php-fpm (srv-ngix sans
+  jour même par vérification SSH** : aucun hôte ne tourne php-fpm (srv-nginx sans
   PHP, clt/pa85 en mod_php `libapache2-mod-php8.4`) — entrées `php*-fpm` mortes
   retirées des deux whitelists. `suricata` ajouté à `ALLOWED_SOC_RESTART_SVCS` :
   l'auto-engine SOC (`_check_services`, déclencheur #10) devait pouvoir le
@@ -923,7 +923,7 @@ Windows 11 (localhost:5000)
 |---|---|---|
 | `ollama_circuit.py` | 100% | Circuit breaker Ollama (state machine 3 états CLOSED/HALF_OPEN/OPEN · backoff exponentiel ×2 plafonné 5min · thread-safe singleton) |
 | `security_whitelists.py` | 100% | `_BLOCKED_SSH` 29 patterns · `_ALLOWED_SERVICES` immuables sans validation |
-| `ssh_terminal.py` | 100% | SSH read-only 4 hôtes (srv-ngix · clt · pa85 · proxmox) · clés `~/.ssh/id_*` |
+| `ssh_terminal.py` | 100% | SSH read-only 4 hôtes (srv-nginx · clt · pa85 · proxmox) · clés `~/.ssh/id_*` |
 | `bypass_filesystem.py` | 100% | Bypass fichiers (read/list/stat) · sandboxé par hôte |
 | `bypass_proxmox.py` | 100% | Bypass Proxmox (API ticket + token · qm list · pct list) |
 | `bypass_backup.py` | 96% | Bypass backup Proxmox + Windows + GPU + disque |
@@ -1086,12 +1086,12 @@ ONGLET SOC · SOC GRAPHIQUES · MODELE/VOICE SWITCHER · SETTINGS GPU HEALTH · 
 
 ## 7. Intégrations SOC (cross-projet)
 
-JARVIS consomme `monitoring.json` (cron srv-ngix 1min) via 3 patterns :
+JARVIS consomme `monitoring.json` (cron srv-nginx 1min) via 3 patterns :
 
 ### 7.1. Cache + fallback SSH
 - `/api/soc/*` endpoints utilisent `_fetch_monitoring()` (cache TTL 30s)
-- Si HTTP `:8080` échoue → fallback SSH `scp` depuis srv-ngix
-- Garde JARVIS opérationnel même si srv-ngix HTTP down
+- Si HTTP `:8080` échoue → fallback SSH `scp` depuis srv-nginx
+- Garde JARVIS opérationnel même si srv-nginx HTTP down
 
 ### 7.2. Injection contexte phi4 mode SOC (100% serveur)
 - `chat_soc_inject.py` injecte un bloc compact dans le system prompt phi4
@@ -1104,7 +1104,7 @@ JARVIS consomme `monitoring.json` (cron srv-ngix 1min) via 3 patterns :
 
 ### Données consommées de SOC
 
-- **`monitoring.json`** v3.7.0 (cron 1min srv-ngix) — 59 clés validées jsonschema
+- **`monitoring.json`** v3.7.0 (cron 1min srv-nginx) — 59 clés validées jsonschema
 - **`defense_24h.json`** (cron 60s `defense_aggregator.py`) — KPI + heatmap 96 buckets + delta + top + timeline
 - ~~`router.json`~~ retiré 2026-05-17 ( — routeur débranché)
 - **clé `ioc`** dans monitoring.json (Sprint 18a `ioc_collect.py`) — 6 signaux POST-COMPROMISSION
@@ -1152,7 +1152,7 @@ JARVIS consomme `monitoring.json` (cron srv-ngix 1min) via 3 patterns :
 
 ### 8.3. SSH read-only par défaut (`ssh_terminal.py` 100% cov)
 
-4 hôtes terminal interactif xterm.js : srv-dev-1 · srv-ngix · clt · pa85. Mode interactif WebSocket PTY (paramiko).
+4 hôtes terminal interactif xterm.js : srv-dev-1 · srv-nginx · clt · pa85. Mode interactif WebSocket PTY (paramiko).
 
 **Hôtes write ops via `_tool_commande_ssh_*`** : 4 wrappers (ngix · proxmox · clt · pa85). Toute commande qui matche un `BLOCKED_SSH_PATTERN` doit passer `check_write_op` → si whitelistée, exécution + audit log.
 
@@ -1202,7 +1202,7 @@ Adresses RFC1918 (10./172.16-31./192.168./127.) **JAMAIS** :
 ### 9.2. Cache SOC 30s + fallback SSH
 
 `_fetch_monitoring()` dans `blueprints/soc.py` :
-- Cache TTL 30s (évite hammering srv-ngix `:8080`)
+- Cache TTL 30s (évite hammering srv-nginx `:8080`)
 - Fallback SSH `scp` automatique si HTTP fail (garde MCP fonctionnel)
 
 ### 9.3. Pré-warm modèles au boot
@@ -1279,7 +1279,7 @@ Push backend params DSP → debouncé 100ms (évite spam HTTP sur drag slider EQ
 - [x] NDT 100/100 dette zéro absolue CSS/JS/HTML/Python
 - [x] MCP `jarvis_soc_ask` injection historique IP 30j
 - [x] 3.3 ThreatScore 30j historique (sparkline + modal Canvas)
-- [x] 4.2 Rapport quotidien (email cron srv-ngix + vocal `_check_daily_report()`)
+- [x] 4.2 Rapport quotidien (email cron srv-nginx + vocal `_check_daily_report()`)
 - [x] 3.2 Corrélation temporelle 14j (campagnes lentes /24 + alerte vocale)
 - [x] 4.1 Proxmox API directe (`_pve_fetch_state` cache 30s · ticket+token)
 - [x] Circuit breaker Ollama 8 call-sites + indicateur HUD

@@ -220,7 +220,7 @@ def _rag_inject(system: str, query: str) -> str:
         _live_mod.trigger_async_refresh(_ssh_ngix, timeout=_ssh_log_timeout_s)
         live_txt = _live_mod.get_text()
         if live_txt:
-            system = system + f"\n\n[LOGS TEMPS RÉEL — srv-ngix]\n{live_txt}\n"
+            system = system + f"\n\n[LOGS TEMPS RÉEL — srv-nginx]\n{live_txt}\n"
     if not results:
         return system
     block = "\n\n[CONTEXTE DOCUMENTAIRE — sources indexées localement]\n"

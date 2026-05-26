@@ -1125,7 +1125,7 @@ if (Test-Path $backupSSH) {
             Log "chmod $k OK"
         }
     }
-    Write-WARN "Verifier known_hosts apres premier SSH : ssh srv-ngix"
+    Write-WARN "Verifier known_hosts apres premier SSH : ssh srv-nginx"
 } else {
     Write-WARN "Pas de sauvegarde SSH dans $backupSSH"
     Write-WARN "Copier manuellement les cles dans $sshDest"

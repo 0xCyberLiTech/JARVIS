@@ -2,7 +2,7 @@
 
 Extrait de jarvis.py session 33 (2026-05-13) — Phase 3 module 8.
 
-Permet à JARVIS de détecter "redémarre srv-ngix", "stop VM 108", "mise à jour pa85"
+Permet à JARVIS de détecter "redémarre srv-nginx", "stop VM 108", "mise à jour pa85"
 sans appeler le LLM. Les générateurs SSE (`_vm_command_sse`, `_reboot_machine_sse`,
 `_update_machine_sse`, `_service_restart_sse`) restent dans `jarvis.py` car
 couplés à paramiko/SSH/Proxmox API.
@@ -23,13 +23,14 @@ import re
 PVE_STOP_BLACKLIST = {100}  # opnsense
 
 # Alias utilisateur → nom Proxmox exact
+# Rétrocompat 2026-05-26 : ancien nom srv-ngix (typo historique) → srv-nginx
 VM_ALIASES: dict[str, str] = {
-    "srv-nginx": "srv-ngix",
+    "srv-ngix": "srv-nginx",
 }
 
 # Services à vérifier après reboot par hôte (utilisé par _post_start_verify_sse)
 REBOOT_SVC_CHECKS: dict[str, list[str]] = {
-    "srv-ngix":  ["nginx", "crowdsec", "fail2ban"],
+    "srv-nginx":  ["nginx", "crowdsec", "fail2ban"],
     "srv-clt":   ["apache2"],
     "srv-pa85":  ["apache2"],
     "proxmox":   ["pve-cluster", "pveproxy", "pvedaemon"],

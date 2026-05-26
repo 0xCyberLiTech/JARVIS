@@ -1,4 +1,4 @@
-"""Outils SSH exposés au LLM via tool-calling — exec sur srv-ngix/proxmox/clt/pa85.
+"""Outils SSH exposés au LLM via tool-calling — exec sur srv-nginx/proxmox/clt/pa85.
 
 Tuile `ssh` — pas de routes HTTP. Les fonctions sont consommées par le
 dispatcher `execute_tool()` de l'ossature quand le LLM appelle un outil

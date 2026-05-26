@@ -25,7 +25,7 @@ TEXTS = [
     ("court (24 c.)",  "Test du moteur TTS."),
     ("court (36 c.)",  "Vérification audio en cours."),
     ("moyen (95 c.)",  "JARVIS effectue un test du moteur de synthèse vocale pour mesurer sa latence."),
-    ("moyen (110 c.)", "Le système de défense SOC a détecté trois nouvelles tentatives de scan sur le serveur srv-ngix."),
+    ("moyen (110 c.)", "Le système de défense SOC a détecté trois nouvelles tentatives de scan sur le serveur srv-nginx."),
     ("moyen (120 c.)", "Analyse en temps réel des logs CrowdSec : aucun ban critique sur les dernières vingt-quatre heures."),
     ("long (290 c.)",
      "Rapport quotidien JARVIS : l'auto-engine SOC reste actif, les services nginx, fail2ban et CrowdSec "

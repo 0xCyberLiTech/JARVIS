@@ -9,7 +9,7 @@ validée — c'est la couche sécurité ultime contre les commandes destructives
 Couvre :
 - BLOCKED_SSH_PATTERNS : 29 patterns SSH interdits (rm, mkfs, dd, shutdown, qm destroy, etc.)
 - ALLOWED_RESTART_SVCS : services autorisés via `systemctl restart` (SSH, 4 hôtes)
-- ALLOWED_SOC_RESTART_SVCS : services restartables via la route HTTP SOC (srv-ngix)
+- ALLOWED_SOC_RESTART_SVCS : services restartables via la route HTTP SOC (srv-nginx)
 - ALLOWED_APT_PKGS : paquets autorisés via `apt install/upgrade`
 - check_write_op() : validation stricte des ops write
 - parse_upgradable_packages() : parsing sortie `apt list --upgradable`
@@ -71,7 +71,7 @@ BLOCKED_SSH_PATTERNS = [
 _SVC_BOUNCER = "crowdsec-firewall-bouncer"
 
 # Services restartables via SSH write-op (`systemctl restart`) sur les 4 hôtes.
-# Vérifié SSH 2026-05-22 : aucun hôte ne tourne php-fpm — srv-ngix n'a pas PHP,
+# Vérifié SSH 2026-05-22 : aucun hôte ne tourne php-fpm — srv-nginx n'a pas PHP,
 # clt/pa85 utilisent mod_php (libapache2-mod-php8.4) → restart PHP = restart apache2.
 # Les anciennes entrées php7.4-fpm / php8.2-fpm étaient mortes : retirées.
 ALLOWED_RESTART_SVCS = {
@@ -80,8 +80,8 @@ ALLOWED_RESTART_SVCS = {
 }
 
 # Services restartables via la route HTTP /api/soc/restart-service (soc.py) ET par
-# l'auto-engine SOC (_check_services). Portée : srv-ngix uniquement.
-# Vérifié SSH 2026-05-22 : srv-ngix fait tourner nginx + CrowdSec + fail2ban +
+# l'auto-engine SOC (_check_services). Portée : srv-nginx uniquement.
+# Vérifié SSH 2026-05-22 : srv-nginx fait tourner nginx + CrowdSec + fail2ban +
 # Suricata, sans aucun PHP. `suricata` ajouté 2026-05-22 : l'auto-engine est censé
 # le redémarrer s'il tombe (déclencheur #10) mais son absence de cette whitelist
 # bloquait l'action. Anciennes entrées php*-fpm mortes retirées.
@@ -220,7 +220,7 @@ INTERNAL_IPS = {
     "192.168.1.13":  "pa85",
     "192.168.1.20":  "proxmox",
     "192.168.1.21":  "srv-dev-1",
-    "192.168.1.50":  "srv-ngix",
+    "192.168.1.50":  "srv-nginx",
     "192.168.1.110": "routeur-asus-wan",
     "192.168.1.254": "freebox-lan",
     "192.168.50.1":  "routeur-asus-rog-be19000-ai",
@@ -277,10 +277,10 @@ def is_protected_ip(ip: str) -> bool:
 
 
 def protected_ip_label(ip: str) -> str:
-    """Retourne le rôle si l'IP est protégée (ex: "srv-ngix"), vide sinon.
+    """Retourne le rôle si l'IP est protégée (ex: "srv-nginx"), vide sinon.
 
     Utile pour afficher le label de rôle dans les rapports JARVIS au lieu
-    d'une IP brute (transparence : "192.168.1.50 srv-ngix" vs "192.168.1.50").
+    d'une IP brute (transparence : "192.168.1.50 srv-nginx" vs "192.168.1.50").
     """
     if not ip:
         return ""

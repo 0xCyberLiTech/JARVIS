@@ -25,7 +25,7 @@ local, contrôle total sur le pipeline modèle/voix/intégrations.
 
 > Faire de JARVIS un **assistant IA spécialisé cybersécurité homelab**
 > capable de :
-> 1. **Analyser** en continu un SOC déployé sur srv-ngix (CrowdSec,
+> 1. **Analyser** en continu un SOC déployé sur srv-nginx (CrowdSec,
 >    fail2ban, Suricata, nginx, ModSec) et alerter vocalement Marc en cas
 >    de menace réelle (filtre RFC1918, anti-double-ban, crawlers FCrDNS
 >    vérifiés)

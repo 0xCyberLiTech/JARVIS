@@ -117,14 +117,14 @@ qui recommandait 4 actions correctives sur l'infrastructure :
 3. Vérifier AppArmor (qualifié d'« inaccessible »)
 4. Appliquer « 17 mises à jour de sécurité en attente »
 
-### Vérifications croisées en live (SSH read-only sur clt, pa85, srv-ngix)
+### Vérifications croisées en live (SSH read-only sur clt, pa85, srv-nginx)
 
 | Recommandation phi4 | Réalité vérifiée | Verdict |
 |---|---|---|
 | Bannir 177.141.47.123 | `cscli decisions list -i 177.141.47.123` → **déjà bannie** (`fail2ban-nginx-cve`, expire ~24h) | ❌ phi4 a violé sa propre RÈGLE ABSOLUE « IPs DÉJÀ NEUTRALISÉES » |
 | ModSec désactivé Apache | `apache2ctl -M` → `security2_module (shared)` actif sur clt **ET** pa85 | ❌ Hallucination pure |
 | AppArmor inaccessible | `aa-status` → 127 profils chargés / 7 enforce (clt) · 106 / 7 (pa85) | ❌ Hallucination pure |
-| 17 updates sécurité | `apt list --upgradable` → **0** sur clt, pa85, srv-ngix | ❌ Chiffre inventé |
+| 17 updates sécurité | `apt list --upgradable` → **0** sur clt, pa85, srv-nginx | ❌ Chiffre inventé |
 
 **4/4 recommandations hallucinées.** L'attaque réelle (`/cgi-bin/%2e%2e/.../bin/sh` payload `libredtail-http` depuis 177.141.47.123) avait été détectée par Suricata, escaladée par fail2ban-nginx-cve et bannie automatiquement par CrowdSec **sans intervention humaine** — la chaîne défensive a fonctionné.
 

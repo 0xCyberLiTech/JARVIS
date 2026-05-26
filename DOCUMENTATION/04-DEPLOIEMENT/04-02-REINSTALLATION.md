@@ -169,7 +169,7 @@ D:\BACKUP-WINDOWS\                         ← racine sauvegarde
 │   └── doc\                               ← documentation
 │
 ├── SSH\                                   ← clés SSH (CRITIQUE — copie complète ~/.ssh)
-│   ├── id_nginx / id_nginx.pub            ← srv-ngix (VM 108)
+│   ├── id_nginx / id_nginx.pub            ← srv-nginx (VM 108)
 │   ├── id_clt   / id_clt.pub             ← VM clt (106)
 │   ├── id_pa85  / id_pa85.pub            ← VM pa85 (107)
 │   ├── id_proxmox / id_proxmox.pub       ← Proxmox VE
@@ -457,7 +457,7 @@ JARVIS démarre, Ollama est lancé automatiquement, le navigateur ouvre `http://
 ```
 http://localhost:5000/api/stats     → GPU, RAM, CPU
 http://localhost:5000/api/boot-id   → ID de session
-http://localhost:5000/api/soc/test  → Connectivité SOC + SSH srv-ngix + TTS
+http://localhost:5000/api/soc/test  → Connectivité SOC + SSH srv-nginx + TTS
 ```
 
 ---

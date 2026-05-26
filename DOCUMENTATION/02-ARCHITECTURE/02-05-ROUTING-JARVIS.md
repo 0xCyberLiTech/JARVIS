@@ -68,13 +68,13 @@ Requête utilisateur (texte ou [VOCAL]…)
 
 ## Injection du contexte SOC (mode SOC) — 100 % serveur depuis 2026-05-14
 
-En mode SOC, les données `monitoring.json` (srv-ngix) sont injectées dans le **system prompt** — entièrement côté serveur :
+En mode SOC, les données `monitoring.json` (srv-nginx) sont injectées dans le **system prompt** — entièrement côté serveur :
 
 - Chaîne : `_chat_build_system_prompt()` → `chat_system_prompt.build()` → `chat_soc_inject.inject()`.
 - Déclenchement : mots-clés SOC (`SOC_KW` / `SOC_VOCAL_KW`) **ou** `force_soc=True` quand `model_override='soc'` (chat du dashboard SOC — chaque message y est une question SOC par nature).
 - Injecté dans le system prompt à **chaque appel**, **jamais dans l'historique** → aucun snapshot périmé empilé. Source de formatage unique : `_build_monitoring_context()` (Python).
 - L'ancienne incrustation **client-side** (snapshot dans le message utilisateur) a été supprimée — elle empilait des données périmées en multi-tours et causait des hallucinations (IPs/scores fantômes).
-- Garde-fou : srv-ngix injoignable → instruction anti-hallucination injectée (« données indisponibles » au lieu d'inventer).
+- Garde-fou : srv-nginx injoignable → instruction anti-hallucination injectée (« données indisponibles » au lieu d'inventer).
 
 Le contexte expose : IPs déjà bannies CrowdSec, crawlers vérifiés FCrDNS (`verified_bots`), `signal=FORT|faible` par IP Kill Chain (reco de ban proportionnée), horodatage du snapshot cité avec le score.
 
@@ -89,10 +89,10 @@ Avant tout calcul coûteux, JARVIS détecte 9 catégories de commandes qu'il peu
 | `_DATETIME_RE` | "quelle heure", "quel jour", "date du jour" | Réponse directe Python `datetime.now()` |
 | `_detect_backup_command` | "sauvegarde JARVIS", "backup VM 108" | Lance `backup-jarvis.ps1` ou Proxmox vzdump |
 | `_detect_vm_command` | "démarre VM 108", "stoppe pa85" | Proxmox `qm start/stop` (whitelist VMID) |
-| `_detect_reboot_command` | "redémarre srv-ngix", "reboot proxmox" | SSH reboot (4 hôtes connus) |
-| `_detect_update_command` | "mise à jour srv-ngix", "apt upgrade clt" | SSH `apt update && apt upgrade` |
-| `_detect_service_restart` | "redémarre nginx sur srv-ngix" | `systemctl restart <svc>` (whitelist `_ALLOWED_RESTART_SVCS`) |
-| `_detect_file_command` | "lis /etc/nginx/nginx.conf sur srv-ngix" | SSH cat fichier |
+| `_detect_reboot_command` | "redémarre srv-nginx", "reboot proxmox" | SSH reboot (4 hôtes connus) |
+| `_detect_update_command` | "mise à jour srv-nginx", "apt upgrade clt" | SSH `apt update && apt upgrade` |
+| `_detect_service_restart` | "redémarre nginx sur srv-nginx" | `systemctl restart <svc>` (whitelist `_ALLOWED_RESTART_SVCS`) |
+| `_detect_file_command` | "lis /etc/nginx/nginx.conf sur srv-nginx" | SSH cat fichier |
 | `_detect_code_command` | "exec test.py", "scp script.py srv-dev-1" | SCP + exécution sur srv-dev-1 |
 | `_SSH_TERMINAL_RE` | "connecte srv-dev-1", "ouvre terminal proxmox" | Ouvre WebSocket SSH terminal xterm.js |
 
@@ -126,7 +126,7 @@ Liste à `jarvis.py:2483` — ~29 patterns bloqués :
 |-----------|---------|-------|
 | `_ALLOWED_RESTART_SVCS` (jarvis.py:2506) | nginx · fail2ban · crowdsec · bouncer · suricata · apache2 · php-fpm | Seuls ces services peuvent être redémarrés via `systemctl restart` |
 | `_ALLOWED_APT_PKGS` (jarvis.py:2510) | nginx · fail2ban · crowdsec · suricata · openssl · python3 · certbot | Seuls ces paquets peuvent être mis à jour via `apt install/upgrade` |
-| `_SSH_TERMINAL_MAP` (jarvis.py:5072) | dev1 (srv-dev-1) · proxmox · srv-ngix · clt · pa85 | Hôtes SSH autorisés (clés `~/.ssh/id_*` correspondantes) |
+| `_SSH_TERMINAL_MAP` (jarvis.py:5072) | dev1 (srv-dev-1) · proxmox · srv-nginx · clt · pa85 | Hôtes SSH autorisés (clés `~/.ssh/id_*` correspondantes) |
 
 ### 4. CODE = exclusivement srv-dev-1
 
@@ -205,7 +205,7 @@ Le monolithe `jarvis.py` a été allégé : **modules dédiés** extraits (ex-mo
 | [`tts_dedup.py`](../scripts/tts_dedup.py) | 45 | Dedup global TTS |
 | [`chat_capture.py`](../scripts/chat_capture.py) | 45 | Wrapper SSE accumulation |
 | [`chat_system_prompt.py`](../scripts/chat_system_prompt.py) | 50 | Orchestrateur system prompt |
-| [`chat_soc_inject.py`](../scripts/chat_soc_inject.py) | 125 | Injection SOC server-side (system prompt) · 2 listes keywords · `force_soc` · garde-fou srv-ngix injoignable |
+| [`chat_soc_inject.py`](../scripts/chat_soc_inject.py) | 125 | Injection SOC server-side (system prompt) · 2 listes keywords · `force_soc` · garde-fou srv-nginx injoignable |
 | [`code_reasoning.py`](../scripts/code_reasoning.py) | 175 | Pipeline qwen3:8b CR (thinking parsing) |
 | [`llm_opts.py`](../scripts/llm_opts.py) | 65 | Construction options Ollama |
 | [`stream_tokens.py`](../scripts/stream_tokens.py) | 65 | Stream + découpage TTS |
@@ -218,7 +218,7 @@ Le monolithe `jarvis.py` a été allégé : **modules dédiés** extraits (ex-mo
 **Total Python : 31 modules extraits** (Phase 3 : 30 modules · session 33b) + `audio_dsp.py` (chantier dette 2026-05-14) → `jarvis.py` allégé
 **Session 33c — Split JS partiel** : `recorder.js` 660L + `voice_print.js` 852L extraits en IIFE
 **Chantier dette 2026-05-14** : Ruff 98→0 + `ruff.toml` · git initialisé (100% local, aucun remote) · pre-commit hooks bloquants · `jarvis.css` 5270L → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · refactor JS partiel (3 modules : terminal_code/voice_lab/stt)
-**Session 2026-05-14 (soir)** : injection SOC 100 % serveur (suppression incrustation client-side `_monCtxStr`/`_buildChatPayload` → fin des hallucinations) · `force_soc` threadé en DI · règle crawlers légitimes + reco de ban proportionnée au signal · garde-fou srv-ngix injoignable
+**Session 2026-05-14 (soir)** : injection SOC 100 % serveur (suppression incrustation client-side `_monCtxStr`/`_buildChatPayload` → fin des hallucinations) · `force_soc` threadé en DI · règle crawlers légitimes + reco de ban proportionnée au signal · garde-fou srv-nginx injoignable
 **Refactor JS (TERMINÉ)** : `jarvis_main.js` réduit de **−98,1%** · **21 modules JS** (15 dans `static/js/` + 6 historiques). Méthode byte-identique vérifiée (bodies identiques · `node --check` · eslint 0 · validation E2E prod à chaque étape). ⚠ `audio_viz.js` chargé juste après `jarvis_main.js` (définit `_SAMPLE_RATE`, requis au top-level par `recorder.js`). ⚠ `chat_ui.js` AVANT `chat_core.js` (chat_core utilise `addMessage`/`history`/`_esc`). ⚠ `soc_tab.js` AVANT `chat_core.js` (chat_core utilise `_buildChatPayload`).
 
 **Score dette, tests, coverage → source unique [`BILAN-TECHNIQUE.md` §0](../BILAN-TECHNIQUE.md)** · audit dette complet 2026-05-22 · refactor JS terminé · fix perf IPv6 · circuit breaker Ollama 8 call-sites · pré-warm Kokoro CUDA · hook pre-push pytest.

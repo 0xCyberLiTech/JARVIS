@@ -38,8 +38,8 @@ l'outil Claude Code (CLI Anthropic dans VS Code) et Claude Desktop (MCP).
 
 | Hôte | IP | Rôle | Accès SSH |
 |---|---|---|---|
-| Proxmox VE | 192.168.1.20 | Hyperviseur (srv-ngix + clt + pa85 + srv-dev-1) | port 2272, `~/.ssh/id_proxmox` |
-| srv-ngix (VM 108) | 192.168.1.50 | nginx + CrowdSec + dashboard SOC | port 2272, `~/.ssh/id_nginx` |
+| Proxmox VE | 192.168.1.20 | Hyperviseur (srv-nginx + clt + pa85 + srv-dev-1) | port 2272, `~/.ssh/id_proxmox` |
+| srv-nginx (VM 108) | 192.168.1.50 | nginx + CrowdSec + dashboard SOC | port 2272, `~/.ssh/id_nginx` |
 | clt (VM 106) | 192.168.1.12 | Apache + site CLT cybersécurité | port 2272, `~/.ssh/id_clt` |
 | pa85 (VM 107) | 192.168.1.13 | Apache + site PA85 associatif | port 2272, `~/.ssh/id_pa85` |
 | srv-dev-1 (VM 101) | 192.168.1.21 | VM Debian 13 dev/test (mode CODE) | port 2272, `~/.ssh/id_dev` |
@@ -155,9 +155,9 @@ Documentées dans la mémoire centrale Claude (`feedback_jarvis_no_regression.md
 
 | Projet | Dossier | Rôle |
 |---|---|---|
-| SOC | `../SOC/` | Dashboard monitoring sur srv-ngix |
+| SOC | `../SOC/` | Dashboard monitoring sur srv-nginx |
 | PROXMOX | `../PROXMOX/` | Scripts backup VMs Proxmox |
 | CLT | `../CLT/` | Site cybersécurité |
 | PA85 | `../PA85/` | Site associatif |
-| NGINX | `../NGINX/` | Configs nginx srv-ngix |
+| NGINX | `../NGINX/` | Configs nginx srv-nginx |
 | ASUS_ROG_19000_AI | `../ASUS_ROG_19000_AI/` | Routeur ASUS (sauvegarde + intégration SOC) |

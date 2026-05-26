@@ -83,7 +83,7 @@ Message utilisateur
   │        Lecture fichier → SSH cat / ls -la
   │
   ├─ 2. 🤖 Branche SOC — mot-clé (_CHAT_SOC_KW) → phi4:14b
-  │        + contexte monitoring.json live (SSH srv-ngix)
+  │        + contexte monitoring.json live (SSH srv-nginx)
   │        + temp=0.2 · num_ctx=8192 (16384→8192 le 2026-05-20, optim VRAM)
   │
   ├─ 3. 🤖 Branche CODE — _jarvis_mode == 'code' → qwen2.5-coder:14b
@@ -273,7 +273,7 @@ Périmètre : `jarvis.py` · `soc.py` · `jarvis_mcp_server.py` · `audio_dsp.py
 | `jarvis_soc_status` | GET `/api/soc/context` | État SOC : menace, bans, services |
 | `jarvis_stats` | GET `/api/stats` | Uptime, GPU, sessions, TTS/STT |
 | `jarvis_soc_ask` | POST `/api/chat` SSE | Question SOC + logs SSH + historique IP 30j |
-| `jarvis_infra_status` | POST `/api/chat` SSE | État infra (Proxmox VMs, srv-ngix, clt, pa85) |
+| `jarvis_infra_status` | POST `/api/chat` SSE | État infra (Proxmox VMs, srv-nginx, clt, pa85) |
 | `jarvis_proxmox_vms` | POST `/api/chat` SSE | État VMs Proxmox |
 | `jarvis_read_file` | POST `/api/chat` SSE | Lecture fichiers SSH |
 | `jarvis_model_switch` | POST `/api/models` | Changement modèle Ollama actif |
@@ -323,7 +323,7 @@ jarvis_mcp_server.py (NDT-LONG refactorisé — 0 fonction >80L)
 
 | Outil | Hôte | IP | Port | Clé SSH |
 |---|---|---|---|---|
-| `commande_ssh_ngix` | srv-ngix (VM 108) | 192.168.1.50 | 2272 | `~/.ssh/id_nginx` |
+| `commande_ssh_ngix` | srv-nginx (VM 108) | 192.168.1.50 | 2272 | `~/.ssh/id_nginx` |
 | `commande_ssh_proxmox` | Proxmox VE | 192.168.1.20 | 2272 | `~/.ssh/id_proxmox` |
 | `commande_ssh_clt` | clt (VM 106) | 192.168.1.12 | 2272 | `~/.ssh/id_clt` |
 | `commande_ssh_pa85` | pa85 (VM 107) | 192.168.1.13 | 2272 | `~/.ssh/id_pa85` |
@@ -365,7 +365,7 @@ JARVIS reste **optionnel** — le SOC dashboard fonctionne à 100% sans lui.
 
 | Hôte | IP | Rôle |
 |---|---|---|
-| srv-ngix (VM 108) | 192.168.1.50 | nginx + CrowdSec WAF + Suricata + fail2ban |
+| srv-nginx (VM 108) | 192.168.1.50 | nginx + CrowdSec WAF + Suricata + fail2ban |
 | clt (VM 106) | 192.168.1.12 | Apache · site cybersécurité CLT |
 | pa85 (VM 107) | 192.168.1.13 | Apache · site associatif PA85 |
 | Proxmox VE | 192.168.1.20 | Hyperviseur · ZFS 3.5 To |

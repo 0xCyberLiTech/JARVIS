@@ -19,7 +19,7 @@ def _fetch_ok(force):
 
 
 def _fetch_fail(force):
-    """Fetch monitoring qui échoue (srv-ngix injoignable)."""
+    """Fetch monitoring qui échoue (srv-nginx injoignable)."""
     return False, ""
 
 

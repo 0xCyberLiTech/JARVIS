@@ -405,7 +405,7 @@ inflaté → consolidé honnêtement **84/100**, puis **88/100** après correcti
   (soc.py, route HTTP `/restart-service`) et `ALLOWED_RESTART_SVCS`
   (security_whitelists.py, write-ops SSH). Consolidées dans `security_whitelists.py`
   via une nouvelle constante `ALLOWED_SOC_RESTART_SVCS` (soc.py l'importe en alias).
-  Divergence `php*-fpm` **résolue le jour même par vérification SSH** : srv-ngix n'a
+  Divergence `php*-fpm` **résolue le jour même par vérification SSH** : srv-nginx n'a
   aucun PHP installé, clt/pa85 tournent en mod_php (`libapache2-mod-php8.4`, pas de
   php-fpm) — les entrées mortes `php7.4-fpm` / `php8.2-fpm` / `php8.3-fpm` ont été
   retirées des deux whitelists (`ALLOWED_RESTART_SVCS` garde `apache2` = le chemin
@@ -745,7 +745,7 @@ La roadmap était simplement **obsolète** (TODO non actualisé après livraison
 
 Le module a été testé en direct et fonctionne. Le test bout-en-bout via JARVIS web requiert redémarrage (`jarvis.py` modifié). À faire au prochain restart :
 1. Démarrer JARVIS
-2. Lancer commande SSH `systemctl restart nginx` sur srv-ngix via JARVIS
+2. Lancer commande SSH `systemctl restart nginx` sur srv-nginx via JARVIS
 3. Vérifier `JARVIS/logs/audit_writeops.jsonl` contient 1 ligne `allowed=true`
 4. Lancer commande non whitelistée (`systemctl restart cron`) → vérif `allowed=false`
 
@@ -765,7 +765,7 @@ for pattern in BLOCKED_SSH_PATTERNS:
 
 `check_write_op` ne traite QUE 2 cas (systemctl restart + apt install/upgrade). Pour TOUT le reste (`rm`, `mkfs`, `dd`, `shutdown`, `qm destroy`, ...), elle retourne `None`. Le test ligne 123 le documente même explicitement.
 
-**Conséquence** : `rm -rf /` matchait pattern `"rm "`, `check_write_op("rm -rf /")` retournait `None`, `err is not None` était False, `break` → **commande EXÉCUTÉE sur srv-ngix/proxmox/clt/pa85**.
+**Conséquence** : `rm -rf /` matchait pattern `"rm "`, `check_write_op("rm -rf /")` retournait `None`, `err is not None` était False, `break` → **commande EXÉCUTÉE sur srv-nginx/proxmox/clt/pa85**.
 
 **Risque réel** : faible en pratique (phi4 local, prompt restreint, pas d'accès externe) mais **inacceptable** comme défense-en-profondeur.
 
@@ -793,7 +793,7 @@ for pattern in BLOCKED_SSH_PATTERNS:
 ```
 
 **Smoke test live à faire au prochain restart JARVIS** :
-1. Demander à JARVIS : "Sur srv-ngix, lance : rm -rf /tmp/test" → doit refuser
+1. Demander à JARVIS : "Sur srv-nginx, lance : rm -rf /tmp/test" → doit refuser
 2. Vérifier `JARVIS/logs/audit_writeops.jsonl` : 1 ligne `allowed=false` avec pattern `rm `
 
 ---
@@ -914,7 +914,7 @@ QW4 — ESLint pre-commit JARVIS aligné cohérence cross-projet :
 - **Cause hallucination** : `jarvis_main.js` `_buildChatPayload()` incrustait le snapshot SOC **dans le message utilisateur** → persisté dans l'historique. En multi-tours, le client ne rafraîchissait que le dernier message → les vieux snapshots restaient → phi4 les mélangeait. Idem `SOC/dashboard/js/18-jarvis-chat.js`.
 - **Fix** : suppression de l'injection client-side (`_monCtxStr` + `_SOC_CHAT_KW` + `_MON_NET_SPIKE_S` morts, −83 L). Injection **100 % serveur** via `chat_soc_inject.py` → system prompt, **frais à chaque appel, jamais persisté**, source de formatage unique (Python `_build_monitoring_context`).
 - **`force_soc`** threadé en DI (`api_chat` → `chat_system_prompt.build` → `chat_soc_inject.inject`) : `model_override='soc'` (chat du dashboard SOC) force l'injection même sans mot-clé.
-- **Garde-fou** : srv-ngix injoignable → instruction anti-hallucination dans le system prompt (était côté client, déplacé serveur).
+- **Garde-fou** : srv-nginx injoignable → instruction anti-hallucination dans le system prompt (était côté client, déplacé serveur).
 - **`_build_monitoring_context`** : affiche la liste « IPs DÉJÀ BANNIES par CrowdSec » (corrige les bans redondants) + « Crawlers légitimes vérifiés FCrDNS » + flag `⚠UA-USURPÉ`.
 - **Profil SOC** (`jarvis_prompt_profiles.json`) : règles ABSOLUES — IPs déjà neutralisées + crawlers légitimes (ne jamais bannir un crawler vérifié ; usurpateur = menace réelle).
 - **Auto-engine proactif** (`18-jarvis-engine.js`) **inchangé** — et n'auto-bannira plus un crawler vérifié (exclu de `kill_chain.active_ips` côté SOC). Bilan : **−39 L nettes**, ruff/eslint verts. Côté SOC : commit `7d386c2` (cf. `SOC/MEMORY.md`).
@@ -1516,7 +1516,7 @@ Ordre de priorité : `JARVIS/scripts/` → `JARVIS/` → `Documents/` → `Downl
 
 | Commande JARVIS | Action | Machines |
 |----------------|--------|----------|
-| `met à jour <machine>` | apt update + dist-upgrade + reboot si requis | srv-ngix · srv-clt · srv-pa85 · srv-dev-1 · proxmox |
+| `met à jour <machine>` | apt update + dist-upgrade + reboot si requis | srv-nginx · srv-clt · srv-pa85 · srv-dev-1 · proxmox |
 | `reboot <machine>` | SSH reboot + poll SSH + vérif services | idem |
 | `stop <vm>` | qm stop dynamique | toutes VMs sauf vmid 100 |
 | `start <vm>` | qm start + poll SSH + vérif services | idem |
@@ -1543,14 +1543,14 @@ _REBOOT_DEFER_RE    # "reporter", "plus tard"
 _REBOOT_SVC_CHECKS  # services vérifiés par hôte après reboot/start
 _VM_START_SSH_MAP   # VMID → (host_label, ssh_fn) pour post-start verify
 _UPDATE_REBOOT_HOSTS  # liste hôtes avec aliases, ssh_fn, is_proxmox
-_VM_ALIASES         # "srv-nginx" → "srv-ngix"
+_VM_ALIASES         # "srv-nginx" → "srv-nginx"
 ```
 
 ### Services vérifiés post-start/reboot
 
 | Hôte | Services |
 |------|----------|
-| srv-ngix | nginx · crowdsec · fail2ban |
+| srv-nginx | nginx · crowdsec · fail2ban |
 | srv-clt | apache2 |
 | srv-pa85 | apache2 |
 | srv-dev-1 | ssh |
@@ -1580,7 +1580,7 @@ _VM_ALIASES         # "srv-nginx" → "srv-ngix"
 | `reboot proxmox` (4 VMs arrêtées proprement) | ✅ |
 | `reboot srv-nginx` | ✅ nginx/crowdsec/fail2ban ✓ |
 | `reboot srv-dev-1` | ✅ ssh ✓ |
-| `start srv-ngix` enrichi | ✅ nginx/crowdsec/fail2ban ✓ |
+| `start srv-nginx` enrichi | ✅ nginx/crowdsec/fail2ban ✓ |
 
 ---
 
@@ -1603,7 +1603,7 @@ Nouvelles fonctions dans `jarvis.py` :
   - Stockage : nom · utilisé/total Go · %
 
 - **`_chat_inject_pve(system, last_user)`** — injection conditionnelle
-  - Déclenché par `_CHAT_PVE_KW` (14 mots-clés : proxmox, pve, vm 106, srv-ngix…)
+  - Déclenché par `_CHAT_PVE_KW` (14 mots-clés : proxmox, pve, vm 106, srv-nginx…)
   - Appel dans `api_chat()` step 5b (après SOC inject, avant routing)
 
 **Constantes ajoutées :**
@@ -1674,7 +1674,7 @@ Flask port 5000, Windows 11 Pro, RTX 5080 Blackwell (sm_120, PyTorch 2.7.1+cu128
 **Bypasses Python directs (sans LLM) — `_chat_try_bypass()` :**
 | Trigger | Fonction | Hôte |
 |---|---|---|
-| `redémarre/relance` + `nginx/crowdsec/fail2ban` | `_service_restart_sse()` | srv-ngix |
+| `redémarre/relance` + `nginx/crowdsec/fail2ban` | `_service_restart_sse()` | srv-nginx |
 | `redémarre apache sur clt/pa85` | `_service_restart_sse()` | clt / pa85 |
 | `arrête/démarre` + VM nommée | `_vm_command_sse()` | Proxmox |
 | `sauvegarde/backup` + `JARVIS` | `_jarvis_backup_sse()` | local PS1 streaming |
@@ -1699,7 +1699,7 @@ Flask port 5000, Windows 11 Pro, RTX 5080 Blackwell (sm_120, PyTorch 2.7.1+cu128
 - `_tsTrendBlockHtml()` — lit `threat_history_72h` du JSON, affiche sparkline + bouton "Historique 30j"
 - `_openTsHistoryModal()` — fetch `/threat_history.json`, `_renderTsHistoryModal()`, `_drawTsHistChart()` Canvas 30j
 
-**monitoring_gen.py** (srv-ngix) :
+**monitoring_gen.py** (srv-nginx) :
 - `_append_threat_history()` retourne `h72` (72 derniers scores entiers)
 - `data['threat_history_72h']` injecté dans monitoring.json
 
@@ -1712,7 +1712,7 @@ Flask port 5000, Windows 11 Pro, RTX 5080 Blackwell (sm_120, PyTorch 2.7.1+cu128
 - Fonction `_check_daily_report(d, ts)` : fenêtre 08h00-08h09, clé cooldown `daily_report_{YYYY-MM-DD}` (23h), une fois par jour, survit aux redémarrages
 - Message TTS : date FR · niveau/score · CrowdSec bans · fail2ban · trafic horaire · services DOWN
 - Appel ajouté dans `_soc_monitor_loop()` après `_check_net_spikes(d)`
-- Email déjà existant via cron `soc-daily-report.py` sur srv-ngix (0 8 * * *)
+- Email déjà existant via cron `soc-daily-report.py` sur srv-nginx (0 8 * * *)
 
 **Comportement :** se déclenche uniquement si dashboard fermé (sous la garde `_soc_dashboard_open()`).
 
@@ -1944,7 +1944,7 @@ Nouveau mécanisme bypass `_pending_infra_cmd` — "oui" après proposition apt 
 **Mises à jour sécurité appliquées ce soir :**
 - clt → Apache `2.4.66 → 2.4.67` (stable-security) ✅
 - pa85 → Apache `2.4.66 → 2.4.67` (stable-security) ✅
-- srv-ngix → nginx déjà à jour (`1.26.3-3+deb13u2`) ✅
+- srv-nginx → nginx déjà à jour (`1.26.3-3+deb13u2`) ✅
 
 ### Audit NDT jarvis.py — Session 16 (2026-05-07)
 
@@ -2012,7 +2012,7 @@ Score initial de l'audit : **6.5/10** (NDT-CSS:1 · NDT-MAGIC:15 · NDT-ERR:8)
 
 ### Nouvelles fonctionnalités bypass (sans LLM)
 - `_SVC_RESTART_RE` + `_detect_service_restart()` + `_service_restart_sse()` — restart service direct SSH : `systemctl restart` → `systemctl is-active` → TTS état réel garanti
-- Routage : nginx/crowdsec/fail2ban → srv-ngix · apache + hôte précis → clt ou pa85 · apache sans hôte → ambiguous → LLM
+- Routage : nginx/crowdsec/fail2ban → srv-nginx · apache + hôte précis → clt ou pa85 · apache sans hôte → ambiguous → LLM
 - `_jarvis_backup_sse()` — streaming `backup-jarvis.ps1` (JARVIS + SSH + Claude + Ollama ~47Go) avec TTS fin
 - `_jarvis_backup_log_sse()` — lecture `Desktop\jarvis-backup.log` 30 dernières lignes + état en/terminé
 - `_JARVIS_BACKUP_RE` / `_JARVIS_BACKUP_LOG_RE` — regex detection backup/log JARVIS
@@ -2296,7 +2296,7 @@ Règle fondamentale établie cette session :
 - **Grille XTTS** : `repeat(auto-fill, minmax(130px, 1fr))` — 3-4 colonnes auto selon largeur
 
 **2026-05-03 — Session 2 : Moteur vocal complet + SOC CORS fix**
-- **CORS nginx srv-ngix** : `add_header Access-Control-Allow-Origin "*"` dans `location = /monitoring.json` → browser fetch OK → SOC temps réel fonctionnel (plus d'hallucination)
+- **CORS nginx srv-nginx** : `add_header Access-Control-Allow-Origin "*"` dans `location = /monitoring.json` → browser fetch OK → SOC temps réel fonctionnel (plus d'hallucination)
 - **MOTEUR VOCAL (unité 07 DSP)** : pleine largeur (`rack-unit-full`) · panneau EDGE + panneau KOKORO (speed slider 0.5×→2.0×) · `tts_kokoro_speed` DSP param → `_tts_kokoro(..., speed)` Python
 - **tts_default_engine** : param persisté DSP · boutons "DÉFAUT AU DÉMARRAGE" dans DSP · init JS lit `tts_default_engine` au chargement (pas `tts_engine`) · boucle connectivité bascule sur défaut si internet KO + engine=edge
 - **Voyant LED état** : `veng-dot` CSS 3 états (ok=vert clignotant / err=rouge / dim=non sélectionné) · polling `/api/tts/status` 15s · statuts depuis runtime Python (`_KOKORO_AVAILABLE`, `_tts_internet_was_up`) — zéro hardcode
@@ -2345,7 +2345,7 @@ Règle fondamentale établie cette session :
 
 Le chatbot JARVIS direct lisait `monitoring.json` via le backend (`_fetch_monitoring`) avec un cache 30s côté Python — résultat : JARVIS affichait 56/100 pendant que le SOC dashboard affichait 41/100. Divergence temporelle inacceptable.
 
-**Source de vérité :** `monitoring.json` sur srv-ngix — valeur actuelle 41/100 MOYEN.
+**Source de vérité :** `monitoring.json` sur srv-nginx — valeur actuelle 41/100 MOYEN.
 
 ### Circuit implémenté — identique au SOC dashboard (`window._lastData`)
 
@@ -2829,7 +2829,7 @@ JARVIS est intégré dans `monitoring-index.html`.
 | `POST /api/speak/stop` | Stop TTS en cours |
 | `POST /api/tts` | TTS via DSP pipeline |
 | `GET /api/security` | Journal blocklist LLM |
-| `POST /api/soc/ban-ip` | Ban IP via CrowdSec srv-ngix |
+| `POST /api/soc/ban-ip` | Ban IP via CrowdSec srv-nginx |
 | `POST /api/soc/unban-ip` | Lève ban IP |
 | `POST /api/soc/restart-service` | Redémarre service autorisé |
 | `GET /api/soc/actions` | Journal opérations proactives |
@@ -2906,7 +2906,7 @@ Scripts legacy supprimés de `JARVIS/scripts/` :
    - Résultat : plus de `[DeepFilterNet] Non disponible: RuntimeError` au démarrage
 
 2. **SSH ban — `_SSH_LOCK` + retry + timeout (lignes ~2539-2609)**
-   - Cause : 4+ bans simultanés → connexions SSH parallèles vers srv-ngix → timeouts en compétition
+   - Cause : 4+ bans simultanés → connexions SSH parallèles vers srv-nginx → timeouts en compétition
    - `_SSH_LOCK = threading.Lock()` — sérialise toutes les connexions SSH (une seule à la fois)
    - `ConnectTimeout` : 8s → **10s** · `timeout` subprocess : 15s → **20s** · `retries=1` (retry après 2s)
    - ControlMaster retiré — Windows OpenSSH ne supporte pas les Unix sockets
@@ -3108,10 +3108,10 @@ Dans `_soc_monitor_loop()` — après `_soc_exploit_gap_check()` :
 
 ### Contexte global session
 
-- monitoring_gen.py v3.5.0 patché sur srv-ngix : `detect_net_spikes()` + `net-spike-log.json`
+- monitoring_gen.py v3.5.0 patché sur srv-nginx : `detect_net_spikes()` + `net-spike-log.json`
 - Dashboard SOC v3.68.3 déployé : BLOCKLIST modal 680→480px, tab Freebox ⚡ ALERTES TRAFIC, SSL 2 colonnes
 - Scripts bureau nettoyés + alignés : `soc-menu.bat`, `DEPLOYER-CLT.bat` créés, `PROXMOX-BACKUP.ps1` → `SAUVEGARDER-VM.ps1`
-- RAM VMs redistribuée : srv-ngix 6→10 GB, clt 6→2 GB, pa85 4→2 GB
+- RAM VMs redistribuée : srv-nginx 6→10 GB, clt 6→2 GB, pa85 4→2 GB
 
 ---
 

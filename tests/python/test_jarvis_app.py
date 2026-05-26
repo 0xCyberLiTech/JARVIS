@@ -42,7 +42,7 @@ def test_cors_origin_origin_vide_fallback_localhost():
 
 
 def test_soc_origins_contient_localhost_et_192_168():
-    """Sanity : la whitelist CORS couvre localhost et le LAN srv-ngix."""
+    """Sanity : la whitelist CORS couvre localhost et le LAN srv-nginx."""
     assert "http://localhost" in jarvis_module.SOC_ORIGINS
     assert "http://192.168.1.50" in jarvis_module.SOC_ORIGINS
     assert "http://127.0.0.1" in jarvis_module.SOC_ORIGINS

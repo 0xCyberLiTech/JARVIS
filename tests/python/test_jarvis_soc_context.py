@@ -63,11 +63,11 @@ def test_pve_context_lines_erreur_vide():
 def test_pve_context_lines_configure_resume():
     pve = {"configured": True, "vms_running": 3, "vms_total": 4,
            "nodes": [{"vms": [
-               {"vmid": 108, "name": "srv-ngix", "status": "running",
+               {"vmid": 108, "name": "srv-nginx", "status": "running",
                 "cpu": 0.12, "mem": 2_000_000, "maxmem": 4_000_000}]}]}
     lines = jm._pve_context_lines(pve)
     assert any("3/4 VMs running" in ln for ln in lines)
-    assert any("srv-ngix" in ln and "running" in ln for ln in lines)
+    assert any("srv-nginx" in ln and "running" in ln for ln in lines)
 
 
 def test_pve_context_lines_maxmem_zero_pas_de_division():
@@ -203,7 +203,7 @@ def test_soc_allowed_services_pointe_sur_source_unique():
 
 
 def test_soc_restart_whitelist_contenu_reel():
-    """Contenu aligné sur les services réels de srv-ngix (vérif SSH 2026-05-22).
+    """Contenu aligné sur les services réels de srv-nginx (vérif SSH 2026-05-22).
     `suricata` inclus : l'auto-engine SOC doit pouvoir le redémarrer (déclencheur #10)."""
     assert sw.ALLOWED_SOC_RESTART_SVCS == {"nginx", "crowdsec", "fail2ban", "suricata"}
 
@@ -216,7 +216,7 @@ def test_les_deux_whitelists_services_vivent_dans_le_meme_module():
 
 def test_aucune_whitelist_ne_contient_php_fpm():
     """Garde-fou : aucun hôte ne tourne php-fpm (vérif SSH 2026-05-22 — mod_php
-    sur clt/pa85, pas de PHP sur srv-ngix). Empêche de réintroduire une entrée morte."""
+    sur clt/pa85, pas de PHP sur srv-nginx). Empêche de réintroduire une entrée morte."""
     for svc in (sw.ALLOWED_RESTART_SVCS | sw.ALLOWED_SOC_RESTART_SVCS):
         assert "fpm" not in svc
 
