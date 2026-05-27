@@ -707,7 +707,7 @@ def test_ssh_nginx_delegue_a_ssh_host(monkeypatch):
                         lambda arr, cmd, t, r: calls.append((arr, cmd)) or (True, "ok"))
     ok, out = soc._ssh_nginx("uptime")
     assert (ok, out) == (True, "ok")
-    assert calls[0][0] is soc._SSH_NGIX and calls[0][1] == "uptime"
+    assert calls[0][0] is soc._SSH_NGINX and calls[0][1] == "uptime"
 
 
 def test_ssh_proxmox_delegue_a_ssh_host(monkeypatch):

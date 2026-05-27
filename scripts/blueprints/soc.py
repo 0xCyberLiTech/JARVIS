@@ -295,7 +295,7 @@ def _ssh_base(user, host, port, key):
             f"{user}@{host}"]
 
 # ── Config SSH — tous les hôtes ───────────────────────────────
-_SSH_NGIX    = _ssh_base(_SOC_CFG["nginx_ssh_user"],    _SOC_CFG["nginx_host"],    _SOC_CFG["nginx_ssh_port"],    _SOC_CFG["nginx_ssh_key"])
+_SSH_NGINX    = _ssh_base(_SOC_CFG["nginx_ssh_user"],    _SOC_CFG["nginx_host"],    _SOC_CFG["nginx_ssh_port"],    _SOC_CFG["nginx_ssh_key"])
 _SSH_PROXMOX = _ssh_base(_SOC_CFG["proxmox_ssh_user"], _SOC_CFG["proxmox_host"], _SOC_CFG["proxmox_ssh_port"], _SOC_CFG["proxmox_ssh_key"])
 _SSH_CLT     = _ssh_base(_SOC_CFG["clt_ssh_user"],     _SOC_CFG["clt_host"],     _SOC_CFG["clt_ssh_port"],     _SOC_CFG["clt_ssh_key"])
 _SSH_PA85    = _ssh_base(_SOC_CFG["pa85_ssh_user"],     _SOC_CFG["pa85_host"],    _SOC_CFG["pa85_ssh_port"],    _SOC_CFG["pa85_ssh_key"])
@@ -476,7 +476,7 @@ def _ssh_host(ssh_arr, remote_cmd, timeout=20, retries=1):
 
 def _ssh_nginx(remote_cmd, timeout=20, retries=1):
     """Exécute une commande sur srv-nginx via SSH."""
-    return _ssh_host(_SSH_NGIX, remote_cmd, timeout, retries)
+    return _ssh_host(_SSH_NGINX, remote_cmd, timeout, retries)
 
 
 def _ssh_proxmox(remote_cmd, timeout=20, retries=1):

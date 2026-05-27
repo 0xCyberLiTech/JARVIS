@@ -81,7 +81,7 @@ def test_re_pa85_match():
 
 def test_re_case_insensitive():
     """Les regex sont insensibles à la casse."""
-    assert ssh_terminal.TERMINAL_RE["nginx"].search("OUVRE TERMINAL NGIX")
+    assert ssh_terminal.TERMINAL_RE["nginx"].search("OUVRE TERMINAL NGINX")
 
 
 def test_re_aucun_match_phrase_quelconque():
