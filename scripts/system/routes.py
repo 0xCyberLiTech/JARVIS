@@ -67,7 +67,7 @@ def api_sysdiag():
     data["dsp_available"] = _get_dsp_avail()
     dsp_params = _get_dsp_params()
     data["dsp_enabled"]   = dsp_params.get("enabled", False)
-    data["dsp_params"]    = {k: v for k, v in dsp_params.items()}
+    data["dsp_params"]    = dict(dsp_params)
     _df_avail, _df_sample_rate = _get_df_status()
     data["df_available"]  = _df_avail
     data["df_enabled"]    = dsp_params.get("df_enabled", False)

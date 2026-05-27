@@ -137,10 +137,7 @@ def detect_vm_command(text: str, vms_api: list, alias_map: dict | None = None, b
         name = (vm.get("name") or "").lower()
         if vmid in blacklist:
             continue
-        if name and re.search(r'\b' + re.escape(name) + r'\b', text_l_resolved) and vmid not in seen:
-            seen.add(vmid)
-            vm_list.append((vmid, vm.get("name", f"vm{vmid}")))
-        elif re.search(r'\b' + str(vmid) + r'\b', text_l_resolved) and vmid not in seen:
+        if name and re.search(r'\b' + re.escape(name) + r'\b', text_l_resolved) and vmid not in seen or re.search(r'\b' + str(vmid) + r'\b', text_l_resolved) and vmid not in seen:
             seen.add(vmid)
             vm_list.append((vmid, vm.get("name", f"vm{vmid}")))
     if vm_list:

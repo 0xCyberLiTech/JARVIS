@@ -135,9 +135,7 @@ def detect_multi_file_command(text: str, vm_ssh_map: dict):
     """Détecte une commande multi-fichiers (2+ chemins).
     Retourne ('read', vm_name, ssh_fn, [paths]) ou None.
     Multi-fichiers = lecture seule pour correction (pas d'édition)."""
-    if FADD_RE.search(text) or FEDIT_RE.search(text):
-        action = "read"
-    elif FREAD_RE.search(text) or FCORR_RE.search(text):
+    if FADD_RE.search(text) or FEDIT_RE.search(text) or FREAD_RE.search(text) or FCORR_RE.search(text):
         action = "read"
     else:
         return None

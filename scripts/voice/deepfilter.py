@@ -60,7 +60,7 @@ def _load():
             _saved_py_stderr = _sys.stderr
             _saved_fd2 = None
             try:
-                _sys.stderr = open(_os.devnull, "w")
+                _sys.stderr = open(_os.devnull, "w")  # noqa: SIM115  # fermé dans le finally L. 82 (mutation globale sys.stderr — pas de with possible)
                 _fd2_null = _os.open(_os.devnull, _os.O_WRONLY)
                 _saved_fd2 = _os.dup(2)
                 _os.dup2(_fd2_null, 2)

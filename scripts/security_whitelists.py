@@ -26,7 +26,7 @@ Couplage : zéro pour validation pure, write fichier I/O pour audit_writeop().
 import ipaddress
 import json
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 # ── Patterns SSH bloqués ──────────────────────────────────────
@@ -186,7 +186,7 @@ def audit_writeop(host: str, cmd: str, allowed: bool, output: str = "",
     """
     path = log_path or AUDIT_WRITEOP_PATH
     record = {
-        "ts": ts or datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        "ts": ts or datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "host": host,
         "cmd": cmd[:500],
         "allowed": bool(allowed),

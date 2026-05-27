@@ -294,7 +294,7 @@ def api_set_dsp_params():
         elif isinstance(orig, (int, float)) and isinstance(v, (int, float)):
             lo, hi = _dsp_bounds.get(k, (-9999, 9999))
             clamped = max(lo, min(hi, v))
-            sanitized[k] = int(round(clamped)) if isinstance(orig, int) else round(float(clamped), 6)
+            sanitized[k] = round(clamped) if isinstance(orig, int) else round(float(clamped), 6)
         elif isinstance(orig, str):
             sanitized[k] = str(v)[:128]
     dsp_params.update(sanitized)
