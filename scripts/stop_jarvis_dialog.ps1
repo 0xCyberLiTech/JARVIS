@@ -50,7 +50,7 @@ $form.TopMost         = $true
 $form.Add_Shown({ try { [JDwm]::Dark($form.Handle) } catch {} })
 
 $lbl_title = New-Object Windows.Forms.Label
-$lbl_title.Text      = "J A R V I S   " + [char]9672 + "   A R R" + [char]0xCA + "T"
+$lbl_title.Text      = "J A R V I S   " + [char]9672 + "   A R R E T"
 $lbl_title.Font      = $F_TITLE
 $lbl_title.ForeColor = $C_CYAN
 $lbl_title.Location  = New-Object Drawing.Point(20, 16)

@@ -341,7 +341,7 @@ if ($DryRun) {
     Show-DrHead "ETAPE 8  -  Raccourcis bureau"
 
     $desktop = [Environment]::GetFolderPath("Desktop")
-    foreach ($lnk in @("JARVIS Dashboard.lnk","JARVIS - Arret.lnk","JARVIS - Demarrage.lnk")) {
+    foreach ($lnk in @("JARVIS Dashboard.lnk",("JARVIS - Arr" + [char]0xEA + "t.lnk"),"JARVIS - Demarrage.lnk")) {
         if (Test-Path (Join-Path $desktop $lnk)) { Show-DrOk "Raccourci $lnk" "Present" }
         else                                      { Show-DrWarn "Raccourci $lnk" "Absent  -  sera cree" }
     }
@@ -620,7 +620,7 @@ if ($DryRunRestore) {
         Show-SimOk "CREERAIT raccourci : JARVIS Dashboard.lnk  ->  http://localhost:5000"
         $bkJ = "$BACKUP_ROOT\JARVIS"
         foreach ($pair in @(
-            @{ lnk = "JARVIS - Arret.lnk";     bat = "stop_jarvis.bat" },
+            @{ lnk = ("JARVIS - Arr" + [char]0xEA + "t.lnk"); bat = "stop_jarvis.bat" },
             @{ lnk = "JARVIS - Demarrage.lnk"; bat = "start_dashboard.bat" }
         )) {
             $local = Join-Path $JARVIS_ROOT $pair.bat
@@ -1174,7 +1174,7 @@ Log "Raccourci JARVIS Dashboard OK"
 # Raccourci Arret JARVIS
 $stopBat = "$JARVIS_ROOT\stop_jarvis.bat"
 if (Test-Path $stopBat) {
-    $lnkStop = $wsh.CreateShortcut("$desktop\JARVIS - Arret.lnk")
+    $lnkStop = $wsh.CreateShortcut(("$desktop\JARVIS - Arr" + [char]0xEA + "t.lnk"))
     $lnkStop.TargetPath = $stopBat
     $lnkStop.WorkingDirectory = $JARVIS_ROOT
     $lnkStop.Description = "Arrete JARVIS (port 5000)"
