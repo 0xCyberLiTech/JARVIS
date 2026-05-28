@@ -81,7 +81,7 @@ if (-not $DryRun) {
     if (-not $isAdmin) {
         Write-FAIL "Ce script doit etre lance en tant qu'Administrateur"
         Write-INFO "Relancer ce script (install-jarvis.ps1) dans un PowerShell administrateur"
-        Write-INFO "Ou simulation sans droits : menu JARVIS -> [13] Verification (DryRun)"
+        Write-INFO "Ou simulation sans droits (CLI) : & '$PSCommandPath' -DryRun"
         exit 1
     }
 }
@@ -393,7 +393,9 @@ if ($DryRun) {
     Write-Host "  Rapport sauvegarde : $REPORT_FILE" -ForegroundColor Gray
     Write-Host ""
     Write-Host "  Mode simulation  -  rien n'a ete installe ni modifie." -ForegroundColor Magenta
-    Write-Host "  Pour lancer l'installation reelle : menu JARVIS -> [14] Restauration" -ForegroundColor White
+    Write-Host "  Pour lancer l'installation reelle :" -ForegroundColor White
+    Write-Host "    - menu JARVIS -> [14] Restauration  (recommande)" -ForegroundColor White
+    Write-Host "    - ou en CLI  : & '$PSCommandPath'" -ForegroundColor White
     Write-Host ""
 
     exit 0
