@@ -1,9 +1,9 @@
 ---
 title: "Procédure de réinstallation / recovery"
 code: "JARVIS-DOC-04-02"
-version: "1.0"
+version: "1.1"
 date_creation: "2026-05-23"
-date_revision: "2026-05-23"
+date_revision: "2026-05-28"
 auteur: "Marc Sabater (0xCyberLiTech)"
 contributeurs: ["Claude (Anthropic)"]
 statut: "Valide"
@@ -14,7 +14,34 @@ mots_cles: ["reinstallation", "recovery", "disaster-recovery", "dr"]
 # JARVIS — Guide de réinstallation Windows
 
 > Document critique — à conserver dans les sauvegardes.
-> Dernière mise à jour : 2026-05-22 — Audit dette complet · 35 modules Python · refactor JS terminé · 18 modules static/js/
+> Dernière mise à jour : 2026-05-28 — clarification des 2 scénarios d'usage (réinstall complète vs code erroné).
+
+---
+
+## Quand utiliser quoi — 2 scénarios
+
+La sauvegarde JARVIS répond à **deux besoins distincts** — ne pas les confondre.
+
+### 🔴 CAS 1 — Réinstallation complète (Windows réinstallé · nouveau PC · disque C: perdu)
+
+- **Outil : `install-jarvis.ps1`**
+- (Ré)installe **toutes les dépendances** : driver NVIDIA, Python 3.11, **Ollama (binaire, téléchargé depuis ollama.com puis installé)**, PyTorch CUDA, 17 packages pip.
+- **PUIS** restaure les **données** depuis `D:\BACKUP-WINDOWS` : code JARVIS, modèles Ollama (~31 GB), clés SSH, mémoire Claude.
+- Le backup est **indispensable** ici (sinon re-télécharger ~47 GB de modèles, 30-90 min).
+- Part d'un Windows nu → JARVIS opérationnel.
+
+### 🟡 CAS 2 — Souci de fonctionnement / code erroné (dépendances intactes)
+
+- Régression, mauvaise modification, JARVIS planté — mais Ollama / Python / PyTorch **déjà installés**.
+- **Outil : `git`** (JARVIS est versionné en dépôt local) → `git checkout <fichier>` ou `git reset --hard <commit>` = rollback **fin et instantané** du code.
+- ⚠️ **Exception configs runtime** : les fichiers *gitignored* (`jarvis_dsp_params.json`, `jarvis_llm_params.json`, `jarvis_system_prompt.txt`…) ne sont **pas dans git** → si l'une est corrompue, c'est le **backup** (`D:\BACKUP-WINDOWS\JARVIS\scripts\`) qui la couvre.
+
+**Règle simple :**
+
+| Situation | Outil |
+|-----------|-------|
+| C: perdu / réinstall Windows | `install-jarvis.ps1` + backup (tout) |
+| Code cassé, dépendances OK | `git` (rollback) ; backup en secours pour les configs *gitignored* |
 
 ---
 
