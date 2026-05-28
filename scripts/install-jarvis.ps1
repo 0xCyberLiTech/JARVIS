@@ -341,7 +341,7 @@ if ($DryRun) {
     Show-DrHead "ETAPE 8  -  Raccourcis bureau"
 
     $desktop = [Environment]::GetFolderPath("Desktop")
-    foreach ($lnk in @("JARVIS Dashboard.lnk",("JARVIS - Arr" + [char]0xEA + "t.lnk"),"JARVIS - Demarrage.lnk")) {
+    foreach ($lnk in @("JARVIS Dashboard.lnk",("JARVIS - Arr" + [char]0xEA + "t.lnk"))) {
         if (Test-Path (Join-Path $desktop $lnk)) { Show-DrOk "Raccourci $lnk" "Present" }
         else                                      { Show-DrWarn "Raccourci $lnk" "Absent  -  sera cree" }
     }
@@ -617,11 +617,10 @@ if ($DryRunRestore) {
 
     function Sim-Etape8 {
         Show-SimHd "ETAPE 8  -  Raccourcis bureau"
-        Show-SimOk "CREERAIT raccourci : JARVIS Dashboard.lnk  ->  http://localhost:5000"
         $bkJ = "$BACKUP_ROOT\JARVIS"
         foreach ($pair in @(
-            @{ lnk = ("JARVIS - Arr" + [char]0xEA + "t.lnk"); bat = "scripts\stop_jarvis.bat" },
-            @{ lnk = "JARVIS - Demarrage.lnk"; bat = "scripts\start_dashboard.bat" }
+            @{ lnk = "JARVIS Dashboard.lnk"; bat = "scripts\start_dashboard.bat" },
+            @{ lnk = ("JARVIS - Arr" + [char]0xEA + "t.lnk"); bat = "scripts\stop_jarvis.bat" }
         )) {
             $local = Join-Path $JARVIS_ROOT $pair.bat
             $bkup  = Join-Path $bkJ         $pair.bat
@@ -1161,15 +1160,23 @@ Write-Title "ETAPE 8  -  Raccourcis bureau"
 
 $desktop = [Environment]::GetFolderPath("Desktop")
 
-# Raccourci JARVIS Dashboard
+# Raccourci JARVIS Dashboard (lanceur tout-en-un : start_dashboard.bat demarre
+# Ollama+MCP+Flask PUIS ouvre le navigateur ; si deja actif, ouvre juste le navigateur)
 $wsh = New-Object -ComObject WScript.Shell
 
-$lnkDashboard = $wsh.CreateShortcut("$desktop\JARVIS Dashboard.lnk")
-$lnkDashboard.TargetPath = "http://localhost:5000"
-$lnkDashboard.Description = "Ouvre JARVIS dans le navigateur"
-$lnkDashboard.Save()
-Write-OK "Raccourci 'JARVIS Dashboard' cree"
-Log "Raccourci JARVIS Dashboard OK"
+$startBat = "$JARVIS_ROOT\scripts\start_dashboard.bat"
+if (Test-Path $startBat) {
+    $lnkDashboard = $wsh.CreateShortcut("$desktop\JARVIS Dashboard.lnk")
+    $lnkDashboard.TargetPath = $startBat
+    $lnkDashboard.WorkingDirectory = $JARVIS_ROOT
+    $lnkDashboard.Description = "Demarre JARVIS et ouvre le dashboard"
+    $lnkDashboard.Save()
+    Write-OK "Raccourci 'JARVIS Dashboard' cree"
+    Log "Raccourci JARVIS Dashboard OK"
+} else {
+    Write-WARN "start_dashboard.bat absent  -  raccourci Dashboard non cree"
+    Log "WARN start_dashboard.bat absent"
+}
 
 # Raccourci Arret JARVIS
 $stopBat = "$JARVIS_ROOT\scripts\stop_jarvis.bat"
@@ -1184,21 +1191,6 @@ if (Test-Path $stopBat) {
 } else {
     Write-WARN "stop_jarvis.bat absent  -  raccourci Arret non cree"
     Log "WARN stop_jarvis.bat absent"
-}
-
-# Raccourci Demarrage JARVIS
-$startBat = "$JARVIS_ROOT\scripts\start_dashboard.bat"
-if (Test-Path $startBat) {
-    $lnkStart = $wsh.CreateShortcut("$desktop\JARVIS - Demarrage.lnk")
-    $lnkStart.TargetPath = $startBat
-    $lnkStart.WorkingDirectory = $JARVIS_ROOT
-    $lnkStart.Description = "Demarre JARVIS (Flask + Ollama)"
-    $lnkStart.Save()
-    Write-OK "Raccourci 'JARVIS - Demarrage' cree"
-    Log "Raccourci JARVIS Demarrage OK"
-} else {
-    Write-WARN "start_dashboard.bat absent  -  raccourci Demarrage non cree"
-    Log "WARN start_dashboard.bat absent"
 }
 
 # ══════════════════════════════════════════════════════════════
@@ -1221,10 +1213,11 @@ Write-Host "    7. Memoire Claude Code" -ForegroundColor Gray
 Write-Host "    8. Raccourcis bureau" -ForegroundColor Gray
 Write-Host ""
 Write-Host "  Pour demarrer JARVIS :" -ForegroundColor White
-Write-Host "    Double-clic sur 'JARVIS - Demarrage' sur le bureau" -ForegroundColor Yellow
-Write-Host "    Ou : $JARVIS_ROOT\start_dashboard.bat" -ForegroundColor Yellow
+Write-Host "    Double-clic sur 'JARVIS Dashboard' sur le bureau" -ForegroundColor Yellow
+Write-Host "    (demarre Ollama+MCP+Flask PUIS ouvre le dashboard automatiquement)" -ForegroundColor Yellow
+Write-Host "    Ou : $JARVIS_ROOT\scripts\start_dashboard.bat" -ForegroundColor Yellow
 Write-Host ""
-Write-Host "  Puis ouvrir : http://localhost:5000" -ForegroundColor White
+Write-Host "  Dashboard : http://localhost:5000" -ForegroundColor White
 Write-Host ""
 Write-Host "  Log complet : $LOG" -ForegroundColor Gray
 Write-Host ""
