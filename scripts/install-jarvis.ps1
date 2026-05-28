@@ -917,6 +917,14 @@ if (-not $ollamaOk) {
     Log "Ollama installe OK"
 }
 
+# ── Reglage Ollama : OLLAMA_FLASH_ATTENTION (perf/VRAM RTX 5080) ───────────────
+# Variable d'env User, PERDUE a une reinstall Windows (pas un fichier du coffre).
+# Reconfiguree ici -> restauration a zero reglage manuel ("survie de JARVIS").
+[Environment]::SetEnvironmentVariable("OLLAMA_FLASH_ATTENTION", "1", "User")
+$env:OLLAMA_FLASH_ATTENTION = "1"
+Write-OK "OLLAMA_FLASH_ATTENTION=1 configure (optimisation VRAM RTX 5080)"
+Log "OLLAMA_FLASH_ATTENTION=1 (User) configure"
+
 # ── Modeles LLM  -  restauration depuis backup (independant du statut Ollama)
 Write-Title "ETAPE 2b - Modeles LLM Ollama"
 
