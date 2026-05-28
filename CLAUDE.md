@@ -68,6 +68,16 @@ cd JARVIS\scripts && python jarvis_mcp_server.py
 # → écoute 127.0.0.1:5010
 ```
 
+## Disaster Recovery (DR) — « JARVIS inperdable »
+
+> Détails complets : `DOCUMENTATION/04-DEPLOIEMENT/04-02-REINSTALLATION.md`. Règle : ne jamais perdre JARVIS.
+
+- **Coffre** `D:\BACKUP-WINDOWS\` : modèles Ollama (32 Go) + installeurs Python/**Ollama**/NVIDIA (reinstall **hors-ligne**) + dossier JARVIS (+ `.git`) + SSH + Claude. Mis à jour par `scripts/backup-jarvis.ps1`.
+- **Backend SOC** : `SOC/scripts/backup-soc-backend.ps1` → `D:\BACKUP-WINDOWS\SOC-BACKEND\` (sans secrets).
+- **Restauration** : menu JARVIS `[14]` (2 modes : R1 complète / R2 code seul) · ou `scripts/install-jarvis.bat` (menu + fenêtre persistante) · ou `install-jarvis.ps1 -Unattended` (admin). Reconfigure `OLLAMA_FLASH_ATTENTION=1`.
+- **Feu vert DR** : `scripts/dr-check.ps1` → verdict GO/NO-GO du coffre dans `Bureau\DR-STATUT-JARVIS.txt`, lancé chaque dimanche par la tâche `JARVIS-DR-Check` (installée via `scripts/install-dr-check-task.ps1`).
+- **Source unique** : scripts dans `JARVIS\scripts\` (aucune copie racine) · `.lnk` sur le Bureau (gitignorés, recréés par install).
+
 ## 4 modes (règle absolue)
 
 Cf. mémoire `jarvis_modes` — règle ABSOLUE pour Claude :

@@ -435,29 +435,26 @@ xcopy /E /I "D:\BACKUP-WINDOWS\JARVIS" "C:\Users\mmsab\Documents\0xCyberLiTech\J
 
 ## Étape 5 — Shortcuts bureau
 
-Les raccourcis `.lnk` sont dans `C:\Users\mmsab\Documents\0xCyberLiTech\JARVIS\` :
+Les raccourcis `.lnk` vivent sur le **Bureau** (recréés automatiquement par `install-jarvis.ps1`, étape 8) :
 
-- `JARVIS Dashboard.lnk` → ouvre `http://localhost:5000`
-- `JARVIS - Arrêt.lnk` → lance `stop_jarvis.bat`
+- `JARVIS Dashboard.lnk` → lance `scripts\start_dashboard.bat` (lanceur tout-en-un : Ollama + MCP + Flask + ouverture du dashboard)
+- `JARVIS - Arrêt.lnk` → lance `scripts\stop_jarvis.bat`
 
-Si les .lnk ne fonctionnent plus (chemin brisé), recréer :
+Si les .lnk manquent après une restauration, ils sont recréés par l'étape 8 de `install-jarvis.ps1` (ou via le menu JARVIS).
 
-```cmd
-cd "C:\Users\mmsab\Documents\0xCyberLiTech\JARVIS\scripts"
-python create_shortcut.py
-```
+> ⚠️ Les `.lnk` ne sont **pas** versionnés dans le dépôt (`*.lnk` gitignoré) ni stockés dans `JARVIS\` : ils sont **régénérés** par `install-jarvis.ps1`.
 
 ---
 
 ## Étape 5b — Scripts de démarrage et d'arrêt
 
-Les scripts sont dans deux emplacements (identiques) :
+**Source unique : `JARVIS\scripts\`** (les anciennes copies à la racine `JARVIS\` ont été supprimées le 2026-05-28 — plus de doublon) :
 
 ```
-JARVIS\start_dashboard.bat       ← raccourci bureau pointe ici
-JARVIS\scripts\start_dashboard.bat
-JARVIS\stop_jarvis.bat
-JARVIS\scripts\stop_jarvis.bat
+JARVIS\scripts\start_dashboard.bat      ← cible du raccourci JARVIS Dashboard.lnk
+JARVIS\scripts\stop_jarvis.bat          ← cible du raccourci JARVIS - Arrêt.lnk
+JARVIS\scripts\start_jarvis_dialog.ps1  ← dialogue GUI de démarrage
+JARVIS\scripts\stop_jarvis_dialog.ps1   ← dialogue GUI d'arrêt
 ```
 
 ### start_dashboard.bat — Ce qu'il fait

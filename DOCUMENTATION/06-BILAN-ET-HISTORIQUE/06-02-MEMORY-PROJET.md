@@ -13,6 +13,18 @@ mots_cles: ["memoire", "historique", "sessions", "refactor", "chronologie"]
 
 # JARVIS — Mémoire projet (2026-05-23 — refactor architecture par tuiles complet, 24 tuiles + bug UI reload résolu cause racine + couverture +282 tests + audit ruff strict)
 
+## Session 2026-05-28 — chantier DR « JARVIS inperdable » + audit dette 96/100
+
+**DR complète (~11 commits)** : coffre `D:\BACKUP-WINDOWS` rendu autonome (installeur **Ollama** caché dans `INSTALLERS\` → reinstall hors-ligne) · backend SOC sauvegardé dans le coffre **sans secrets** (`SOC\scripts\backup-soc-backend.ps1` → `SOC-BACKEND\`, exclut token Freebox + alert.conf) · `dr-check.ps1` (feu vert GO/NO-GO du coffre) + tâche planifiée hebdo `JARVIS-DR-Check` (S4U, sans fenêtre) installée via `install-dr-check-task.ps1` · menu `[2]/[3]/[4]` désormais délégués aux scripts canoniques `start_dashboard.bat`/`stop_jarvis.bat` (source unique → MCP + sauvegarde mémoire inclus à l'arrêt) · menu `[14]` = sous-menu restauration explicite 2 modes (R1 complète / R2 code seul) · `install-jarvis.bat` (point d'entrée DR, fenêtre persistante) · `OLLAMA_FLASH_ATTENTION=1` reconfiguré automatiquement à la restauration · `install-jarvis.ps1` utilise le cache Ollama en priorité (fallback internet).
+
+**Ménage / cohérence** : ancien `scripts/JARVIS-menu.ps1` supprimé (menu actif = `SCRIPTS_WINDOWS\MENU\02_JARVIS\jarvis.ps1`) · copies racine `JARVIS\*.bat` supprimées (source unique = `scripts\`) · `*.lnk` gitignorés + 2 raccourcis cassés versionnés supprimés (les `.lnk` vivent sur le Bureau, recréés par install) · titre du dialogue d'arrêt « A R RÊT » → « A R R E T » (lisibilité, accessibilité) · détection raccourci `Arrêt.lnk` corrigée (`[char]0xEA`).
+
+**Audit dette JARVIS** : score **96/100 maintenu** · pytest tous verts (0 fail/skip) · ruff 0 · eslint 0 · TODO/FIXME 0 · coverage re-mesurée **76%** (corrigée dans §0, exactitude). Dette saine/gelée (12 modules HTTP <50% couverts fonctionnellement E2E) → statu quo. Avis donné : ne pas refactorer (aucun trigger atteint).
+
+**Sauvegardes D:** : coffre `BACKUP-WINDOWS` (modèles 32 Go + installeurs + code + SSH + Claude) **+** copie complète `D:\0xCyberLiTech` (code + menu SCRIPTS_WINDOWS + tous projets, à jour). DR validée 3×  : dr-check GO · menu testé (MCP lancé) · DryRun 21 OK.
+
+---
+
 ## Session 2026-05-23 soirée — étape 37 mode/ + audit ruff strict + clôture honnête
 
 Suite directe de la session fin d'après-midi (étapes 35-36 + bug UI reload
