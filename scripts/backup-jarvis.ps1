@@ -92,24 +92,10 @@ if (-not (Test-Path $JARVIS_SRC)) {
     Write-SIZE $BACKUP_JARVIS
     Log "JARVIS sauvegarde OK"
 
-    # Scripts bureau (Desktop) -> backup JARVIS (avant verification critiques)
-    $desktop = "$env:USERPROFILE\Desktop"
-    foreach ($s in @("JARVIS-menu.bat", "JARVIS-menu.ps1")) {
-        $src = Join-Path $desktop $s
-        $dst = Join-Path $BACKUP_JARVIS $s
-        if (Test-Path $src) {
-            Copy-Item -Path $src -Destination $dst -Force
-            Log "$s copie OK"
-        } else {
-            Write-WARN "$s introuvable sur le bureau"
-            Log "WARN $s absent"
-        }
-    }
-
     # Verifier les fichiers critiques
     $critiques = @(
-        "start_dashboard.bat",
-        "stop_jarvis.bat",
+        "scripts\start_dashboard.bat",
+        "scripts\stop_jarvis.bat",
         "scripts\jarvis.py",
         "scripts\templates\jarvis.html",
         "scripts\jarvis_system_prompt.txt",
@@ -117,9 +103,7 @@ if (-not (Test-Path $JARVIS_SRC)) {
         "scripts\jarvis_model.json",
         "scripts\jarvis_llm_params.json",
         "scripts\jarvis_dsp_params.json",
-        "scripts\jarvis_welcome.json",
-        "JARVIS-menu.bat",
-        "JARVIS-menu.ps1"
+        "scripts\jarvis_welcome.json"
     )
 
     Write-INFO "Verification fichiers critiques :"

@@ -60,7 +60,7 @@ cd JARVIS\scripts && python jarvis.py
 # → http://localhost:5000
 
 # Arrêt
-JARVIS\stop_jarvis.bat
+JARVIS\scripts\stop_jarvis.bat
 # OU raccourci bureau `JARVIS - Arrêt.lnk`
 
 # MCP server (optionnel pour Claude Desktop)
