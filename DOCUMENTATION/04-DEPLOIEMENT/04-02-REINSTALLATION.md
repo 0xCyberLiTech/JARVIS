@@ -49,29 +49,35 @@ La sauvegarde JARVIS répond à **deux besoins distincts** — ne pas les confon
 
 | Script | Rôle | Emplacement |
 |--------|------|-------------|
-| `backup-jarvis.ps1` | **Sauvegarde complète** → `D:\BACKUP-WINDOWS\` | `JARVIS\doc\` et `D:\BACKUP-WINDOWS\JARVIS\` |
-| `install-jarvis.ps1` | **Réinstallation automatique** depuis backup | `JARVIS\doc\` et `D:\BACKUP-WINDOWS\JARVIS\` |
+| `backup-jarvis.ps1` | **Sauvegarde** JARVIS → coffre `D:\BACKUP-WINDOWS\` (+ installeurs Python/Ollama/NVIDIA) | `JARVIS\scripts\` (+ copié dans le coffre) |
+| `install-jarvis.ps1` | **Restauration** complète depuis le coffre (deps + données) | `JARVIS\scripts\` (+ copié dans le coffre) |
+| `dr-check.ps1` | **Feu vert DR** : vérifie (lecture seule) que le coffre est complet → GO/NO-GO sur le Bureau | `JARVIS\scripts\` |
+| `install-dr-check-task.ps1` | Installe la tâche planifiée hebdo du dr-check (à lancer en admin) | `JARVIS\scripts\` |
+| `backup-soc-backend.ps1` | Sauvegarde du backend SOC (srv-nginx) → coffre, **sans secrets** | `SOC\scripts\` |
 
-### backup-jarvis.ps1 — Ce qu'il sauvegarde
+### backup-jarvis.ps1 — Ce qu'il sauvegarde (le coffre)
 
-1. Fichiers JARVIS complets (scripts, html, configs, voices, start/stop scripts)
-2. Clés SSH (`~/.ssh/` — id_nginx, id_clt, id_pa85, id_proxmox)
+1. Fichiers JARVIS complets (scripts, html, configs, voices, start/stop, **+ `.git` = historique des versions**)
+2. Clés SSH (`~/.ssh/` — id_nginx, id_clt, id_pa85, id_proxmox, id_dev, id_router)
 3. Mémoire Claude Code (`~/.claude/`)
-4. **Modèles Ollama** (`~/.ollama/models/` → `D:\BACKUP-WINDOWS\OLLAMA-MODELS\models\`) — copie automatique ~47 GB
-5. Auto-copie de backup-jarvis.ps1 et install-jarvis.ps1 dans le backup
+4. **Modèles Ollama** (`~/.ollama/models/` → `OLLAMA-MODELS\models\`) — ~32 GB
+5. **Installeurs** (`INSTALLERS\`) : Python 3.11.9 + **OllamaSetup.exe** + pilote NVIDIA → **réinstall 100% hors-ligne**
+6. Auto-copie de backup-jarvis.ps1 et install-jarvis.ps1 dans le coffre
+
+> Le backend SOC (srv-nginx) est sauvegardé séparément par `SOC\scripts\backup-soc-backend.ps1` → `SOC-BACKEND\` (sans secrets).
 
 > Lancer régulièrement et **obligatoirement** avant toute réinstallation Windows.
 
 ### install-jarvis.ps1 — Ce qu'il installe (8 étapes)
 
 1. Python 3.11.9 (téléchargement + install silencieuse + PATH)
-2. Ollama (téléchargement + install)
+2. Ollama (cache `INSTALLERS\OllamaSetup.exe` en priorité = hors-ligne, sinon téléchargement)
 3. **Modèles LLM** — restauration depuis `D:\BACKUP-WINDOWS\OLLAMA-MODELS\models\` → `~/.ollama/models/`
    - Ollama est arrêté pendant la copie (évite les verrous fichiers)
    - Redémarré automatiquement après
    - Si pas de backup : `ollama pull` des 5 modèles (~47 GB)
 4. Packages Python (Flask, edge-tts, Whisper, DeepFilterNet, scipy...)
-5. PyTorch CUDA 12.4 (~4 GB)
+5. PyTorch CUDA 12.8 (cu128 — RTX 5080 Blackwell, ~4 GB)
 6. Fichiers JARVIS depuis `D:\BACKUP-WINDOWS\JARVIS\`
 7. Clés SSH depuis `D:\BACKUP-WINDOWS\SSH\` + permissions
 8. Mémoire Claude depuis `D:\BACKUP-WINDOWS\CLAUDE-MEMORY\`
@@ -85,6 +91,19 @@ La sauvegarde JARVIS répond à **deux besoins distincts** — ne pas les confon
 Set-ExecutionPolicy Bypass -Scope Process -Force
 & "D:\BACKUP-WINDOWS\JARVIS\install-jarvis.ps1"
 ```
+
+---
+
+## Feu vert DR — vérification automatique du coffre
+
+`dr-check.ps1` vérifie (**lecture seule**) que le coffre `D:\BACKUP-WINDOWS\` contient tout pour restaurer JARVIS + backend SOC. Verdict **GO / NO-GO** écrit sur le Bureau (`DR-STATUT-JARVIS.txt`) + log + exit code.
+
+- **Activation auto** (1 fois, en admin) : `install-dr-check-task.ps1` → tâche hebdomadaire `JARVIS-DR-Check` (dimanche 9 h, S4U, sans fenêtre).
+- **Lancement manuel** : `& JARVIS\scripts\dr-check.ps1`
+
+Contrôle 9 points : frontend + serveur, modèles Ollama, installeurs Python/Ollama, pilote NVIDIA, clés SSH, mémoire Claude, backend SOC (< 14 j), scripts DR dans le coffre.
+
+> **GO** = réinstall possible de A à Z sur une autre machine Windows, hors-ligne, depuis le seul coffre.
 
 ---
 
