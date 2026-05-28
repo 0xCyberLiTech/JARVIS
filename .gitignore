@@ -61,3 +61,7 @@ scripts.aprem-*/
 *.bak
 *.bak[0-9]
 *.bak.*
+
+# ── Raccourcis Windows (.lnk) — vivent sur le Bureau, recrees par install-jarvis.ps1 ──
+# Un .lnk a chemin absolu n'est pas du code source. Ne jamais versionner.
+*.lnk
