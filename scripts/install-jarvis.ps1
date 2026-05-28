@@ -80,7 +80,7 @@ if (-not $DryRun) {
     $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
     if (-not $isAdmin) {
         Write-FAIL "Ce script doit etre lance en tant qu'Administrateur"
-        Write-INFO "Clic droit sur JARVIS-menu.ps1 → Executer en tant qu'administrateur"
+        Write-INFO "Relancer ce script (install-jarvis.ps1) dans un PowerShell administrateur"
         Write-INFO "Ou mode simulation sans droits : .\install-jarvis.ps1 -DryRun"
         exit 1
     }
@@ -659,7 +659,7 @@ if ($DryRunRestore) {
     Write-Host "  Rapport sauvegarde : $REPORT_SIM" -ForegroundColor Gray
     Write-Host ""
     Write-Host "  Simulation terminee  -  aucune modification effectuee." -ForegroundColor Magenta
-    Write-Host "  Pour restaurer reellement : [14] Restauration dans JARVIS-menu.ps1" -ForegroundColor White
+    Write-Host "  Pour restaurer reellement : option [14] du menu JARVIS (raccourci JARVIS-menu)" -ForegroundColor White
     Write-Host ""
     exit 0
 }
