@@ -212,7 +212,16 @@ if ($DryRun) {
     $ollamaOkDR = $false
     try { $ollamaVer = (& ollama --version 2>&1).ToString().Trim(); $ollamaOkDR = $true } catch {}
     if ($ollamaOkDR) { Show-DrOk "Ollama" $ollamaVer }
-    else             { Show-DrWarn "Ollama" "Non installe  -  telechargement internet requis" }
+    else             { Show-DrWarn "Ollama" "Non installe (sera installe a la restauration)" }
+
+    # Installeur Ollama en cache ? (garantit une reinstall hors-ligne)
+    $olCacheDR = "$BACKUP_ROOT\INSTALLERS\OllamaSetup.exe"
+    if (Test-Path $olCacheDR) {
+        $olcSize = [math]::Round((Get-Item $olCacheDR).Length / 1MB, 1)
+        Show-DrOk "Installeur Ollama (cache)" "$olcSize MB  -  reinstall hors-ligne OK"
+    } else {
+        Show-DrWarn "Installeur Ollama (cache)" "Absent  -  reinstall necessitera internet (lancer une sauvegarde)"
+    }
 
     $backupOllamaPath = "$BACKUP_ROOT\OLLAMA-MODELS\models"
     if (Test-Path $backupOllamaPath) {
@@ -871,20 +880,32 @@ try {
 } catch {}
 
 if (-not $ollamaOk) {
-    Write-INFO "Telechargement Ollama..."
-    Log "Telechargement Ollama"
-    try {
-        Invoke-WebRequest -Uri $OLLAMA_URL -OutFile $OLLAMA_EXE -UseBasicParsing -TimeoutSec 300
-        Write-OK "Telechargement OK"
-    } catch {
-        Write-FAIL "Echec telechargement Ollama : $_"
-        Log "ERREUR telechargement Ollama : $_"
-        exit 1
+    # Priorite au cache local (reinstall hors-ligne), fallback internet sinon
+    $olCache     = "$BACKUP_ROOT\INSTALLERS\OllamaSetup.exe"
+    $olFromCache = $false
+    if (Test-Path $olCache) {
+        Write-OK "Installeur Ollama trouve dans le cache (hors-ligne) : $olCache"
+        Log "Ollama installeur depuis cache : $olCache"
+        $installerPath = $olCache
+        $olFromCache   = $true
+    } else {
+        Write-INFO "Installeur Ollama absent du cache -> telechargement internet..."
+        Log "Telechargement Ollama (cache absent)"
+        try {
+            Invoke-WebRequest -Uri $OLLAMA_URL -OutFile $OLLAMA_EXE -UseBasicParsing -TimeoutSec 600
+            Write-OK "Telechargement OK"
+            $installerPath = $OLLAMA_EXE
+        } catch {
+            Write-FAIL "Echec telechargement Ollama : $_"
+            Log "ERREUR telechargement Ollama : $_"
+            exit 1
+        }
     }
 
     Write-INFO "Installation Ollama (silencieuse)..."
-    Start-Process -FilePath $OLLAMA_EXE -ArgumentList "/S" -Wait
-    Remove-Item $OLLAMA_EXE -Force -ErrorAction SilentlyContinue
+    Start-Process -FilePath $installerPath -ArgumentList "/S" -Wait
+    # Ne supprimer QUE le telechargement temporaire, jamais le cache
+    if (-not $olFromCache) { Remove-Item $installerPath -Force -ErrorAction SilentlyContinue }
 
     # Recharger PATH
     $env:PATH = [System.Environment]::GetEnvironmentVariable("PATH", "Machine") + ";" +

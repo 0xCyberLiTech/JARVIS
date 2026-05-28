@@ -246,7 +246,7 @@ foreach ($s in $scripts) {
 # Cache les installeurs dans INSTALLERS\ pour reinstallation
 # 100% hors-ligne sans avoir a re-telecharger.
 # ══════════════════════════════════════════════════════════════
-Write-Title "6 - Installeurs (Python + pilote NVIDIA)"
+Write-Title "6 - Installeurs (Python + Ollama + pilote NVIDIA)"
 
 $BACKUP_INST = "$BACKUP_ROOT\INSTALLERS"
 if (-not (Test-Path $BACKUP_INST)) {
@@ -356,6 +356,30 @@ Pour recuperer l'installeur manuellement :
         Log "WARN nvidia-smi absent au backup"
     }
     Write-INFO "Placer l'installeur .exe NVIDIA dans : $BACKUP_INST\"
+}
+
+# ── 6c : Ollama (installeur OllamaSetup.exe) ──────────────────
+# Cache l'installeur Ollama (le binaire) pour une reinstall 100% hors-ligne.
+# Les modeles, eux, sont dans OLLAMA-MODELS\. install-jarvis.ps1 utilise ce
+# cache en priorite avant tout telechargement internet.
+$olDest = "$BACKUP_INST\OllamaSetup.exe"
+$olUrl  = "https://ollama.com/download/OllamaSetup.exe"
+if (Test-Path $olDest) {
+    $olSize = [math]::Round((Get-Item $olDest).Length / 1MB, 1)
+    Write-OK "Ollama installeur deja en cache ($olSize MB) — skip"
+    Log "Ollama installeur deja present : $olDest"
+} else {
+    Write-INFO "Telechargement installeur Ollama (~700 MB, peut prendre quelques min)..."
+    Log "Telechargement Ollama installeur : $olUrl"
+    try {
+        Invoke-WebRequest -Uri $olUrl -OutFile $olDest -UseBasicParsing -TimeoutSec 600
+        $olSize = [math]::Round((Get-Item $olDest).Length / 1MB, 1)
+        Write-OK "Ollama installeur cache ($olSize MB) : $olDest"
+        Log "Ollama installeur telecharge OK"
+    } catch {
+        Write-WARN "Echec telechargement Ollama installeur : $_"
+        Log "WARN Ollama installeur telechargement echec : $_"
+    }
 }
 
 # ── Bilan installeurs ─────────────────────────────────────────
