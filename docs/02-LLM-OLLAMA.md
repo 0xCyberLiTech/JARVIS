@@ -79,7 +79,7 @@ import requests, json
 
 OLLAMA_URL = "http://localhost:11434"
 
-def chat_with_llm(prompt, model="phi4", system_prompt=None, stream=True):
+def chat_with_llm(prompt, model="phi4:14b", system_prompt=None, stream=True):
     """
     Envoie un prompt à Ollama et retourne la réponse.
     stream=True : retourne les tokens au fur et à mesure (pour SSE).
@@ -151,7 +151,7 @@ Tes règles :
 # Exemple d'utilisation
 for token in chat_with_llm(
     prompt="Analyse cette alerte CrowdSec : 150 bans en 1 heure depuis des IPs chinoises",
-    model="phi4",
+    model="phi4:14b",
     system_prompt=SYSTEM_PROMPT_SOC,
     stream=True
 ):
@@ -173,7 +173,7 @@ def chat():
     """Route Flask — streaming Server-Sent Events."""
     data    = request.get_json()
     prompt  = data.get("prompt", "")
-    model   = data.get("model", "phi4")
+    model   = data.get("model", "phi4:14b")
 
     def generate():
         try:
@@ -207,9 +207,9 @@ def get_active_model():
     """Retourne le modèle Ollama actuellement actif."""
     try:
         with open(MODEL_FILE) as f:
-            return json.load(f).get("model", "phi4")
+            return json.load(f).get("model", "phi4:14b")
     except Exception:
-        return "phi4"
+        return "phi4:14b"
 
 def set_active_model(model_name):
     """Change le modèle actif (sans redémarrage)."""
