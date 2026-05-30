@@ -54,7 +54,7 @@ Il expose les routes HTTP utilisées par l'interface web.
 ```
 Interface web (jarvis.html)
     ↕ HTTP / SSE / WebSocket
-Flask (jarvis.py) — 55 routes
+Flask (jarvis.py) — 75 routes
     ↕
 Ollama LLM | edge-tts | faster-whisper | DeepFilterNet | SSH SOC
 ```

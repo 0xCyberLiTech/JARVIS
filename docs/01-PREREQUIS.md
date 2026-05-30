@@ -101,14 +101,17 @@ ollama --version
 ### Télécharger un modèle
 
 ```bash
-# Modèle recommandé : phi4 (14B, bon rapport qualité/performance)
-ollama pull phi4
+# Modèle par défaut : phi4:14b (SOC, raisonnement) — actif au démarrage
+ollama pull phi4:14b
 
-# Alternative légère (moins de RAM)
-ollama pull mistral:7b
+# Code (génération, multi-fichiers)
+ollama pull qwen2.5-coder:14b
 
-# Alternative puissante (nécessite 16 Go+ RAM)
-ollama pull phi4-reasoning
+# Général / vision / conversation
+ollama pull gemma4
+
+# Mémoire vectorielle (RAG) — embeddings
+ollama pull mxbai-embed-large
 
 # Lister les modèles disponibles
 ollama list
