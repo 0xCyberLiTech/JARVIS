@@ -497,10 +497,10 @@ Défense     SSH lecture seule + actions whitelistées + audit · CrowdSec · fa
 | 🔊 **Configurer le pipeline audio** TTS · STT · DeepFilterNet | [03-PIPELINE-AUDIO.md](./docs/03-PIPELINE-AUDIO.md) |
 | 🛡️ **Connecter JARVIS au SOC** pour les actions proactives | [05-INTEGRATION-SOC.md](./docs/05-INTEGRATION-SOC.md) |
 
-> **Ce dépôt met à disposition :**
-> Documentation technique complète · 5 guides · guide d'installation · configurations exemples
+> **Ce dépôt est une vitrine technique :**
+> architecture, diagrammes et concepts — pour montrer ce que JARVIS fait et comment il est pensé.
 >
-> 🔒 Les scripts opérationnels SOC, les clés SSH et les configurations d'infrastructure restent privés — connaissance construite, pas redistribuée.
+> 🔒 **Le code opérationnel reste volontairement privé** : `jarvis.py` et ses ~13 000 lignes, les scripts SOC, les clés SSH, les configurations d'infrastructure. Ce dépôt n'est **pas reproductible tel quel** — le savoir-faire est protégé, pas redistribué.
 
 ---
 
