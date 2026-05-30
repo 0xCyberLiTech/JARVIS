@@ -41,6 +41,16 @@ JARVIS_BACKUP_LOG_RE = re.compile(
     r'.{0,40}\bjarvis\b|\bjarvis\b.{0,40}\b(log|[eé]tat|avanc[eé]|statut)\b',
     re.I,
 )
+# Lint du menu 0xCyberLiTech (outil DEV read-only menu-lint.ps1). Ce n'est pas un
+# backup mais un script PowerShell LOCAL -> il reutilise la meme machinerie
+# d'execution streaming (backup_sse). Bypass deterministe : phrase fiable a 100%,
+# independante du modele (le function-calling des petits LLM n'est pas fiable).
+MENULINT_RE = re.compile(
+    r'\b(v[eé]rifie[rz]?|lint(?:e[rz]?)?|contr[oô]le[rz]?|check|valide[rz]?|audit(?:e[rz]?)?)\b'
+    r'.{0,30}\bmenu\b'
+    r'|\bmenu\b.{0,20}\b(lint|v[eé]rif)',
+    re.I,
+)
 
 # Parser résumé sauvegarde Proxmox
 _VM_LINE_RE = re.compile(
@@ -89,10 +99,28 @@ def parse_backup_summary(lines: list) -> tuple:
     return md, tts
 
 
+def parse_menulint_verdict(lines: list) -> str:
+    """Extrait le verdict menu-lint (GO/FINDINGS) → phrase TTS concise (accessibilité)."""
+    for line in lines:
+        m = re.search(r'VERDICT\s*:\s*GO\b.*?\((\d+)\s+fichiers?,\s*(\d+)\s+warn', line, re.I)
+        if m:
+            w = m.group(2)
+            return (f"Menu sain. Verdict GO : {m.group(1)} fichiers vérifiés, "
+                    f"{w} avertissement{'s' if w != '1' else ''}.")
+        m = re.search(r'VERDICT\s*:\s*FINDINGS\b.*?(\d+)\s+bloquant', line, re.I)
+        if m:
+            n = m.group(1)
+            s = 's' if n != '1' else ''
+            return f"Attention : le menu a {n} problème{s} bloquant{s} à corriger."
+    return "Vérification du menu terminée."
+
+
 # ── Détecteur ─────────────────────────────────────────────────
 
 def detect_backup_command(text: str) -> str | None:
-    """Retourne ('backup-auto'|'disk-report'|'backup-jarvis'|'backup-jarvis-log') ou None."""
+    """Retourne ('menu-lint'|'backup-auto'|'disk-report'|'backup-jarvis'|'backup-jarvis-log') ou None."""
+    if MENULINT_RE.search(text):
+        return "menu-lint"
     if JARVIS_BACKUP_LOG_RE.search(text):
         return "backup-jarvis-log"
     if JARVIS_BACKUP_RE.search(text):
@@ -119,6 +147,7 @@ def backup_sse(script_path: str, script_key: str):
     labels = {
         "backup-auto": ("Sauvegarde Proxmox", "proxmox-backup-auto.ps1", "Sauvegarde terminée."),
         "disk-report": ("Rapport disque Windows", "windows-disk-report.ps1", "Rapport disque envoyé au SOC."),
+        "menu-lint":   ("Lint du menu 0xCyberLiTech", "menu-lint.ps1", "Vérification du menu terminée."),
     }
     label, fname, speak_msg = labels.get(script_key, (script_key, script_key, "Script terminé."))
     yield _sse_tok(f"[LOCAL] Exécution : `{fname}`…\n\n")
@@ -142,6 +171,8 @@ def backup_sse(script_path: str, script_key: str):
             if summary_md:
                 yield _sse_tok(f"\n\n{summary_md}")
                 speak_msg = summary_tts or speak_msg
+        elif script_key == "menu-lint":
+            speak_msg = parse_menulint_verdict(buf)   # verdict GO/FINDINGS lu a voix haute
         yield _sse_tok(f"\n\n**{status}**")
     except subprocess.TimeoutExpired:
         proc.kill()
