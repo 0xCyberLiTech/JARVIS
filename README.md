@@ -208,7 +208,7 @@ flowchart TB
 ```mermaid
 flowchart TD
     A["💬 Message utilisateur<br/>(texte ou voix)"] --> B{"Mode actif ?"}
-    B -->|SOC| C["phi4 + contexte SOC live"]
+    B -->|SOC| C["phi4:14b + contexte SOC live"]
     B -->|Code / C·R| D["qwen · raisonnement chain-of-thought"]
     B -->|Général / Vocal| E["gemma · conversation"]
     C --> R["📚 RAG local<br/>(mémoire vectorielle ~600 chunks)"]
