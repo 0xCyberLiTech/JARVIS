@@ -204,14 +204,14 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "executer_script_windows",
-            "description": "Exécute un script PowerShell local sur la machine Windows. Scripts disponibles : 'backup-auto' (sauvegarde automatique des 4 VMs Proxmox : srv-nginx 108 / clt 106 / pa85 107 / srv-dev-1 101 vers D:\\BACKUP-PROXMOX\\auto\\), 'disk-report' (rapport disque/GPU/CPU → dashboard SOC). Utiliser quand l'utilisateur demande de lancer une sauvegarde Proxmox ou un rapport système.",
+            "description": "Exécute un script PowerShell local sur la machine Windows. Scripts disponibles : 'backup-auto' (sauvegarde automatique des 4 VMs Proxmox : srv-nginx 108 / clt 106 / pa85 107 / srv-dev-1 101 vers D:\\BACKUP-PROXMOX\\auto\\), 'disk-report' (rapport disque/GPU/CPU → dashboard SOC), 'menu-lint' (valide le menu 0xCyberLiTech : parse PowerShell + encodage + descriptions vocales — outil read-only, à lancer quand l'utilisateur demande de vérifier / linter / contrôler le menu, ou avant de committer une modif du menu). Utiliser quand l'utilisateur demande de lancer une sauvegarde Proxmox, un rapport système, ou une vérification du menu.",
             "parameters": {
                 "type": "object",
                 "properties": {
                     "script": {
                         "type": "string",
-                        "enum": ["backup-auto", "disk-report"],
-                        "description": "Script à exécuter : 'backup-auto' ou 'disk-report'"
+                        "enum": ["backup-auto", "disk-report", "menu-lint"],
+                        "description": "Script à exécuter : 'backup-auto', 'disk-report' ou 'menu-lint'"
                     }
                 },
                 "required": ["script"]

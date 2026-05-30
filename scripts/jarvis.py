@@ -982,6 +982,9 @@ _ALLOWED_SCRIPTS = {
     "backup-auto":   str(_WORKSPACE_ROOT / "PROXMOX" / "proxmox-backup-auto.ps1"),
     "disk-report":   str(_WORKSPACE_ROOT / "PROXMOX" / "windows-disk-report.ps1"),
     "backup-jarvis": str(_WORKSPACE_ROOT / "JARVIS" / "scripts" / "backup-jarvis.ps1"),
+    # Outil DEV read-only : valide le menu 0xCyberLiTech (parse + encodage + voix).
+    # A lancer quand Marc demande de verifier/linter le menu. Cf [[feedback_menu_lint_rule]].
+    "menu-lint":     str(_WORKSPACE_ROOT / "DEV" / "TOOLS" / "menu-lint" / "menu-lint.ps1"),
 }
 
 # _tool_executer_script_windows déménagé dans tools/local.py (étape 33).
