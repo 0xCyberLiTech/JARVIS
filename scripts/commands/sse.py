@@ -17,6 +17,8 @@ import json
 import subprocess
 import time
 
+import security_whitelists as _sec
+
 _ssh_proxmox = None
 _ssh_proxmox_cmd_timeout_s = 15
 _ssh_proxmox_state_timeout_s = 8
@@ -162,6 +164,9 @@ def update_machine_sse(host_label, ssh_fn, is_proxmox=False):
     yield _sse_tok("Index mis à jour.\n\napt-get dist-upgrade -y...\n")
     ok_upg, out_upg = ssh_fn(
         "DEBIAN_FRONTEND=noninteractive apt-get dist-upgrade -y 2>&1", timeout=_ssh_apt_timeout_s)
+    # Traçage forensique : write-op SSH réelle via bypass UI (zéro LLM) — comble le
+    # trou d'audit (le bypass ne passait pas par ssh/tools.py → audit_writeops.jsonl).
+    _sec.audit_writeop(host_label, "apt-get dist-upgrade -y", allowed=ok_upg, output=out_upg or "")
     if not ok_upg:
         yield _sse_tok(f"Erreur apt-get upgrade :\n{(out_upg or '')[:400]}\n", done=True)
         return

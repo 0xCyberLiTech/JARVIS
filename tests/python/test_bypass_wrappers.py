@@ -263,3 +263,20 @@ def test_apt_upgrade_bypass_sse_clear_pending_infra_cmd():
     }
     list(bp_wrap.apt_upgrade_bypass_sse(pending))
     assert "zombie" not in bp_wrap._pending_infra_cmd
+
+
+def test_apt_upgrade_bypass_sse_trace_audit_writeop(monkeypatch):
+    """La MAJ bypass réelle trace la write-op SSH dans audit_writeops.jsonl (gap fix 2026-05-30)."""
+    spy = MagicMock()
+    monkeypatch.setattr(bp_wrap._sec, "audit_writeop", spy)
+    pending = {
+        "host":     "proxmox",
+        "ssh_fn":   MagicMock(return_value=(True, "Setting up a...\nSetting up b...\n")),
+        "packages": ["pkg-a", "pkg-b"],
+    }
+    list(bp_wrap.apt_upgrade_bypass_sse(pending))
+    spy.assert_called_once()
+    args, kwargs = spy.call_args
+    assert args[0] == "proxmox"
+    assert "apt-get upgrade" in args[1]
+    assert kwargs["allowed"] is True

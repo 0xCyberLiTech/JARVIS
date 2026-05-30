@@ -357,3 +357,23 @@ def test_service_restart_sse_exception_ssh_renvoie_erreur():
     speaks = [e for e in events if e.get("type") == "speak"]
     assert "Erreur SSH" in full
     assert any("Erreur SSH lors du redémarrage" in s["text"] for s in speaks)
+
+
+# ── update_machine_sse : traçage forensique write-op (gap fix 2026-05-30) ──
+
+
+def test_update_machine_sse_trace_audit_writeop(monkeypatch):
+    """Chaque dist-upgrade réel via bypass UI trace la write-op dans audit_writeops.jsonl."""
+    spy = MagicMock()
+    monkeypatch.setattr(sse._sec, "audit_writeop", spy)
+    ssh = MagicMock(side_effect=[
+        (True, ""),                                     # apt-get update
+        (True, "Setting up a...\nSetting up b...\n"),   # dist-upgrade (2 paquets)
+        (True, "NO_REBOOT"),                            # reboot-required check
+    ])
+    list(sse.update_machine_sse("proxmox", ssh, is_proxmox=True))
+    spy.assert_called_once()
+    args, kwargs = spy.call_args
+    assert args[0] == "proxmox"
+    assert "dist-upgrade" in args[1]
+    assert kwargs["allowed"] is True

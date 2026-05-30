@@ -23,6 +23,8 @@ Constantes calculées dans `init()` car couplées aux fns SSH :
 import json
 import re
 
+import security_whitelists as _sec
+
 # ── Module-level DI placeholders (rempli par init()) ──────────────────────────
 _ssh_nginx = None
 _ssh_proxmox = None
@@ -198,6 +200,8 @@ def apt_upgrade_bypass_sse(pending: dict):
     yield _sse_tok("\n")
     _log.info(f"[BYPASS_APT] {host} → {cmd}")
     ok, output = ssh_fn(cmd, timeout=_ssh_apt_timeout_s)
+    # Traçage forensique : write-op SSH réelle via bypass UI → audit_writeops.jsonl.
+    _sec.audit_writeop(host, cmd, allowed=ok, output=output or "")
     if ok:
         updated = sum(1 for ln in output.splitlines() if "Paramétrage de" in ln or "Setting up" in ln)
         yield _sse_tok(f"✓ {updated} paquet(s) mis à jour sur **{host}**.")

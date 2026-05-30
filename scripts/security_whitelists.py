@@ -168,6 +168,34 @@ def parse_upgradable_packages(text: str) -> list:
 # d'action douteuse de l'auto-engine SOC ou hallucination LLM.
 
 AUDIT_WRITEOP_PATH = Path(__file__).resolve().parent.parent / "logs" / "audit_writeops.jsonl"
+# Maitrise volumetrie : rotation taille-bornee EN PYTHON (jamais de logrotate systeme
+# avec copytruncate sur ce JSONL d'etat — anti-pattern connu qui corrompt l'append).
+# Aligne sur le pattern RotatingFileHandler de jarvis.log/tts.log. Write-ops rares
+# (~qq/semaine, ~120 o/ligne) → la rotation ne se declenchera quasi jamais, mais le
+# volume total est borne a max_bytes * (1 + backups) = ~12 Mo dans le pire cas.
+AUDIT_WRITEOP_MAX_BYTES = 2_000_000   # 2 MB avant rotation
+AUDIT_WRITEOP_BACKUPS = 5             # audit_writeops.jsonl.1 .. .5 conserves
+
+
+def _rotate_audit_log(path: Path, max_bytes: int, backups: int) -> None:
+    """Rotation best-effort facon RotatingFileHandler : .N→.N+1 puis base→.1.
+
+    Conserve l'historique forensic (jamais de troncature en place), borne le volume.
+    Toute erreur d'I/O est avalee — la rotation ne doit jamais bloquer un audit.
+    """
+    try:
+        if not (path.exists() and path.stat().st_size >= max_bytes):
+            return
+        oldest = path.parent / f"{path.name}.{backups}"
+        if oldest.exists():
+            oldest.unlink()
+        for i in range(backups - 1, 0, -1):
+            src = path.parent / f"{path.name}.{i}"
+            if src.exists():
+                src.rename(path.parent / f"{path.name}.{i + 1}")
+        path.rename(path.parent / f"{path.name}.1")
+    except OSError:
+        pass
 
 
 def audit_writeop(host: str, cmd: str, allowed: bool, output: str = "",
@@ -194,6 +222,7 @@ def audit_writeop(host: str, cmd: str, allowed: bool, output: str = "",
     }
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
+        _rotate_audit_log(path, AUDIT_WRITEOP_MAX_BYTES, AUDIT_WRITEOP_BACKUPS)
         with path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     except Exception:

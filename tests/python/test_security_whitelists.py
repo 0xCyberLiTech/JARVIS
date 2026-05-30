@@ -6,6 +6,7 @@ from security_whitelists import (
     ALLOWED_APT_PKGS,
     ALLOWED_RESTART_SVCS,
     BLOCKED_SSH_PATTERNS,
+    _rotate_audit_log,
     audit_writeop,
     check_write_op,
     is_known_write_op,
@@ -297,6 +298,52 @@ def test_audit_writeop_tronque_cmd_longue(tmp_path):
     audit_writeop("nginx", long_cmd, allowed=False, log_path=log)
     rec = json.loads(log.read_text(encoding="utf-8").strip())
     assert len(rec["cmd"]) == 500
+
+
+# ── Maitrise volumetrie : rotation taille-bornee (2026-05-30) ──────────────
+
+
+def test_rotate_audit_log_roule_base_vers_1(tmp_path):
+    """Base au-dessus du seuil → renommee en .1, base disparait (pas de troncature)."""
+    log = tmp_path / "audit.jsonl"
+    log.write_text("x" * 100, encoding="utf-8")
+    _rotate_audit_log(log, max_bytes=50, backups=5)
+    assert not log.exists()
+    assert (tmp_path / "audit.jsonl.1").read_text(encoding="utf-8") == "x" * 100
+
+
+def test_rotate_audit_log_sous_seuil_ne_fait_rien(tmp_path):
+    """Sous le seuil → aucune rotation, fichier intact."""
+    log = tmp_path / "audit.jsonl"
+    log.write_text("x" * 10, encoding="utf-8")
+    _rotate_audit_log(log, max_bytes=1000, backups=5)
+    assert log.exists()
+    assert not (tmp_path / "audit.jsonl.1").exists()
+
+
+def test_rotate_audit_log_chaine_backups_et_drop_oldest(tmp_path):
+    """Chaine .N→.N+1, le plus ancien (.backups) est supprime → volume borne."""
+    log = tmp_path / "audit.jsonl"
+    log.write_text("BASE" * 50, encoding="utf-8")          # > seuil
+    for i in range(1, 4):                                   # .1 .2 .3 existants
+        (tmp_path / f"audit.jsonl.{i}").write_text(f"OLD{i}", encoding="utf-8")
+    _rotate_audit_log(log, max_bytes=10, backups=3)
+    assert not log.exists()
+    assert (tmp_path / "audit.jsonl.1").read_text(encoding="utf-8").startswith("BASE")
+    assert (tmp_path / "audit.jsonl.2").read_text(encoding="utf-8") == "OLD1"
+    assert (tmp_path / "audit.jsonl.3").read_text(encoding="utf-8") == "OLD2"
+    assert not (tmp_path / "audit.jsonl.4").exists()        # jamais cree au-dela de backups
+
+
+def test_audit_writeop_borne_le_volume_bout_en_bout(tmp_path, monkeypatch):
+    """audit_writeop maitrise la volumetrie : au-dela du seuil, le JSONL est roule."""
+    import security_whitelists as sw
+    monkeypatch.setattr(sw, "AUDIT_WRITEOP_MAX_BYTES", 80)
+    log = tmp_path / "audit.jsonl"
+    for i in range(6):
+        audit_writeop(f"h{i}", "apt-get dist-upgrade -y", allowed=True, log_path=log)
+    assert log.exists()                                    # fichier courant toujours present
+    assert (tmp_path / "audit.jsonl.1").exists()           # rotation declenchee (volume borne)
 
 
 def test_audit_writeop_cree_repertoire_parent(tmp_path):
