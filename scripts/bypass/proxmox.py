@@ -46,6 +46,20 @@ UPDATE_ACTION_RE = re.compile(
     re.I,
 )
 
+# Routine post-MAJ : déclencheur VOCAL JARVIS, LECTURE-SEULE. JARVIS exécute un
+# probe smoke/health-audit read-only, LIT le verdict, puis renvoie Marc au MENU
+# pour la partie exécutive (apt/reboot/rebaseline). JARVIS n'exécute JAMAIS la
+# routine. Doit exiger 'routine' OU 'post-maj' (PAS le bare 'maj' d'UPDATE_ACTION_RE),
+# sinon collision avec la mise à jour simple.
+ROUTINE_POSTMAJ_RE = re.compile(
+    r'\b(routine\s+post[\s-]?maj'
+    r'|routine\s+post[\s-]?mise\s+[àa]\s+jour'
+    r'|routine\s+(?:de\s+)?mise\s+[àa]\s+jour'
+    r'|post[\s-]?maj'
+    r'|v[eé]rifie[rz]?\s+(?:la\s+)?routine)\b',
+    re.I,
+)
+
 # Reboot immédiat / différé (utilisé par bypass reboot après upgrade)
 REBOOT_NOW_RE = re.compile(
     r'\b(reboot(\s+maintenant)?|red[eé]marre(\s+maintenant)?)\b',
@@ -168,6 +182,24 @@ def detect_update_command(text: str, host_map: list):
     `host_map` : liste de tuples `(aliases, label, ssh_fn, is_proxmox)` — passé par jarvis.py.
     """
     if not UPDATE_ACTION_RE.search(text):
+        return None
+    text_l = text.lower()
+    for aliases, label, fn, is_pve in host_map:
+        for alias in aliases:
+            if re.search(r'\b' + re.escape(alias) + r'\b', text_l):
+                return label, fn, is_pve
+    return None
+
+
+def detect_routine_postmaj_command(text: str, host_map: list):
+    """Retourne (host_label, ssh_fn, is_proxmox) si routine post-MAJ demandée pour
+    un hôte EXPLICITE, sinon None. FAIL-CLOSED : aucun défaut d'hôte (clone strict
+    de detect_update_command — même boucle word-boundary). JARVIS ne fera qu'une
+    VÉRIFICATION lecture-seule + verdict ; l'exécution réelle reste le menu.
+
+    `host_map` : liste de tuples `(aliases, label, ssh_fn, is_proxmox)`.
+    """
+    if not ROUTINE_POSTMAJ_RE.search(text):
         return None
     text_l = text.lower()
     for aliases, label, fn, is_pve in host_map:

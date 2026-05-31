@@ -180,6 +180,17 @@ def chat_try_bypass(orig_last: str, is_vocal: bool):
     if _bypass_simple.DATETIME_RE.search(orig_last):
         _log.info("[BYPASS] datetime → réponse directe (zéro LLM)")
         return _sse_response(_bypass_simple.datetime_sse())
+    # Routine post-MAJ : déclencheur VOCAL LECTURE-SEULE. Placé AVANT le gate
+    # is_vocal pour fonctionner à la voix ; read-only (probe smoke/health) donc
+    # sans risque vocal. JARVIS lit le verdict, le MENU exécute. FAIL-CLOSED.
+    routine_cmd = _bypass_wrap.detect_routine_postmaj_command(orig_last)
+    if routine_cmd:
+        host_label, ssh_fn, is_proxmox = routine_cmd
+        _log.info(f"[BYPASS_ROUTINE_POSTMAJ] {host_label} (verdict lecture-seule)")
+        return _sse_response(_bypass_wrap.routine_postmaj_sse(host_label, ssh_fn, is_proxmox))
+    if _bypass_wrap.routine_postmaj_re_matches(orig_last):
+        _log.info("[BYPASS_ROUTINE_POSTMAJ] hôte ambigu → clarification vocale")
+        return _sse_response(_bypass_wrap.routine_postmaj_clarify_sse())
     if is_vocal:
         return None
     backup_cmd = _bypass_wrap.detect_backup_command(orig_last)

@@ -7,6 +7,7 @@ from bypass.proxmox import (
     REBOOT_MACHINE_RE,
     REBOOT_NOW_RE,
     REBOOT_SVC_CHECKS,
+    ROUTINE_POSTMAJ_RE,
     UPDATE_ACTION_RE,
     VM_ALIASES,
     VM_ALL_START_RE,
@@ -15,6 +16,7 @@ from bypass.proxmox import (
     VM_START_ACTION_RE,
     VM_STOP_ACTION_RE,
     detect_reboot_command,
+    detect_routine_postmaj_command,
     detect_update_command,
     detect_vm_command,
     make_svc_restart_re,
@@ -262,6 +264,42 @@ def test_detect_update_aucun_verbe_renvoie_none():
 
 def test_detect_update_verbe_mais_hote_inconnu():
     assert detect_update_command("update inconnu", _host_map()) is None
+
+
+# ── detect_routine_postmaj_command (P5 : déclencheur lecture-seule FAIL-CLOSED) ──
+
+
+def test_detect_routine_postmaj_hote_explicite():
+    result = detect_routine_postmaj_command("routine post-maj srv-nginx", _host_map())
+    assert result is not None
+    assert result[0] == "srv-nginx"
+    assert result[2] is False
+
+
+def test_detect_routine_postmaj_alias_court():
+    assert detect_routine_postmaj_command("routine post maj clt", _host_map())[0] == "srv-clt"
+
+
+def test_detect_routine_postmaj_proxmox_is_pve_true():
+    result = detect_routine_postmaj_command("routine post-maj proxmox", _host_map())
+    assert result[2] is True
+
+
+def test_detect_routine_postmaj_sans_hote_fail_closed_none():
+    # FAIL-CLOSED : regex matche mais aucun hôte nommé → None (jamais de défaut pve).
+    assert detect_routine_postmaj_command("routine post-maj", _host_map()) is None
+
+
+def test_detect_routine_postmaj_ne_capte_pas_le_maj_simple():
+    # "maj nginx" (update simple) NE doit PAS matcher la routine → reste pour l'update.
+    assert detect_routine_postmaj_command("maj nginx", _host_map()) is None
+    assert detect_routine_postmaj_command("mets à jour nginx", _host_map()) is None
+
+
+def test_routine_postmaj_re_match_variantes():
+    assert ROUTINE_POSTMAJ_RE.search("lance la routine post-maj")
+    assert ROUTINE_POSTMAJ_RE.search("routine post mise à jour clt")
+    assert not ROUTINE_POSTMAJ_RE.search("mets à jour clt")
 
 
 # ── Vérification cohérence regex (escape + \b) ───────────────────────────

@@ -253,6 +253,69 @@ def test_apt_upgrade_bypass_sse_echec_yield_erreur():
     assert "Erreur lors de la mise à jour sur pa85" in speak["text"]
 
 
+# ── routine post-MAJ (P5 : déclencheur VOCAL LECTURE-SEULE) ────────────────
+
+
+def test_parse_postmaj_verdict_go():
+    msg = bp_wrap.parse_postmaj_verdict("srv-nginx", "blabla\n[VERDICT GO] tout ok\n")
+    assert "sain" in msg.lower() and "menu" in msg.lower()
+
+
+def test_parse_postmaj_verdict_nogo():
+    msg = bp_wrap.parse_postmaj_verdict("srv-clt", "[VERDICT NO-GO] apache=failed")
+    assert "attention" in msg.lower()
+
+
+def test_parse_postmaj_verdict_illisible():
+    msg = bp_wrap.parse_postmaj_verdict("srv-pa85", "sortie sans verdict")
+    assert "illisible" in msg.lower()
+
+
+def test_routine_postmaj_sse_pve_refuse_zero_ssh():
+    """is_proxmox=True → AUCUN SSH, renvoi vers le menu Proxmox (jamais d'action)."""
+    fake_ssh = MagicMock()
+    events = list(bp_wrap.routine_postmaj_sse("proxmox", fake_ssh, True))
+    assert fake_ssh.call_count == 0
+    speak = _parse_speak_event(events[-1])
+    assert "proxmox" in speak["text"].lower() and "menu" in speak["text"].lower()
+
+
+def test_routine_postmaj_sse_nginx_go_lit_verdict_read_only():
+    """srv-nginx : exécute le probe health-audit READ-ONLY + lit le verdict GO."""
+    fake_ssh = MagicMock(return_value=(True, "...\n[VERDICT GO] 47/47\n"))
+    events = list(bp_wrap.routine_postmaj_sse("srv-nginx", fake_ssh, False))
+    # Le probe est bien lecture-seule (health-audit), jamais reboot/apt/rebaseline.
+    cmd = fake_ssh.call_args[0][0]
+    assert "health-audit" in cmd
+    assert not any(w in cmd for w in ("reboot", "apt-get", "aide --update", "rm "))
+    speak = _parse_speak_event(events[-1])
+    assert "sain" in speak["text"].lower()
+
+
+def test_routine_postmaj_sse_clt_nogo():
+    """srv-clt : probe web smoke read-only → verdict NO-GO lu."""
+    fake_ssh = MagicMock(return_value=(True, "[VERDICT NO-GO] apache=active http=500"))
+    events = list(bp_wrap.routine_postmaj_sse("srv-clt", fake_ssh, False))
+    cmd = fake_ssh.call_args[0][0]
+    assert "systemctl is-active apache2" in cmd  # read-only (pas restart)
+    speak = _parse_speak_event(events[-1])
+    assert "attention" in speak["text"].lower()
+
+
+def test_routine_postmaj_clarify_demande_la_machine():
+    events = list(bp_wrap.routine_postmaj_clarify_sse())
+    speak = _parse_speak_event(events[-1])
+    assert "machine" in speak["text"].lower()
+
+
+def test_detect_routine_postmaj_command_passe_update_reboot_hosts():
+    """Le wrapper résout l'hôte via UPDATE_REBOOT_HOSTS (FAIL-CLOSED)."""
+    assert bp_wrap.detect_routine_postmaj_command("routine post-maj srv-nginx")[0] == "srv-nginx"
+    assert bp_wrap.detect_routine_postmaj_command("routine post-maj") is None
+    assert bp_wrap.routine_postmaj_re_matches("routine post-maj") is True
+    assert bp_wrap.routine_postmaj_re_matches("bonjour") is False
+
+
 def test_apt_upgrade_bypass_sse_clear_pending_infra_cmd():
     """Au démarrage de la fonction, _pending_infra_cmd est vidé."""
     bp_wrap._pending_infra_cmd["zombie"] = "data"

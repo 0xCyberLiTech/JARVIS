@@ -148,6 +148,17 @@ def detect_update_command(text: str):
     return _bypass_pve.detect_update_command(text, UPDATE_REBOOT_HOSTS)
 
 
+def detect_routine_postmaj_command(text: str):
+    """Wrapper — injecte UPDATE_REBOOT_HOSTS puis délègue (FAIL-CLOSED)."""
+    return _bypass_pve.detect_routine_postmaj_command(text, UPDATE_REBOOT_HOSTS)
+
+
+def routine_postmaj_re_matches(text: str) -> bool:
+    """True si la phrase matche la routine post-MAJ (même sans hôte nommé). Sert au
+    dispatcher à distinguer 'ambigu → demander' de 'pas une routine → LLM'."""
+    return bool(_bypass_pve.ROUTINE_POSTMAJ_RE.search(text))
+
+
 # ── Wrappers code ─────────────────────────────────────────────────────────────
 
 def detect_code_command(text: str):
@@ -211,3 +222,89 @@ def apt_upgrade_bypass_sse(pending: dict):
         tts_msg = f"Erreur lors de la mise à jour sur {host}."
     yield _sse_tok("", done=True)
     yield "data: " + json.dumps({"type": "speak", "text": tts_msg}) + "\n\n"
+
+
+# ── Routine post-MAJ : déclencheur VOCAL LECTURE-SEULE (JARVIS = lecteur) ──────
+# JARVIS exécute UNIQUEMENT un probe SSH read-only (smoke/health-audit) et LIT le
+# verdict. L'exécution réelle (apt/reboot/rebaseline) reste le MENU
+# (Invoke-PostMajRoutine, option [m]). Aucune écriture, aucun reboot, aucun pending.
+
+# Smoke web read-only clt/pa85 (miroir de Test-HostWebSmoke côté menu) : apache
+# actif + config valide + répond (HTTP non-5xx, non-000) → [VERDICT GO|NO-GO].
+_WEB_SMOKE_CMD = (
+    "A=$(systemctl is-active apache2 2>/dev/null); "
+    "apache2ctl -t >/dev/null 2>&1; C=$?; "
+    "H=$(curl -s -o /dev/null -m 8 -w '%{http_code}' http://localhost/ 2>/dev/null); "
+    "if [ \"$A\" = active ] && [ \"$C\" = 0 ] && [ \"$H\" -ge 100 ] && [ \"$H\" -lt 500 ]; "
+    "then echo \"[VERDICT GO] apache=$A http=$H\"; "
+    "else echo \"[VERDICT NO-GO] apache=$A cfg=$C http=$H\"; fi"
+)
+
+# Probe SSH LECTURE-SEULE par rôle (miroir de Invoke-PostMajSmokeCheck). Aucune
+# commande destructive (rien dans BLOCKED_SSH_PATTERNS) : bash audit, systemctl
+# is-active, apache2ctl -t, curl, cut /proc/uptime.
+_POSTMAJ_PROBE = {
+    "srv-nginx": "bash /opt/clt/health-audit-srv-nginx.sh 2>&1",
+    "srv-clt":   _WEB_SMOKE_CMD,
+    "srv-pa85":  _WEB_SMOKE_CMD,
+    "srv-dev-1": ("U=$(cut -d. -f1 /proc/uptime 2>/dev/null); "
+                  "if [ -n \"$U\" ]; then echo \"[VERDICT GO] uptime=${U}s\"; "
+                  "else echo '[VERDICT NO-GO] injoignable'; fi"),
+}
+
+_POSTMAJ_VERDICT_RE = re.compile(r'\[VERDICT\s+(GO|NO-GO)\]', re.I)
+
+
+def parse_postmaj_verdict(host_label: str, output: str) -> str:
+    """Extrait [VERDICT GO]/[VERDICT NO-GO] du probe → phrase TTS courte (<280 car)."""
+    m = _POSTMAJ_VERDICT_RE.search(output or "")
+    verdict = m.group(1).upper() if m else None
+    if verdict == "GO":
+        return (f"État sain sur {host_label}. Si tu veux appliquer les mises à jour, "
+                f"lance la routine post mise à jour dans le menu de la machine.")
+    if verdict == "NO-GO":
+        return (f"Attention, {host_label} n'est pas sain. Ouvre le menu et vérifie "
+                f"avant toute mise à jour.")
+    return (f"Verdict illisible pour {host_label}. Vérifie l'état dans le menu "
+            f"avant de lancer la routine.")
+
+
+def routine_postmaj_sse(host_label: str, ssh_fn, is_proxmox: bool):
+    """Déclencheur VOCAL routine post-MAJ — LECTURE-SEULE.
+
+    JARVIS exécute UNIQUEMENT le probe read-only, lit le verdict, puis renvoie
+    Marc au MENU pour la partie exécutive. Il N'EXÉCUTE JAMAIS apt/reboot/rebaseline.
+    pve : la routine VM ne s'applique pas (reboot coupe les 4 VMs) → renvoi menu.
+    """
+    if is_proxmox:
+        msg = ("La routine post mise à jour ne s'applique pas à Proxmox depuis le chat. "
+               "Passe par le menu Proxmox, qui arrête proprement les VMs avant de "
+               "redémarrer l'hyperviseur.")
+        yield _sse_tok(f"[INFO] {msg}\n", done=True)
+        yield "data: " + json.dumps({"type": "speak", "text": msg}) + "\n\n"
+        return
+    probe = _POSTMAJ_PROBE.get(host_label)
+    if not ssh_fn or not probe:
+        msg = f"Hôte inconnu pour la routine post mise à jour : {host_label}."
+        yield _sse_tok(f"[INFO] {msg}\n", done=True)
+        yield "data: " + json.dumps({"type": "speak", "text": msg}) + "\n\n"
+        return
+    yield _sse_tok(f"[LECTURE-SEULE] Vérification de l'état de **{host_label}**…\n\n")
+    try:
+        ok, output = ssh_fn(probe, timeout=90)
+        yield _sse_tok((output or "(aucune sortie)")[:2000])
+        speak_msg = parse_postmaj_verdict(host_label, output or "")
+    except Exception as e:
+        yield _sse_tok(f"\n\n**Erreur** : {e}")
+        speak_msg = f"Impossible de vérifier {host_label}. Lance le menu manuellement."
+    yield _sse_tok("\n\n_Pour appliquer : menu de la machine, option routine post-MAJ._")
+    yield _sse_tok("", done=True)
+    yield "data: " + json.dumps({"type": "speak", "text": speak_msg}) + "\n\n"
+
+
+def routine_postmaj_clarify_sse():
+    """Routine demandée sans hôte → demande vocale de préciser (FAIL-CLOSED)."""
+    msg = ("Pour quelle machine ? Dis : routine post mise à jour, suivi de "
+           "srv-nginx, clt, pa85 ou srv-dev-1.")
+    yield _sse_tok(msg, done=True)
+    yield "data: " + json.dumps({"type": "speak", "text": msg}) + "\n\n"
