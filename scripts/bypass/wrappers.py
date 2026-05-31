@@ -258,7 +258,9 @@ _ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
 _POSTMAJ_OK_RE = re.compile(r'\[OK\]')
 _POSTMAJ_KO_RE = re.compile(r'\[(?:KO|NO-GO|ERREUR|FAIL|ECHEC)\]', re.I)
 # En-tete de section "=== N. Titre ===" (health-audit nginx) -> 1 etape affichee.
-_POSTMAJ_SECTION_RE = re.compile(r'^={2,}\s*(.+?)\s*={2,}$')
+# Le titre exige >=1 caractere NON-'=' ([^=]) -> les bordures decoratives pur '='
+# (=========) ne sont PAS prises pour des sections.
+_POSTMAJ_SECTION_RE = re.compile(r'^={2,}\s*([^=].*?)\s*={2,}$')
 
 
 def _postmaj_sections(out: str):

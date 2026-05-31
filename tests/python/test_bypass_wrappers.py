@@ -294,11 +294,13 @@ def test_routine_postmaj_sse_nginx_go_lit_verdict_read_only():
 
 def test_routine_postmaj_sse_nginx_resume_concis_sans_ansi():
     """Audit long : affichage RESUME (compteur OK/KO + ligne verdict), sans codes ANSI."""
-    audit = ("\x1b[0;36m=== Services ===\x1b[0m\n"
+    audit = ("===========================================\n"   # bordure decorative
+             "\x1b[0;36m=== Services ===\x1b[0m\n"
              "\x1b[0;32m[OK]\x1b[0m nginx actif\n"
              "\x1b[0;32m[OK]\x1b[0m crowdsec actif\n"
              "\x1b[0;32m[OK]\x1b[0m fail2ban actif\n"
-             "[VERDICT GO] 47/47\n")
+             "[VERDICT GO] 47/47\n"
+             "===========================================\n")          # bordure decorative
     fake_ssh = MagicMock(return_value=(True, audit))
     events = list(bp_wrap.routine_postmaj_sse("srv-nginx", fake_ssh, False))
     toks = ""
@@ -311,6 +313,7 @@ def test_routine_postmaj_sse_nginx_resume_concis_sans_ansi():
             pass
     assert "Services" in toks        # section d'audit affichee comme etape
     assert "✓" in toks          # etape franchie (coche ✓)
+    assert "✓ =" not in toks    # les bordures decoratives '=' NE sont PAS des etapes
     assert "3 OK" in toks            # compteur dans le verdict final
     assert "SAIN" in toks            # resultat final clair (pas le flux brut)
     assert "\x1b[" not in toks       # AUCUN code couleur ANSI brut a l'ecran
