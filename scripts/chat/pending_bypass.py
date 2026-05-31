@@ -54,7 +54,7 @@ def resolve_pending_bypass(
 
     # ── Reboot en attente (différé après upgrade) ─────────────
     if pending_reboot and (now_fn() - pending_reboot.get("ts", 0)) < ttl_s:
-        if reboot_now_re.search(orig_last):
+        if reboot_now_re.search(orig_last) or confirm_re.match(orig_last):
             log_info_fn(f"[BYPASS_REBOOT] reboot confirmé → {pending_reboot['host']}")
             return sse_response_fn(reboot_machine_sse_fn(dict(pending_reboot)))
         if reboot_defer_re.search(orig_last) or cancel_re.match(orig_last):

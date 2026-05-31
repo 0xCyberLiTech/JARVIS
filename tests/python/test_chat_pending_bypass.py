@@ -101,6 +101,15 @@ def test_reboot_maintenant_confirme_reboot_pending():
     assert holder["called_with"] == ["reboot-sse:srv-clt"]
 
 
+def test_oui_confirme_aussi_le_reboot_pending():
+    """`confirm_re` (oui/confirme/ok) confirme aussi le reboot en attente (2e tour
+    du bypass reboot sécurisé : 1er tour pose le pending, 'oui' déclenche)."""
+    pending = {"host": "srv-clt", "ts": 950.0}
+    result, holder = _call(orig_last="oui", pending_reboot=pending)
+    assert result == "RESPONSE_OBJ"
+    assert holder["called_with"] == ["reboot-sse:srv-clt"]
+
+
 def test_plus_tard_diffère_le_reboot_et_clear():
     pending = {"host": "srv-clt", "ts": 950.0}
     result, holder = _call(orig_last="plus tard", pending_reboot=pending)

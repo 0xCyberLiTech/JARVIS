@@ -1318,6 +1318,7 @@ _post_start_verify_sse      = _commands.post_start_verify_sse
 _update_machine_sse         = _commands.update_machine_sse
 _pve_stop_vms_before_reboot = _commands.pve_stop_vms_before_reboot
 _reboot_machine_sse         = _commands.reboot_machine_sse
+_reboot_machine_request_sse = _commands.reboot_machine_request_sse
 _service_restart_sse        = _commands.service_restart_sse
 
 
@@ -1740,6 +1741,7 @@ _chat_dispatch.init(
     capture_gen                  = _capture_gen,
     vm_command_sse               = _vm_command_sse,
     reboot_machine_sse           = _reboot_machine_sse,
+    reboot_machine_request_sse   = _reboot_machine_request_sse,
     update_machine_sse           = _update_machine_sse,
     service_restart_sse          = _service_restart_sse,
     ssh_terminal_sse             = _ssh_terminal_sse,

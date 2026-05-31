@@ -221,6 +221,41 @@ def pve_stop_vms_before_reboot(running):
     yield _sse_tok("\n")
 
 
+def reboot_machine_request_sse(pending):
+    """1er tour d'un reboot demandé par phrase vocale : NE reboot PAS tout de suite.
+
+    Ferme le trou critique (audit conception routine post-MAJ 2026-05-31) où une
+    SEULE phrase rebootait une machine — et pour pve = TOUTES les VMs — sans 2e
+    confirmation. Désormais :
+      - pve : REFUS net. Le reboot hyperviseur passe OBLIGATOIREMENT par le menu
+        (triple confirmation) — JARVIS ne le déclenche JAMAIS à la voix.
+      - VM  : met en attente (`_pending_reboot`) → exige une confirmation au tour
+        suivant (« oui » / « redémarre maintenant »), résolue par
+        `resolve_pending_bypass`. L'exécution réelle reste `reboot_machine_sse`.
+    """
+    host   = pending["host"]
+    is_pve = pending.get("is_proxmox", False)
+    if is_pve:
+        _log.warning("[BYPASS_REBOOT_PVE_REFUS] reboot pve refusé via JARVIS → menu")
+        yield _sse_tok(
+            "⚠ Redémarrer l'hyperviseur Proxmox coupe les 4 VMs. Je ne le déclenche "
+            "PAS à la voix : ça passe par le menu (triple confirmation).\n", done=True)
+        yield "data: " + json.dumps({"type": "speak", "text":
+            "Le redémarrage de Proxmox passe par le menu, avec triple confirmation. "
+            "Je ne le fais pas à la voix."}) + "\n\n"
+        return
+    _pending_reboot.clear()
+    _pending_reboot.update({
+        "host": host, "ssh_fn": pending["ssh_fn"], "is_proxmox": False, "ts": time.time(),
+    })
+    _log.info(f"[BYPASS_REBOOT_PENDING] reboot {host} → confirmation requise (2 tours)")
+    yield _sse_tok(
+        f"Confirme le redémarrage de **{host}** : réponds « oui » (ou « redémarre "
+        f"maintenant ») pour redémarrer, « non » pour annuler.\n", done=True)
+    yield "data: " + json.dumps({"type": "speak", "text":
+        f"Confirme le redémarrage de {host}. Dis oui pour redémarrer, ou non pour annuler."}) + "\n\n"
+
+
 def reboot_machine_sse(pending):
     """Exécute le reboot différé. Si Proxmox : arrêt propre de toutes les VMs avant reboot."""
     host   = pending["host"]
@@ -240,8 +275,14 @@ def reboot_machine_sse(pending):
         else:
             yield _sse_tok("Aucune VM en cours d'exécution — redémarrage direct.\n\n")
     yield _sse_tok(f"Redémarrage de **{host}**...\n")
+    reboot_ok = True
     try:
         ssh_fn("reboot", timeout=8)
+    except Exception:
+        reboot_ok = False
+    try:
+        _sec.audit_writeop(host, "reboot", allowed=reboot_ok,
+                           output="reboot confirmé (bypass JARVIS)")
     except Exception:
         pass
     yield _sse_tok("Commande reboot envoyée. Vérification en cours...\n")

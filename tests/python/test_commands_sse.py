@@ -320,6 +320,37 @@ def test_reboot_machine_sse_proxmox_aucune_vm_running_direct():
     assert "Aucune VM" in full and "redémarrage direct" in full
 
 
+# ── reboot_machine_request_sse (1er tour : NE reboot PAS) ───────────────────
+
+
+def test_reboot_machine_request_sse_pve_refuse_et_renvoie_au_menu():
+    """is_proxmox=True → REFUS : aucun reboot, aucun pending, redirige vers le menu."""
+    ssh = MagicMock(return_value=(True, "OK"))
+    pending = {"host": "proxmox", "ssh_fn": ssh, "is_proxmox": True}
+    events = _parse_events(list(sse.reboot_machine_request_sse(pending)))
+    full = "".join(e.get("token", "") for e in events)
+    speaks = [e for e in events if e.get("type") == "speak"]
+    # Aucune commande SSH reboot, aucun pending posé
+    assert ssh.call_count == 0
+    assert sse._pending_reboot == {}
+    assert "menu" in full.lower() and "voix" in full.lower()
+    assert any("menu" in s["text"].lower() for s in speaks)
+
+
+def test_reboot_machine_request_sse_vm_met_en_attente_sans_rebooter():
+    """is_proxmox=False → pose _pending_reboot + demande confirmation, NE reboot PAS."""
+    ssh = MagicMock(return_value=(True, "OK"))
+    pending = {"host": "srv-clt", "ssh_fn": ssh, "is_proxmox": False}
+    events = _parse_events(list(sse.reboot_machine_request_sse(pending)))
+    full = "".join(e.get("token", "") for e in events)
+    # Pas de reboot dans ce tour
+    assert ssh.call_count == 0
+    # Pending posé pour le 2e tour
+    assert sse._pending_reboot.get("host") == "srv-clt"
+    assert sse._pending_reboot.get("ssh_fn") is ssh
+    assert "Confirme le redémarrage" in full and "srv-clt" in full
+
+
 # ── service_restart_sse ────────────────────────────────────────────────────
 
 

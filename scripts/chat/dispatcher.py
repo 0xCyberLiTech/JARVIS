@@ -40,6 +40,7 @@ _sse_response = None
 _capture_gen = None
 _vm_command_sse = None
 _reboot_machine_sse = None
+_reboot_machine_request_sse = None
 _update_machine_sse = None
 _service_restart_sse = None
 _ssh_terminal_sse = None
@@ -85,6 +86,7 @@ def init(
     capture_gen,
     vm_command_sse,
     reboot_machine_sse,
+    reboot_machine_request_sse,
     update_machine_sse,
     service_restart_sse,
     ssh_terminal_sse,
@@ -115,6 +117,7 @@ def init(
     global _log, _limiter
     global _bypass_simple, _bypass_fs, _bypass_wrap, _chat_orch
     global _sse_response, _capture_gen, _vm_command_sse, _reboot_machine_sse
+    global _reboot_machine_request_sse
     global _update_machine_sse, _service_restart_sse, _ssh_terminal_sse
     global _chat_resolve_pending_bypass, _chat_build_system_prompt, _chat_resolve_model
     global _chat_generate, _code_reasoning_gen, _chat_build_messages, _facts_inject
@@ -134,6 +137,7 @@ def init(
     _capture_gen = capture_gen
     _vm_command_sse = vm_command_sse
     _reboot_machine_sse = reboot_machine_sse
+    _reboot_machine_request_sse = reboot_machine_request_sse
     _update_machine_sse = update_machine_sse
     _service_restart_sse = service_restart_sse
     _ssh_terminal_sse = ssh_terminal_sse
@@ -192,9 +196,9 @@ def chat_try_bypass(orig_last: str, is_vocal: bool):
     reboot_cmd = _bypass_wrap.detect_reboot_command(orig_last)
     if reboot_cmd:
         host_label, ssh_fn, is_proxmox = reboot_cmd
-        _log.info(f"[BYPASS_REBOOT_DIRECT] reboot {host_label}")
+        _log.info(f"[BYPASS_REBOOT_REQUEST] reboot {host_label} → confirmation requise")
         pending = {"host": host_label, "ssh_fn": ssh_fn, "is_proxmox": is_proxmox, "ts": time.time()}
-        return _sse_response(_reboot_machine_sse(pending))
+        return _sse_response(_reboot_machine_request_sse(pending))
     upd_cmd = _bypass_wrap.detect_update_command(orig_last)
     if upd_cmd:
         host_label, ssh_fn, is_proxmox = upd_cmd
