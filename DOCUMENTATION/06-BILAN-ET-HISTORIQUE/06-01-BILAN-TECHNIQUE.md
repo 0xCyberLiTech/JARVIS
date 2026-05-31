@@ -23,6 +23,17 @@ mots_cles: ["bilan", "dette", "metriques", "score", "coverage"]
 > Les autres docs JARVIS pointent ici au lieu de recopier ces chiffres : un seul
 > endroit à mettre à jour, plus de dérive entre documents.
 
+> 🔄 **Re-mesure — passe de dette complète 2026-05-31** (audit exclusif JARVIS) :
+> **pytest 1357 pass · 0 fail · 0 skip** (+26 vs 1331) · coverage **76 %** (7577 stmts · 1781 miss) ·
+> ruff défaut **0** · eslint **0** · node --check **25/25** · scan_secrets **0 réel** (1 faux positif
+> `token:'function'` thème Monaco) · résidus ngix code **0** · TODO/FIXME **0** · **JARVIS live (:5000 HTTP 200)** ·
+> JSON `jarvis_facts`/`jarvis_tasks` **valides** (les 2 en-suspens `jarvis_bypass_writeop_audit_gap` RÉSOLUS).
+> ⚠ **ruff strict re-mesuré : 62 → 113** = drift **cosmétique pur, 0 B-bugbear** (29 RUF100 = `noqa` légitimes
+> config défaut **à NE PAS retirer**, 17 typo FR, 16 SIM105 + 8 RUF005 style assumé, 19 RUF059 unused-unpack +
+> 12 C408 `dict()` nouveaux cosmétiques). ✅ **Action hygiène livrée** : `*.mp4/.mov/.mkv/.webm` ajoutés au
+> `.gitignore` (`Images/` contenait **3,6 Go** de vidéo non ignorée — risque de commit accidentel massif).
+> **Score 96/100 inchangé** (bar ruff défaut = 0 tient ; 0 défaut réel — passe de confirmation, `scores-marbre`).
+
 **Score honnête : 96/100** (+1 vs 95 affiché en début 2026-05-27 après l'audit dette JARVIS qui a recalibré 4 drifts numériques honnêtement à la baisse (93/100 honnête), puis traité les 3 priorités actionnables (+3 pts) → cap pratique 96/100 atteint. Détail : Documentation 14→15 (drift résolu), Lisibilité 13→14 (4 ruff safe fixes), Tests 22→23 (+37 tests web/memory). **Plafond pratique atteint** — voir §0audit2026-05-27 ci-dessous pour le détail. Décomposition :
 
 | Critère | Score | Justification |
