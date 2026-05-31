@@ -280,17 +280,38 @@ def _postmaj_sections(out: str):
     return sections
 
 
-def parse_postmaj_verdict(host_label: str, output: str) -> str:
-    """Extrait [VERDICT GO]/[VERDICT NO-GO] du probe → phrase TTS courte (<280 car)."""
+def _postmaj_apt_count(ssh_fn) -> int:
+    """Nombre de MAJ apt en attente — LECTURE SEULE (index en cache, AUCUN apt-get
+    update → zéro écriture, zéro pollution AIDE). Même indicateur que le menu (E1).
+    Retourne -1 si la lecture échoue (-> verdict neutre, on ne ment pas)."""
+    try:
+        _ok, out = ssh_fn("LANG=C apt list --upgradable 2>/dev/null | tail -n +2 | grep -c .", timeout=20)
+        mm = re.search(r'(\d+)', out or "")
+        return int(mm.group(1)) if mm else -1
+    except Exception:
+        return -1
+
+
+def parse_postmaj_verdict(host_label: str, output: str, n_upd: int = -1) -> str:
+    """[VERDICT GO/NO-GO] + nb de MAJ apt → phrase TTS explicite (< 280 car). Même
+    logique que le menu : sain + N MAJ → exécuter ; sain + 0 → rien à appliquer."""
     m = _POSTMAJ_VERDICT_RE.search(output or "")
     verdict = m.group(1).upper() if m else None
-    if verdict == "GO":
-        return (f"Routine post mise à jour {host_label} : vérification réussie, état sain. "
-                f"Tu peux passer sur le menu de la machine et l'exécuter en mode réel, "
-                f"l'option deux.")
     if verdict == "NO-GO":
         return (f"Attention. Routine post mise à jour {host_label} : l'état n'est pas sain. "
                 f"N'exécute pas la routine en réel : ouvre le menu et investigue d'abord.")
+    if verdict == "GO":
+        if n_upd > 0:
+            s = "s" if n_upd > 1 else ""
+            return (f"Routine post mise à jour {host_label} : état sain, {n_upd} mise{s} à jour "
+                    f"en attente. Tu peux passer sur le menu et l'exécuter en mode réel, "
+                    f"l'option deux, pour les appliquer.")
+        if n_upd == 0:
+            return (f"Routine post mise à jour {host_label} : état sain, et aucune mise à jour "
+                    f"système en attente. Rien à appliquer côté apt ; le menu vérifierait "
+                    f"quand même l'intégrité si tu veux.")
+        return (f"Routine post mise à jour {host_label} : état sain. Tu peux passer sur le "
+                f"menu et l'exécuter en mode réel, l'option deux.")
     return (f"Routine post mise à jour {host_label} : verdict illisible. "
             f"Vérifie l'état dans le menu avant d'exécuter.")
 
@@ -319,7 +340,8 @@ def routine_postmaj_sse(host_label: str, ssh_fn, is_proxmox: bool):
     try:
         ok, output = ssh_fn(probe, timeout=90)
         out = _ANSI_RE.sub("", output or "")  # retire les codes couleur ANSI
-        speak_msg = parse_postmaj_verdict(host_label, out)  # parser = sortie COMPLETE
+        n_upd = _postmaj_apt_count(ssh_fn)  # MAJ apt en attente (read-only, meme logique que le menu)
+        speak_msg = parse_postmaj_verdict(host_label, out, n_upd)  # parser = sortie COMPLETE
         # Affichage "chaque étape franchie + résultat final" (accessibilité Marc) :
         # 1 ligne ✓/✗ par SECTION d'audit (jamais le flux brut), puis le verdict.
         for title, sec_ok in _postmaj_sections(out):
@@ -334,6 +356,11 @@ def routine_postmaj_sse(host_label: str, ssh_fn, is_proxmox: bool):
             tail = f" — {extra}" if extra else ""
             yield _sse_tok(f"\n**VERDICT : {host_label} "
                            f"{'✅ SAIN' if sain else '❌ NON SAIN'}{tail}**\n")
+            if n_upd > 0:  # MAJ apt en attente (meme logique que le menu)
+                yield _sse_tok(f"Mises à jour système : **{n_upd} en attente** → "
+                               f"menu, mode réel (option 2) pour les appliquer.\n")
+            elif n_upd == 0:
+                yield _sse_tok("Mises à jour système : **0 en attente** (rien à appliquer côté apt).\n")
         elif not _postmaj_sections(out):  # ni verdict ni sections → sortie brute (sécurité)
             yield _sse_tok(out[:800])
     except Exception as e:

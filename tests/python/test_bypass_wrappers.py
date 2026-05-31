@@ -271,6 +271,18 @@ def test_parse_postmaj_verdict_illisible():
     assert "illisible" in msg.lower()
 
 
+def test_parse_postmaj_verdict_go_avec_maj():
+    """Sain + N MAJ en attente -> annonce le nombre + guide vers le mode reel."""
+    msg = bp_wrap.parse_postmaj_verdict("srv-clt", "[VERDICT GO]", n_upd=3)
+    assert "3 mise" in msg.lower() and "mode" in msg.lower()
+
+
+def test_parse_postmaj_verdict_go_zero_maj():
+    """Sain + 0 MAJ -> 'aucune mise a jour' + renvoi au menu (logique du menu)."""
+    msg = bp_wrap.parse_postmaj_verdict("srv-clt", "[VERDICT GO]", n_upd=0)
+    assert "aucune mise" in msg.lower() and "menu" in msg.lower()
+
+
 def test_routine_postmaj_sse_pve_refuse_zero_ssh():
     """is_proxmox=True → AUCUN SSH, renvoi vers le menu Proxmox (jamais d'action)."""
     fake_ssh = MagicMock()
@@ -284,10 +296,11 @@ def test_routine_postmaj_sse_nginx_go_lit_verdict_read_only():
     """srv-nginx : exécute le probe health-audit READ-ONLY + lit le verdict GO."""
     fake_ssh = MagicMock(return_value=(True, "...\n[VERDICT GO] 47/47\n"))
     events = list(bp_wrap.routine_postmaj_sse("srv-nginx", fake_ssh, False))
-    # Le probe est bien lecture-seule (health-audit), jamais reboot/apt/rebaseline.
-    cmd = fake_ssh.call_args[0][0]
-    assert "health-audit" in cmd
-    assert not any(w in cmd for w in ("reboot", "apt-get", "aide --update", "rm "))
+    # Toutes les commandes SSH sont read-only (health-audit + apt list), jamais
+    # reboot/apt-get/aide --update/rm. Le probe health-audit est bien lance.
+    cmds = [c.args[0] for c in fake_ssh.call_args_list]
+    assert any("health-audit" in c for c in cmds)
+    assert all(not any(w in c for w in ("reboot", "apt-get", "aide --update", "rm ")) for c in cmds)
     speak = _parse_speak_event(events[-1])
     assert "sain" in speak["text"].lower()
 
@@ -325,8 +338,8 @@ def test_routine_postmaj_sse_clt_nogo():
     """srv-clt : probe web smoke read-only → verdict NO-GO lu."""
     fake_ssh = MagicMock(return_value=(True, "[VERDICT NO-GO] apache=active http=500"))
     events = list(bp_wrap.routine_postmaj_sse("srv-clt", fake_ssh, False))
-    cmd = fake_ssh.call_args[0][0]
-    assert "systemctl is-active apache2" in cmd  # read-only (pas restart)
+    cmds = [c.args[0] for c in fake_ssh.call_args_list]
+    assert any("systemctl is-active apache2" in c for c in cmds)  # read-only (pas restart)
     speak = _parse_speak_event(events[-1])
     assert "attention" in speak["text"].lower()
 
