@@ -82,21 +82,22 @@ Le contexte expose : IPs déjà bannies CrowdSec, crawlers vérifiés FCrDNS (`v
 
 ## Étape 1 — BYPASS Python (sans LLM)
 
-Avant tout calcul coûteux, JARVIS détecte 9 catégories de commandes qu'il peut exécuter sans LLM (latence ~50ms vs ~3-30s avec LLM) :
+Avant tout calcul coûteux, JARVIS détecte 10 catégories de commandes qu'il peut exécuter sans LLM (latence ~50ms vs ~3-30s avec LLM) :
 
 | Détecteur | Pattern reconnu | Action |
 |-----------|----------------|--------|
 | `_DATETIME_RE` | "quelle heure", "quel jour", "date du jour" | Réponse directe Python `datetime.now()` |
 | `_detect_backup_command` | "sauvegarde JARVIS", "backup VM 108" | Lance `backup-jarvis.ps1` ou Proxmox vzdump |
 | `_detect_vm_command` | "démarre VM 108", "stoppe pa85" | Proxmox `qm start/stop` (whitelist VMID) |
-| `_detect_reboot_command` | "redémarre srv-nginx", "reboot proxmox" | SSH reboot (4 hôtes connus) |
+| `_detect_reboot_command` | "redémarre srv-nginx", "reboot proxmox" | Reboot **confirmation 2 tours** ; pve = refus (→ menu). Cf. P0 2026-05-31 |
 | `_detect_update_command` | "mise à jour srv-nginx", "apt upgrade clt" | SSH `apt update && apt upgrade` |
+| `detect_routine_postmaj_command` | "routine post-maj clt", "routine post-maj srv-nginx" | **LECTURE-SEULE** : probe smoke/health-audit + lit le verdict, **renvoie au menu** (n'exécute PAS). `bypass/proxmox.py` + `bypass/wrappers.py` (P5 2026-05-31) |
 | `_detect_service_restart` | "redémarre nginx sur srv-nginx" | `systemctl restart <svc>` (whitelist `_ALLOWED_RESTART_SVCS`) |
 | `_detect_file_command` | "lis /etc/nginx/nginx.conf sur srv-nginx" | SSH cat fichier |
 | `_detect_code_command` | "exec test.py", "scp script.py srv-dev-1" | SCP + exécution sur srv-dev-1 |
 | `_SSH_TERMINAL_RE` | "connecte srv-dev-1", "ouvre terminal proxmox" | Ouvre WebSocket SSH terminal xterm.js |
 
-**Particularité vocal** : en mode `[VOCAL]`, seul le bypass datetime est actif. Tout le reste passe par le LLM (gemma4) pour formulation naturelle.
+**Particularité vocal** : en mode `[VOCAL]`, seuls le bypass **datetime** et la **routine post-MAJ (lecture-seule)** sont actifs — tous deux placés AVANT le gate `if is_vocal: return None` dans `chat/dispatcher.py::chat_try_bypass`. Tout le reste (backup/VM/reboot/update/service) passe par le LLM (gemma4) en vocal. La routine post-MAJ est vocal-safe car **read-only + FAIL-CLOSED** : hôte ambigu → demande de préciser (jamais d'action), pve → renvoi vers le menu Proxmox (zéro SSH). JARVIS lit le verdict ; **le menu reste le seul exécuteur** (apt/reboot/rebaseline via l'option `[m]` des modules host).
 
 ---
 
