@@ -91,7 +91,7 @@ Avant tout calcul coûteux, JARVIS détecte 10 catégories de commandes qu'il pe
 | `_detect_vm_command` | "démarre VM 108", "stoppe pa85" | Proxmox `qm start/stop` (whitelist VMID) |
 | `_detect_reboot_command` | "redémarre srv-nginx", "reboot proxmox" | Reboot **confirmation 2 tours** ; pve = refus (→ menu). Cf. P0 2026-05-31 |
 | `_detect_update_command` | "mise à jour srv-nginx", "apt upgrade clt" | SSH `apt update && apt upgrade` |
-| `detect_routine_postmaj_command` | "routine post-maj clt", "routine post-maj srv-nginx" | **LECTURE-SEULE** : probe smoke/health-audit + lit le verdict, **renvoie au menu** (n'exécute PAS). `bypass/proxmox.py` + `bypass/wrappers.py` (P5 2026-05-31) |
+| `detect_routine_postmaj_command` | "routine post-maj clt", "routine post-maj srv-nginx" | **LECTURE-SEULE** : probe smoke/health-audit + compte les MAJ apt (`apt list --upgradable`, read-only, sans `apt-get update`) → verdict explicite **santé + N MAJ** (affichage : 1 ligne ✓ par section + verdict final), **renvoie au menu** (n'exécute PAS). Même logique que le menu. `bypass/proxmox.py` + `bypass/wrappers.py` (P5 2026-05-31) |
 | `_detect_service_restart` | "redémarre nginx sur srv-nginx" | `systemctl restart <svc>` (whitelist `_ALLOWED_RESTART_SVCS`) |
 | `_detect_file_command` | "lis /etc/nginx/nginx.conf sur srv-nginx" | SSH cat fichier |
 | `_detect_code_command` | "exec test.py", "scp script.py srv-dev-1" | SCP + exécution sur srv-dev-1 |
