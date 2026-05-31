@@ -309,8 +309,10 @@ def test_routine_postmaj_sse_nginx_resume_concis_sans_ansi():
                 toks += d.get("token", "")
         except Exception:
             pass
-    assert "3 OK" in toks            # compteur de controles
-    assert "[VERDICT GO]" in toks    # ligne verdict visible (non tronquee)
+    assert "Services" in toks        # section d'audit affichee comme etape
+    assert "✓" in toks          # etape franchie (coche ✓)
+    assert "3 OK" in toks            # compteur dans le verdict final
+    assert "SAIN" in toks            # resultat final clair (pas le flux brut)
     assert "\x1b[" not in toks       # AUCUN code couleur ANSI brut a l'ecran
     speak = _parse_speak_event(events[-1])
     assert "sain" in speak["text"].lower()
