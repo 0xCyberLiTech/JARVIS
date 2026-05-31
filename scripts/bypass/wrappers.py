@@ -253,6 +253,10 @@ _POSTMAJ_PROBE = {
 }
 
 _POSTMAJ_VERDICT_RE = re.compile(r'\[VERDICT\s+(GO|NO-GO)\]', re.I)
+# Codes couleur ANSI emis par health-audit-srv-nginx.sh -> retires a l'affichage.
+_ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
+_POSTMAJ_OK_RE = re.compile(r'\[OK\]')
+_POSTMAJ_KO_RE = re.compile(r'\[(?:KO|NO-GO|ERREUR|FAIL|ECHEC)\]', re.I)
 
 
 def parse_postmaj_verdict(host_label: str, output: str) -> str:
@@ -292,8 +296,20 @@ def routine_postmaj_sse(host_label: str, ssh_fn, is_proxmox: bool):
     yield _sse_tok(f"[LECTURE-SEULE] Vérification de l'état de **{host_label}**…\n\n")
     try:
         ok, output = ssh_fn(probe, timeout=90)
-        yield _sse_tok((output or "(aucune sortie)")[:2000])
-        speak_msg = parse_postmaj_verdict(host_label, output or "")
+        out = _ANSI_RE.sub("", output or "")  # retire les codes couleur ANSI
+        # Le PARSER lit TOUTE la sortie (verdict en fin) → la voix est juste même si
+        # l'affichage est résumé. L'affichage, lui, reste CONCIS (accessibilité) :
+        # compteur de contrôles + la ligne verdict, jamais le flux brut tronqué.
+        speak_msg = parse_postmaj_verdict(host_label, out)
+        verdict_line = next((ln.strip() for ln in out.splitlines() if "[VERDICT" in ln.upper()), "")
+        n_ok = len(_POSTMAJ_OK_RE.findall(out))
+        n_ko = len(_POSTMAJ_KO_RE.findall(out))
+        if n_ok or n_ko:  # audit multi-contrôles (srv-nginx) → résumé chiffré
+            yield _sse_tok(f"Contrôles : **{n_ok} OK**, {n_ko} KO.\n")
+        if verdict_line:
+            yield _sse_tok(verdict_line + "\n")
+        elif not (n_ok or n_ko):  # sortie courte sans verdict structuré → l'afficher
+            yield _sse_tok(out[:800])
     except Exception as e:
         yield _sse_tok(f"\n\n**Erreur** : {e}")
         speak_msg = f"Impossible de vérifier {host_label}. Lance le menu manuellement."
