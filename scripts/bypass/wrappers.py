@@ -285,13 +285,14 @@ def parse_postmaj_verdict(host_label: str, output: str) -> str:
     m = _POSTMAJ_VERDICT_RE.search(output or "")
     verdict = m.group(1).upper() if m else None
     if verdict == "GO":
-        return (f"État sain sur {host_label}. Si tu veux appliquer les mises à jour, "
-                f"lance la routine post mise à jour dans le menu de la machine.")
+        return (f"Routine post mise à jour {host_label} : vérification réussie, état sain. "
+                f"Tu peux passer sur le menu de la machine et l'exécuter en mode réel, "
+                f"l'option deux.")
     if verdict == "NO-GO":
-        return (f"Attention, {host_label} n'est pas sain. Ouvre le menu et vérifie "
-                f"avant toute mise à jour.")
-    return (f"Verdict illisible pour {host_label}. Vérifie l'état dans le menu "
-            f"avant de lancer la routine.")
+        return (f"Attention. Routine post mise à jour {host_label} : l'état n'est pas sain. "
+                f"N'exécute pas la routine en réel : ouvre le menu et investigue d'abord.")
+    return (f"Routine post mise à jour {host_label} : verdict illisible. "
+            f"Vérifie l'état dans le menu avant d'exécuter.")
 
 
 def routine_postmaj_sse(host_label: str, ssh_fn, is_proxmox: bool):
