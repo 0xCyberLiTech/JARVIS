@@ -1,0 +1,4 @@
+# Scripts executes sous Linux -> LF (sinon bash casse en CRLF).
+# Prevention du piege Windows->CRLF (sweep 2026-06-01, cf. menu-lint Check 4).
+*.sh  text eol=lf
+*.py  text eol=lf
