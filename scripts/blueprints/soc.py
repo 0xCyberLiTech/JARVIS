@@ -24,7 +24,7 @@ import soc_reqhour
 import soc_suricata_ban
 import soc_threat_score
 from flask import Blueprint, Response, request
-from security_whitelists import ALLOWED_SOC_RESTART_SVCS
+from security_whitelists import ALLOWED_SOC_RESTART_SVCS, is_protected_ip
 
 soc_bp = Blueprint("soc", __name__)
 
@@ -351,6 +351,11 @@ def _is_whitelisted(ip: str) -> bool:
     """Retourne True si l'IP est LAN ou dans la whitelist — jamais alertée ni bannie.
     Thread-safe : snapshot de la liste sous lock avant itération."""
     if any(ip.startswith(p) for p in _LAN_PREFIXES):
+        return True
+    # Liste curée source-unique (security_whitelists) : LAN hôtes + DNS/WAN publics
+    # + relais mail. Unifie le ban-path avec le filtre phi4 — une IP de confiance
+    # ajoutée là protège DÉSORMAIS les deux chemins (incident laposte 2026-06-02).
+    if is_protected_ip(ip):
         return True
     with _SOC_WHITELIST_LOCK:
         entries = list(_SOC_WHITELIST)

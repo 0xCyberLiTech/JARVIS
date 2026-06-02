@@ -93,8 +93,8 @@ def test_is_whitelisted_localhost():
 
 
 def test_is_whitelisted_ip_publique_pas_dans_liste():
-    """IP publique aléatoire → pas whitelisté."""
-    assert not soc_module._is_whitelisted("8.8.8.8")
+    """IP publique aléatoire (non infra) → pas whitelisté → bannissable."""
+    assert not soc_module._is_whitelisted("203.0.113.45")
 
 
 def test_ip_skip_chaine_vide():

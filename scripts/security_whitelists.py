@@ -265,7 +265,8 @@ PROTECTED_EXTERNAL_IPS = {
     "212.27.40.240": "free-dns-1",
     "212.27.40.241": "free-dns-2",
     "82.65.147.2":   "freebox-wan-public",
-}
+    "160.92.124.65": "laposte-smtp-smarthost",  # relais mail exim — incident 2026-06-02
+}                                               # (banni 8j par FP suricata-nmap-scan)
 
 # C — Catch-all CIDRs (RFC1918 + loopback étendu)
 # Toute IP ajoutée demain sur LAN srv ou LAN ASUS est automatiquement protégée.

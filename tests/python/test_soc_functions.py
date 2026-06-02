@@ -651,7 +651,16 @@ def test_is_whitelisted_lan_172_16():
 
 
 def test_is_whitelisted_ip_publique_non_listee():
-    assert soc._is_whitelisted("8.8.8.8") is False
+    assert soc._is_whitelisted("203.0.113.45") is False
+
+
+def test_is_whitelisted_protege_dns_et_relais_mail():
+    """Incident 2026-06-02 : le ban-path délègue à is_protected_ip → DNS publics ET
+    relais mail laposte sont protégés dans le ban-path (plus seulement le filtre phi4).
+    Unifie les 2 chemins → plus jamais d'auto-ban d'une infra de confiance."""
+    assert soc._is_whitelisted("8.8.8.8") is True          # DNS public protégé
+    assert soc._is_whitelisted("160.92.124.65") is True    # relais mail smtp.laposte.net
+    assert soc._ip_skip("160.92.124.65") is True           # → skip de ban
 
 
 def test_is_whitelisted_entree_exacte_dynamique(monkeypatch):
@@ -674,7 +683,7 @@ def test_ip_skip_lan_renvoie_true():
 
 
 def test_ip_skip_ip_publique_renvoie_false():
-    assert soc._ip_skip("8.8.8.8") is False
+    assert soc._ip_skip("203.0.113.45") is False
 
 
 # ── _load_soc_config — fusion overrides + défauts ────────────────────────
