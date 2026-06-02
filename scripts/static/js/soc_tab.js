@@ -115,7 +115,9 @@ async function refreshSocTab() {
 // proactive (checkThreatLevel). L'injection du contexte SOC dans le chat est
 // 100 % côté serveur (chat_soc_inject.py → system prompt, frais à chaque appel,
 // jamais persisté dans l'historique) — source unique _build_monitoring_context.
-var _MON_ENDPOINT  = (window.JARVIS_CONFIG && window.JARVIS_CONFIG.monEndpoint) || 'http://192.168.1.50:8080/monitoring.json';
+// Endpoint = source unique JARVIS_CONFIG.monEndpoint (injecté par jarvis.html depuis
+// soc_config.json) — plus de fallback hardcodé (le poll se garde si absent, cf. _pollMon).
+var _MON_ENDPOINT  = (window.JARVIS_CONFIG && window.JARVIS_CONFIG.monEndpoint) || '';
 window._jarvisMonData = null;
 
 // ── Alerte vocale proactive SOC (piste 4 — checkThreatLevel) ────
@@ -146,6 +148,7 @@ function checkThreatLevel(d) {
 
 (function(){
   async function _pollMon(){
+    if(!_MON_ENDPOINT) return;   // pas d'endpoint injecté → on saute (pas de fetch vide)
     try{
       var r = await fetch(_MON_ENDPOINT);
       if(r.ok){
