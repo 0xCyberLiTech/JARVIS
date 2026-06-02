@@ -16,7 +16,7 @@ Couvre :
 - audit_writeop() : append JSON ligne à logs/audit_writeops.jsonl (best-effort,
   ne bloque jamais l'exécution si IO échoue) — ajouté 2026-05-17.
 - INTERNAL_IPS + PROTECTED_EXTERNAL_IPS + INTERNAL_CIDRS + is_protected_ip() :
-  source unique JARVIS pour filtrer les IPs internes (LAN srv + LAN ASUS + loopback)
+  dérivées de soc_infra.yaml (jarvis_trusted_ips, généré) pour filtrer les IPs internes
   ET les IPs externes whitelistées (DNS publics + WAN Freebox de Marc) — ajouté
   2026-05-25 (validation Marc, cf. mémoire soc_design_harmonisation). Toute modif
   ici impose un grep des consommateurs (blueprints/soc.py, chat/soc_context.py).
@@ -28,6 +28,11 @@ import json
 import re
 from datetime import UTC, datetime
 from pathlib import Path
+
+# IP de confiance — GÉNÉRÉES depuis SOC/scripts/soc_infra.yaml (source unique) par
+# SOC/scripts/sync_jarvis_whitelist.py -> jarvis_trusted_ips.py (committé = JARVIS autonome/DR).
+from jarvis_trusted_ips import INTERNAL_CIDRS as _TRUSTED_CIDRS_STR
+from jarvis_trusted_ips import INTERNAL_IPS, PROTECTED_EXTERNAL_IPS
 
 # ── Patterns SSH bloqués ──────────────────────────────────────
 # Toute commande contenant un de ces patterns est REFUSÉE par défaut.
@@ -229,54 +234,17 @@ def audit_writeop(host: str, cmd: str, allowed: bool, output: str = "",
         pass
 
 
-# ── Whitelist IPs protégées (source unique JARVIS — validation Marc 2026-05-25) ─
-# Doit rester aligné avec `SOC/soc_infra.yaml` (hosts.* + protected_external_ips)
-# + architecture réseau documentée dans `CLAUDE.md` racine.
+# ── Whitelist IPs protégées — SOURCE UNIQUE : SOC/scripts/soc_infra.yaml ────────
+# Unification 2026-06-02 (incident laposte : whitelist dupliquée 4+ endroits -> relais
+# mail banni 8j). Les IP de confiance ne sont PLUS hardcodées ici : INTERNAL_IPS et
+# PROTECTED_EXTERNAL_IPS sont importées de `jarvis_trusted_ips` (généré depuis soc_infra.yaml
+# par sync_jarvis_whitelist.py, committé -> JARVIS autonome/DR). INTERNAL_CIDRS = ces CIDR
+# (strings) convertis en objets ip_network. Dérive d'UNE source -> zéro divergence
+# (garde-fou DEV/TOOLS/refactor-precheck/audit-whitelist-sources.py).
 #
-# Pourquoi cette source ICI dans security_whitelists ? Marc a tranché 2026-05-25
-# (cf. soc_design_harmonisation) : option (c) hardcode dans le fichier qui sert
-# déjà de source unique pour les whitelists JARVIS — cohérence avec ALLOWED_*.
-# Le yaml SOC reste source maître documentaire ; toute évolution = MAJ ici + grep
-# des consommateurs (chat/soc_context.py, blueprints/soc.py).
-#
-# Évolution = modifier les dicts ci-dessous + commentaire daté + run grep :
-#   grep -rn "INTERNAL_IPS\|PROTECTED_EXTERNAL_IPS\|is_protected_ip" scripts/
-
-# A — Infrastructure interne (LAN serveur + LAN ASUS + loopback)
-INTERNAL_IPS = {
-    "127.0.0.1":     "loopback",
-    "192.168.1.12":  "clt",
-    "192.168.1.13":  "pa85",
-    "192.168.1.20":  "proxmox",
-    "192.168.1.21":  "srv-dev-1",
-    "192.168.1.50":  "srv-nginx",
-    "192.168.1.110": "routeur-asus-wan",
-    "192.168.1.254": "freebox-lan",
-    "192.168.50.1":  "routeur-asus-rog-be19000-ai",
-    "192.168.50.90": "windows-jarvis",
-}
-
-# B — Externes protégées (DNS publics + IP publique Freebox de Marc)
-PROTECTED_EXTERNAL_IPS = {
-    "1.1.1.1":       "cloudflare-dns-1",
-    "1.0.0.1":       "cloudflare-dns-2",
-    "8.8.8.8":       "google-dns-1",
-    "8.8.4.4":       "google-dns-2",
-    "212.27.40.240": "free-dns-1",
-    "212.27.40.241": "free-dns-2",
-    "82.65.147.2":   "freebox-wan-public",
-    "160.92.124.65": "laposte-smtp-smarthost",  # relais mail exim — incident 2026-06-02
-}                                               # (banni 8j par FP suricata-nmap-scan)
-
-# C — Catch-all CIDRs (RFC1918 + loopback étendu)
-# Toute IP ajoutée demain sur LAN srv ou LAN ASUS est automatiquement protégée.
-INTERNAL_CIDRS = [
-    ipaddress.ip_network("192.168.1.0/24"),
-    ipaddress.ip_network("192.168.50.0/24"),
-    ipaddress.ip_network("127.0.0.0/8"),
-    ipaddress.ip_network("10.0.0.0/8"),
-    ipaddress.ip_network("172.16.0.0/12"),
-]
+# Évolution = éditer soc_infra.yaml -> python sync_jarvis_whitelist.py -> committer.
+# NE PAS éditer jarvis_trusted_ips.py à la main.
+INTERNAL_CIDRS = [ipaddress.ip_network(_c) for _c in _TRUSTED_CIDRS_STR]
 
 
 def is_protected_ip(ip: str) -> bool:
