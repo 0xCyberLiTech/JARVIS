@@ -3,7 +3,7 @@ title: "Dette technique restante (décisions architecturales assumées)"
 code: "JARVIS-DOC-07-02"
 version: "1.0"
 date_creation: "2026-05-23"
-date_revision: "2026-05-23"
+date_revision: "2026-06-05"
 auteur: "Marc Sabater (0xCyberLiTech)"
 contributeurs: ["Claude (Anthropic)"]
 statut: "Validé"
@@ -13,9 +13,11 @@ mots_cles: ["dette-technique", "assumée", "decisions", "audit", "optimisations"
 
 # Dette technique restante
 
-> Audit dette honnête au **2026-05-23** après les 30 commits de la journée.
-> **Score honnête actuel : 95/100** (audit re-calibré 2026-05-23 nuit post refonte documentaire + extension Playwright sur 4 Blueprints HTTP sous-couverts — plafond pratique atteint) — détaillé dans
-> [`../06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md`](../06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md).
+> Audit dette honnête re-mesuré au **2026-06-05** (audit complet, demande Marc).
+> **Score honnête actuel : 96/100** (marbre tenu) — preuves : pytest **1360**/0 fail · coverage **77%** ·
+> ruff défaut **0** · ruff strict **0 B-bugbear** (63 cosmétiques) · eslint **0/0** · **0 secret** · logs bornés.
+> Améliorations sans franchir de seuil, dette gelée persiste honnêtement, **0 nouvelle dette** — détaillé dans
+> [`../06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md`](../06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md) §0.
 >
 > Cette page liste les éléments qui pourraient être améliorés mais qui sont
 > **assumés comme décisions architecturales** ou **non prioritaires** après

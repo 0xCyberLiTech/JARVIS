@@ -3,7 +3,7 @@ title: "Mémoire projet — historique chronologique des sessions"
 code: "JARVIS-DOC-06-02"
 version: "1.0"
 date_creation: "2026-05-23"
-date_revision: "2026-05-23"
+date_revision: "2026-06-05"
 auteur: "Marc Sabater (0xCyberLiTech)"
 contributeurs: ["Claude (Anthropic)"]
 statut: "Valide"
@@ -12,6 +12,16 @@ mots_cles: ["memoire", "historique", "sessions", "refactor", "chronologie"]
 ---
 
 # JARVIS — Mémoire projet (2026-05-23 — refactor architecture par tuiles complet, 24 tuiles + bug UI reload résolu cause racine + couverture +282 tests + audit ruff strict)
+
+## Session 2026-06-05 — fix cycle de vie MCP (Job Object) + stop-dialog + audit dette 96/100 confirmé
+
+**Bug MCP orphelin résolu** (commits `02e53dc` + `2e2cf75`) : le serveur MCP (`jarvis_mcp_server`, port 5010) survivait à l'arrêt en **processus orphelin** (`[MCP] kill orphelin` à CHAQUE démarrage dans `jarvis.log`) — l'enfant `Popen` n'était nettoyé que par le `finally` (Ctrl+C uniquement), pas sur `taskkill /F` / fermeture de la fenêtre / crash. **Fix** : nouveau module `proc_guard.py` (Job Object Windows `KILL_ON_JOB_CLOSE`, **0 hardcode** — constantes winnt.h, best-effort, no-op hors Windows) → l'OS tue le MCP quand JARVIS meurt **par n'importe quel moyen**. **Prouvé en prod** (arrêt 07:12 : `[MCP] PIDs port 5010:` vide, port libre). **+2 tests** (`test_proc_guard.py`, dont kill-on-close bout-en-bout réel).
+
+**Dialogue d'arrêt — étape 4 corrigée** (commit `ae99005`) : conséquence directe du fix Job Object — le MCP étant déjà tué à l'étape 3 (avec Flask), l'étape 4 ne trouvait plus rien sur 5010 → voyant **gris « skip »** au lieu de vert. Corrigé : `count==0` affiche désormais **OK vert** (« arrêté avec JARVIS »), comportement aligné sur les 4 autres étapes (un résiduel reste rattrapé à l'étape 5). Parse PowerShell 0 erreur.
+
+**Audit dette complet re-mesuré** (demande Marc, commit `c178acd`) : **96/100 CONFIRMÉ (marbre tient)**. Preuves outils : pytest **1360**/0 fail · coverage **77%** · ruff défaut **0** · ruff strict **0 B-bugbear** (63 cosmétiques) · **eslint 0/0** (les ~102 warnings historiques ont disparu) · **0 secret** · **0 TODO réel** · logs **bornés** (jarvis 5 Mo×7, tts, tts_perf, audit_writeops) · `jarvis.py` 1834 L · 99 modules. **10 modules <50%** (routes HTTP → Playwright E2E, le −2 Tests assumé). Améliorations sans franchir de seuil, **dette gelée persiste honnêtement, 0 nouvelle dette**. Drift recalé : §0 (1331/76%/102→1360/77%/0) + dette-technique 07-02 (95→96).
+
+---
 
 ## Session 2026-05-28 — chantier DR « JARVIS inperdable » + audit dette 96/100
 
