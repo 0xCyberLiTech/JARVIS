@@ -34,6 +34,18 @@ mots_cles: ["bilan", "dette", "metriques", "score", "coverage"]
 > `.gitignore` (`Images/` contenait **3,6 Go** de vidéo non ignorée — risque de commit accidentel massif).
 > **Score 96/100 inchangé** (bar ruff défaut = 0 tient ; 0 défaut réel — passe de confirmation, `scores-marbre`).
 
+> 🔄 **MAJ 2026-06-05 — fix cycle de vie du MCP (orphelin port 5010)** : nouveau module
+> `proc_guard.py` qui attache le sous-processus MCP à un **Job Object Windows
+> `KILL_ON_JOB_CLOSE`** → l'OS tue le MCP quand JARVIS meurt **par n'importe quel moyen**
+> (Ctrl+C, `taskkill /F`, fermeture de la fenêtre, crash). Fin du `[MCP] kill orphelin`
+> à chaque démarrage (diagnostiqué via `jarvis.log`, systématique avant le fix). Cause :
+> l'enfant `Popen` n'était nettoyé que par le `finally` (Ctrl+C uniquement). Best-effort
+> (filets existants conservés : `finally` + nettoyage orphelin au boot), no-op hors Windows,
+> **0 hardcode** (constantes `winnt.h`), `_MCP_PORT` reste source-unique. **+2 tests** (dont
+> kill-on-close bout-en-bout réel) → **pytest 1360** · ruff 0. **Prouvé en prod** (arrêt 07:12 :
+> `[MCP] PIDs port 5010:` **vide** = MCP mort en même temps que Flask ; port 5010 **libre**).
+> Commit `02e53dc`. **Score 96/100 inchangé** (bugfix de cycle de vie, sans dette).
+
 **Score honnête : 96/100** (+1 vs 95 affiché en début 2026-05-27 après l'audit dette JARVIS qui a recalibré 4 drifts numériques honnêtement à la baisse (93/100 honnête), puis traité les 3 priorités actionnables (+3 pts) → cap pratique 96/100 atteint. Détail : Documentation 14→15 (drift résolu), Lisibilité 13→14 (4 ruff safe fixes), Tests 22→23 (+37 tests web/memory). **Plafond pratique atteint** — voir §0audit2026-05-27 ci-dessous pour le détail. Décomposition :
 
 | Critère | Score | Justification |
