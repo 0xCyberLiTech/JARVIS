@@ -345,7 +345,11 @@ foreach ($pid_val in $mcpPids) {
 if ($mcpKilled) {
     Set-Step 3 "ok"; Set-Msg "Serveur MCP arrete."
 } elseif ($mcpPids.Count -eq 0) {
-    Set-Step 3 "skip"; Set-Msg "Serveur MCP non detecte sur port 5010."
+    # Plus aucun MCP sur 5010 = comportement NORMAL depuis le lien Job Object (proc_guard) :
+    # le MCP est tue AUTOMATIQUEMENT par l'OS quand Flask/JARVIS meurt (etape 3 taskkill /F).
+    # C'est un SUCCES, pas un "skip" -> voyant OK vert comme les autres etapes (fin du gris
+    # trompeur). Un eventuel residuel est de toute facon rattrape a l'etape 5.
+    Set-Step 3 "ok"; Set-Msg "Serveur MCP arrete (ferme automatiquement avec JARVIS)."
 } else {
     Set-Step 3 "error"; Set-Msg "Echec arret MCP  - voir jarvis-stop.log"
 }
