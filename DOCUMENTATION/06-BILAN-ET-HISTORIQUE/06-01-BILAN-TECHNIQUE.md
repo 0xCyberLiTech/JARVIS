@@ -46,6 +46,8 @@ mots_cles: ["bilan", "dette", "metriques", "score", "coverage"]
 > `[MCP] PIDs port 5010:` **vide** = MCP mort en même temps que Flask ; port 5010 **libre**).
 > Commit `02e53dc`. **Score 96/100 inchangé** (bugfix de cycle de vie, sans dette).
 
+> 🔍 **MAJ 2026-06-05 — audit dette complet re-mesuré (demande Marc)** : **pytest 1360** pass / 0 fail (+proc_guard) · **coverage 77%** (7626 stmts · 1772 miss) · **ruff défaut 0** · **ruff strict 0 B-bugbear** (63 cosmétiques : 26 RUF100 noqa légitimes config-défaut + unicode FR + SIM105/RUF005 stylistique) · **eslint 0 erreur / 0 warning** (22 fichiers — les ~102 warnings historiques ont disparu) · **0 secret** · **0 TODO réel** (16 = JSON data + libs minifiées) · **logs bornés** (jarvis 5 Mo×7, tts 5 Mo×7, tts_perf 1 Mo×3, audit_writeops rotation manuelle) · `jarvis.py` **1834 L** · 99 modules. **Modules <50% = 10** (surtout routes HTTP dev/voice/rag/settings/vision/memory/tasks + soc.py 60%) → couverts par Playwright E2E (le −2 Tests assumé). **Score 96/100 CONFIRMÉ (marbre tient)** : améliorations (1360/77%/eslint 0) ne franchissent pas de seuil, dette gelée persiste honnêtement, 0 nouvelle dette (proc_guard/stop-dialog propres). ⚠ **Ces chiffres remplacent les 1331/76% ci-dessous** (drift recalé).
+
 **Score honnête : 96/100** (+1 vs 95 affiché en début 2026-05-27 après l'audit dette JARVIS qui a recalibré 4 drifts numériques honnêtement à la baisse (93/100 honnête), puis traité les 3 priorités actionnables (+3 pts) → cap pratique 96/100 atteint. Détail : Documentation 14→15 (drift résolu), Lisibilité 13→14 (4 ruff safe fixes), Tests 22→23 (+37 tests web/memory). **Plafond pratique atteint** — voir §0audit2026-05-27 ci-dessous pour le détail. Décomposition :
 
 | Critère | Score | Justification |
