@@ -378,6 +378,7 @@ import files as _files
 import health as _health
 import llm_opts as _llm_opts_mod
 import memory as _memory
+import proc_guard as _proc_guard
 from proxmox import api as _pve_api
 import rag as _rag
 import rag_live as _rag_live_mod
@@ -1809,6 +1810,12 @@ if __name__ == "__main__":
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
             )
             _log.info(f"[MCP] jarvis_mcp_server démarré (PID {_mcp_proc.pid}) → port {_MCP_PORT}")
+            # Lien de vie : l'OS tue le MCP si JARVIS meurt par N'IMPORTE QUEL moyen
+            # (Ctrl+C, taskkill /F, fermeture de la fenêtre, crash) → fin des orphelins 5010.
+            # Best-effort : si indisponible, le finally + le nettoyage au boot restent actifs.
+            _mcp_job = _proc_guard.kill_child_with_parent(_mcp_proc)
+            if _mcp_job:
+                _log.info("[MCP] lié à JARVIS (Job Object kill-on-close) — zéro orphelin à l'arrêt")
         except Exception as _e:
             _log.warning(f"[MCP] Impossible de démarrer jarvis_mcp_server : {_e}")
     else:
