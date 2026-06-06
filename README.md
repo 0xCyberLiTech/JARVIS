@@ -209,7 +209,7 @@ flowchart TB
 flowchart TD
     A["💬 Message utilisateur<br/>(texte ou voix)"] --> B{"Mode actif ?"}
     B -->|SOC| C["phi4:14b + contexte SOC live"]
-    B -->|Code / C·R| D["qwen · raisonnement chain-of-thought"]
+    B -->|Code / C·R| D["qwen2.5-coder:14b (Code)<br/>qwen3:8b (Reasoning natif)"]
     B -->|Général / Vocal| E["gemma · conversation"]
     C --> R["📚 RAG local<br/>(mémoire vectorielle ~600 chunks)"]
     D --> F
@@ -234,7 +234,9 @@ flowchart TD
     B -->|oui| BYP["⚡ Bypass Python — ZÉRO LLM<br/>exécution directe, fiable, tracée"]
     B -->|non| M{"Mode actif ?"}
     M -->|SOC| P["phi4:14b + contexte SOC live"]
-    M -->|Code / C·R| Q["qwen2.5-coder:14b"]
+    M -->|Code| Q["qwen2.5-coder:14b"]
+    M -->|Code-Reasoning| Q2["qwen3:8b — reasoning natif"]
+    Q2 --> CTX
     M -->|Général / Vocal| G["gemma4"]
     P --> CTX["num_ctx adaptatif<br/>(ajusté selon la charge)"]
     Q --> CTX
@@ -253,6 +255,7 @@ flowchart TD
 |--------|------|-------------------------|
 | `phi4:14b` | ~9 Go | **Préchargé au boot** — modèle SOC par défaut |
 | `qwen2.5-coder:14b` | ~9 Go | À la demande (mode Code) |
+| `qwen3:8b` | ~5 Go | À la demande (Code-Reasoning — *reasoning* natif, thinking masqué) |
 | `gemma4:latest` | ~10 Go | À la demande (Général / Vision) |
 | `mxbai-embed-large` | ~0,7 Go | Résident léger — RAG, `keep_alive` court |
 
@@ -462,7 +465,7 @@ flowchart TD
 ```
 OS          Windows 11 Pro
 GPU         NVIDIA RTX 5080 — 16 GB GDDR7 · CUDA 12 · Blackwell GB203
-LLM         Ollama (local) — phi4:14b · gemma4 · qwen2.5-coder:14b · mxbai-embed-large (RAG)
+LLM         Ollama (local) — phi4:14b · gemma4 · qwen2.5-coder:14b · qwen3:8b (reasoning) · mxbai-embed-large (RAG)
 TTS         edge-tts Neural — fr-CA-AntoineNeural (défaut) · rollback Kokoro local (CUDA)
 STT         faster-whisper large-v3-turbo FR — CUDA float16 · vocabulaire SOC
 NR          DeepFilterNet — réduction bruit micro temps réel (CUDA)
