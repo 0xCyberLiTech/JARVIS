@@ -44,105 +44,339 @@
 </div>
 
 ---
+
 # Hermès — L'agent persistant
 
-## Objectif
-Hermès est la couche d'agentification de JARVIS.
-Là où un assistant répond à des questions, un agent **observe, mémorise, apprend et agit** de façon autonome — sans être re-briefé à chaque session.
+## Qu'est-ce qu'Hermès ?
+
+Un **assistant** répond à des questions — et oublie tout dès que la session se ferme.
+
+Un **agent** est fondamentalement différent : il **observe** son environnement en permanence, **mémorise** ce qu'il apprend entre les sessions, **anticipe** les besoins récurrents, et **agit** de façon autonome quand une condition est remplie — sans attendre d'être interrogé.
+
+**Hermès est la couche d'agentification de JARVIS.** C'est lui qui transforme un assistant LLM classique en agent autonome persistant. Il s'intercale entre l'utilisateur et le moteur LLM, et prend en charge tout ce que le LLM ne devrait pas faire : la mémoire long terme, les décisions déterministes, les actions système et le briefing proactif.
 
 ---
 
-## Les 5 briques
-
-| # | Brique | Rôle |
-|---|--------|------|
-| 1 | **Synoptique temps réel** | 6 couches moteur visibles dans l'interface : LLM actif, chunks RAG chargés, STT/TTS, auto-engine SOC, état mémoire |
-| 2 | **Tuile Mémoire** | État de la mémoire vectorielle — échanges, résumés, leçons apprises — rechargeable depuis l'interface sans redémarrage |
-| 3 | **Bypass déterministe** | Les commandes critiques sont interceptées avant le LLM — exécution < 100 ms, zéro hallucination possible |
-| 4 | **Boucle d'apprentissage** | `"Souviens-toi que X"` → leçon persistée, indexée dans le RAG, réinjectée automatiquement dans les futures réponses |
-| 5 | **Briefing matinal** | `"Bonjour JARVIS"` → briefing vocal : niveau de menace SOC, état des machines, alertes 24 h |
-
----
-
-## Avant / Après Hermès
-
-| Avant | Après |
-|-------|-------|
-| Chaque session recommence à zéro | JARVIS accumule le contexte entre les sessions |
-| Le contexte disparaît au redémarrage | Leçons, conventions et préférences indexées dans le RAG |
-| L'assistant répond seulement | L'agent surveille, alerte et agit sur seuil dépassé |
-| Toutes les commandes passent par le LLM | Bypass déterministe pour les commandes critiques |
-
----
-
-## Bypass déterministe
-
-Le bypass intercepte les commandes **avant** le LLM. Aucun token Ollama n'est consommé.
-
-| Commande vocale / texte | Action directe |
-|------------------------|----------------|
-| `"quelle heure est-il ?"` | Python `datetime.now()` → réponse immédiate |
-| `"recharge le RAG"` | `rag_engine.reload()` direct |
-| `"vide la mémoire"` | `memory.clear()` direct |
-| `"bonjour JARVIS"` | Briefing matinal complet (SOC + infra + alertes) |
-| `"vérifie le menu"` | Menu-lint → verdict lu vocalement |
-| `"état des VMs"` | SSH Proxmox → `qm list` live |
-
----
-
-## Boucle d'apprentissage
+## Schéma 1 — Position d'Hermès dans l'architecture
 
 ```
-Utilisateur : "Souviens-toi que les backups se font le samedi soir"
-    │
-    ▼ JARVIS détecte le pattern "souviens-toi"
-    │
-    ▼ Leçon persistée dans jarvis_facts.json
-    │
-    ▼ Indexée dans la base vectorielle RAG
-    │
-    ▼ Réinjectée automatiquement dans les futures réponses pertinentes
-    │
-Résultat : JARVIS connaît cette règle dans toutes les sessions suivantes
-           sans être re-briefé
+╔══════════════════════════════════════════════════════════════════╗
+║  UTILISATEUR  (voix ou texte)                                    ║
+╚══════════════════════════╤═══════════════════════════════════════╝
+                           │
+              ┌────────────▼────────────┐
+              │                         │
+              │       H E R M È S       │
+              │   (couche agentification)│
+              │                         │
+              │  ┌─────────────────────┐│
+              │  │ 1. Bypass ?         ││  ← commande déterministe ?
+              │  │    OUI → action     ││     exécution directe < 100ms
+              │  │    NON ↓            ││     zéro LLM consommé
+              │  └─────────────────────┘│
+              │  ┌─────────────────────┐│
+              │  │ 2. Facts inject     ││  ← date/heure + leçons
+              │  │    Mémoire RAG      ││     persistées entre sessions
+              │  └─────────────────────┘│
+              │  ┌─────────────────────┐│
+              │  │ 3. RAG conditionnel ││  ← documentation locale
+              │  │    (si pertinent)   ││     injectée si besoin
+              │  └─────────────────────┘│
+              │  ┌─────────────────────┐│
+              │  │ 4. SOC inject       ││  ← contexte sécurité live
+              │  │    (mode SOC seul)  ││     side-channel, jamais
+              │  └─────────────────────┘│    dans l'historique chat
+              └────────────┬────────────┘
+                           │
+              ┌────────────▼────────────┐
+              │          L L M          │
+              │  phi4 / gemma4 / qwen   │  ← ne voit que ce qu'Hermès
+              └────────────┬────────────┘    lui prépare
+                           │
+              ┌────────────▼────────────┐
+              │   RÉPONSE ENRICHIE      │
+              │   + TTS vocal Antoine   │
+              └─────────────────────────┘
+```
+
+> **Règle fondamentale** : Hermès décide ce qui arrive au LLM. Le LLM ne voit jamais les données brutes — seulement un contexte filtré, structuré et pertinent.
+
+---
+
+## Schéma 2 — Les 5 briques d'Hermès
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                      H E R M È S                                 │
+│                                                                  │
+│  ┌──────────────────┐   ┌──────────────────┐                    │
+│  │  BRIQUE 1        │   │  BRIQUE 2        │                    │
+│  │  SYNOPTIQUE      │   │  TUILE MÉMOIRE   │                    │
+│  │  TEMPS RÉEL      │   │                  │                    │
+│  │                  │   │  ● Échanges      │                    │
+│  │  ● LLM actif     │   │  ● Résumés       │                    │
+│  │  ● RAG chunks    │   │  ● Leçons        │                    │
+│  │  ● STT/TTS état  │   │  ● Conventions   │                    │
+│  │  ● Auto-engine   │   │                  │                    │
+│  │  ● Mémoire état  │   │  Persistant      │                    │
+│  │  ● Mode actif    │   │  entre sessions  │                    │
+│  └──────────────────┘   └──────────────────┘                    │
+│                                                                  │
+│  ┌──────────────────┐   ┌──────────────────┐                    │
+│  │  BRIQUE 3        │   │  BRIQUE 4        │                    │
+│  │  BYPASS          │   │  BOUCLE          │                    │
+│  │  DÉTERMINISTE    │   │  APPRENTISSAGE   │                    │
+│  │                  │   │                  │                    │
+│  │  Interception    │   │  "Souviens-toi"  │                    │
+│  │  avant LLM       │   │  → persisté RAG  │                    │
+│  │  < 100ms         │   │  → réinjecté     │                    │
+│  │  0 hallucination │   │    auto futures  │                    │
+│  └──────────────────┘   └──────────────────┘                    │
+│                                                                  │
+│  ┌──────────────────┐                                           │
+│  │  BRIQUE 5        │                                           │
+│  │  BRIEFING        │                                           │
+│  │  MATINAL         │                                           │
+│  │                  │                                           │
+│  │  "Bonjour JARVIS"│                                           │
+│  │  → menaces SOC   │                                           │
+│  │  → état machines │                                           │
+│  │  → alertes 24h   │                                           │
+│  └──────────────────┘                                           │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Pipeline de décision — ordre strict
+## Brique 1 — Synoptique temps réel
+
+Le synoptique est le **tableau de bord live d'Hermès** — visible en permanence dans l'interface. Il affiche l'état des 6 couches du moteur au moment présent.
 
 ```
-Question reçue
-    │
-    ▼ 1. BYPASS DETERMINISTE (< 100 ms — zéro LLM)
-    │   • commandes temporelles, VM, service, lecture fichier
-    │
-    ▼ 2. FACTS INJECT — date/heure + mémoire persistante (leçons)
-    │
-    ▼ 3. RAG CONDITIONNEL
-    │   • requête ≥ 60 caractères OU mot-clé documentation
-    │   → chunks pertinents injectés (BM25 + vecteur hybride)
-    │
-    ▼ 4. SOC INJECT (mode soc uniquement)
-    │   • contexte monitoring live injecté en side-channel
-    │   • n'entre JAMAIS dans l'historique chat
-    │
-    ▼ 5. ROUTING LLM
-        • mode SOC    → phi4:14b (toujours chaud)
-        • mode GÉNÉRAL → gemma4:latest
-        • mode CODE   → qwen2.5-coder:14b
+┌─────────────────────────────────────────────────────────┐
+│  ◈  HERMÈS  —  SYNOPTIQUE  MOTEUR                       │
+├─────────────────┬───────────────────────────────────────┤
+│  LLM ACTIF      │  phi4:14b  ●  CHAUD  (en mémoire)    │
+│  RAG             │  599 chunks  ●  PRÊT  TTL: 4m32s     │
+│  STT             │  large-v3-turbo  ●  EN ÉCOUTE        │
+│  TTS             │  edge-tts  Antoine fr-CA  ●  ACTIF   │
+│  AUTO-ENGINE    │  ●  ACTIF  —  dernier scan: 42s       │
+│  MÉMOIRE        │  12 leçons  ●  3 résumés  ●  SYNC    │
+└─────────────────┴───────────────────────────────────────┘
+```
+
+L'utilisateur sait **en un coup d'œil** si JARVIS est pleinement opérationnel, si un modèle est en cours de chargement, si le RAG est à jour, ou si l'auto-engine SOC surveille activement.
+
+---
+
+## Brique 2 — Mémoire persistante
+
+C'est la brique qui différencie le plus radicalement un agent d'un chatbot.
+
+### Sans mémoire persistante (chatbot classique)
+
+```
+Session 1 :  "Appelle-moi Marc"      → JARVIS apprend
+             Session fermée          → TOUT OUBLIÉ
+
+Session 2 :  "Bonjour JARVIS"
+             "Tu te souviens de moi ?" → "Je suis désolé, je n'ai pas
+                                          de mémoire des sessions précédentes"
+```
+
+### Avec Hermès — mémoire persistante RAG
+
+```
+Session 1 :  "Souviens-toi : les backups le samedi soir"
+                │
+                ▼
+             Leçon indexée dans jarvis_facts.json
+             + vecteur créé dans la base RAG
+
+Session 2 (lendemain) :
+             "Quand faire les backups ?"
+                │
+                ▼  RAG retrouve la leçon automatiquement
+             "Les backups se font le samedi soir — tu me l'as appris hier."
+```
+
+### Structure de la mémoire
+
+```
+jarvis_facts.json  (persistant sur disque)
+├── leçons        : règles et conventions apprises
+├── tâches        : TODO persistants entre sessions
+└── préférences   : comportements personnalisés
+
+jarvis_memory.json  (persistant sur disque)
+├── résumés       : condensés des longues conversations
+└── contexte      : état de l'échange en cours
+
+Base vectorielle RAG  (~600 chunks)
+├── documentation technique locale
+├── leçons apprises  (injection automatique)
+└── résumés de sessions
 ```
 
 ---
 
-## Les 4 modes
+## Brique 3 — Bypass déterministe
 
-| Mode | Modèle | Usage |
-|------|--------|-------|
-| **SOC** (défaut) | phi4:14b | Cybersécurité · analyse menaces · contexte monitoring injecté |
-| **GÉNÉRAL** | gemma4:latest | Conversation fluide · questions générales · vision multimodale |
-| **CODE** | qwen2.5-coder:14b | Développement · infogérance · SSH dev · SCP · exécution |
-| **CR** | qwen2.5-coder:14b | Code avec raisonnement explicite · analyse multi-fichiers |
+### Le problème sans bypass
+
+Quand on passe toutes les commandes par le LLM, on accepte deux risques :
+- **Latence** : le modèle 14b prend 2 à 8 secondes pour répondre
+- **Hallucination** : le LLM peut inventer une heure, un nom de fichier, un état de service
+
+Pour des commandes simples et prévisibles, ce comportement est inacceptable.
+
+### La solution Hermès — interception avant le LLM
+
+```
+Entrée utilisateur
+       │
+       ▼
+┌──────────────────────────────────┐
+│   MOTEUR BYPASS  (regex Python)  │
+│                                  │
+│   Patterns interceptés :         │
+│   ● temporel     → datetime()    │
+│   ● état VM      → SSH qm list   │
+│   ● lecture fich → open() local  │
+│   ● recharge RAG → rag.reload()  │
+│   ● briefing mat → brief()       │
+│   ● menu-lint    → lint()        │
+│   ● ... (29 patterns)            │
+└──────────┬───────────────────────┘
+           │ Match ?
+    ┌──────┴──────┐
+    │ OUI         │ NON
+    ▼             ▼
+Action       Continuer vers
+directe      LLM (étapes 2-5)
+< 100ms
+0 token LLM
+```
+
+### Exemples concrets
+
+| Commande vocale | Sans Hermès | Avec Hermès |
+|-----------------|-------------|-------------|
+| `"Quelle heure est-il ?"` | LLM invoqué — 4 secondes — risque hallucination | Python `datetime.now()` direct — 8 ms — exact |
+| `"État des VMs"` | LLM génère une commande SSH — risque d'erreur de syntaxe | `qm list` SSH direct — résultat brut exact |
+| `"Recharge le RAG"` | LLM interprète — résultat incertain | `rag_engine.reload()` direct — confirmation immédiate |
+| `"Bonjour JARVIS"` | LLM génère un bonjour générique | Briefing matinal complet : SOC + infra + alertes 24h |
+
+---
+
+## Brique 4 — Boucle d'apprentissage
+
+### Comment JARVIS apprend
+
+```
+UTILISATEUR :  "Souviens-toi que X"  (texte ou voix)
+                    │
+                    ▼
+            Hermès détecte le pattern "souviens-toi"
+                    │
+         ┌──────────▼──────────────────┐
+         │   PERSISTANCE               │
+         │   ├── jarvis_facts.json     │  ← écriture disque
+         │   └── jarvis_memory.json   │
+         └──────────┬──────────────────┘
+                    │
+         ┌──────────▼──────────────────┐
+         │   INDEXATION RAG            │
+         │   ├── embedding calculé     │  ← mxbai-embed-large
+         │   └── chunk ajouté à l'index│
+         └──────────┬──────────────────┘
+                    │
+         ┌──────────▼──────────────────┐
+         │   INJECTION AUTOMATIQUE     │
+         │   Toute future question     │  ← sans action de
+         │   pertinente reçoit cette   │    l'utilisateur
+         │   leçon en contexte         │
+         └─────────────────────────────┘
+
+  RÉSULTAT :  JARVIS connaît cette règle dans TOUTES
+              les sessions suivantes — sans re-briefing
+```
+
+### Exemples de leçons apprisibles
+
+- Conventions de travail : `"Souviens-toi : les commits en anglais"`
+- Règles métier : `"Souviens-toi : ne jamais redémarrer nginx sans vérifier les configs"`
+- Préférences vocales : `"Souviens-toi : réponds toujours en français"`
+- Contexte infra : `"Souviens-toi : le disque D est le disque de secours"`
+
+---
+
+## Brique 5 — Briefing matinal
+
+Le briefing matinal est la manifestation la plus visible du comportement **proactif** d'Hermès.
+
+Au lieu d'attendre une question, JARVIS prend l'initiative de livrer un résumé complet de la situation à la première interaction de la journée.
+
+### Déclencheur et pipeline
+
+```
+"Bonjour JARVIS"  (ou variantes vocales)
+         │
+         ▼  Hermès identifie le pattern matinal
+         │
+         ▼  Assemblage sans LLM (bypass total — données directes)
+         │
+    ┌────┴────────────────────────────────────┐
+    │  ● ThreatScore SOC en cours             │
+    │  ● Bans actifs dernières 24h            │
+    │  ● Alertes IDS / WAF                    │
+    │  ● État des VMs Proxmox                 │
+    │  ● Dernière sauvegarde (date + état)    │
+    │  ● État LLM + RAG + mémoire JARVIS      │
+    └────┬────────────────────────────────────┘
+         │
+         ▼  Synthèse vocale TTS Antoine fr-CA
+         │
+    Briefing complet lu en < 30 secondes
+    sans interaction clavier
+```
+
+---
+
+## Bilan — Ce qu'Hermès apporte à JARVIS
+
+```
+┌─────────────────────────┬──────────────────────────────────────┐
+│  SANS HERMÈS            │  AVEC HERMÈS                         │
+│  (chatbot LLM classique)│  (agent persistant)                  │
+├─────────────────────────┼──────────────────────────────────────┤
+│  Chaque session repart  │  Contexte, leçons et conventions     │
+│  de zéro                │  conservés entre toutes les sessions │
+├─────────────────────────┼──────────────────────────────────────┤
+│  Toutes les commandes   │  Bypass déterministe : 29 patterns   │
+│  passent par le LLM     │  exécutés directement < 100 ms       │
+│  (latence + risque      │  sans consommer un seul token LLM    │
+│  d'hallucination)       │                                      │
+├─────────────────────────┼──────────────────────────────────────┤
+│  L'assistant attend     │  L'agent surveille en permanence,    │
+│  d'être interrogé       │  alerte vocalement si seuil dépassé, │
+│                         │  agit (ban IP, restart) si configuré │
+├─────────────────────────┼──────────────────────────────────────┤
+│  Le LLM voit toutes     │  Hermès filtre : le LLM ne reçoit    │
+│  les données brutes     │  que le contexte utile — structuré   │
+│                         │  et pertinent                        │
+├─────────────────────────┼──────────────────────────────────────┤
+│  Pas de conscience      │  Briefing matinal proactif :         │
+│  de l'état du système   │  sécurité + infra + état JARVIS      │
+│  au démarrage           │  lu vocalement sans interaction       │
+├─────────────────────────┼──────────────────────────────────────┤
+│  Apprentissage limité   │  Boucle d'apprentissage : une leçon  │
+│  à la session courante  │  apprise persiste dans toutes les    │
+│                         │  sessions futures automatiquement    │
+└─────────────────────────┴──────────────────────────────────────┘
+```
+
+> Hermès ne remplace pas le LLM — il le **protège** des tâches pour lesquelles il est mauvais (déterminisme, mémoire, temps réel), et lui réserve ce pour quoi il excelle : le raisonnement, l'analyse et la réponse contextuelle.
 
 ---
 
