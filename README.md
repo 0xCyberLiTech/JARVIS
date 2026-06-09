@@ -1,25 +1,28 @@
-# JARVIS — Assistant IA Personnel v3.3
+# JARVIS — Agent IA Personnel v3.3
 
-Interface web locale type Iron Man : chat IA, terminal intégré, monitoring GPU/CPU, explorateur de fichiers, gestionnaire de tâches, DSP audio stéréo, éditeur audio IA, Voice Lab, STT local.
+> Pas un chatbot. Un **agent persistant** qui tourne en local, surveille l'infrastructure, mémorise les leçons et parle chaque matin.
 
-> **Créateur** : Marc Sabater (0xcyberlitech)
-> **Version** : v3.3 (interface holographique)
+> **Créateur** : Marc Sabater (0xcyberlitech) · **Version** : v3.3 · **GPU** : RTX 5080 · **LLM** : Ollama local
 
 ---
 
-## 📚 Documentation
+## ◈ HERMÈS — Agent persistant
 
-> **Toute la documentation projet vit dans [`DOCUMENTATION/`](DOCUMENTATION/00-INDEX.md)** — base documentaire structurée (25 docs, 8 catégories numérotées, frontmatter YAML).
+![Hermès — synoptique 6 couches actives : LLM, RAG, STT, TTS, SOC, MÉMOIRE](Images/hermes.png)
 
-| Pour | Aller à |
-|---|---|
-| **Vue d'ensemble projet** | [01-PRESENTATION/01-01-VISION-PROJET.md](DOCUMENTATION/01-PRESENTATION/01-01-VISION-PROJET.md) |
-| **Architecture technique** | [02-ARCHITECTURE/](DOCUMENTATION/02-ARCHITECTURE/) (7 docs) |
-| **Installation / déploiement** | [04-DEPLOIEMENT/04-01-DEPLOIEMENT.md](DOCUMENTATION/04-DEPLOIEMENT/04-01-DEPLOIEMENT.md) |
-| **Procédures opérationnelles** | [05-EXPLOITATION/05-01-RUNBOOK.md](DOCUMENTATION/05-EXPLOITATION/05-01-RUNBOOK.md) |
-| **État technique actuel** | [06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md) |
-| **Index complet** | [`DOCUMENTATION/00-INDEX.md`](DOCUMENTATION/00-INDEX.md) |
-| **Briefing IA Claude** | [`CLAUDE.md`](CLAUDE.md) |
+Hermès est la couche d'**agentification persistante** de JARVIS — bâtie en **5 briques** sans rupture d'architecture :
+
+| Brique | Ce qu'elle fait |
+|--------|----------------|
+| **1 — Synoptique** | 6 couches moteur visibles en temps réel : LLM actif, chunks RAG, STT/TTS, auto-engine SOC, mémoire. Tableau de bord vivant de ce que pense JARVIS. |
+| **2 — Tuile Mémoire** | État de la mémoire vectorielle : échanges, résumés, leçons apprises. Rechargement RAG et purge depuis l'interface. |
+| **3 — Commandes vocales** | Bypass LLM pour les commandes système : *"recharge le RAG"*, *"vide la mémoire"*. Exécution instantanée, déterministe. |
+| **4 — Boucle d'apprentissage** | *"Souviens-toi que X"* — la leçon est persistée, indexée dans le RAG, et remonte dans les réponses futures. |
+| **5 — Briefing matinal** | *"Bonjour JARVIS"* → briefing vocal complet : niveau menace SOC, état des machines, alertes 24h. Automatisable à heure fixe. |
+
+**Avant Hermès** — JARVIS répondait aux questions. Chaque session commençait à zéro.
+
+**Après Hermès** — JARVIS accumule les leçons, les indexe et les réinjecte automatiquement. Il connaît les règles d'infra, les conventions de code, les préférences — sans re-briefing.
 
 ---
 
@@ -51,27 +54,19 @@ Détails complets : [`DOCUMENTATION/02-ARCHITECTURE/`](DOCUMENTATION/02-ARCHITEC
 
 ---
 
-## ◈ HERMÈS — Agent persistant
+## 📚 Documentation
 
-JARVIS n'est plus un chatbot. Avec Hermès, il devient un **agent persistant** qui observe, mémorise, apprend et agit de façon autonome.
+> **Toute la documentation projet vit dans [`DOCUMENTATION/`](DOCUMENTATION/00-INDEX.md)** — base documentaire structurée (25 docs, 8 catégories numérotées, frontmatter YAML).
 
-![Hermès — synoptique 6 couches actives : LLM, RAG, STT, TTS, SOC, MÉMOIRE](Images/hermes.png)
-
-Hermès est bâti en **5 briques** au-dessus du moteur JARVIS, sans rupture d'architecture :
-
-| Brique | Ce qu'elle fait |
-|--------|----------------|
-| **1 — Synoptique** | 6 couches moteur visibles en temps réel : LLM actif, chunks RAG chargés, état STT/TTS, auto-engine SOC, historique mémoire. Tableau de bord vivant de ce que pense JARVIS. |
-| **2 — Tuile Mémoire** | État de la mémoire vectorielle : échanges, taille, résumés, leçons apprises. Rechargement RAG et purge accessibles depuis l'interface. |
-| **3 — Commandes vocales système** | Bypass LLM pour les commandes système : *"recharge le RAG"*, *"vide la mémoire"*, *"rafraîchis l'index"*. Exécution instantanée, déterministe. |
-| **4 — Boucle d'apprentissage** | *"Souviens-toi que X"*, *"retiens que Y"* — la leçon est persistée, indexée dans le RAG, et remonte automatiquement dans les réponses futures. |
-| **5 — Briefing matinal** | *"Bonjour JARVIS"* déclenche un briefing vocal complet : niveau de menace SOC, état des machines, alertes 24h. Automatisable à heure fixe — JARVIS parle seul chaque matin. |
-
-### Avant / Après Hermès
-
-**Avant** — JARVIS répondait aux questions et exécutait des commandes. Chaque session commençait à zéro. Le contexte était perdu au redémarrage.
-
-**Après** — JARVIS accumule les leçons explicites, les indexe dans sa base vectorielle et les réinjecte dans ses réponses futures. Il connaît les règles d'infra, les conventions de code, les préférences de l'utilisateur — sans être re-briefé à chaque session.
+| Pour | Aller à |
+|---|---|
+| **Vue d'ensemble projet** | [01-PRESENTATION/01-01-VISION-PROJET.md](DOCUMENTATION/01-PRESENTATION/01-01-VISION-PROJET.md) |
+| **Architecture technique** | [02-ARCHITECTURE/](DOCUMENTATION/02-ARCHITECTURE/) (7 docs) |
+| **Installation / déploiement** | [04-DEPLOIEMENT/04-01-DEPLOIEMENT.md](DOCUMENTATION/04-DEPLOIEMENT/04-01-DEPLOIEMENT.md) |
+| **Procédures opérationnelles** | [05-EXPLOITATION/05-01-RUNBOOK.md](DOCUMENTATION/05-EXPLOITATION/05-01-RUNBOOK.md) |
+| **État technique actuel** | [06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md) |
+| **Index complet** | [`DOCUMENTATION/00-INDEX.md`](DOCUMENTATION/00-INDEX.md) |
+| **Briefing IA Claude** | [`CLAUDE.md`](CLAUDE.md) |
 
 ---
 
