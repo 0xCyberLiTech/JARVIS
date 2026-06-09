@@ -177,6 +177,10 @@ def chat_try_bypass(orig_last: str, is_vocal: bool):
     pending = _chat_resolve_pending_bypass(orig_last)
     if pending:
         return pending
+    sys_cmd = _bypass_wrap.detect_system_ctrl_command(orig_last)
+    if sys_cmd:
+        _log.info(f"[BYPASS_SYSCTRL] commande détectée : {sys_cmd}")
+        return _sse_response(_bypass_wrap.system_ctrl_sse(sys_cmd))
     if _bypass_simple.DATETIME_RE.search(orig_last):
         _log.info("[BYPASS] datetime → réponse directe (zéro LLM)")
         return _sse_response(_bypass_simple.datetime_sse())

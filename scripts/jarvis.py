@@ -837,6 +837,18 @@ _memory.init(
 )
 app.register_blueprint(_memory.bp)
 
+# Source unique des chemins MEMORY.md à indexer — consommée par _rag.init()
+# ET par le bypass system_ctrl (rag_refresh_fn).
+def _rag_refresh_paths() -> list[str]:
+    return [
+        str(_WORKSPACE_ROOT / "JARVIS"  / "MEMORY.md"),
+        str(_WORKSPACE_ROOT / "SOC"     / "MEMORY.md"),
+        str(_WORKSPACE_ROOT / "PROXMOX" / "MEMORY.md"),
+        str(_WORKSPACE_ROOT / "NGINX"   / "MEMORY.md"),
+        str(_claude_memory_root() / "MEMORY.md"),
+    ]
+
+
 # Init différé de la tuile rag + register Blueprint (refactor jarvis.py
 # étape 5). _WORKSPACE_ROOT / _claude_memory_root() définis tôt → init OK ici.
 _rag.init(
@@ -856,13 +868,7 @@ _rag.init(
     live_mod          = _rag_live_mod,
     ssh_nginx          = _ssh_nginx,
     ssh_log_timeout_s = _SSH_LOG_TIMEOUT_S,
-    get_refresh_paths = lambda: [
-        str(_WORKSPACE_ROOT / "JARVIS"  / "MEMORY.md"),
-        str(_WORKSPACE_ROOT / "SOC"     / "MEMORY.md"),
-        str(_WORKSPACE_ROOT / "PROXMOX" / "MEMORY.md"),
-        str(_WORKSPACE_ROOT / "NGINX"   / "MEMORY.md"),
-        str(_claude_memory_root() / "MEMORY.md"),
-    ],
+    get_refresh_paths = _rag_refresh_paths,
 )
 app.register_blueprint(_rag.bp)
 _vram_model:    str | None = None   # modèle actuellement chargé en VRAM (tracké par JARVIS)
@@ -1512,6 +1518,20 @@ app.register_blueprint(_dev.bp)
 # _commands.init (qui consomme VM_START_SSH_MAP) et avant _chat_orch.init
 # (qui consomme _apt_upgrade_bypass_sse). DI : 5 SSH fns + 3 modules bypass +
 # _pve_fetch_state + _sse_tok + _log + dicts mutables.
+def _rag_bypass_refresh() -> dict:
+    """Re-indexe les MEMORY.md via _rag_refresh_paths() — callable bypass/system_ctrl."""
+    total = 0
+    for p_str in _rag_refresh_paths():
+        p = Path(p_str)
+        if p.exists():
+            try:
+                total += _rag.engine._rag_index_text(
+                    p.read_text(encoding="utf-8", errors="ignore"), p.name)
+            except Exception:
+                pass
+    return {"chunks_added": total}
+
+
 _bypass_wrap.init(
     ssh_nginx          = _ssh_nginx,
     ssh_proxmox       = _ssh_proxmox,
@@ -1528,6 +1548,12 @@ _bypass_wrap.init(
     allowed_scripts   = _ALLOWED_SCRIPTS,
     ssh_apt_timeout_s = _SSH_APT_TIMEOUT_S,
     svc_bouncer       = _SVC_BOUNCER,
+    rag_refresh_fn    = _rag_bypass_refresh,
+    memory_clear_fn   = lambda: MEMORY_FILE.unlink() if MEMORY_FILE.exists() else None,
+    rag_clear_fn      = lambda: [
+        f.unlink() for f in [_rag.engine._rag_meta_file, _rag.engine._rag_emb_file]
+        if f.exists()
+    ],
 )
 
 # ── Init tuile commands (étape 20, 2026-05-23) — placé tard car nécessite ──

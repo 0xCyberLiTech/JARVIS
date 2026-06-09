@@ -25,7 +25,12 @@ import re
 
 import security_whitelists as _sec
 
+from . import system_ctrl as _system_ctrl
+
 # ── Module-level DI placeholders (rempli par init()) ──────────────────────────
+_rag_refresh_fn   = None   # () → {"chunks_added": n, ...}
+_memory_clear_fn  = None   # () → None
+_rag_clear_fn     = None   # () → None
 _ssh_nginx = None
 _ssh_proxmox = None
 _ssh_clt = None
@@ -65,6 +70,9 @@ def init(
     allowed_scripts: dict,
     ssh_apt_timeout_s: int = 180,
     svc_bouncer: str = "crowdsec-firewall-bouncer",
+    rag_refresh_fn=None,
+    memory_clear_fn=None,
+    rag_clear_fn=None,
 ) -> None:
     """Injecte les deps couplées à jarvis.py et calcule les tables/regex."""
     global _ssh_nginx, _ssh_proxmox, _ssh_clt, _ssh_pa85, _ssh_dev1
@@ -72,6 +80,10 @@ def init(
     global _pve_fetch_state, _sse_tok, _log
     global _pending_infra_cmd, _allowed_scripts, _ssh_apt_timeout_s, _svc_bouncer
     global VM_START_SSH_MAP, UPDATE_REBOOT_HOSTS, SVC_RESTART_RE
+    global _rag_refresh_fn, _memory_clear_fn, _rag_clear_fn
+    _rag_refresh_fn  = rag_refresh_fn
+    _memory_clear_fn = memory_clear_fn
+    _rag_clear_fn    = rag_clear_fn
 
     _ssh_nginx = ssh_nginx
     _ssh_proxmox = ssh_proxmox
@@ -377,3 +389,20 @@ def routine_postmaj_clarify_sse():
            "srv-nginx, clt, pa85 ou srv-dev-1.")
     yield _sse_tok(msg, done=True)
     yield "data: " + json.dumps({"type": "speak", "text": msg}) + "\n\n"
+
+
+# ── System ctrl Hermès (RAG / mémoire) ────────────────────────────────────────
+
+def detect_system_ctrl_command(msg: str) -> str | None:
+    """Délègue à system_ctrl.detect_system_ctrl_command."""
+    return _system_ctrl.detect_system_ctrl_command(msg)
+
+
+def system_ctrl_sse(cmd: str):
+    """Exécute la commande système cmd et stream le résultat SSE."""
+    if cmd == "rag_refresh":
+        yield from _system_ctrl.rag_refresh_sse(_rag_refresh_fn)
+    elif cmd == "memory_clear":
+        yield from _system_ctrl.memory_clear_sse(_memory_clear_fn)
+    elif cmd == "rag_clear":
+        yield from _system_ctrl.rag_clear_sse(_rag_clear_fn)

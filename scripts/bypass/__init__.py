@@ -24,4 +24,12 @@ Sous-modules :
 La fonction `init()` du sous-module `wrappers` reçoit toutes les deps couplées
 (5 SSH fns + 3 modules bypass + pve_fetch_state + sse_tok + log + dicts mutables).
 """
-from . import backup, code, filesystem, proxmox, simple, wrappers  # noqa: F401
+from . import (  # noqa: F401
+    backup,
+    code,
+    filesystem,
+    proxmox,
+    simple,
+    system_ctrl,
+    wrappers,
+)
