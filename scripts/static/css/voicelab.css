@@ -1094,7 +1094,8 @@
   #btn-mode-soc.mode-loading,
   #btn-mode-general.mode-loading,
   #btn-mode-code.mode-loading,
-  #btn-mode-code-reasoning.mode-loading {
+  #btn-mode-code-reasoning.mode-loading,
+  #btn-mode-think.mode-loading {
     animation: mode-loading-pulse 1.2s ease-in-out infinite;
     position: relative;
     cursor: progress;
@@ -1102,7 +1103,8 @@
   #btn-mode-soc.mode-loading::after,
   #btn-mode-general.mode-loading::after,
   #btn-mode-code.mode-loading::after,
-  #btn-mode-code-reasoning.mode-loading::after {
+  #btn-mode-code-reasoning.mode-loading::after,
+  #btn-mode-think.mode-loading::after {
     content: '⏳';
     position: absolute;
     right: 6px;
