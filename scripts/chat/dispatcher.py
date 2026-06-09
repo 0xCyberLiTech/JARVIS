@@ -185,6 +185,9 @@ def chat_try_bypass(orig_last: str, is_vocal: bool):
     if sys_cmd:
         _log.info(f"[BYPASS_SYSCTRL] commande détectée : {sys_cmd}")
         return _sse_response(_bypass_wrap.system_ctrl_sse(sys_cmd))
+    if _bypass_wrap.detect_morning_brief(orig_last):
+        _log.info("[BYPASS_BRIEF] briefing matinal Hermès")
+        return _sse_response(_bypass_wrap.morning_brief_sse())
     if _bypass_simple.DATETIME_RE.search(orig_last):
         _log.info("[BYPASS] datetime → réponse directe (zéro LLM)")
         return _sse_response(_bypass_simple.datetime_sse())

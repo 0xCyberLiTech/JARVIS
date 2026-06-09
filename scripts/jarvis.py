@@ -330,6 +330,7 @@ from blueprints.soc import (
     _ssh_nginx,
     _ssh_pa85,
     _ssh_proxmox,
+    get_brief_data,
     get_soc_status,
     init_soc,
     soc_bp,
@@ -874,6 +875,9 @@ _rag.init(
     get_refresh_paths = _rag_refresh_paths,
 )
 app.register_blueprint(_rag.bp)
+# Pré-charge le RAG depuis le cache disque au démarrage — évite l'état "non chargé"
+# après restart sans attendre la 1re requête chat. Thread daemon, non bloquant.
+_rag.engine.warmup()
 _vram_model:    str | None = None   # modèle actuellement chargé en VRAM (tracké par JARVIS)
 _VRAM_LOCK = threading.Lock()       # protège _vram_model + _ollama_swap (anti-race multi-requête)
 _last_toks_per_sec: float = 0.0     # vitesse dernière génération (tok/s)
@@ -1566,9 +1570,24 @@ _bypass_wrap.init(
         f.unlink() for f in [_rag.engine._rag_meta_file, _rag.engine._rag_emb_file]
         if f.exists()
     ],
-    lesson_save_fn    = _lesson_save,
-    lesson_index_fn   = lambda lesson: _rag.engine._rag_index_text(lesson, "corrections"),
+    lesson_save_fn       = _lesson_save,
+    lesson_index_fn      = lambda lesson: _rag.engine._rag_index_text(lesson, "corrections"),
+    morning_brief_soc_fn = get_brief_data,
+    morning_brief_pve_fn = _pve_fetch_state,
 )
+
+# ── Hermès — scheduler briefing matinal automatique ───────────────────────────
+# Heure configurée dans jarvis_hermes.json ("morning_brief_time": "08:30").
+# speak() pousse le TTS vers le frontend SSE (même canal que les alertes SOC).
+from bypass.morning_brief import start_scheduler as _mb_start_scheduler
+_HERMES_CFG_FILE = Path(__file__).parent / "jarvis_hermes.json"
+_mb_start_scheduler(
+    speak_fn    = speak,
+    soc_fn      = get_brief_data,
+    pve_fn      = _pve_fetch_state,
+    config_path = str(_HERMES_CFG_FILE),
+)
+_log.info("[HERMES] scheduler briefing matinal démarré (config: jarvis_hermes.json)")
 
 # ── Init tuile commands (étape 20, 2026-05-23) — placé tard car nécessite ──
 # _pve_fetch_state (alias chat orchestrator) + _sse_tok (sse helpers alias).

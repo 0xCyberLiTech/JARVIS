@@ -903,6 +903,26 @@ def get_soc_status() -> dict:
     }
 
 
+def get_brief_data() -> dict:
+    """Données résumées pour le briefing vocal matinal Hermès.
+    Combine état SOC en mémoire + threat_level depuis monitoring.json (cache 30s)."""
+    status = get_soc_status()
+    threat_level = "INCONNU"
+    try:
+        ok, raw = _fetch_monitoring(timeout=8)
+        if ok and raw:
+            d = json.loads(raw)
+            threat_level = d.get("threat_level", "INCONNU")
+    except Exception:
+        pass
+    return {
+        "bans_24h":      status.get("bans_24h",          0),
+        "alerts_24h":    status.get("alerts_24h",         0),
+        "engine_active": status.get("soc_engine_active", False),
+        "threat_level":  threat_level,
+    }
+
+
 @soc_bp.route("/api/soc/monitor", methods=["GET", "POST"])
 def api_soc_monitor():
     global _SOC_MON_ENABLED

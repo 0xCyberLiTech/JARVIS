@@ -209,10 +209,11 @@ def _rag_query(query: str) -> list:
 
 
 def get_status() -> dict:
-    """État courant du RAG (chunks chargés, âge cache, TTL) — zéro IO."""
+    """État courant du RAG (chunks chargés, âge cache, TTL) — zéro IO.
+    Utilise time.monotonic() pour rester cohérent avec _rag_load() qui stocke ts via monotonic."""
     meta = _rag_mem_cache.get("meta")
     ts   = _rag_mem_cache.get("ts", 0.0)
-    now  = time.time()
+    now  = time.monotonic()
     age  = int(now - ts) if ts > 0 else -1
     return {
         "chunks":        len(meta) if meta is not None else 0,
@@ -221,6 +222,18 @@ def get_status() -> dict:
         "ttl_s":         int(_RAG_CACHE_TTL),
         "ttl_remaining_s": max(0, int(_RAG_CACHE_TTL - (now - ts))) if ts > 0 else -1,
     }
+
+
+def warmup() -> None:
+    """Pré-charge le RAG depuis le cache disque au démarrage de JARVIS.
+    Évite l'état 'non chargé' après restart — charge en background thread sans bloquer boot."""
+    import threading
+    def _do():
+        try:
+            _rag_load()
+        except Exception:
+            pass
+    threading.Thread(target=_do, daemon=True, name="rag-warmup").start()
 
 
 def _rag_inject(system: str, query: str) -> str:

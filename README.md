@@ -51,6 +51,30 @@ Détails complets : [`DOCUMENTATION/02-ARCHITECTURE/`](DOCUMENTATION/02-ARCHITEC
 
 ---
 
+## ◈ HERMÈS — Agent persistant
+
+JARVIS n'est plus un chatbot. Avec Hermès, il devient un **agent persistant** qui observe, mémorise, apprend et agit de façon autonome.
+
+![Hermès — synoptique 6 couches actives : LLM, RAG, STT, TTS, SOC, MÉMOIRE](Images/!hermes.png)
+
+Hermès est bâti en **5 briques** au-dessus du moteur JARVIS, sans rupture d'architecture :
+
+| Brique | Ce qu'elle fait |
+|--------|----------------|
+| **1 — Synoptique** | 6 couches moteur visibles en temps réel : LLM actif, chunks RAG chargés, état STT/TTS, auto-engine SOC, historique mémoire. Tableau de bord vivant de ce que pense JARVIS. |
+| **2 — Tuile Mémoire** | État de la mémoire vectorielle : échanges, taille, résumés, leçons apprises. Rechargement RAG et purge accessibles depuis l'interface. |
+| **3 — Commandes vocales système** | Bypass LLM pour les commandes système : *"recharge le RAG"*, *"vide la mémoire"*, *"rafraîchis l'index"*. Exécution instantanée, déterministe. |
+| **4 — Boucle d'apprentissage** | *"Souviens-toi que X"*, *"retiens que Y"* — la leçon est persistée, indexée dans le RAG, et remonte automatiquement dans les réponses futures. |
+| **5 — Briefing matinal** | *"Bonjour JARVIS"* déclenche un briefing vocal complet : niveau de menace SOC, état des machines, alertes 24h. Automatisable à heure fixe — JARVIS parle seul chaque matin. |
+
+### Avant / Après Hermès
+
+**Avant** — JARVIS répondait aux questions et exécutait des commandes. Chaque session commençait à zéro. Le contexte était perdu au redémarrage.
+
+**Après** — JARVIS accumule les leçons explicites, les indexe dans sa base vectorielle et les réinjecte dans ses réponses futures. Il connaît les règles d'infra, les conventions de code, les préférences de l'utilisateur — sans être re-briefé à chaque session.
+
+---
+
 ## 📁 Structure du projet
 
 ```

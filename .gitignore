@@ -28,6 +28,9 @@ node_modules/
 *.mkv
 *.webm
 
+# ── Fichier leçons Hermès (mémoire privée — contient IPs/infra, généré au runtime) ──
+scripts/jarvis_corrections.md
+
 # ── Données runtime (changent en continu, pas du code) ─────────
 scripts/jarvis_facts.json
 scripts/jarvis_memory.json

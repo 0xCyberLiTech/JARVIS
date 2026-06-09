@@ -28,6 +28,7 @@ from . import (  # noqa: F401
     backup,
     code,
     filesystem,
+    morning_brief,
     proxmox,
     simple,
     system_ctrl,

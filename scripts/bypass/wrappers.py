@@ -26,14 +26,17 @@ import re
 import security_whitelists as _sec
 
 from . import learn as _learn
+from . import morning_brief as _morning_brief
 from . import system_ctrl as _system_ctrl
 
 # ── Module-level DI placeholders (rempli par init()) ──────────────────────────
-_rag_refresh_fn   = None   # () → {"chunks_added": n, ...}
-_memory_clear_fn  = None   # () → None
-_rag_clear_fn     = None   # () → None
-_lesson_save_fn   = None   # (lesson: str) → None
-_lesson_index_fn  = None   # (lesson: str) → None
+_rag_refresh_fn         = None   # () → {"chunks_added": n, ...}
+_memory_clear_fn        = None   # () → None
+_rag_clear_fn           = None   # () → None
+_lesson_save_fn         = None   # (lesson: str) → None
+_lesson_index_fn        = None   # (lesson: str) → None
+_morning_brief_soc_fn   = None   # () → {"threat_level", "bans_24h", "alerts_24h", ...}
+_morning_brief_pve_fn   = None   # () → {"vms": [...], ...}
 _ssh_nginx = None
 _ssh_proxmox = None
 _ssh_clt = None
@@ -78,6 +81,8 @@ def init(
     rag_clear_fn=None,
     lesson_save_fn=None,
     lesson_index_fn=None,
+    morning_brief_soc_fn=None,
+    morning_brief_pve_fn=None,
 ) -> None:
     """Injecte les deps couplées à jarvis.py et calcule les tables/regex."""
     global _ssh_nginx, _ssh_proxmox, _ssh_clt, _ssh_pa85, _ssh_dev1
@@ -87,11 +92,14 @@ def init(
     global VM_START_SSH_MAP, UPDATE_REBOOT_HOSTS, SVC_RESTART_RE
     global _rag_refresh_fn, _memory_clear_fn, _rag_clear_fn
     global _lesson_save_fn, _lesson_index_fn
-    _rag_refresh_fn  = rag_refresh_fn
-    _memory_clear_fn = memory_clear_fn
-    _rag_clear_fn    = rag_clear_fn
-    _lesson_save_fn  = lesson_save_fn
-    _lesson_index_fn = lesson_index_fn
+    global _morning_brief_soc_fn, _morning_brief_pve_fn
+    _rag_refresh_fn          = rag_refresh_fn
+    _memory_clear_fn         = memory_clear_fn
+    _rag_clear_fn            = rag_clear_fn
+    _lesson_save_fn          = lesson_save_fn
+    _lesson_index_fn         = lesson_index_fn
+    _morning_brief_soc_fn    = morning_brief_soc_fn
+    _morning_brief_pve_fn    = morning_brief_pve_fn
 
     _ssh_nginx = ssh_nginx
     _ssh_proxmox = ssh_proxmox
@@ -426,3 +434,17 @@ def detect_learn_command(msg: str) -> str | None:
 def learn_sse(lesson: str):
     """Wrapper — persiste + indexe la leçon et stream la confirmation SSE."""
     yield from _learn.learn_sse(lesson, _lesson_save_fn, _lesson_index_fn)
+
+
+# ── Briefing matinal Hermès (Brique 5) ────────────────────────────────────────
+
+def detect_morning_brief(text: str) -> bool:
+    """True si le message est un déclencheur de briefing matinal."""
+    return _morning_brief.detect_morning_brief(text)
+
+
+def morning_brief_sse():
+    """Wrapper — génère le briefing matinal SSE avec DI injectée."""
+    soc_fn = _morning_brief_soc_fn or (lambda: {})
+    pve_fn = _morning_brief_pve_fn or (lambda: {})
+    yield from _morning_brief.morning_brief_sse(soc_fn, pve_fn)
