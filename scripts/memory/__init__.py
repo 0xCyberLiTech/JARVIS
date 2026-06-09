@@ -32,7 +32,7 @@ _ROUTE_LIMITS = {
 def init(*, limiter, ollama_url, ollama_circuit, log,
          get_memory_file, get_summary_file, get_model, get_mode,
          memory_limit, summary_keep, summary_min_msgs,
-         general_model, code_model) -> None:
+         general_model, code_model, get_corrections_file=None) -> None:
     """Injecte toutes les dépendances de la tuile et applique les rate limits."""
     # 1) Brique store (DI initialisée à l'étape 2 du refactor jarvis.py)
     store.init(
@@ -51,10 +51,11 @@ def init(*, limiter, ollama_url, ollama_circuit, log,
     )
     # 2) Routes (accesseurs fichier + log + seuil min msgs)
     routes.init_routes(
-        get_memory_file  = get_memory_file,
-        get_summary_file = get_summary_file,
-        summary_min_msgs = summary_min_msgs,
-        log              = log,
+        get_memory_file       = get_memory_file,
+        get_summary_file      = get_summary_file,
+        summary_min_msgs      = summary_min_msgs,
+        log                   = log,
+        get_corrections_file  = get_corrections_file,
     )
     # 3) Rate limits par route
     for fn_name, limit_str in _ROUTE_LIMITS.items():

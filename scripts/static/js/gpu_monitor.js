@@ -426,6 +426,8 @@ function _updateMemStats(d) {
   _jsColor('js-mem-count',    d.count > 0 ? 'stat-val c-cyan' : 'stat-val c-white');
   _jsStat('js-mem-size',      d.size_kb !== undefined ? d.size_kb + ' Ko' : '—');
   _jsStat('js-mem-summaries', d.summary_count !== undefined ? d.summary_count + ' résumé(s)' : '—');
+  _jsStat('js-mem-lessons',   d.lessons_count !== undefined ? d.lessons_count + ' leçon(s)' : '—');
+  _jsColor('js-mem-lessons',  d.lessons_count > 0 ? 'stat-val c-cyan' : 'stat-val c-white');
 }
 async function pollMemStats() {
   try { var r = await fetch('/api/memory/stats'); var d = await r.json(); _updateMemStats(d); } catch(e) {}

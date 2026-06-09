@@ -18,17 +18,21 @@ from . import bp, store
 # monkeypatch de test sur MEMORY_FILE / SUMMARY_FILE).
 _get_memory_file:    object = None
 _get_summary_file:   object = None
+_get_corrections_file: object = None
 _summary_min_msgs:   int = 5
 _log:                object = None
 
 
-def init_routes(*, get_memory_file, get_summary_file, summary_min_msgs, log) -> None:
+def init_routes(*, get_memory_file, get_summary_file, summary_min_msgs, log,
+                get_corrections_file=None) -> None:
     """Injecte les accesseurs fichier + constantes consommées par les routes."""
     global _get_memory_file, _get_summary_file, _summary_min_msgs, _log
-    _get_memory_file  = get_memory_file
-    _get_summary_file = get_summary_file
-    _summary_min_msgs = summary_min_msgs
-    _log              = log
+    global _get_corrections_file
+    _get_memory_file       = get_memory_file
+    _get_summary_file      = get_summary_file
+    _get_corrections_file  = get_corrections_file
+    _summary_min_msgs      = summary_min_msgs
+    _log                   = log
 
 
 @bp.route("/api/memory", methods=["GET"])
@@ -94,8 +98,17 @@ def api_memory_stats():
         summary_count = len(data.get("summaries", []))
     except Exception:
         summary_count = 0
+    lessons_count = 0
+    try:
+        if _get_corrections_file:
+            cf = _get_corrections_file()
+            if cf and cf.exists():
+                lessons_count = cf.read_text(encoding="utf-8").count("\n## ")
+    except Exception:
+        lessons_count = 0
     return Response(
-        json.dumps({"count": count, "size_kb": size_kb, "summary_count": summary_count},
+        json.dumps({"count": count, "size_kb": size_kb,
+                    "summary_count": summary_count, "lessons_count": lessons_count},
                    ensure_ascii=False),
         mimetype="application/json")
 

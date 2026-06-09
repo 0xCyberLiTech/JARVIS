@@ -177,6 +177,10 @@ def chat_try_bypass(orig_last: str, is_vocal: bool):
     pending = _chat_resolve_pending_bypass(orig_last)
     if pending:
         return pending
+    lesson = _bypass_wrap.detect_learn_command(orig_last)
+    if lesson:
+        _log.info(f"[BYPASS_LEARN] leçon détectée ({len(lesson)} chars)")
+        return _sse_response(_bypass_wrap.learn_sse(lesson))
     sys_cmd = _bypass_wrap.detect_system_ctrl_command(orig_last)
     if sys_cmd:
         _log.info(f"[BYPASS_SYSCTRL] commande détectée : {sys_cmd}")

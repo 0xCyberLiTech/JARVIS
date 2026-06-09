@@ -503,7 +503,8 @@ VOICES       = [
     {"id": "fr-CH-ArianeNeural",   "label": "Ariane CH",   "flag": "🇨🇭", "gender": "F"},
 ]
 TEMPLATES    = Path(__file__).parent / "templates"
-MEMORY_FILE   = Path(__file__).parent / "jarvis_memory.json"
+MEMORY_FILE       = Path(__file__).parent / "jarvis_memory.json"
+CORRECTIONS_FILE  = Path(__file__).parent / "jarvis_corrections.md"
 FACTS_FILE    = Path(__file__).parent / "jarvis_facts.json"
 SUMMARY_FILE  = Path(__file__).parent / "jarvis_memory_summary.json"
 RAG_DIR       = Path(__file__).parent / "jarvis_rag"
@@ -832,8 +833,9 @@ _memory.init(
     memory_limit     = MEMORY_LIMIT,
     summary_keep     = _SUMMARY_KEEP,
     summary_min_msgs = _SUMMARY_MIN_MSGS,
-    general_model    = _GENERAL_MODEL,
-    code_model       = _CODE_MODEL,
+    general_model          = _GENERAL_MODEL,
+    code_model             = _CODE_MODEL,
+    get_corrections_file   = lambda: CORRECTIONS_FILE,
 )
 app.register_blueprint(_memory.bp)
 
@@ -846,6 +848,7 @@ def _rag_refresh_paths() -> list[str]:
         str(_WORKSPACE_ROOT / "PROXMOX" / "MEMORY.md"),
         str(_WORKSPACE_ROOT / "NGINX"   / "MEMORY.md"),
         str(_claude_memory_root() / "MEMORY.md"),
+        str(CORRECTIONS_FILE),
     ]
 
 
@@ -1518,6 +1521,15 @@ app.register_blueprint(_dev.bp)
 # _commands.init (qui consomme VM_START_SSH_MAP) et avant _chat_orch.init
 # (qui consomme _apt_upgrade_bypass_sse). DI : 5 SSH fns + 3 modules bypass +
 # _pve_fetch_state + _sse_tok + _log + dicts mutables.
+def _lesson_save(lesson: str) -> None:
+    """Appende une leçon horodatée dans jarvis_corrections.md."""
+    import datetime as _dt
+    ts = _dt.datetime.now().strftime("%Y-%m-%d %H:%M")
+    entry = f"\n## {ts}\n{lesson}\n"
+    with CORRECTIONS_FILE.open("a", encoding="utf-8") as fh:
+        fh.write(entry)
+
+
 def _rag_bypass_refresh() -> dict:
     """Re-indexe les MEMORY.md via _rag_refresh_paths() — callable bypass/system_ctrl."""
     total = 0
@@ -1554,6 +1566,8 @@ _bypass_wrap.init(
         f.unlink() for f in [_rag.engine._rag_meta_file, _rag.engine._rag_emb_file]
         if f.exists()
     ],
+    lesson_save_fn    = _lesson_save,
+    lesson_index_fn   = lambda lesson: _rag.engine._rag_index_text(lesson, "corrections"),
 )
 
 # ── Init tuile commands (étape 20, 2026-05-23) — placé tard car nécessite ──
