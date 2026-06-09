@@ -145,6 +145,7 @@
   .grid-panels { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:12px; }
   .grid-bottom { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
   .grid-bottom + .grid-bottom { margin-top:12px; }
+  .jarvis-state-grid { grid-template-columns:repeat(5,1fr); margin-bottom:16px; }
   .vram-llm-grid { grid-template-columns: 1fr !important; }
   .panel-vram-llm { padding:14px 16px; }
   .vram-llm-alert { font-size:.55rem; letter-spacing:2px; color:#ff4444; animation:_vramBlink 1s ease-in-out infinite; }
