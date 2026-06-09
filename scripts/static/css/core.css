@@ -138,15 +138,13 @@
   .gpu-label { font-family:'Orbitron',monospace; font-size:.6rem; letter-spacing:5px; color:#00cfff66; text-align:center; margin-bottom:16px; }
 
   /* ── HERMÈS header ── */
-  .hermes-header { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
-  .hermes-header::before,
-  .hermes-header::after { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,#00cfff22); }
-  .hermes-header::before { background:linear-gradient(90deg,transparent,#00cfff33); }
-  .hermes-header::after  { background:linear-gradient(90deg,#00cfff33,transparent); }
-  .hermes-icon  { font-size:.75rem; color:#00cfff; animation:_hermesPulse 3s ease-in-out infinite; }
-  .hermes-title { font-family:'Orbitron',monospace; font-size:.65rem; letter-spacing:6px; color:#00cfff; text-shadow:0 0 10px #00cfff66; white-space:nowrap; }
-  .hermes-sub   { font-family:'Orbitron',monospace; font-size:.45rem; letter-spacing:3px; color:#00cfff44; white-space:nowrap; }
-  @keyframes _hermesPulse { 0%,100%{opacity:1;text-shadow:0 0 6px #00cfff88} 50%{opacity:.6;text-shadow:0 0 16px #00cfffcc} }
+  .hermes-header { display:flex; align-items:center; gap:14px; margin-bottom:14px; padding:10px 0 8px; border-bottom:1px solid #00cfff1a; }
+  .hermes-header::before { content:''; flex:1; height:1px; background:linear-gradient(90deg,transparent,#00cfff44); }
+  .hermes-header::after  { content:''; flex:1; height:1px; background:linear-gradient(90deg,#00cfff44,transparent); }
+  .hermes-icon  { font-size:1rem; color:#00cfff; animation:_hermesPulse 3s ease-in-out infinite; flex-shrink:0; }
+  .hermes-title { font-family:'Orbitron',monospace; font-size:.9rem; letter-spacing:8px; color:#00cfff; text-shadow:0 0 18px #00cfff99,0 0 40px #00cfff33; white-space:nowrap; flex-shrink:0; }
+  .hermes-sub   { font-family:'Orbitron',monospace; font-size:.5rem; letter-spacing:4px; color:#00cfff77; white-space:nowrap; flex-shrink:0; }
+  @keyframes _hermesPulse { 0%,100%{opacity:1;text-shadow:0 0 8px #00cfff99} 50%{opacity:.7;text-shadow:0 0 22px #00cfffee} }
 
   .gauge-row { display:flex; justify-content:space-around; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
   .gauge-wrap { display:flex; flex-direction:column; align-items:center; gap:6px; }
