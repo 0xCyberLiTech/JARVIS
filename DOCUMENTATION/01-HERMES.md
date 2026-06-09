@@ -67,7 +67,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
               ┌────────────▼────────────┐
               │                         │
               │       H E R M È S       │
-              │   (couche agentification)│
+              │ (couche agentification) │
               │                         │
               │  ┌─────────────────────┐│
               │  │ 1. Bypass ?         ││  ← commande déterministe ?
@@ -107,8 +107,8 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                      H E R M È S                                 │
-│                                                                  │
+│                      H E R M È S                                │
+│                                                                 │
 │  ┌──────────────────┐   ┌──────────────────┐                    │
 │  │  BRIQUE 1        │   │  BRIQUE 2        │                    │
 │  │  SYNOPTIQUE      │   │  TUILE MÉMOIRE   │                    │
@@ -121,7 +121,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 │  │  ● Mémoire état  │   │  Persistant      │                    │
 │  │  ● Mode actif    │   │  entre sessions  │                    │
 │  └──────────────────┘   └──────────────────┘                    │
-│                                                                  │
+│                                                                 │
 │  ┌──────────────────┐   ┌──────────────────┐                    │
 │  │  BRIQUE 3        │   │  BRIQUE 4        │                    │
 │  │  BYPASS          │   │  BOUCLE          │                    │
@@ -132,7 +132,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 │  │  < 100ms         │   │  → réinjecté     │                    │
 │  │  0 hallucination │   │    auto futures  │                    │
 │  └──────────────────┘   └──────────────────┘                    │
-│                                                                  │
+│                                                                 │
 │  ┌──────────────────┐                                           │
 │  │  BRIQUE 5        │                                           │
 │  │  BRIEFING        │                                           │
@@ -154,14 +154,14 @@ Le synoptique est le **tableau de bord live d'Hermès** — visible en permanenc
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  ◈  HERMÈS  —  SYNOPTIQUE  MOTEUR                       │
+│  ◈  HERMÈS  —  SYNOPTIQUE  MOTEUR                      │
 ├─────────────────┬───────────────────────────────────────┤
-│  LLM ACTIF      │  phi4:14b  ●  CHAUD  (en mémoire)    │
+│  LLM ACTIF      │  phi4:14b  ●  CHAUD  (en mémoire)     │
 │  RAG             │  599 chunks  ●  PRÊT  TTL: 4m32s     │
 │  STT             │  large-v3-turbo  ●  EN ÉCOUTE        │
 │  TTS             │  edge-tts  Antoine fr-CA  ●  ACTIF   │
 │  AUTO-ENGINE    │  ●  ACTIF  —  dernier scan: 42s       │
-│  MÉMOIRE        │  12 leçons  ●  3 résumés  ●  SYNC    │
+│  MÉMOIRE        │  12 leçons  ●  3 résumés  ●  SYNC     │
 └─────────────────┴───────────────────────────────────────┘
 ```
 
@@ -282,7 +282,7 @@ UTILISATEUR :  "Souviens-toi que X"  (texte ou voix)
          ┌──────────▼──────────────────┐
          │   PERSISTANCE               │
          │   ├── jarvis_facts.json     │  ← écriture disque
-         │   └── jarvis_memory.json   │
+         │   └── jarvis_memory.json    │
          └──────────┬──────────────────┘
                     │
          ┌──────────▼──────────────────┐
@@ -368,7 +368,7 @@ Au lieu d'attendre une question, JARVIS prend l'initiative de livrer un résumé
 ├─────────────────────────┼──────────────────────────────────────┤
 │  Pas de conscience      │  Briefing matinal proactif :         │
 │  de l'état du système   │  sécurité + infra + état JARVIS      │
-│  au démarrage           │  lu vocalement sans interaction       │
+│  au démarrage           │  lu vocalement sans interaction      │
 ├─────────────────────────┼──────────────────────────────────────┤
 │  Apprentissage limité   │  Boucle d'apprentissage : une leçon  │
 │  à la session courante  │  apprise persiste dans toutes les    │
