@@ -81,3 +81,11 @@ scripts.aprem-*/
 .DS_Store
 Thumbs.db
 *.lnk
+
+# ── Code source (vitrine uniquement — code source reste local) ──
+scripts/
+tests/
+tools/
+docs/
+CLAUDE.md
+build_vitrine.py
