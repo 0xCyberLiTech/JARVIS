@@ -51,6 +51,10 @@
 JARVIS est un assistant IA personnel de type Iron Man construit sur Python/Flask + Ollama.
 Tout tourne en local — aucune donnée ne quitte la machine.
 
+<div align="center">
+  <img src="Images/Jarvis.png" alt="JARVIS — interface holographique principale" width="900"/>
+</div>
+
 ---
 
 ## Hermès — L'agent persistant
