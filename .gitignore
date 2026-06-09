@@ -18,15 +18,13 @@ scripts/jarvis_rag/embeddings.npy
 scripts/jarvis_rag/meta.json
 node_modules/
 
-# ── Medias volumineux (captures ecran, montages video) ─────────
-# Audit dette 2026-05-31 : Images/ contenait 3,6 Go de .mp4 non ignores
-# (2 captures Desktop 3,35 Go + 397 Mo) → risque de commit accidentel
-# massif. Les videos sont des artefacts media, pas du code source.
-# Les petites photos (Images/*.jpg) restent versionnables si besoin.
+# ── Medias volumineux (captures ecran, montages video, photos) ─────────
 *.mp4
 *.mov
 *.mkv
 *.webm
+Images/*.jpg
+images/*.jpg
 
 # ── Fichier leçons Hermès (mémoire privée — contient IPs/infra, généré au runtime) ──
 scripts/jarvis_corrections.md
