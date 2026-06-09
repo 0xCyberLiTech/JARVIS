@@ -157,9 +157,9 @@ Le synoptique est le **tableau de bord live d'Hermès** — visible en permanenc
 │  ◈  HERMÈS  —  SYNOPTIQUE  MOTEUR                      │
 ├─────────────────┬───────────────────────────────────────┤
 │  LLM ACTIF      │  phi4:14b  ●  CHAUD  (en mémoire)     │
-│  RAG             │  599 chunks  ●  PRÊT  TTL: 4m32s     │
-│  STT             │  large-v3-turbo  ●  EN ÉCOUTE        │
-│  TTS             │  edge-tts  Antoine fr-CA  ●  ACTIF   │
+│  RAG            │  599 chunks  ●  PRÊT  TTL: 4m32s      │
+│  STT            │  large-v3-turbo  ●  EN ÉCOUTE         │
+│  TTS            │  edge-tts  Antoine fr-CA  ●  ACTIF    │
 │  AUTO-ENGINE    │  ●  ACTIF  —  dernier scan: 42s       │
 │  MÉMOIRE        │  12 leçons  ●  3 résumés  ●  SYNC     │
 └─────────────────┴───────────────────────────────────────┘
