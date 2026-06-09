@@ -1,92 +1,179 @@
-# J.A.R.V.I.S — Assistant IA Local & SOC Cybersécurité
+<div align="center">
 
-> **Agent persistant · 100 % local · SOC cybersécurité · Voix · Mémoire vectorielle**
+  <br/>
 
-**Créateur** : Marc Sabater — [0xCyberLiTech](https://github.com/0xCyberLiTech) &nbsp;·&nbsp; RTX 5080 &nbsp;·&nbsp; Ollama local
+  <a href="https://github.com/0xCyberLiTech">
+    <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=50&duration=6000&pause=1000000000&color=8B5CF6&center=true&vCenter=true&width=1100&lines=%3EJARVIS_" alt="JARVIS" />
+  </a>
 
-![Tests](https://img.shields.io/badge/tests-1465%20pass-brightgreen)
-![Coverage](https://img.shields.io/badge/coverage-79%25-green)
-![Score](https://img.shields.io/badge/score%20qualit%C3%A9-97%2F100-blue)
-![Python](https://img.shields.io/badge/python-3.11-blue)
-![Licence](https://img.shields.io/badge/licence-usage%20personnel-lightgrey)
+  <br/>
+
+  <h2>J.A.R.V.I.S — Assistant IA local · Agent Hermès · SOC cybersécurité</h2>
+
+  <p align="center">
+    <a href="https://github.com/0xCyberLiTech">
+      <img src="https://img.shields.io/badge/Portfolio-0xCyberLiTech-181717?logo=github&style=flat-square" alt="Portfolio" />
+    </a>
+    &nbsp;
+    <a href="https://github.com/0xCyberLiTech/JARVIS">
+      <img src="https://img.shields.io/badge/GitHub-JARVIS-8B5CF6?logo=github&style=flat-square" alt="GitHub JARVIS" />
+    </a>
+    &nbsp;
+    <img src="https://img.shields.io/badge/tests-1465%20pass-22C55E?style=flat-square" alt="Tests" />
+    &nbsp;
+    <img src="https://img.shields.io/badge/coverage-79%25-22C55E?style=flat-square" alt="Coverage" />
+    &nbsp;
+    <img src="https://img.shields.io/badge/score-97%2F100-8B5CF6?style=flat-square" alt="Score qualité" />
+    &nbsp;
+    <img src="https://img.shields.io/badge/Python-3.11-00B4D8?style=flat-square&logo=python&logoColor=white" alt="Python 3.11" />
+    &nbsp;
+    <img src="https://img.shields.io/badge/Ollama-local-F59E0B?style=flat-square" alt="Ollama" />
+    &nbsp;
+    <img src="https://img.shields.io/badge/usage-personnel-lightgrey?style=flat-square" alt="Licence" />
+  </p>
+
+</div>
 
 ---
 
-## Sommaire
-
-- [Qu'est-ce que JARVIS ?](#quest-ce-que-jarvis-)
-- [Hermès — Agent persistant](#hermès--agent-persistant)
-- [SOC Cybersécurité](#soc-cybersécurité)
-- [Lancement rapide](#-lancement-rapide)
-- [Stack technique](#-stack-technique)
-- [Documentation](#-documentation)
-- [Structure du projet](#-structure-du-projet)
-- [Sécurité](#-sécurité)
-- [Qualité](#-qualité)
-- [Licence](#-licence)
+<div align="center">
+  <img src="https://img.icons8.com/fluency/96/000000/artificial-intelligence.png" alt="IA" width="80"/>
+</div>
 
 ---
 
-## Qu'est-ce que JARVIS ?
+## ⚡ Hermès — L'agent persistant au coeur de JARVIS
 
-JARVIS est une interface web locale type **Iron Man** construite sur Python/Flask + Ollama.  
-Elle intègre un chat IA multi-modèles, un terminal SSH, un monitoring GPU/système en temps réel,
-un Voice Lab complet (STT + TTS CUDA), un éditeur audio DSP et une intégration SOC cybersécurité.
+<div align="center">
+  <img src="Images/hermes.png" alt="Hermès — synoptique 6 couches actives" width="800"/>
+</div>
 
-Tout tourne **entièrement en local** — aucune donnée ne quitte la machine.
+<br/>
 
----
+> **Hermès est ce qui transforme un assistant en agent.**  
+> Là où un assistant répond à des questions, un agent **observe, mémorise, apprend et agit** de façon autonome — sans être re-briefé à chaque session.
 
-## Hermès — Agent persistant
-
-![Hermès — synoptique 6 couches actives : LLM, RAG, STT, TTS, SOC, MÉMOIRE](Images/hermes.png)
-
-Hermès est la couche d'**agentification persistante** de JARVIS.  
-Là où un assistant répond à des questions, un agent **observe, mémorise, apprend et agit** de façon autonome.
+### Les 5 briques de l'agent
 
 | Brique | Rôle |
 |--------|------|
-| **Synoptique** | 6 couches moteur visibles en temps réel : LLM actif, chunks RAG chargés, STT/TTS, auto-engine SOC, mémoire |
-| **Tuile Mémoire** | État de la mémoire vectorielle — échanges, résumés, leçons apprises — rechargement RAG depuis l'interface |
-| **Commandes vocales** | Bypass LLM déterministe — *"recharge le RAG"*, *"vide la mémoire"* — exécution instantanée, sans LLM |
-| **Boucle d'apprentissage** | *"Souviens-toi que X"* → leçon persistée, indexée dans le RAG, réinjectée automatiquement dans les futures réponses |
-| **Briefing matinal** | *"Bonjour JARVIS"* → briefing vocal complet : niveau de menace SOC, état des machines, alertes 24 h |
+| **Synoptique temps réel** | 6 couches moteur visibles dans l'interface : LLM actif, chunks RAG chargés, STT/TTS, auto-engine SOC, état mémoire |
+| **Tuile Mémoire** | État de la mémoire vectorielle — échanges, résumés, leçons apprises — rechargement RAG depuis l'interface sans redémarrage |
+| **Bypass déterministe** | Les commandes critiques (`"recharge le RAG"`, `"vide la mémoire"`, `"état des VMs"`) sont interceptées avant le LLM — exécution instantanée < 100 ms |
+| **Boucle d'apprentissage** | `"Souviens-toi que X"` → leçon persistée, indexée dans la base vectorielle, réinjectée automatiquement dans toutes les futures réponses |
+| **Briefing matinal** | `"Bonjour JARVIS"` → briefing vocal complet : niveau de menace SOC, état des machines, alertes des dernières 24 h |
 
-**Avant Hermès** — chaque session recommençait à zéro. Le contexte était perdu au redémarrage.  
-**Après Hermès** — JARVIS accumule les leçons, les indexe dans sa base vectorielle et les réinjecte.
-Il connaît les règles d'infra, les conventions de code, les préférences utilisateur — sans être re-briefé.
+### Avant / Après Hermès
+
+| Avant | Après |
+|-------|-------|
+| Chaque session recommence à zéro | JARVIS accumule les leçons à travers les sessions |
+| Le contexte est perdu au redémarrage | Les préférences, règles et conventions sont indexées dans le RAG |
+| L'assistant répond, il n'agit pas | L'agent surveille, alerte, et agit sur seuil dépassé |
+| Les commandes passent toujours par le LLM | Les commandes critiques ont un bypass déterministe (zéro LLM, 0 hallucination) |
 
 ---
 
-## SOC Cybersécurité
+## 🤖 À propos & Objectifs
 
-JARVIS s'intègre avec un dashboard SOC homelab (CrowdSec · fail2ban · Suricata · ModSec)
-et expose des capacités de **réponse automatisée** :
+**JARVIS** est une interface web holographique locale de type Iron Man, construite sur **Python/Flask + Ollama**.  
+Elle intègre un chat IA multi-modèles, un terminal SSH, un monitoring GPU/système en temps réel, un Voice Lab complet (STT + TTS CUDA), un éditeur audio DSP broadcast et une intégration SOC cybersécurité.
 
-| Capacité | Description |
+Tout tourne **entièrement en local** — aucune donnée ne quitte la machine vers un LLM cloud.
+
+| Objectif | Description |
 |----------|-------------|
-| **Auto-engine SOC** | Analyse le niveau de menace en continu — ban automatique si seuil dépassé, restart automatique si service down |
-| **Injection contexte** | Le contexte sécurité (IPs actives, menaces 24 h, Kill Chain) est injecté côté serveur dans chaque réponse LLM en mode SOC |
-| **Routes SOC sécurisées** | ban-ip · unban-ip · restart-service — opérations protégées par whitelist RFC1918 et liste de services explicite |
-| **MCP Claude Desktop** | 12 outils exposés : `jarvis_soc_status`, `jarvis_soc_ask`, `jarvis_ioc_status`, `jarvis_proxmox_vms`... |
-| **Alertes vocales** | TTS déclenché automatiquement si niveau de menace ÉLEVÉ ou CRITIQUE |
-
-Intégration détaillée → [03-01 Circuit SOC ↔ JARVIS](DOCUMENTATION/03-INTEGRATION-SOC/03-01-CIRCUIT-SOC-JARVIS.md)
+| **100 % local** | LLM, STT, TTS, RAG, données — tout sur le poste de travail (RTX 5080 CUDA) |
+| **Agentification persistante** | Hermès — mémoire longue durée, apprentissage inter-sessions, briefing automatique |
+| **SOC cybersécurité** | Auto-engine de détection, ban automatique, alertes vocales, injection contexte sécurité |
+| **Accessibilité** | Interface haute lisibilité, alertes vocales TTS, commandes vocales déterministes |
+| **Qualité sans compromis** | 1 465 tests · 79 % coverage · ruff 0 · eslint 0 · hooks bloquants pre-commit/pre-push |
 
 ---
 
-## 🚀 Lancement rapide
+## 🖼️ Aperçu
 
-```bat
-start_dashboard.bat
-```
+<div align="center">
 
-Lance l'environnement virtuel Python, démarre Ollama et ouvre l'interface dans le navigateur.
+| | |
+|:---:|:---:|
+| <img src="Images/photo-01.jpg" alt="JARVIS interface" width="400"/> | <img src="Images/photo-02.jpg" alt="SOC dashboard" width="400"/> |
+| <img src="Images/photo-03.jpg" alt="Voice Lab" width="400"/> | <img src="Images/photo-04.jpg" alt="DSP Audio" width="400"/> |
+| <img src="Images/photo-05.jpg" alt="Monitor GPU" width="400"/> | <img src="Images/photo-06.jpg" alt="Terminal SSH" width="400"/> |
 
-**Arrêt** : `stop_jarvis.bat`
+</div>
 
-Pré-requis → [04-03 Pré-requis](DOCUMENTATION/04-DEPLOIEMENT/04-03-PRE-REQUIS.md)  
-Installation complète → [04-01 Déploiement](DOCUMENTATION/04-DEPLOIEMENT/04-01-DEPLOIEMENT.md)
+---
+
+## 📋 Sommaire
+
+| # | Section | Documents |
+|---|---------|-----------|
+| 01 | [Hermès — Modes & Routing](#01--hermès--modes--routing) | 1 doc |
+| 02 | [Intégration SOC](#02--intégration-soc) | 2 docs |
+| 03 | [Architecture](#03--architecture) | 5 docs |
+| 04 | [Installation](#04--installation) | 3 docs |
+| 05 | [Exploitation](#05--exploitation) | 3 docs |
+| 06 | [Qualité](#06--qualité) | 3 docs |
+
+---
+
+## 01 — Hermès : Modes & Routing
+
+| Document | Description | |
+|----------|-------------|---|
+| Routing & Modes | 4 modes (SOC · GÉNÉRAL · CODE · CR) · bypass déterministe · règles de sécurité | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/01-HERMES/ROUTING-MODES.md) |
+
+---
+
+## 02 — Intégration SOC
+
+| Document | Description | |
+|----------|-------------|---|
+| MCP Server | 12 outils MCP exposés à Claude Desktop · port streamable-HTTP · watchdog | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/02-SOC/MCP-SERVER.md) |
+| Circuit SOC ↔ JARVIS | Auto-engine · ban/unban · injection contexte sécurité live | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/02-SOC/SOC-INTEGRATION.md) |
+
+---
+
+## 03 — Architecture
+
+| Document | Description | |
+|----------|-------------|---|
+| Architecture globale | Vue d'ensemble · 5 zones fonctionnelles · diagrammes ASCII | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/03-ARCHITECTURE/OVERVIEW.md) |
+| Schéma IA locale | Pipeline LLM · RAG · STT · TTS · Ollama · routing décisionnel | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/03-ARCHITECTURE/IA-PIPELINE.md) |
+| Audio DSP | Web Audio graph broadcast · BiquadFilter · Compresseur · Convolver · DeepFilterNet | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/03-ARCHITECTURE/AUDIO-DSP.md) |
+| Référence technique | Routes Flask · API endpoints · structures de données · Blueprints | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/03-ARCHITECTURE/REFERENCE-TECHNIQUE.md) |
+| Tuiles & Blueprints | Modèle des tuiles autoportantes · DI pur · 33 modules Python | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/03-ARCHITECTURE/TILES.md) |
+
+---
+
+## 04 — Installation
+
+| Document | Description | |
+|----------|-------------|---|
+| Installation | Installation pas à pas · virtualenv · Ollama · dépendances CUDA | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/04-INSTALLATION/INSTALLATION.md) |
+| Pré-requis | Matériel minimum · versions Python/CUDA · modèles Ollama requis | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/04-INSTALLATION/PRE-REQUIS.md) |
+| Réinstallation | Procédure disaster recovery · coffre de sauvegarde · restauration complète | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/04-INSTALLATION/REINSTALLATION.md) |
+
+---
+
+## 05 — Exploitation
+
+| Document | Description | |
+|----------|-------------|---|
+| Runbook | Procédures opérationnelles · démarrage/arrêt · MAJ Ollama · maintenance | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/05-EXPLOITATION/RUNBOOK.md) |
+| Observabilité & Logs | jarvis.log · rotation · diagnostics · métriques runtime | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/05-EXPLOITATION/OBSERVABILITE.md) |
+| Support & Infogérance | Dépannage · cas fréquents · reset d'urgence | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/05-EXPLOITATION/SUPPORT.md) |
+
+---
+
+## 06 — Qualité
+
+| Document | Description | |
+|----------|-------------|---|
+| Bilan technique | Score · métriques · décisions architecturales (source unique) | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/06-QUALITE/BILAN-TECHNIQUE.md) |
+| Dette technique | Inventaire dette assumée · décisions de gel documentées | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/06-QUALITE/DETTE-TECHNIQUE.md) |
+| Roadmap | Évolutions prévues · fonctionnalités en cours | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white" alt="Explorer">](DOCUMENTATION/06-QUALITE/ROADMAP.md) |
 
 ---
 
@@ -94,137 +181,44 @@ Installation complète → [04-01 Déploiement](DOCUMENTATION/04-DEPLOIEMENT/04-
 
 | Couche | Technologie |
 |--------|-------------|
-| **Backend** | Python 3.11 · Flask · 33 modules · Blueprints autoportants |
-| **LLM local** | Ollama · phi4:14b (SOC/raisonnement) · gemma4 (GÉNÉRAL + vision) · qwen2.5-coder:14b (CODE) · mxbai-embed-large (RAG) |
-| **RAG** | mxbai-embed-large · BM25 hybride · ~600 chunks · seuil 0.35 · TTL 5 min · warmup au boot |
-| **TTS** | edge-tts fr-CA Antoine (défaut) → Kokoro CUDA → SAPI5 (fallback auto) |
-| **STT** | faster-whisper large-v3-turbo CUDA · vocabulaire SOC |
+| **Backend** | Python 3.11 · Flask · 33 modules · Blueprints autoportants avec DI pur |
+| **LLM local** | Ollama · phi4:14b (SOC/raisonnement) · gemma4 (GÉNÉRAL + vision) · qwen2.5-coder:14b (CODE) |
+| **RAG** | mxbai-embed-large · BM25 hybride · ~600 chunks · TTL 5 min · warmup au démarrage |
+| **TTS** | edge-tts fr-CA Antoine (défaut) → Kokoro CUDA → SAPI5 (fallback automatique) |
+| **STT** | faster-whisper large-v3-turbo CUDA · vocabulaire spécialisé SOC |
 | **Frontend** | Vanilla JS · 21 modules · Web Audio API · xterm.js · Monaco Editor |
-| **Agent Hermès** | 5 briques · bypass regex déterministe · scheduler daemon · DI pur · indépendant du LLM |
-| **MCP** | 12 outils exposés à Claude Desktop · port 5010 streamable-HTTP · watchdog |
+| **Agent Hermès** | 5 briques · bypass regex déterministe · scheduler daemon · DI pur |
+| **MCP** | 12 outils exposés à Claude Desktop · streamable-HTTP · watchdog |
 | **Tests** | 1 465 pytest · 0 fail · 79 % coverage · ruff 0 · eslint 0 · hooks pre-commit/pre-push bloquants |
 
-Architecture détaillée → [02-ARCHITECTURE/](DOCUMENTATION/02-ARCHITECTURE/)
-
----
-
-## 📚 Documentation
-
-> 26 fichiers · 8 catégories · Index complet → [DOCUMENTATION/00-INDEX.md](DOCUMENTATION/00-INDEX.md)
-
-### 01 — Présentation
-
-| Document | Description |
-|----------|-------------|
-| [01-01 Vision projet](DOCUMENTATION/01-PRESENTATION/01-01-VISION-PROJET.md) | Philosophie · objectifs · positionnement |
-| [01-02 Présentation JARVIS](DOCUMENTATION/01-PRESENTATION/01-02-PRESENTATION-JARVIS.md) | Vue d'ensemble fonctionnelle |
-| [01-03 Équipe & contexte](DOCUMENTATION/01-PRESENTATION/01-03-EQUIPE-ET-CONTEXTE.md) | Contexte homelab · environnement matériel |
-
-### 02 — Architecture
-
-| Document | Description |
-|----------|-------------|
-| [02-01 Architecture globale](DOCUMENTATION/02-ARCHITECTURE/02-01-ARCHITECTURE-GLOBALE.md) | Vue d'ensemble des composants |
-| [02-02 Architecture tuiles](DOCUMENTATION/02-ARCHITECTURE/02-02-ARCHITECTURE-TUILES.md) | Modèle des tuiles autoportantes |
-| [02-03 Référence technique](DOCUMENTATION/02-ARCHITECTURE/02-03-REFERENCE-TECHNIQUE.md) | API routes · structures de données |
-| [02-04 Schéma IA local](DOCUMENTATION/02-ARCHITECTURE/02-04-SCHEMA-IA-LOCAL.md) | Pipeline LLM · RAG · STT · TTS |
-| [02-05 Routing JARVIS](DOCUMENTATION/02-ARCHITECTURE/02-05-ROUTING-JARVIS.md) | 4 modes · bypasses déterministes · règles de sécurité |
-| [02-06 Audio DSP](DOCUMENTATION/02-ARCHITECTURE/02-06-AUDIO-DSP.md) | Web Audio graph · BiquadFilter · Compresseur · Convolver |
-| [02-07 MCP Server](DOCUMENTATION/02-ARCHITECTURE/02-07-MCP-SERVER.md) | 12 outils · config Claude Desktop · watchdog |
-
-### 03 — Intégration SOC
-
-| Document | Description |
-|----------|-------------|
-| [03-01 Circuit SOC ↔ JARVIS](DOCUMENTATION/03-INTEGRATION-SOC/03-01-CIRCUIT-SOC-JARVIS.md) | Auto-engine · ban/unban · injection contexte sécurité |
-
-### 04 — Déploiement
-
-| Document | Description |
-|----------|-------------|
-| [04-01 Déploiement](DOCUMENTATION/04-DEPLOIEMENT/04-01-DEPLOIEMENT.md) | Installation pas à pas |
-| [04-02 Réinstallation](DOCUMENTATION/04-DEPLOIEMENT/04-02-REINSTALLATION.md) | Procédure disaster recovery |
-| [04-03 Pré-requis](DOCUMENTATION/04-DEPLOIEMENT/04-03-PRE-REQUIS.md) | Dépendances · versions · matériel minimum |
-
-### 05 — Exploitation
-
-| Document | Description |
-|----------|-------------|
-| [05-01 Runbook](DOCUMENTATION/05-EXPLOITATION/05-01-RUNBOOK.md) | Procédures opérationnelles courantes |
-| [05-02 Support & infogérance](DOCUMENTATION/05-EXPLOITATION/05-02-SUPPORT-INFOGERANCE.md) | Dépannage · cas fréquents |
-| [05-03 Observabilité & logs](DOCUMENTATION/05-EXPLOITATION/05-03-OBSERVABILITE-LOGS.md) | jarvis.log · rotation · diagnostics |
-
-### 06 — Bilan & Historique
-
-| Document | Description |
-|----------|-------------|
-| [06-01 Bilan technique](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md) | Score qualité · métriques · décisions (source unique) |
-| [06-02 Mémoire projet](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-02-MEMORY-PROJET.md) | Décisions architecturales clés |
-| [06-03 Historique incidents](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-03-HISTORIQUE-INCIDENTS.md) | Bugs majeurs résolus · leçons apprises |
-
-### 07 — Roadmap
-
-| Document | Description |
-|----------|-------------|
-| [07-01 Roadmap](DOCUMENTATION/07-ROADMAP/07-01-ROADMAP.md) | Évolutions prévues · priorités |
-| [07-02 Dette technique](DOCUMENTATION/07-ROADMAP/07-02-DETTE-TECHNIQUE.md) | Inventaire dette · décisions de gel |
-
-### 08 — Annexes
-
-| Document | Description |
-|----------|-------------|
-| [08-01 Glossaire](DOCUMENTATION/08-ANNEXES/08-01-GLOSSAIRE.md) | Termes techniques · acronymes |
-| [08-02 Conventions code](DOCUMENTATION/08-ANNEXES/08-02-CONVENTIONS-CODE.md) | Style Python/JS/Git · règles de contribution |
-
----
-
-## 📁 Structure du projet
-
 ```
-JARVIS/
-├── DOCUMENTATION/              ← Base documentaire (26 docs, 8 catégories)
-│   ├── 00-INDEX.md             ← Index complet
-│   ├── 01-PRESENTATION/        ← Vision, présentation, contexte
-│   ├── 02-ARCHITECTURE/        ← 7 docs techniques
-│   ├── 03-INTEGRATION-SOC/     ← Circuit SOC ↔ JARVIS
-│   ├── 04-DEPLOIEMENT/         ← Installation, pré-requis, recovery
-│   ├── 05-EXPLOITATION/        ← Runbook, support, observabilité
-│   ├── 06-BILAN-ET-HISTORIQUE/ ← Bilan technique, incidents
-│   ├── 07-ROADMAP/             ← Évolutions, dette
-│   └── 08-ANNEXES/             ← Glossaire, conventions
-├── Images/
-│   └── hermes.png              ← Synoptique Hermès
-├── scripts/                    ← Code source
-│   ├── jarvis.py               ← Orchestrateur Flask (33 Blueprints)
-│   ├── bypass/                 ← Agent Hermès (morning_brief, learn, sysctrl...)
-│   ├── blueprints/soc.py       ← Blueprint SOC — auto-engine + routes
-│   ├── chat/                   ← Dispatcher · routing · contexte sécurité
-│   ├── rag/                    ← Moteur RAG hybride (BM25 + vecteur)
-│   ├── voice/                  ← STT · TTS · DSP audio
-│   ├── jarvis_mcp_server.py    ← MCP bridge (12 outils)
-│   ├── static/                 ← JS (21 modules) · CSS
-│   └── templates/              ← HTML
-├── tests/                      ← pytest · 1 465 tests · 79 % coverage
-├── tools/                      ← Outils dev (profiling, diagnostics)
-├── CLAUDE.md                   ← Briefing IA (collaboration développement)
-└── README.md
+Windows 11 (localhost:5000)
+├── jarvis.py (Flask — orchestrateur, 75 routes)
+├── blueprints/soc.py (Auto-engine SOC, poll Python 60s)
+├── Bypass Hermès (morning_brief · learn · sysctrl · wrappers)
+├── Ollama (:11434)
+│   ├── phi4:14b             9.1 GB  ← SOC/raisonnement (défaut, toujours chaud)
+│   ├── qwen2.5-coder:14b    9.0 GB  ← CODE · dev · SCP
+│   ├── gemma4:latest        9.6 GB  ← GÉNÉRAL + vision native
+│   └── mxbai-embed-large    0.7 GB  ← RAG embeddings · keep_alive 10m
+├── STT : faster-whisper large-v3-turbo (CUDA float16)
+├── TTS : edge-tts Antoine → Kokoro (CUDA) → SAPI5
+├── RAG : BM25 + vecteur hybride · ~600 chunks · seuil 0.35
+└── MCP : jarvis_mcp_server.py — 12 outils · Claude Desktop
 ```
 
 ---
 
 ## 🛡️ Sécurité
 
-Principes non négociables intégrés dans le code :
-
 | Principe | Implémentation |
 |----------|----------------|
+| **100 % local** | JARVIS filtre et agrège en local — rien ne quitte la machine vers un LLM cloud |
 | **IPs privées immuables** | Plages RFC1918 jamais bannies, quelle que soit la situation |
 | **SSH lecture seule** | 29 patterns bloqués par défaut · whitelist explicite pour les opérations d'écriture |
-| **Injection SOC côté serveur** | Le contexte sécurité n'entre jamais dans l'historique chat |
+| **Injection SOC côté serveur** | Le contexte sécurité n'entre jamais dans l'historique chat — injection side-channel |
 | **Auto-engine isolé** | Actif uniquement en mode `soc` — jamais en mode général ou code |
-| **100 % local** | JARVIS filtre et agrège en local — rien ne quitte la machine vers un LLM cloud |
-
-Détails → [02-05 Routing JARVIS](DOCUMENTATION/02-ARCHITECTURE/02-05-ROUTING-JARVIS.md)
+| **Audit forensique** | Toute opération d'écriture SSH journalisée dans `audit_writeops.jsonl` |
 
 ---
 
@@ -240,11 +234,73 @@ Détails → [02-05 Routing JARVIS](DOCUMENTATION/02-ARCHITECTURE/02-05-ROUTING-
 | Pre-push hook | pytest bloquant |
 | Score qualité global | **97 / 100** |
 
-Source unique des métriques → [06-01 Bilan technique](DOCUMENTATION/06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md)
+Source unique → [Bilan technique](DOCUMENTATION/06-QUALITE/BILAN-TECHNIQUE.md)
 
 ---
 
-## 📜 Licence
+## 📁 Structure du projet
 
-Usage personnel — Marc Sabater (0xCyberLiTech).  
-Candidat MIT pour publication future.
+```
+JARVIS/
+├── DOCUMENTATION/
+│   ├── 01-HERMES/          ← Modes, routing, agent Hermès
+│   ├── 02-SOC/             ← MCP Server, circuit SOC ↔ JARVIS
+│   ├── 03-ARCHITECTURE/    ← 5 docs techniques (overview, IA, DSP, API, tuiles)
+│   ├── 04-INSTALLATION/    ← Installation, pré-requis, disaster recovery
+│   ├── 05-EXPLOITATION/    ← Runbook, observabilité, support
+│   └── 06-QUALITE/         ← Bilan, dette, roadmap
+├── Images/
+│   ├── hermes.png          ← Synoptique Hermès (6 couches)
+│   └── Jarvis.png          ← Logo JARVIS
+├── scripts/                ← Code source
+│   ├── jarvis.py           ← Orchestrateur Flask (75 routes)
+│   ├── bypass/             ← Agent Hermès (morning_brief, learn, sysctrl)
+│   ├── blueprints/soc.py   ← Blueprint SOC — auto-engine
+│   ├── chat/               ← Dispatcher · routing · contexte sécurité
+│   ├── rag/                ← Moteur RAG hybride (BM25 + vecteur)
+│   ├── voice/              ← STT · TTS · DSP audio
+│   ├── jarvis_mcp_server.py← MCP bridge (12 outils)
+│   ├── static/             ← JS (21 modules) · CSS
+│   └── templates/          ← HTML
+├── tests/                  ← pytest · 1 465 tests · 79 % coverage
+└── tools/                  ← Outils dev (profiling, diagnostics)
+```
+
+---
+
+<div align="center">
+
+<table>
+<tr>
+<td align="center"><b>🖥️ Infrastructure & Sécurité</b></td>
+<td align="center"><b>💻 Développement & Web</b></td>
+<td align="center"><b>🤖 Intelligence Artificielle</b></td>
+</tr>
+<tr>
+<td align="center">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=linux,nginx,debian" />
+  </a>
+</td>
+<td align="center">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=python,js,html,css,flask" />
+  </a>
+</td>
+<td align="center">
+  <a href="https://skillicons.dev">
+    <img src="https://skillicons.dev/icons?i=pytorch,cuda" />
+  </a>
+</td>
+</tr>
+</table>
+
+</div>
+
+---
+
+<div align="center">
+
+<sub>🤖 Projet réalisé par <a href="https://github.com/0xCyberLiTech">0xCyberLiTech</a> · Développé en collaboration avec <a href="https://claude.ai">Claude AI</a> (Anthropic) 🤖</sub>
+
+</div>
