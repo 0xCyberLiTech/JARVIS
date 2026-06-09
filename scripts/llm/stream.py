@@ -18,12 +18,14 @@ URL + timeout + setter _last_toks_per_sec.
 """
 import json
 
+from .config import OLLAMA_URL as _OLLAMA_URL_DEFAULT
+
 # ── DI placeholders ───────────────────────────────────────────────────────────
 _log = None
 _ollama_circuit = None
 _OllamaUnavailable = None
 _req = None
-_ollama_url = "http://127.0.0.1:11434"
+_ollama_url = _OLLAMA_URL_DEFAULT  # placeholder DI — remplacé par init()
 _ollama_stream_timeout_s = 240
 _get_model = None
 _get_llm_params = None

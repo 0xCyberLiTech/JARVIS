@@ -689,23 +689,26 @@ def test_ip_skip_ip_publique_renvoie_false():
 # ── _load_soc_config — fusion overrides + défauts ────────────────────────
 
 def test_load_soc_config_fichier_absent_renvoie_defauts(monkeypatch, tmp_path):
-    monkeypatch.setattr(soc, "_SOC_CONFIG_PATH", tmp_path / "absent.json")
+    import soc_config_loader
+    monkeypatch.setattr(soc_config_loader, "CONFIG_PATH", tmp_path / "absent.json")
     cfg = soc._load_soc_config()
-    assert cfg == soc._SOC_CONFIG_DEFAULTS
+    assert cfg == soc_config_loader.DEFAULTS
 
 
 def test_load_soc_config_override_partiel(monkeypatch, tmp_path):
     """Un override partiel ne remplace que les clés présentes ET connues."""
     import json as _j
+
+    import soc_config_loader
     f = tmp_path / "soc_config.json"
     f.write_text(_j.dumps({"nginx_host": "10.0.0.99", "cle_inconnue": "ignorée"}),
                  encoding="utf-8")
-    monkeypatch.setattr(soc, "_SOC_CONFIG_PATH", f)
+    monkeypatch.setattr(soc_config_loader, "CONFIG_PATH", f)
     cfg = soc._load_soc_config()
     assert cfg["nginx_host"] == "10.0.0.99"
     assert "cle_inconnue" not in cfg
     # Les autres clés gardent leurs défauts
-    assert cfg["proxmox_host"] == soc._SOC_CONFIG_DEFAULTS["proxmox_host"]
+    assert cfg["proxmox_host"] == soc_config_loader.DEFAULTS["proxmox_host"]
 
 
 # ── Wrappers SSH par hôte — délégation vers _ssh_host ────────────────────

@@ -14,16 +14,17 @@ Dépendance : `bypass_code` (pour réutiliser CODE_DEV_IP/PORT/KEY de srv-dev-1)
 """
 import json
 import re
-from pathlib import Path
 
-from bypass import code as bypass_code
+from soc_config_loader import load as _soc_cfg_load
+
+_cfg = _soc_cfg_load()
 
 # ── Mapping SSH terminal (4 hôtes — retiré 2026-05-17)
 TERMINAL_MAP = {
-    "dev1":   {"ip": bypass_code.CODE_DEV_IP,   "port": bypass_code.CODE_DEV_PORT, "user": "root",      "key": bypass_code.CODE_DEV_KEY,                "label": "srv-dev-1"},
-    "nginx":   {"ip": "192.168.1.50",            "port": 2272,                       "user": "root",      "key": str(Path.home() / ".ssh" / "id_nginx"),  "label": "srv-nginx"},
-    "clt":    {"ip": "192.168.1.12",            "port": 2272,                       "user": "root",      "key": str(Path.home() / ".ssh" / "id_clt"),    "label": "clt"},
-    "pa85":   {"ip": "192.168.1.13",            "port": 2272,                       "user": "root",      "key": str(Path.home() / ".ssh" / "id_pa85"),   "label": "pa85"},
+    "dev1":  {"ip": _cfg["dev1_host"],  "port": int(_cfg["dev1_ssh_port"]),  "user": _cfg["dev1_ssh_user"],  "key": _cfg["dev1_ssh_key"],  "label": "srv-dev-1"},
+    "nginx": {"ip": _cfg["nginx_host"], "port": int(_cfg["nginx_ssh_port"]), "user": _cfg["nginx_ssh_user"], "key": _cfg["nginx_ssh_key"], "label": "srv-nginx"},
+    "clt":   {"ip": _cfg["clt_host"],   "port": int(_cfg["clt_ssh_port"]),   "user": _cfg["clt_ssh_user"],   "key": _cfg["clt_ssh_key"],   "label": "clt"},
+    "pa85":  {"ip": _cfg["pa85_host"],  "port": int(_cfg["pa85_ssh_port"]),  "user": _cfg["pa85_ssh_user"],  "key": _cfg["pa85_ssh_key"],  "label": "pa85"},
 }
 
 

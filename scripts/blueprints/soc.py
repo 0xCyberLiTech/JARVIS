@@ -24,7 +24,10 @@ import soc_reqhour
 import soc_suricata_ban
 import soc_threat_score
 from flask import Blueprint, Response, request
+from llm.config import OLLAMA_URL as _INJ_OLLAMA_URL
 from security_whitelists import ALLOWED_SOC_RESTART_SVCS, is_protected_ip
+from soc_config_loader import CONFIG_PATH as _SOC_CONFIG_PATH
+from soc_config_loader import load as _soc_cfg_load
 
 soc_bp = Blueprint("soc", __name__)
 
@@ -44,7 +47,6 @@ def _INJ_get_jarvis_mode():        # callable → str (mode mutable, défaut sû
 _INJ_CODE_REASONING_MODE = "code_reasoning"        # constante (immuable)
 def _INJ_get_model():              # callable → str (MODEL mutable, défaut sûr phi4)
     return "phi4:14b"
-_INJ_OLLAMA_URL          = "http://127.0.0.1:11434"  # constante (immuable)
 
 # Limites par route — appliquées en une seule passe dans init_soc()
 _ROUTE_LIMITS = {
@@ -242,47 +244,18 @@ _load_auto_banned()
 _load_cooldowns()
 
 # ════════════════════════════════════════════════════════════════
-# CONFIG CENTRALISÉE — chargée depuis soc_config.json (optionnel)
-# Fallback sur valeurs par défaut si le fichier est absent.
-# Permet de changer IP/port srv-nginx, clé SSH, URL monitoring
-# sans modifier le code.
+# CONFIG CENTRALISÉE — chargée depuis soc_config.json via soc_config_loader
+# (source unique partagée avec ssh_terminal.py et bypass/code.py)
 # ════════════════════════════════════════════════════════════════
-_SOC_CONFIG_PATH = _SCRIPTS_DIR / "soc_config.json"
-_SOC_CONFIG_DEFAULTS = {
-    "nginx_host":         "192.168.1.50",
-    "nginx_ssh_port":     "2272",
-    "nginx_ssh_user":     "root",
-    "nginx_ssh_key":      str(Path.home() / ".ssh/id_nginx"),
-    "monitoring_url":    "http://192.168.1.50:8080/monitoring.json",
-    "proxmox_host":      "192.168.1.20",
-    "proxmox_ssh_port":  "2272",
-    "proxmox_ssh_user":  "root",
-    "proxmox_ssh_key":   str(Path.home() / ".ssh/id_proxmox"),
-    "clt_host":          "192.168.1.12",
-    "clt_ssh_port":      "2272",
-    "clt_ssh_user":      "root",
-    "clt_ssh_key":       str(Path.home() / ".ssh/id_clt"),
-    "pa85_host":         "192.168.1.13",
-    "pa85_ssh_port":     "2272",
-    "pa85_ssh_user":     "root",
-    "pa85_ssh_key":      str(Path.home() / ".ssh/id_pa85"),
-    "dev1_host":         "192.168.1.21",
-    "dev1_ssh_port":     "2272",
-    "dev1_ssh_user":     "root",
-    "dev1_ssh_key":      str(Path.home() / ".ssh/id_dev"),
-}
 
 
 def _load_soc_config() -> dict:
-    """Charge soc_config.json et fusionne avec les défauts."""
-    cfg = dict(_SOC_CONFIG_DEFAULTS)
-    try:
-        if _SOC_CONFIG_PATH.exists():
-            overrides = json.loads(_SOC_CONFIG_PATH.read_text(encoding="utf-8"))
-            cfg.update({k: v for k, v in overrides.items() if k in cfg})
-            _log.info(f"[SOC-CONFIG] Chargé depuis {_SOC_CONFIG_PATH}")
-    except Exception as e:
-        _log.warning(f"[SOC-CONFIG] Erreur lecture soc_config.json : {e} — défauts utilisés")
+    """Charge soc_config.json et fusionne avec les défauts (via soc_config_loader)."""
+    cfg = _soc_cfg_load()
+    if _SOC_CONFIG_PATH.exists():
+        _log.info(f"[SOC-CONFIG] Chargé depuis {_SOC_CONFIG_PATH}")
+    else:
+        _log.warning("[SOC-CONFIG] soc_config.json absent — défauts utilisés")
     return cfg
 
 

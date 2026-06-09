@@ -16,13 +16,18 @@ import re
 import subprocess
 from pathlib import Path
 
+from soc_config_loader import load as _soc_cfg_load
+
 _log = logging.getLogger("jarvis.bypass_code")
 
-# ── Config srv-dev-1 ──────────────────────────────────────────
+_cfg = _soc_cfg_load()
+
+# ── Config srv-dev-1 — source unique : soc_config_loader ─────
+# ⚠ RÈGLE ABSOLUE : uniquement srv-dev-1. Aucun autre hôte cible.
 CODE_DEV_VM     = "srv-dev-1"
-CODE_DEV_IP     = "192.168.1.21"
-CODE_DEV_PORT   = 2272
-CODE_DEV_KEY    = str(Path.home() / ".ssh" / "id_dev")
+CODE_DEV_IP     = _cfg["dev1_host"]
+CODE_DEV_PORT   = int(_cfg["dev1_ssh_port"])
+CODE_DEV_KEY    = _cfg["dev1_ssh_key"]
 CODE_REMOTE_DIR = "/tmp/jarvis-code"
 
 # Timeouts

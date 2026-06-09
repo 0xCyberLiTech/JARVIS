@@ -226,9 +226,10 @@ def test_aucune_whitelist_ne_contient_php_fpm():
 # ════════════════════════════════════════════════════════════════════════
 
 def test_soc_config_dev1_dans_les_defauts():
-    assert soc_module._SOC_CONFIG_DEFAULTS["dev1_host"] == "192.168.1.21"
-    assert soc_module._SOC_CONFIG_DEFAULTS["dev1_ssh_port"] == "2272"
-    assert "id_dev" in soc_module._SOC_CONFIG_DEFAULTS["dev1_ssh_key"]
+    import soc_config_loader
+    assert soc_config_loader.DEFAULTS["dev1_host"] == "192.168.1.21"
+    assert soc_config_loader.DEFAULTS["dev1_ssh_port"] == "2272"
+    assert "id_dev" in soc_config_loader.DEFAULTS["dev1_ssh_key"]
 
 
 def test_ssh_dev1_construit_depuis_la_config():

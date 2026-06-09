@@ -21,13 +21,15 @@ import json
 import threading
 import urllib.request
 
+from .config import OLLAMA_URL as _OLLAMA_URL_DEFAULT
+
 # ── DI placeholders ───────────────────────────────────────────────────────────
 _log = None
 _get_model = None
 _get_vram_model = None
 _set_vram_model = None
 _vram_lock = None
-_ollama_url = "http://127.0.0.1:11434"
+_ollama_url = _OLLAMA_URL_DEFAULT  # placeholder DI — remplacé par init()
 
 
 def init(*, log, get_model, get_vram_model, set_vram_model, vram_lock, ollama_url) -> None:
