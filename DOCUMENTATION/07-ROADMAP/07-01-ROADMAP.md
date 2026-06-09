@@ -3,7 +3,7 @@ title: "Roadmap — prochaines étapes prévues"
 code: "JARVIS-DOC-07-01"
 version: "1.0"
 date_creation: "2026-05-23"
-date_revision: "2026-05-23"
+date_revision: "2026-06-09"
 auteur: "Marc Sabater (0xCyberLiTech)"
 contributeurs: ["Claude (Anthropic)"]
 statut: "Validé"
@@ -14,18 +14,37 @@ mots_cles: ["roadmap", "futur", "evolutions", "v3.4", "feature"]
 # Roadmap JARVIS
 
 > Document vivant — mis à jour à chaque session de planification.
-> Date dernière revue : **2026-05-23**.
+> Date dernière revue : **2026-06-09**.
 
-## Court terme (jours / semaines)
+## Fait — historique
 
 ### ✅ Fait (2026-05-23)
 
-- ✅ Refactor monolithe `jarvis.py` 4814 L → 1821 L (−62 %)
+- ✅ Refactor monolithe `jarvis.py` 4814 L → 1834 L (−62 %)
 - ✅ 24 tuiles autoportantes avec pattern Blueprint+DI
 - ✅ Bug UI reload résolu cause racine (DI explicite `blueprints/soc.py`)
-- ✅ Couverture 62 % → 76 % (1294 tests)
+- ✅ Couverture 62 % → 77 % (1360 tests · score 96/100)
 - ✅ Observabilité complète (jarvis.log + JS-DIAG v2 + try/except enrich)
-- ✅ Base documentaire `DOCUMENTATION/` créée (cette refonte)
+- ✅ Base documentaire `DOCUMENTATION/` créée (26 docs, 8 catégories)
+
+### ✅ Fait (2026-06-05 — 2026-06-09)
+
+- ✅ **Hermès Brique 1 — Synoptique** : 6 couches moteur temps réel
+  (LLM actif, RAG chunks, STT/TTS état, SOC auto-engine, mémoire)
+- ✅ **Hermès Brique 2 — Tuile Mémoire** : état vectorielle depuis l'UI
+- ✅ **Hermès Brique 3 — Commandes vocales** : bypass LLM déterministe
+  (*"recharge le RAG"*, *"vide la mémoire"*) — indépendant du modèle actif
+- ✅ **Hermès Brique 4 — Boucle d'apprentissage** : *"souviens-toi que X"*
+  → persisté dans `jarvis_corrections.md`, indexé RAG, réinjecté
+- ✅ **Hermès Brique 5 — Briefing matinal** : *"bonjour JARVIS"* →
+  brief vocal SOC + Proxmox. Scheduler daemon à heure fixe configurable
+- ✅ **RAG warmup au boot** : `engine.warmup()` — fin de l'état "non chargé"
+  après redémarrage JARVIS
+- ✅ **Fix RAG timestamp monotonic** : `get_status()` utilisait `time.time()`
+  (unix timestamp ~1,78 milliard) alors que `_rag_load()` stockait via
+  `time.monotonic()` → affichage "1780970605s" corrigé
+- ✅ **proc_guard.py** : MCP lifecycle fix — Job Object Windows
+  `KILL_ON_JOB_CLOSE`, fin des orphelins port 5010 à chaque démarrage
 
 ### 🔄 Court terme (à venir)
 
@@ -34,7 +53,6 @@ mots_cles: ["roadmap", "futur", "evolutions", "v3.4", "feature"]
 | Moyen | Tests E2E Playwright nettoyés (cover Blueprints HTTP voice/settings/dev/web routes) | 2-3 h | +1 pt dette |
 | Bas | Documentation auto-générée à partir des docstrings Python (Sphinx ?) | 1 h | +0.5 pt |
 | Bas | Réduction des aliases backward-compat (~80 L jarvis.py) — *risqué : modif 30+ tests* | 1-2 h | +0.5 pt |
-| Bas | Sortir `stream_llm` + `_think_filter_step` resté dans jarvis.py vers tuile dédiée | 30 min | clean |
 
 ## Moyen terme (mois)
 
@@ -78,8 +96,9 @@ mots_cles: ["roadmap", "futur", "evolutions", "v3.4", "feature"]
 
 Ces idées ont été évoquées mais reportées à plus tard ou non décidées :
 
-- **Mode "agent autonome"** (JARVIS prend des décisions seul sans validation) :
-  trop risqué pour l'instant, garde-fou Marc validation.
+- **Mode "agent autonome" complet** (décisions sans validation) : Hermès
+  implémente les 5 briques d'agentification — l'autonomie complète
+  (décisions critiques infra sans confirmation) reste différée.
 - **Intégration Claude API cloud directe depuis JARVIS** : violerait le
   principe "100 % local" sauf si stricte escalade vers Anthropic.
 - **Interface mobile native** : webapp responsive suffit actuellement.

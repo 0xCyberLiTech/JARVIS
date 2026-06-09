@@ -3,7 +3,7 @@ title: "Schéma IA locale (Ollama, modèles, RAG)"
 code: "JARVIS-DOC-02-04"
 version: "1.0"
 date_creation: "2026-05-23"
-date_revision: "2026-05-23"
+date_revision: "2026-06-09"
 auteur: "Marc Sabater (0xCyberLiTech)"
 contributeurs: ["Claude (Anthropic)"]
 statut: "Valide"

@@ -13,6 +13,21 @@ mots_cles: ["memoire", "historique", "sessions", "refactor", "chronologie"]
 
 # JARVIS — Mémoire projet (2026-05-23 — refactor architecture par tuiles complet, 24 tuiles + bug UI reload résolu cause racine + couverture +282 tests + audit ruff strict)
 
+## Session 2026-06-09 — Hermès agent persistant (5 briques) + RAG fix + vitrine GitHub
+
+**Hermès Brique 5 — Briefing matinal** : module `bypass/morning_brief.py` — bypass LLM pur (regex `BRIEF_RE` + `GREET_RE`), `morning_brief_sse()` générateur SSE, scheduler daemon (`start_scheduler()`) déclenché à heure fixe configurable via `jarvis_hermes.json`. Injection DI dans `wrappers.py` et `dispatcher.py` (avant le gate `is_vocal` — fonctionne vocal ET chat). Hermès Briques 1-4 déjà livrées (Synoptique, Tuile Mémoire, Commandes vocales bypass, Boucle d'apprentissage). **Toutes les 5 briques actives indépendamment du modèle LLM sélectionné** (bypasses exécutés avant le routing vers Ollama).
+
+**RAG fix monotonic** : `rag/engine.py` — `get_status()` utilisait `time.time()` (~1,78 milliard) alors que `_rag_load()` stockait `ts` via `time.monotonic()` (~uptime) → affichage "1780970605s" corrigé. **RAG warmup au boot** : `engine.warmup()` via daemon thread après `_rag.init()` — fin de l'état "non chargé" après restart.
+
+**Leçons apprises clés** :
+- Les bypasses Hermès doivent être placés AVANT le gate `is_vocal` dans `dispatcher.py` pour fonctionner en mode vocal ET chat
+- `time.monotonic()` et `time.time()` ne sont PAS interchangeables dans les calculs de durée inter-fonctions
+- `jarvis_corrections.md` (mémoire Hermès Brique 4) doit être en `.gitignore` — il contient des données infra privées générées au runtime
+
+**Vitrine GitHub** : README JARVIS refondu (Hermès en tête, sommaire cliquable, 26 docs liés, sanitisé 0 IP). Branches `master` et `main` fusionnées. Image `Images/hermes.png` (synoptique Hermès 6 couches) poussée. Vitrine portfolio `0xcyberlitech.github.io/jarvis.html` mise à jour avec section Hermès.
+
+---
+
 ## Session 2026-06-05 — fix cycle de vie MCP (Job Object) + stop-dialog + audit dette 96/100 confirmé
 
 **Bug MCP orphelin résolu** (commits `02e53dc` + `2e2cf75`) : le serveur MCP (`jarvis_mcp_server`, port 5010) survivait à l'arrêt en **processus orphelin** (`[MCP] kill orphelin` à CHAQUE démarrage dans `jarvis.log`) — l'enfant `Popen` n'était nettoyé que par le `finally` (Ctrl+C uniquement), pas sur `taskkill /F` / fermeture de la fenêtre / crash. **Fix** : nouveau module `proc_guard.py` (Job Object Windows `KILL_ON_JOB_CLOSE`, **0 hardcode** — constantes winnt.h, best-effort, no-op hors Windows) → l'OS tue le MCP quand JARVIS meurt **par n'importe quel moyen**. **Prouvé en prod** (arrêt 07:12 : `[MCP] PIDs port 5010:` vide, port libre). **+2 tests** (`test_proc_guard.py`, dont kill-on-close bout-en-bout réel).

@@ -1,9 +1,9 @@
----
-title: "Référence technique — stack, composants"
+﻿---
+title: "RÃ©fÃ©rence technique â€” stack, composants"
 code: "JARVIS-DOC-02-03"
 version: "1.0"
 date_creation: "2026-05-23"
-date_revision: "2026-05-23"
+date_revision: "2026-06-09"
 auteur: "Marc Sabater (0xCyberLiTech)"
 contributeurs: ["Claude (Anthropic)"]
 statut: "Valide"
@@ -11,23 +11,23 @@ categorie: "Architecture"
 mots_cles: ["reference", "stack", "composants", "flask", "python", "ollama"]
 ---
 
-# JARVIS — Référence Technique
-<!-- 2026-05-22 — v2.1 — routing 4 branches · phi4:14b + qwen3:8b CR · mxbai-embed-large · refactor JS terminé · fix perf IPv6 · circuit breaker Ollama · pré-warm Kokoro · hook pre-push · métriques courantes (score, lignes, tests, coverage) → ../BILAN-TECHNIQUE.md §0 -->
+# JARVIS â€” RÃ©fÃ©rence Technique
+<!-- 2026-05-22 â€” v2.1 â€” routing 4 branches Â· phi4:14b + qwen3:8b CR Â· mxbai-embed-large Â· refactor JS terminÃ© Â· fix perf IPv6 Â· circuit breaker Ollama Â· prÃ©-warm Kokoro Â· hook pre-push Â· mÃ©triques courantes (score, lignes, tests, coverage) â†’ ../BILAN-TECHNIQUE.md Â§0 -->
 
-Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · Python 3.11
+Assistant IA personnel 0xCyberLiTech Â· Windows 11 Pro Â· RTX 5080 Blackwell Â· Python 3.11
 
 ---
 
-## 1. Identité & état
+## 1. IdentitÃ© & Ã©tat
 
 | Attribut | Valeur |
 |---|---|
-| Version | 3.3 (production) · chantier dette technique 2026-05-14/15 |
-| Audit sécurité | **8/10** honnête (v2.7 — 2026-05-13 · audit ciblé + 1 fix race condition) |
-| Dette technique (NDT script auto) | **100/100** · D1/D2/D6/D13 zéro violation (session 17 — 2026-05-08) |
-| **Score & métriques** | Source unique → [`BILAN-TECHNIQUE.md` §0](../BILAN-TECHNIQUE.md) (score dette, lignes, tests, coverage). Plafond pratique sans CI cloud atteint — alternative locale : hook pre-push pytest. |
-| Machine | Windows 11 Pro · RTX 5080 16 GB GDDR7 · CUDA 12 · Python 3.11 |
-| LLM | Ollama local uniquement — zéro cloud |
+| Version | 3.3 (production) Â· chantier dette technique 2026-05-14/15 |
+| Audit sÃ©curitÃ© | **8/10** honnÃªte (v2.7 â€” 2026-05-13 Â· audit ciblÃ© + 1 fix race condition) |
+| Dette technique (NDT script auto) | **100/100** Â· D1/D2/D6/D13 zÃ©ro violation (session 17 â€” 2026-05-08) |
+| **Score & mÃ©triques** | Source unique â†’ [`BILAN-TECHNIQUE.md` Â§0](../BILAN-TECHNIQUE.md) (score dette, lignes, tests, coverage). Plafond pratique sans CI cloud atteint â€” alternative locale : hook pre-push pytest. |
+| Machine | Windows 11 Pro Â· RTX 5080 16 GB GDDR7 Â· CUDA 12 Â· Python 3.11 |
+| LLM | Ollama local uniquement â€” zÃ©ro cloud |
 
 ---
 
@@ -37,84 +37,84 @@ Assistant IA personnel 0xCyberLiTech · Windows 11 Pro · RTX 5080 Blackwell · 
 
 | Couche | Technologie |
 |---|---|
-| Backend | Python 3.11 · Flask :5000 (loopback 127.0.0.1) |
-| LLM SOC / raisonnement | phi4:14b · 9.1 GB · keep_alive 24h |
-| LLM GÉNÉRAL + VOCAL + vision | gemma4:latest · ~9.6 GB · multimodal · switch manuel ↔ SOC |
-| LLM CODE | qwen2.5-coder:14b · 9.0 GB · dev srv-dev-1 · switch manuel ↔ CODE |
-| LLM CODE REASONING | qwen3:8b · ~5 GB · single-pass thinking `<think>` masqué · switch manuel ↔ C·R |
-| Embeddings RAG | mxbai-embed-large · ~0.7 GB · 1024 dims |
-| RAG | mxbai-embed-large · 599 chunks · seuil 0.35 · TTL 300s |
-| STT | faster-whisper large-v3-turbo · CUDA · FR · initial_prompt SOC |
-| TTS défaut | edge-tts fr-CA-AntoineNeural (HTTPS) |
-| TTS fallback | Kokoro ff_siwis (CUDA) → XTTS v2 58 voix → Piper (onnx) → SAPI5 |
-| DSP | numpy · scipy · DeepFilterNet GPU sm_120 Blackwell |
-| MCP | jarvis_mcp_server.py · **12 outils** (+`jarvis_defense_24h` 2026-05-16) · stdio pythonw |
+| Backend | Python 3.11 Â· Flask :5000 (loopback 127.0.0.1) |
+| LLM SOC / raisonnement | phi4:14b Â· 9.1 GB Â· keep_alive 24h |
+| LLM GÃ‰NÃ‰RAL + VOCAL + vision | gemma4:latest Â· ~9.6 GB Â· multimodal Â· switch manuel â†” SOC |
+| LLM CODE | qwen2.5-coder:14b Â· 9.0 GB Â· dev srv-dev-1 Â· switch manuel â†” CODE |
+| LLM CODE REASONING | qwen3:8b Â· ~5 GB Â· single-pass thinking `<think>` masquÃ© Â· switch manuel â†” CÂ·R |
+| Embeddings RAG | mxbai-embed-large Â· ~0.7 GB Â· 1024 dims |
+| RAG | mxbai-embed-large Â· 599 chunks Â· seuil 0.35 Â· TTL 300s |
+| STT | faster-whisper large-v3-turbo Â· CUDA Â· FR Â· initial_prompt SOC |
+| TTS dÃ©faut | edge-tts fr-CA-AntoineNeural (HTTPS) |
+| TTS fallback | Kokoro ff_siwis (CUDA) â†’ XTTS v2 58 voix â†’ Piper (onnx) â†’ SAPI5 |
+| DSP | numpy Â· scipy Â· DeepFilterNet GPU sm_120 Blackwell |
+| MCP | jarvis_mcp_server.py Â· **12 outils** (+`jarvis_defense_24h` 2026-05-16) Â· stdio pythonw |
 
-### 2.2 Fichiers & rôles
+### 2.2 Fichiers & rÃ´les
 
-> Tailles de fichiers, coverage par module et score dette → source unique
-> [`BILAN-TECHNIQUE.md` §0 et §2](../BILAN-TECHNIQUE.md).
+> Tailles de fichiers, coverage par module et score dette â†’ source unique
+> [`BILAN-TECHNIQUE.md` Â§0 et Â§2](../BILAN-TECHNIQUE.md).
 
-| Fichier | Rôle |
+| Fichier | RÃ´le |
 |---|---|
-| `scripts/jarvis.py` | Orchestrateur Flask · ~150 routes · routing 4 branches SOC/GÉNÉRAL/CODE/CR · 33 modules satellites |
-| `scripts/blueprints/soc.py` | Blueprint SOC · auto-engine · SSH 4 hôtes · `/api/soc/ip-history` · cache 30s + fallback SSH |
-| `scripts/jarvis_mcp_server.py` | MCP — 12 outils · `_TOOLS_DEFS` · streamable-HTTP port 5010 |
-| `scripts/static/jarvis_main.js` | Point d'entrée JS · refactor terminé · 18 modules extraits |
-| `scripts/static/js/` | 18 modules JS (audio_viz, chat_core, chat_ui, boot_init, settings_llm, …) |
-| **31 modules Python extraits** | Phase 3 : Audio/Voice + Bypass + Infra/RAG + Chat/LLM core + `audio_dsp.py` — voir [`ROUTING-JARVIS.md`](ROUTING-JARVIS.md) |
-| `scripts/static/css/` | 8 fichiers (ex-`jarvis.css` éclaté · chantier 2026-05-14) |
-| `scripts/templates/jarvis.html` | Shell Jinja2 · 0 handler inline · 8 onglets |
-| RAG `jarvis_rag/meta.json` | 599 chunks (MEMORY.md×2 + CIRCUIT_SOC + RUNBOOK) |
-| `jarvis_prompt_profiles.json` | — | 7 profils · Généraliste Gemma4 · 3 RÈGLES ABSOLUES (Qwen2.5/DeepSeek/LLaVA supprimés) |
+| `scripts/jarvis.py` | Orchestrateur Flask Â· ~150 routes Â· routing 4 branches SOC/GÃ‰NÃ‰RAL/CODE/CR Â· 33 modules satellites |
+| `scripts/blueprints/soc.py` | Blueprint SOC Â· auto-engine Â· SSH 4 hÃ´tes Â· `/api/soc/ip-history` Â· cache 30s + fallback SSH |
+| `scripts/jarvis_mcp_server.py` | MCP â€” 12 outils Â· `_TOOLS_DEFS` Â· streamable-HTTP port 5010 |
+| `scripts/static/jarvis_main.js` | Point d'entrÃ©e JS Â· refactor terminÃ© Â· 18 modules extraits |
+| `scripts/static/js/` | 18 modules JS (audio_viz, chat_core, chat_ui, boot_init, settings_llm, â€¦) |
+| **31 modules Python extraits** | Phase 3 : Audio/Voice + Bypass + Infra/RAG + Chat/LLM core + `audio_dsp.py` â€” voir [`ROUTING-JARVIS.md`](ROUTING-JARVIS.md) |
+| `scripts/static/css/` | 8 fichiers (ex-`jarvis.css` Ã©clatÃ© Â· chantier 2026-05-14) |
+| `scripts/templates/jarvis.html` | Shell Jinja2 Â· 0 handler inline Â· 8 onglets |
+| RAG `jarvis_rag/meta.json` | 599 chunks (MEMORY.mdÃ—2 + CIRCUIT_SOC + RUNBOOK) |
+| `jarvis_prompt_profiles.json` | â€” | 7 profils Â· GÃ©nÃ©raliste Gemma4 Â· 3 RÃˆGLES ABSOLUES (Qwen2.5/DeepSeek/LLaVA supprimÃ©s) |
 
 ---
 
-## 3. Routage LLM automatique — 4 branches + bypass ⚡
+## 3. Routage LLM automatique â€” 4 branches + bypass âš¡
 
 ```
 Message utilisateur
-  │
-  ├─ 1. ⚡ Bypass direct (sans LLM, instantané)
-  │        VM stop/start → SSH Proxmox qm stop/start
-  │        Service restart → SSH systemctl restart + is-active
-  │        Backup JARVIS → PowerShell streaming backup-jarvis.ps1
-  │        Backup Proxmox → PowerShell streaming proxmox-backup-auto.ps1
-  │        Lecture fichier → SSH cat / ls -la
-  │
-  ├─ 2. 🤖 Branche SOC — mot-clé (_CHAT_SOC_KW) → phi4:14b
-  │        + contexte monitoring.json live (SSH srv-nginx)
-  │        + temp=0.2 · num_ctx=8192 (16384→8192 le 2026-05-20, optim VRAM)
-  │
-  ├─ 3. 🤖 Branche CODE — _jarvis_mode == 'code' → qwen2.5-coder:14b
-  │        + _CODE_SYSTEM_SUFFIX injecté · SSH dev srv-dev-1
-  │
-  ├─ 4. 🤖 Branche CODE REASONING — _jarvis_mode == 'code_reasoning' → qwen3:8b
-  │        + single-pass thinking masqué <think>…</think> · zéro injection SOC/PVE
-  │
-  └─ 5. 🤖 Branche GÉNÉRAL — tout le reste → gemma4:latest
-           + profil "◎ Généraliste — Gemma4" · [NO_SOC]
-           + infra · quotidien · vision (multimodal)
-           + sans contexte sécurité
+  â”‚
+  â”œâ”€ 1. âš¡ Bypass direct (sans LLM, instantanÃ©)
+  â”‚        VM stop/start â†’ SSH Proxmox qm stop/start
+  â”‚        Service restart â†’ SSH systemctl restart + is-active
+  â”‚        Backup JARVIS â†’ PowerShell streaming backup-jarvis.ps1
+  â”‚        Backup Proxmox â†’ PowerShell streaming proxmox-backup-auto.ps1
+  â”‚        Lecture fichier â†’ SSH cat / ls -la
+  â”‚
+  â”œâ”€ 2. ðŸ¤– Branche SOC â€” mot-clÃ© (_CHAT_SOC_KW) â†’ phi4:14b
+  â”‚        + contexte monitoring.json live (SSH srv-nginx)
+  â”‚        + temp=0.2 Â· num_ctx=8192 (16384â†’8192 le 2026-05-20, optim VRAM)
+  â”‚
+  â”œâ”€ 3. ðŸ¤– Branche CODE â€” _jarvis_mode == 'code' â†’ qwen2.5-coder:14b
+  â”‚        + _CODE_SYSTEM_SUFFIX injectÃ© Â· SSH dev srv-dev-1
+  â”‚
+  â”œâ”€ 4. ðŸ¤– Branche CODE REASONING â€” _jarvis_mode == 'code_reasoning' â†’ qwen3:8b
+  â”‚        + single-pass thinking masquÃ© <think>â€¦</think> Â· zÃ©ro injection SOC/PVE
+  â”‚
+  â””â”€ 5. ðŸ¤– Branche GÃ‰NÃ‰RAL â€” tout le reste â†’ gemma4:latest
+           + profil "â—Ž GÃ©nÃ©raliste â€” Gemma4" Â· [NO_SOC]
+           + infra Â· quotidien Â· vision (multimodal)
+           + sans contexte sÃ©curitÃ©
 ```
 
-**Priorité** : Bypass > CODE REASONING > SOC > CODE > GÉNÉRAL  
-**Règle** : `soc_trigger=True` force phi4:14b. Switch manuel via boutons `SOC / GÉNÉRAL / CODE / C·R` dans l'UI.  
-⚠ Supprimés : phi4-reasoning:plus · qwen2.5:14b · deepseek-r1:14b · llava-phi3:latest (2026-05-08) · nomic-embed-text (2026-05-10)
+**PrioritÃ©** : Bypass > CODE REASONING > SOC > CODE > GÃ‰NÃ‰RAL  
+**RÃ¨gle** : `soc_trigger=True` force phi4:14b. Switch manuel via boutons `SOC / GÃ‰NÃ‰RAL / CODE / CÂ·R` dans l'UI.  
+âš  SupprimÃ©s : phi4-reasoning:plus Â· qwen2.5:14b Â· deepseek-r1:14b Â· llava-phi3:latest (2026-05-08) Â· nomic-embed-text (2026-05-10)
 
-### 3.1 Mots-clés SOC — liste exacte
+### 3.1 Mots-clÃ©s SOC â€” liste exacte
 
-**Outils** : `soc` · `monitoring` · `crowdsec` · `fail2ban` · `suricata` · `ufw` · `waf` · `bouncer`  
-**IPs** : `bannir` · `débannir` · `ip suspecte` · `ip bloquée` · `ip malveillante`  
-**Événements** : `menace` · `attaque` · `hacker` · `intrusion` · `incident` · `exploit` · `cve` · `rce` · `ddos` · `brute force` · `injection` · `scan de port` · `comportement suspect`  
-**Kill chain** : `kill chain` · `recon`  
-**Phrases composées** : `analyse la situation` · `état soc` · `rapport soc` · `score menace` · `niveau de menace` · `sécurité réseau` · `trafic réseau` · `trafic suspect` · `anomalie réseau` · `tentative de connexion` · `journal sécurité` · `défense réseau`
+**Outils** : `soc` Â· `monitoring` Â· `crowdsec` Â· `fail2ban` Â· `suricata` Â· `ufw` Â· `waf` Â· `bouncer`  
+**IPs** : `bannir` Â· `dÃ©bannir` Â· `ip suspecte` Â· `ip bloquÃ©e` Â· `ip malveillante`  
+**Ã‰vÃ©nements** : `menace` Â· `attaque` Â· `hacker` Â· `intrusion` Â· `incident` Â· `exploit` Â· `cve` Â· `rce` Â· `ddos` Â· `brute force` Â· `injection` Â· `scan de port` Â· `comportement suspect`  
+**Kill chain** : `kill chain` Â· `recon`  
+**Phrases composÃ©es** : `analyse la situation` Â· `Ã©tat soc` Â· `rapport soc` Â· `score menace` Â· `niveau de menace` Â· `sÃ©curitÃ© rÃ©seau` Â· `trafic rÃ©seau` Â· `trafic suspect` Â· `anomalie rÃ©seau` Â· `tentative de connexion` Â· `journal sÃ©curitÃ©` Â· `dÃ©fense rÃ©seau`
 
-> Mots seuls trop génériques **exclus** : `sécurité`, `trafic`, `score`, `tentative`, `anomalie`, `reconnaissance`, `défense` → remplacés par des phrases composées.
+> Mots seuls trop gÃ©nÃ©riques **exclus** : `sÃ©curitÃ©`, `trafic`, `score`, `tentative`, `anomalie`, `reconnaissance`, `dÃ©fense` â†’ remplacÃ©s par des phrases composÃ©es.
 
-### 3.2 Continuations GÉNÉRAL reconnues
+### 3.2 Continuations GÃ‰NÃ‰RAL reconnues
 
-Après une réponse infra/GÉNÉRAL, les confirmations courtes restent sur la branche GÉNÉRAL (gemma4) :
+AprÃ¨s une rÃ©ponse infra/GÃ‰NÃ‰RAL, les confirmations courtes restent sur la branche GÃ‰NÃ‰RAL (gemma4) :
 ```python
 _INFRA_CONFIRM_RE = re.compile(
     r'^\s*(oui|non|ok|vas-y|go|confirme|yes|allez|d.accord|lance|fais.le|applique)\s*[!.]?\s*$', re.I)
@@ -122,137 +122,137 @@ _INFRA_CONFIRM_RE = re.compile(
 
 ---
 
-## 4. Sécurité — Audit 10/10
+## 4. SÃ©curitÃ© â€” Audit 10/10
 
-### 4.1 Points verts (0 gap — 2026-05-06 v2.6)
+### 4.1 Points verts (0 gap â€” 2026-05-06 v2.6)
 
 | Domaine | Mesure |
 |---|---|
-| Exposition réseau | `host=127.0.0.1` · `debug=False` · Windows Firewall bloque LAN |
+| Exposition rÃ©seau | `host=127.0.0.1` Â· `debug=False` Â· Windows Firewall bloque LAN |
 | CORS | Whitelist stricte : localhost + 192.168.1.50 uniquement |
-| Headers HTTP | `X-Frame-Options:DENY` · `nosniff` · `Server` header supprimé |
-| Terminal intégré | IP check 127.0.0.1/192.168.1.x · `shell=False` · blacklist destructive |
-| SSH tools | 4 hôtes · 29 patterns bloqués `_BLOCKED_SSH` · lecture seule + write whitelist |
-| Rate limiting | 8 routes générales + SOC Blueprint 5–120/min |
-| LLM | Ollama localhost:11434 — zéro cloud |
-| RFC1918 | IPs LAN intouchables — code ET tous les profils LLM |
-| Logs | `tts.log` rotation 50 KB×3 · `_SEC_EVENTS` journal sécurité interne |
+| Headers HTTP | `X-Frame-Options:DENY` Â· `nosniff` Â· `Server` header supprimÃ© |
+| Terminal intÃ©grÃ© | IP check 127.0.0.1/192.168.1.x Â· `shell=False` Â· blacklist destructive |
+| SSH tools | 4 hÃ´tes Â· 29 patterns bloquÃ©s `_BLOCKED_SSH` Â· lecture seule + write whitelist |
+| Rate limiting | 8 routes gÃ©nÃ©rales + SOC Blueprint 5â€“120/min |
+| LLM | Ollama localhost:11434 â€” zÃ©ro cloud |
+| RFC1918 | IPs LAN intouchables â€” code ET tous les profils LLM |
+| Logs | `tts.log` rotation 50 KBÃ—3 Â· `_SEC_EVENTS` journal sÃ©curitÃ© interne |
 
-### 4.2 Garde-fous non négociables
+### 4.2 Garde-fous non nÃ©gociables
 
 - **RFC1918 intouchable** : aucun LLM ni outil ne peut bannir 192.168.x / 10.x / 172.16-31.x
-- **`_ALLOWED_SERVICES`** : restart autorisé uniquement nginx / crowdsec / fail2ban / apache2
-- **Données** : zéro logs bruts, zéro IPs vers Anthropic — résumés structurés uniquement
+- **`_ALLOWED_SERVICES`** : restart autorisÃ© uniquement nginx / crowdsec / fail2ban / apache2
+- **DonnÃ©es** : zÃ©ro logs bruts, zÃ©ro IPs vers Anthropic â€” rÃ©sumÃ©s structurÃ©s uniquement
 
-### 4.3 _BLOCKED_SSH — 29 patterns bloqués sur les 4 hôtes
+### 4.3 _BLOCKED_SSH â€” 29 patterns bloquÃ©s sur les 4 hÃ´tes
 
 ```
-Suppression/destruction : rm · rmdir · mkfs · dd if= · truncate
-Arrêt système          : shutdown · reboot
-Services               : systemctl stop · systemctl disable
+Suppression/destruction : rm Â· rmdir Â· mkfs Â· dd if= Â· truncate
+ArrÃªt systÃ¨me          : shutdown Â· reboot
+Services               : systemctl stop Â· systemctl disable
 Firewall               : iptables -F
-Redirections           : > / · | sh · | bash · curl.*sh | · wget.*sh |
-Proxmox destructif     : qm destroy · qm suspend · qm migrate · qm set · qm create · qm clone · qm unlock
-LXC                    : pct stop · pct start · pct destroy · pvectl
-Fichiers système       : tee · sed -i · chmod · chown · echo > · echo >> · > /etc · > /var · > /opt
-Déplacement            : mv · cp
+Redirections           : > / Â· | sh Â· | bash Â· curl.*sh | Â· wget.*sh |
+Proxmox destructif     : qm destroy Â· qm suspend Â· qm migrate Â· qm set Â· qm create Â· qm clone Â· qm unlock
+LXC                    : pct stop Â· pct start Â· pct destroy Â· pvectl
+Fichiers systÃ¨me       : tee Â· sed -i Â· chmod Â· chown Â· echo > Â· echo >> Â· > /etc Â· > /var Â· > /opt
+DÃ©placement            : mv Â· cp
 ```
 
 ### 4.4 Historique passes d'audit
 
-| Date | Score | Points clés |
+| Date | Score | Points clÃ©s |
 |---|---|---|
-| 2026-03-22 | CONFORME | host 0.0.0.0 → 127.0.0.1 |
-| 2026-04-11 | 10/10 | Rate limiters SOC · Blueprint · STT/Vision |
-| 2026-04-15 | 10/10 | CSRF · `shlex.quote` · XSS mixing/main |
-| 2026-04-17 | 10/10 | `'use strict'` IIFE · `_esc()` · `except Exception` typés |
-| 2026-04-18 | 10/10 | 288 onclick → data-action · 86 dispatchers |
-| 2026-05-03 | 10/10 | NDT 100/100 · dette zéro absolue |
-| 2026-05-04 | 10/10 | SSH tools 4 hôtes · `_BLOCKED_SSH` · fix 500 Ollama |
-| 2026-05-05 | 10/10 | STT large-v3-turbo · num_ctx adaptatif · RAG 599 chunks |
-| 2026-05-05 v2.2 | 10/10 | NDT-CSS `_stColor()` · `/api/soc/ip-history` · historique IP MCP |
-| 2026-05-06 v2.5 | 10/10 | NDT-LONG jarvis_mcp_server.py — 0 fonction >80L |
-| 2026-05-06 v2.6 | 10/10 | NDT-CSS `_vpSetInfo` 2 IIFEs · `except OSError` · audit complet |
-| 2026-05-08 s17  | 10/10 | NDT-MAGIC 14 constantes timeout · NDT-ERR 8 catch→warn · NDT-CSS impact-bar classList |
-| 2026-05-10 s26  | NDT 100/100 | NDT-DUP SSH `_tool_commande_ssh_run()` · NDT-HTML-MAGIC Jinja2 `{{ dev_ip }}` · NDT-ERR~15 blocs documentés · NDT-DEAD 5 imports/consts supprimés |
-| 2026-05-13 s33  | **89/100** (valeur d'époque) | Phase 3 split monolithe Python complète (30 modules · -31% jarvis.py) · 25 tests E2E Playwright · ESLint 0 errors · audit sécurité 8/10 |
-| 2026-05-13 s33c | **92/100** (valeur d'époque) | Split JS partiel : `recorder.js` + `voice_print.js` extraits · `jarvis_main.js` 10507→8994L (-14.4%) |
-| 2026-05-14       | **78/100 honnête** (recalibré) | ⚠ Audit strict : le 91 était optimiste, départ réel **62/100**. Chantier dette 2026-05-14 (**62→78, +16**) : Ruff 98→0 (2 bugs F821 réels corrigés) + `ruff.toml` · **git initialisé** (100% local) · **pre-commit hooks bloquants** · `jarvis.css` → 8 fichiers CSS · `audio_dsp.py` extrait · 2 smoke tests LLM · **refactor JS partiel** (3 modules : terminal_code/voice_lab/stt) |
-| 2026-05-14 soir  | **~82/100 honnête** | **Refactor JS massif** : `jarvis_main.js` 7828→**4013 L** (−49%) · **11 modules** extraits dans `static/js/` · méthode byte-identique vérifiée (node --check · eslint 0 · validation E2E prod) · 1 régression d'ordre détectée+corrigée |
-| 2026-05-15       | **~94/100 honnête** | **Refactor JS terminé** + **Phase 4 tests massifs étendus** + **Phase 4 finale** : `jarvis_main.js` 4013→**148 L** (−98,1% cumul depuis 7828) · 21 modules JS · **936 tests pytest** sur **32 modules · 25 à 100% cov** avec coverage **39% lignes** (tts_engines 83% · 42 tests, jarvis_mcp_server 91% · 52 tests, ollama_circuit 100% · 23 tests, proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26%, audio_dsp 25%) · **fix perf systémique IPv6** (-97% latence interne via `OLLAMA_URL`/`JARVIS_BASE` → `127.0.0.1`) · **circuit breaker Ollama étendu 8 call-sites** + bouton SOC PING JARVIS enrichi état Ollama · **pré-warm Kokoro CUDA au boot** (élimine cold start 42.8 s mesuré) · **profiling TTS détaillé** (`tools/profile_tts.py` : médianes chaud edge 1453ms / kokoro 203ms / piper 219ms / sapi 563ms) · **hook pre-push pytest** · 3 bugs prod détectés+fixés · outils `tools/profile_perf.py` + `tools/profile_tts.py` |
-| 2026-05-20       | **92/100** (inchangé) | **Correctif structurel pipeline voix** : invariant « jamais de source TTS sur AudioContext suspendu » (`processQueue`/`playSentence`) — supprime gel définitif + chevauchement · `_splitForTts` (textes > 280 car. découpés aux frontières de phrase → voix en ~1 s vs ~15-24 s) · déverrouillage audio multi-gestes armé tôt · **optimisation VRAM** : `_SOC_NUM_CTX`/`DEFAULT_SOC_NUM_CTX` 16384→8192 (phi4 ~12.4→~11.56 Go), embed `mxbai` dé-épinglé `keep_alive` -1→"10m", pré-warm phi4 en `num_ctx 8192` + délai RAG prewarm 20s→5s (VRAM libre ~1.3→~2.0-2.8 Go) · **instrumentation** `[TTS-PERF]` + log persistant `tts_perf.log` · tuile VRAM tri stable · phi4:14b conservé comme modèle SOC (décision actée) |
+| 2026-03-22 | CONFORME | host 0.0.0.0 â†’ 127.0.0.1 |
+| 2026-04-11 | 10/10 | Rate limiters SOC Â· Blueprint Â· STT/Vision |
+| 2026-04-15 | 10/10 | CSRF Â· `shlex.quote` Â· XSS mixing/main |
+| 2026-04-17 | 10/10 | `'use strict'` IIFE Â· `_esc()` Â· `except Exception` typÃ©s |
+| 2026-04-18 | 10/10 | 288 onclick â†’ data-action Â· 86 dispatchers |
+| 2026-05-03 | 10/10 | NDT 100/100 Â· dette zÃ©ro absolue |
+| 2026-05-04 | 10/10 | SSH tools 4 hÃ´tes Â· `_BLOCKED_SSH` Â· fix 500 Ollama |
+| 2026-05-05 | 10/10 | STT large-v3-turbo Â· num_ctx adaptatif Â· RAG 599 chunks |
+| 2026-05-05 v2.2 | 10/10 | NDT-CSS `_stColor()` Â· `/api/soc/ip-history` Â· historique IP MCP |
+| 2026-05-06 v2.5 | 10/10 | NDT-LONG jarvis_mcp_server.py â€” 0 fonction >80L |
+| 2026-05-06 v2.6 | 10/10 | NDT-CSS `_vpSetInfo` 2 IIFEs Â· `except OSError` Â· audit complet |
+| 2026-05-08 s17  | 10/10 | NDT-MAGIC 14 constantes timeout Â· NDT-ERR 8 catchâ†’warn Â· NDT-CSS impact-bar classList |
+| 2026-05-10 s26  | NDT 100/100 | NDT-DUP SSH `_tool_commande_ssh_run()` Â· NDT-HTML-MAGIC Jinja2 `{{ dev_ip }}` Â· NDT-ERR~15 blocs documentÃ©s Â· NDT-DEAD 5 imports/consts supprimÃ©s |
+| 2026-05-13 s33  | **89/100** (valeur d'Ã©poque) | Phase 3 split monolithe Python complÃ¨te (30 modules Â· -31% jarvis.py) Â· 25 tests E2E Playwright Â· ESLint 0 errors Â· audit sÃ©curitÃ© 8/10 |
+| 2026-05-13 s33c | **92/100** (valeur d'Ã©poque) | Split JS partiel : `recorder.js` + `voice_print.js` extraits Â· `jarvis_main.js` 10507â†’8994L (-14.4%) |
+| 2026-05-14       | **78/100 honnÃªte** (recalibrÃ©) | âš  Audit strict : le 91 Ã©tait optimiste, dÃ©part rÃ©el **62/100**. Chantier dette 2026-05-14 (**62â†’78, +16**) : Ruff 98â†’0 (2 bugs F821 rÃ©els corrigÃ©s) + `ruff.toml` Â· **git initialisÃ©** (100% local) Â· **pre-commit hooks bloquants** Â· `jarvis.css` â†’ 8 fichiers CSS Â· `audio_dsp.py` extrait Â· 2 smoke tests LLM Â· **refactor JS partiel** (3 modules : terminal_code/voice_lab/stt) |
+| 2026-05-14 soir  | **~82/100 honnÃªte** | **Refactor JS massif** : `jarvis_main.js` 7828â†’**4013 L** (âˆ’49%) Â· **11 modules** extraits dans `static/js/` Â· mÃ©thode byte-identique vÃ©rifiÃ©e (node --check Â· eslint 0 Â· validation E2E prod) Â· 1 rÃ©gression d'ordre dÃ©tectÃ©e+corrigÃ©e |
+| 2026-05-15       | **~94/100 honnÃªte** | **Refactor JS terminÃ©** + **Phase 4 tests massifs Ã©tendus** + **Phase 4 finale** : `jarvis_main.js` 4013â†’**148 L** (âˆ’98,1% cumul depuis 7828) Â· 21 modules JS Â· **936 tests pytest** sur **32 modules Â· 25 Ã  100% cov** avec coverage **39% lignes** (tts_engines 83% Â· 42 tests, jarvis_mcp_server 91% Â· 52 tests, ollama_circuit 100% Â· 23 tests, proxmox_api 93%, bypass_backup 96%, voice_lab 71%, deepfilter 84%, ssh_terminal 100%, stt 98%, rag_live 92%, soc.py 33%, jarvis.py 26%, audio_dsp 25%) Â· **fix perf systÃ©mique IPv6** (-97% latence interne via `OLLAMA_URL`/`JARVIS_BASE` â†’ `127.0.0.1`) Â· **circuit breaker Ollama Ã©tendu 8 call-sites** + bouton SOC PING JARVIS enrichi Ã©tat Ollama Â· **prÃ©-warm Kokoro CUDA au boot** (Ã©limine cold start 42.8 s mesurÃ©) Â· **profiling TTS dÃ©taillÃ©** (`tools/profile_tts.py` : mÃ©dianes chaud edge 1453ms / kokoro 203ms / piper 219ms / sapi 563ms) Â· **hook pre-push pytest** Â· 3 bugs prod dÃ©tectÃ©s+fixÃ©s Â· outils `tools/profile_perf.py` + `tools/profile_tts.py` |
+| 2026-05-20       | **92/100** (inchangÃ©) | **Correctif structurel pipeline voix** : invariant Â« jamais de source TTS sur AudioContext suspendu Â» (`processQueue`/`playSentence`) â€” supprime gel dÃ©finitif + chevauchement Â· `_splitForTts` (textes > 280 car. dÃ©coupÃ©s aux frontiÃ¨res de phrase â†’ voix en ~1 s vs ~15-24 s) Â· dÃ©verrouillage audio multi-gestes armÃ© tÃ´t Â· **optimisation VRAM** : `_SOC_NUM_CTX`/`DEFAULT_SOC_NUM_CTX` 16384â†’8192 (phi4 ~12.4â†’~11.56 Go), embed `mxbai` dÃ©-Ã©pinglÃ© `keep_alive` -1â†’"10m", prÃ©-warm phi4 en `num_ctx 8192` + dÃ©lai RAG prewarm 20sâ†’5s (VRAM libre ~1.3â†’~2.0-2.8 Go) Â· **instrumentation** `[TTS-PERF]` + log persistant `tts_perf.log` Â· tuile VRAM tri stable Â· phi4:14b conservÃ© comme modÃ¨le SOC (dÃ©cision actÃ©e) |
 
 ---
 
-## 5. Qualité logicielle — 2 scores distincts
+## 5. QualitÃ© logicielle â€” 2 scores distincts
 
-⚠ **Distinction critique** :
-- **NDT 100/100** = score script automatisé maison (D1/D2/D6/D13 dans le code Python). Mesure fonction longue, silent pass, magic numbers, params >6. Reste vrai au 2026-05-15.
-- **Score honnête global** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf) — valeur courante : [`06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md` §0](../06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md) (source unique). Audit dette complet honnête 2026-05-22 (9 findings + 1 écart code/doc corrigés ; le 92/100 auto-affiché était inflaté). Audit 2026-05-23 nuit : **95/100** post refonte documentaire + extension Playwright `api-coverage.spec.js` (14 tests E2E ciblés sur les 4 Blueprints HTTP sous-couverts en pytest) — **plafond pratique atteint** (les ~5 pts manquants sont des décisions architecturales assumées documentées dans `07-02-DETTE-TECHNIQUE.md`).
+âš  **Distinction critique** :
+- **NDT 100/100** = score script automatisÃ© maison (D1/D2/D6/D13 dans le code Python). Mesure fonction longue, silent pass, magic numbers, params >6. Reste vrai au 2026-05-15.
+- **Score honnÃªte global** = ce que mesure JARVIS dans son ensemble (Python + JS + tests + CI + perf) â€” valeur courante : [`06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md` Â§0](../06-BILAN-ET-HISTORIQUE/06-01-BILAN-TECHNIQUE.md) (source unique). Audit dette complet honnÃªte 2026-05-22 (9 findings + 1 Ã©cart code/doc corrigÃ©s ; le 92/100 auto-affichÃ© Ã©tait inflatÃ©). Audit 2026-05-23 nuit : **95/100** post refonte documentaire + extension Playwright `api-coverage.spec.js` (14 tests E2E ciblÃ©s sur les 4 Blueprints HTTP sous-couverts en pytest) â€” **plafond pratique atteint** (les ~5 pts manquants sont des dÃ©cisions architecturales assumÃ©es documentÃ©es dans `07-02-DETTE-TECHNIQUE.md`).
 
-### NDT (script automatisé) — 100/100
+### NDT (script automatisÃ©) â€” 100/100
 
-| Catégorie NDT | Violations | Résolution |
+| CatÃ©gorie NDT | Violations | RÃ©solution |
 |---|---|---|
-| NDT-CSS (style inline extractable) | 0 | `_stColor()` · 7 classes st-* · classList partout · périmètre 3 fichiers JS |
-| NDT-LONG (fonction >80 lignes) | 0 | `_sse_tok()` · `_ssh_base()` · `list_tools` 2L · `call_tool` 13L |
-| NDT-ERR (bare except:) | 0 | Tous `except: pass` documentés (raison commentée) · catégories : fallback légitime · API throws by design · network poll resilience |
-| NDT-DUP (blocs dupliqués) | 0 | `_sse_tok()` · `_tool_commande_ssh_run()` · `_clearAfter()` · `_TOOLS_DEFS` · `_TOOL_HANDLERS` |
-| NDT-MAGIC (nombres magiques) | 0 | 14 constantes timeout nommées `_*_TIMEOUT_S` · `_NUM_CTX_*` · `_SOC_TEMPERATURE` · etc. |
-| NDT-DEAD (code mort) | 0 | 74 MB nettoyés (Piper mort · WAV dev · logs stale) |
+| NDT-CSS (style inline extractable) | 0 | `_stColor()` Â· 7 classes st-* Â· classList partout Â· pÃ©rimÃ¨tre 3 fichiers JS |
+| NDT-LONG (fonction >80 lignes) | 0 | `_sse_tok()` Â· `_ssh_base()` Â· `list_tools` 2L Â· `call_tool` 13L |
+| NDT-ERR (bare except:) | 0 | Tous `except: pass` documentÃ©s (raison commentÃ©e) Â· catÃ©gories : fallback lÃ©gitime Â· API throws by design Â· network poll resilience |
+| NDT-DUP (blocs dupliquÃ©s) | 0 | `_sse_tok()` Â· `_tool_commande_ssh_run()` Â· `_clearAfter()` Â· `_TOOLS_DEFS` Â· `_TOOL_HANDLERS` |
+| NDT-MAGIC (nombres magiques) | 0 | 14 constantes timeout nommÃ©es `_*_TIMEOUT_S` Â· `_NUM_CTX_*` Â· `_SOC_TEMPERATURE` Â· etc. |
+| NDT-DEAD (code mort) | 0 | 74 MB nettoyÃ©s (Piper mort Â· WAV dev Â· logs stale) |
 | NDT-LOG (console.log prod) | 0 | |
-| NDT-HTML (handler inline) | 0 | data-action · data-oninput · data-onchange dispatchers |
+| NDT-HTML (handler inline) | 0 | data-action Â· data-oninput Â· data-onchange dispatchers |
 
-Périmètre : `jarvis.py` · `soc.py` · `jarvis_mcp_server.py` · `audio_dsp.py` + 30 modules · `jarvis_main.js` · `static/css/` (8 fichiers)
+PÃ©rimÃ¨tre : `jarvis.py` Â· `soc.py` Â· `jarvis_mcp_server.py` Â· `audio_dsp.py` + 30 modules Â· `jarvis_main.js` Â· `static/css/` (8 fichiers)
 
 ---
 
-## 6. Architecture multi-agent — JARVIS + Claude
+## 6. Architecture multi-agent â€” JARVIS + Claude
 
 ### 6.1 Philosophie
 
 ```
-┌──────────────────────────────────────────────────────┐
-│  CLAUDE CODE (Anthropic — cloud)                     │
-│  Code · architecture · incidents inconnus            │
-│  Règle : ne voit que l'escalade structurée de JARVIS │
-└──────────────────────┬───────────────────────────────┘
-                       │ résumé structuré (max 5 points)
-                       │ jamais de raw data ni IPs brutes
-                       ▼
-┌──────────────────────────────────────────────────────┐
-│  JARVIS (local — RTX 5080)                           │
-│  SOC · infra · généraliste · filtrage                │
-│  Coût : électricité GPU (quasi zéro)                 │
-└──────────────────────────────────────────────────────┘
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  CLAUDE CODE (Anthropic â€” cloud)                     â”‚
+â”‚  Code Â· architecture Â· incidents inconnus            â”‚
+â”‚  RÃ¨gle : ne voit que l'escalade structurÃ©e de JARVIS â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”¬â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
+                       â”‚ rÃ©sumÃ© structurÃ© (max 5 points)
+                       â”‚ jamais de raw data ni IPs brutes
+                       â–¼
+â”Œâ”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”
+â”‚  JARVIS (local â€” RTX 5080)                           â”‚
+â”‚  SOC Â· infra Â· gÃ©nÃ©raliste Â· filtrage                â”‚
+â”‚  CoÃ»t : Ã©lectricitÃ© GPU (quasi zÃ©ro)                 â”‚
+â””â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”˜
 ```
 
-### 6.2 Séparation des rôles
+### 6.2 SÃ©paration des rÃ´les
 
 | JARVIS traite seul | Claude intervient |
 |---|---|
-| Monitoring SOC · bans · alertes vocales | Modifier jarvis.py / soc.py / configs nginx |
-| Espace disque · MAJ · état services SSH | Incident inconnu / nouveau pattern |
-| Arrêt/démarrage VMs (bypass LLM direct) | Décision architecturale |
-| Questions générales (Gemma4 auto) | Bug non résolu après 2 tentatives |
+| Monitoring SOC Â· bans Â· alertes vocales | Modifier jarvis.py / soc.py / configs nginx |
+| Espace disque Â· MAJ Â· Ã©tat services SSH | Incident inconnu / nouveau pattern |
+| ArrÃªt/dÃ©marrage VMs (bypass LLM direct) | DÃ©cision architecturale |
+| Questions gÃ©nÃ©rales (Gemma4 auto) | Bug non rÃ©solu aprÃ¨s 2 tentatives |
 
 ### 6.3 Impact tokens
 
-| Scénario | Avant | Après |
+| ScÃ©nario | Avant | AprÃ¨s |
 |---|---|---|
-| "État de la menace ?" | ~3 000 tokens (logs bruts) | ~200 tokens (résumé JARVIS) |
-| Monitoring normal | Claude consulté à chaque poll | 0 token (JARVIS seul) |
+| "Ã‰tat de la menace ?" | ~3 000 tokens (logs bruts) | ~200 tokens (rÃ©sumÃ© JARVIS) |
+| Monitoring normal | Claude consultÃ© Ã  chaque poll | 0 token (JARVIS seul) |
 | "Espace disque sur pa85 ?" | ~800 tokens | 0 token (gemma4 + SSH tool calling) |
-| Question générale | phi4 pollué SOC | Gemma4 direct (0 contexte sécurité) |
+| Question gÃ©nÃ©rale | phi4 polluÃ© SOC | Gemma4 direct (0 contexte sÃ©curitÃ©) |
 
 ---
 
-## 7. MCP — pont Claude Code ↔ JARVIS
+## 7. MCP â€” pont Claude Code â†” JARVIS
 
 ### 7.1 Configuration
 
 ```json
-// .mcp.json — racine workspace VSCode
+// .mcp.json â€” racine workspace VSCode
 {
   "mcpServers": {
     "jarvis": {
@@ -263,112 +263,112 @@ Périmètre : `jarvis.py` · `soc.py` · `jarvis_mcp_server.py` · `audio_dsp.py
 }
 ```
 
-`pythonw` : supprime la fenêtre console Windows, maintient les pipes stdio MCP.
+`pythonw` : supprime la fenÃªtre console Windows, maintient les pipes stdio MCP.
 
 ### 7.2 Les 12 outils MCP
 
-| Outil | Endpoint | Rôle |
+| Outil | Endpoint | RÃ´le |
 |---|---|---|
 | `jarvis_chat` | POST `/api/chat` SSE | Chat LLM avec routing automatique (4 branches + bypass) |
-| `jarvis_soc_status` | GET `/api/soc/context` | État SOC : menace, bans, services |
+| `jarvis_soc_status` | GET `/api/soc/context` | Ã‰tat SOC : menace, bans, services |
 | `jarvis_stats` | GET `/api/stats` | Uptime, GPU, sessions, TTS/STT |
 | `jarvis_soc_ask` | POST `/api/chat` SSE | Question SOC + logs SSH + historique IP 30j |
-| `jarvis_infra_status` | POST `/api/chat` SSE | État infra (Proxmox VMs, srv-nginx, clt, pa85) |
-| `jarvis_proxmox_vms` | POST `/api/chat` SSE | État VMs Proxmox |
+| `jarvis_infra_status` | POST `/api/chat` SSE | Ã‰tat infra (Proxmox VMs, srv-nginx, clt, pa85) |
+| `jarvis_proxmox_vms` | POST `/api/chat` SSE | Ã‰tat VMs Proxmox |
 | `jarvis_read_file` | POST `/api/chat` SSE | Lecture fichiers SSH |
-| `jarvis_model_switch` | POST `/api/models` | Changement modèle Ollama actif |
-| `jarvis_last_response` | GET `/api/conversation/last` | Derniers échanges de la conversation JARVIS |
-| `jarvis_code_exec` | bypass `_code_scp_exec_sse` | Écrit + SCP + exécute un fichier sur srv-dev-1 |
+| `jarvis_model_switch` | POST `/api/models` | Changement modÃ¨le Ollama actif |
+| `jarvis_last_response` | GET `/api/conversation/last` | Derniers Ã©changes de la conversation JARVIS |
+| `jarvis_code_exec` | bypass `_code_scp_exec_sse` | Ã‰crit + SCP + exÃ©cute un fichier sur srv-dev-1 |
 
-> Détail complet des 12 outils : voir [`docs/MCP-SERVER.md`](MCP-SERVER.md).
+> DÃ©tail complet des 12 outils : voir [`docs/MCP-SERVER.md`](MCP-SERVER.md).
 
 ### 7.3 Injection historique IP dans jarvis_soc_ask
 
-Si IPv4 détectée dans la question → appel `/api/soc/ip-history` (~1.2s) → injection :
+Si IPv4 dÃ©tectÃ©e dans la question â†’ appel `/api/soc/ip-history` (~1.2s) â†’ injection :
 ```
-[HISTORIQUE IP x.x.x.x — 30 jours]
-CrowdSec : 5 alertes · actif maintenant : 1
+[HISTORIQUE IP x.x.x.x â€” 30 jours]
+CrowdSec : 5 alertes Â· actif maintenant : 1
 ```
-Résout le cas "IP récidiviste dont le ban a expiré" — JARVIS recommande le ban plutôt que la surveillance.
+RÃ©sout le cas "IP rÃ©cidiviste dont le ban a expirÃ©" â€” JARVIS recommande le ban plutÃ´t que la surveillance.
 
 ### 7.4 Identifiant visuel JARVIS_HEADER
 
 ```
-╔══════════════════════════╗
-║  ◈  JARVIS  —  phi4:14b  ◈  ║
-╚══════════════════════════╝
+â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—
+â•‘  â—ˆ  JARVIS  â€”  phi4:14b  â—ˆ  â•‘
+â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 ```
-Sans ce cadre = réponse Claude directe.
+Sans ce cadre = rÃ©ponse Claude directe.
 
 ### 7.5 Structure jarvis_mcp_server.py
 
 ```
-jarvis_mcp_server.py (NDT-LONG refactorisé — 0 fonction >80L)
-├── _TOOLS_DEFS        ← 12 outils définis en constante
-├── _TOOL_HANDLERS     ← dict nom → handler (dispatch)
-├── _RE_IPV4           ← regex détection IPv4
-├── _collect_sse_tokens()  ← consomme le stream SSE JARVIS
-├── _fetch_ip_history(ip)  ← POST /api/soc/ip-history
-├── _fetch_soc_context()   ← GET /api/soc/context
-├── 10 × _handle_*()   ← un handler par outil
-├── list_tools()       ← 2L
-└── call_tool()        ← 13L
+jarvis_mcp_server.py (NDT-LONG refactorisÃ© â€” 0 fonction >80L)
+â”œâ”€â”€ _TOOLS_DEFS        â† 12 outils dÃ©finis en constante
+â”œâ”€â”€ _TOOL_HANDLERS     â† dict nom â†’ handler (dispatch)
+â”œâ”€â”€ _RE_IPV4           â† regex dÃ©tection IPv4
+â”œâ”€â”€ _collect_sse_tokens()  â† consomme le stream SSE JARVIS
+â”œâ”€â”€ _fetch_ip_history(ip)  â† POST /api/soc/ip-history
+â”œâ”€â”€ _fetch_soc_context()   â† GET /api/soc/context
+â”œâ”€â”€ 10 Ã— _handle_*()   â† un handler par outil
+â”œâ”€â”€ list_tools()       â† 2L
+â””â”€â”€ call_tool()        â† 13L
 ```
 
 ---
 
-## 8. Outils SSH — périmètre et règles
+## 8. Outils SSH â€” pÃ©rimÃ¨tre et rÃ¨gles
 
-### 8.1 4 hôtes disponibles
+### 8.1 4 hÃ´tes disponibles
 
-| Outil | Hôte | IP | Port | Clé SSH |
+| Outil | HÃ´te | IP | Port | ClÃ© SSH |
 |---|---|---|---|---|
 | `commande_ssh_nginx` | srv-nginx (VM 108) | 192.168.1.50 | 2272 | `~/.ssh/id_nginx` |
 | `commande_ssh_proxmox` | Proxmox VE | 192.168.1.20 | 2272 | `~/.ssh/id_proxmox` |
 | `commande_ssh_clt` | clt (VM 106) | 192.168.1.12 | 2272 | `~/.ssh/id_clt` |
 | `commande_ssh_pa85` | pa85 (VM 107) | 192.168.1.13 | 2272 | `~/.ssh/id_pa85` |
 
-### 8.2 RÈGLES ABSOLUES SSH (profil GÉNÉRAL — Gemma4)
+### 8.2 RÃˆGLES ABSOLUES SSH (profil GÃ‰NÃ‰RAL â€” Gemma4)
 
-| # | Règle |
+| # | RÃ¨gle |
 |---|---|
-| N°1 | SSH obligatoire AVANT de répondre — jamais de mémoire, jamais d'estimation |
-| N°2 | Valeurs SSH reproduites EXACTES — zéro arrondi, zéro reformulation des chiffres |
-| N°3 | UN seul appel outil par question — pas de boucle |
-| N°4 | `qm/pvesh/pvesm` exclusifs à l'hôte Proxmox — jamais via nginx/clt/pa85 |
-| N°5 | `systemctl restart` autorisé pour apache2/nginx/crowdsec/fail2ban + vérification `is-active` obligatoire après |
+| NÂ°1 | SSH obligatoire AVANT de rÃ©pondre â€” jamais de mÃ©moire, jamais d'estimation |
+| NÂ°2 | Valeurs SSH reproduites EXACTES â€” zÃ©ro arrondi, zÃ©ro reformulation des chiffres |
+| NÂ°3 | UN seul appel outil par question â€” pas de boucle |
+| NÂ°4 | `qm/pvesh/pvesm` exclusifs Ã  l'hÃ´te Proxmox â€” jamais via nginx/clt/pa85 |
+| NÂ°5 | `systemctl restart` autorisÃ© pour apache2/nginx/crowdsec/fail2ban + vÃ©rification `is-active` obligatoire aprÃ¨s |
 
-### 8.3 Opérations autorisées avec confirmation
+### 8.3 OpÃ©rations autorisÃ©es avec confirmation
 
 ```bash
 DEBIAN_FRONTEND=noninteractive apt-get update -q && apt-get upgrade -y
-# Uniquement après confirmation explicite : "oui", "go", "applique", "vas-y"
+# Uniquement aprÃ¨s confirmation explicite : "oui", "go", "applique", "vas-y"
 ```
 
 ---
 
-## 9. Intégrations
+## 9. IntÃ©grations
 
-### 9.1 Dashboard SOC (monitoring-index.html v3.97.157 — 35 tuiles)
+### 9.1 Dashboard SOC (monitoring-index.html v3.97.157 â€” 35 tuiles)
 
-| Élément | Description |
+| Ã‰lÃ©ment | Description |
 |---|---|
-| Tuile JARVIS | Grille INFRASTRUCTURE — statut, modèle, compteurs session |
-| Auto-engine | Analyse toutes les 60s si JARVIS ONLINE — ban auto si >500 req/h |
+| Tuile JARVIS | Grille INFRASTRUCTURE â€” statut, modÃ¨le, compteurs session |
+| Auto-engine | Analyse toutes les 60s si JARVIS ONLINE â€” ban auto si >500 req/h |
 | TTS SOC | Lecture vocale via `/api/speak` (edge-tts localhost:5000) |
 | Quick prompts | 14 prompts rapides dans le panel bas-droite |
-| Alertes vocales | Si niveau ÉLEVÉ ou CRITIQUE → TTS automatique |
+| Alertes vocales | Si niveau Ã‰LEVÃ‰ ou CRITIQUE â†’ TTS automatique |
 
-JARVIS reste **optionnel** — le SOC dashboard fonctionne à 100% sans lui.
+JARVIS reste **optionnel** â€” le SOC dashboard fonctionne Ã  100% sans lui.
 
-### 9.2 Infrastructure réseau couverte
+### 9.2 Infrastructure rÃ©seau couverte
 
-| Hôte | IP | Rôle |
+| HÃ´te | IP | RÃ´le |
 |---|---|---|
 | srv-nginx (VM 108) | 192.168.1.50 | nginx + CrowdSec WAF + Suricata + fail2ban |
-| clt (VM 106) | 192.168.1.12 | Apache · site cybersécurité CLT |
-| pa85 (VM 107) | 192.168.1.13 | Apache · site associatif PA85 |
-| Proxmox VE | 192.168.1.20 | Hyperviseur · ZFS 3.5 To |
+| clt (VM 106) | 192.168.1.12 | Apache Â· site cybersÃ©curitÃ© CLT |
+| pa85 (VM 107) | 192.168.1.13 | Apache Â· site associatif PA85 |
+| Proxmox VE | 192.168.1.20 | Hyperviseur Â· ZFS 3.5 To |
 
 ---
 
@@ -376,36 +376,37 @@ JARVIS reste **optionnel** — le SOC dashboard fonctionne à 100% sans lui.
 
 ### Items ouverts (v3.3)
 
-| Priorité | Item | Gain |
+| PrioritÃ© | Item | Gain |
 |---|---|---|
-| 🔵 | **3.1 Vision active SOC** — analyse screenshot SOC | Analyse visuelle |
-| 🔵 | **1.2 Wake word** — activation vocale sans clic | Vocal hands-free |
-| 🟡 | **SSH write ops** — apt upgrade · restart étendu (validation) | Maintenance automatisée |
+| ðŸ”µ | **3.1 Vision active SOC** â€” analyse screenshot SOC | Analyse visuelle |
+| ðŸ”µ | **1.2 Wake word** â€” activation vocale sans clic | Vocal hands-free |
+| ðŸŸ¡ | **SSH write ops** â€” apt upgrade Â· restart Ã©tendu (validation) | Maintenance automatisÃ©e |
 
-### Items fermés (ne pas ré-ouvrir)
+### Items fermÃ©s (ne pas rÃ©-ouvrir)
 
 ```
-✅ Routing 3 branches SOC/GÉNÉRAL/CODE + switch  ✅ SSH tools 4 hôtes · _BLOCKED_SSH
-✅ VM multi-stop/start bypass LLM                 ✅ MCP 8 outils · JARVIS_HEADER
-✅ RAG 599 chunks · seuil 0.35 · mxbai-embed      ✅ RAG Live SOC (logs SSH temps réel)
-✅ Vision gemma4 multimodal (remplace llava-phi3) ✅ STT large-v3-turbo + initial_prompt
-✅ ThreatScore 30j historique + tendance           ✅ /api/soc/ip-history + MCP injection
-✅ Mémoire inter-sessions + session-end summary    ✅ SSH write ops (RÈGLE N°5)
-✅ NDT 10/10 session 17 (MAGIC·ERR·CSS résolus)   ✅ Audit 10/10 (0 gap)
-✅ Mots-clés SOC affinés (génériques exclus)      ✅ Sauvegarde JARVIS via chat
-✅ 4 LLM supprimés (phi4-reasoning:plus/qwen2.5:14b/deepseek-r1:14b/llava-phi3) · gemma4 couvre GÉNÉRAL+vision
-✅ nomic-embed-text supprimé (2026-05-10) · mxbai-embed-large seul embed actif
+âœ… Routing 3 branches SOC/GÃ‰NÃ‰RAL/CODE + switch  âœ… SSH tools 4 hÃ´tes Â· _BLOCKED_SSH
+âœ… VM multi-stop/start bypass LLM                 âœ… MCP 8 outils Â· JARVIS_HEADER
+âœ… RAG 599 chunks Â· seuil 0.35 Â· mxbai-embed      âœ… RAG Live SOC (logs SSH temps rÃ©el)
+âœ… Vision gemma4 multimodal (remplace llava-phi3) âœ… STT large-v3-turbo + initial_prompt
+âœ… ThreatScore 30j historique + tendance           âœ… /api/soc/ip-history + MCP injection
+âœ… MÃ©moire inter-sessions + session-end summary    âœ… SSH write ops (RÃˆGLE NÂ°5)
+âœ… NDT 10/10 session 17 (MAGICÂ·ERRÂ·CSS rÃ©solus)   âœ… Audit 10/10 (0 gap)
+âœ… Mots-clÃ©s SOC affinÃ©s (gÃ©nÃ©riques exclus)      âœ… Sauvegarde JARVIS via chat
+âœ… 4 LLM supprimÃ©s (phi4-reasoning:plus/qwen2.5:14b/deepseek-r1:14b/llava-phi3) Â· gemma4 couvre GÃ‰NÃ‰RAL+vision
+âœ… nomic-embed-text supprimÃ© (2026-05-10) Â· mxbai-embed-large seul embed actif
 ```
 
-### Ce qui ne sera pas ajouté
+### Ce qui ne sera pas ajoutÃ©
 
-| Fonctionnalité | Raison |
+| FonctionnalitÃ© | Raison |
 |---|---|
-| Accès LAN (0.0.0.0) | Décision sécurité — loopback strict conservé |
+| AccÃ¨s LAN (0.0.0.0) | DÃ©cision sÃ©curitÃ© â€” loopback strict conservÃ© |
 | WebSocket (remplacement poll) | Refonte trop lourde pour le gain |
-| Cloud LLM (OpenAI, Groq) | Principe zéro dépendance externe |
-| Base de données SQL | JSON files suffisent |
+| Cloud LLM (OpenAI, Groq) | Principe zÃ©ro dÃ©pendance externe |
+| Base de donnÃ©es SQL | JSON files suffisent |
 
 ---
 
-*REFERENCE-TECHNIQUE.md · JARVIS 0xCyberLiTech · 2026-05-14 v1.6*
+*REFERENCE-TECHNIQUE.md Â· JARVIS 0xCyberLiTech Â· 2026-05-14 v1.6*
+

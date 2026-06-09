@@ -3,7 +3,7 @@ title: "INDEX — Documentation projet JARVIS"
 code: "JARVIS-DOC-00-00"
 version: "1.0"
 date_creation: "2026-05-23"
-date_revision: "2026-05-23"
+date_revision: "2026-06-09"
 auteur: "Marc Sabater (0xCyberLiTech)"
 contributeurs: ["Claude (Anthropic)"]
 statut: "Validé"

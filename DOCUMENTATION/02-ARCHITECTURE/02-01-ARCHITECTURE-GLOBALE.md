@@ -3,7 +3,7 @@ title: "Architecture globale JARVIS"
 code: "JARVIS-DOC-02-01"
 version: "1.0"
 date_creation: "2026-05-23"
-date_revision: "2026-05-23"
+date_revision: "2026-06-09"
 auteur: "Marc Sabater (0xCyberLiTech)"
 contributeurs: ["Claude (Anthropic)"]
 statut: "Valide"
@@ -12,7 +12,7 @@ mots_cles: ["jarvis", "architecture", "globale", "flask", "blueprint"]
 ---
 
 # JARVIS — Architecture & Zones fonctionnelles
-<!-- v2.9 — 2026-05-22 — Routing 4 branches + bypass · phi4:14b + qwen3:8b CR · mxbai-embed · refactor JS terminé · fix perf IPv6 · circuit breaker Ollama · pré-warm Kokoro CUDA · git local + pre-commit/pre-push · jarvis.css → 8 fichiers · métriques courantes (score, lignes, tests, coverage) → BILAN-TECHNIQUE.md §0 -->
+<!-- v3.0 — 2026-06-09 — Hermès 5 briques agentiques (bypass/morning_brief + wrappers DI) · RAG warmup boot + monotonic fix · proc_guard MCP lifecycle · métriques courantes → BILAN-TECHNIQUE.md §0 -->
 
 ---
 
