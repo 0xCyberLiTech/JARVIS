@@ -64,6 +64,8 @@ Tout tourne en local — aucune donnée ne quitte la machine.
 > **Hermès transforme un assistant en agent.**
 > Là où un assistant répond à des questions, un agent **observe, mémorise, apprend et agit** — sans être re-briefé à chaque session.
 
+<div align="center">
+
 | Brique | Rôle |
 |--------|------|
 | **Synoptique temps réel** | 6 couches moteur visibles dans l'interface : LLM actif, RAG, STT/TTS, auto-engine SOC, état mémoire |
@@ -72,6 +74,10 @@ Tout tourne en local — aucune donnée ne quitte la machine.
 | **Boucle d'apprentissage** | `"Souviens-toi que X"` → leçon persistée, indexée, réinjectée automatiquement dans les futures réponses |
 | **Briefing matinal** | `"Bonjour JARVIS"` → niveau de menace SOC, état des machines, alertes des 24 dernières heures |
 
+</div>
+
+<div align="center">
+
 | Avant Hermès | Après Hermès |
 |--------------|--------------|
 | Chaque session recommence à zéro | Contexte conservé entre les sessions |
@@ -79,9 +85,13 @@ Tout tourne en local — aucune donnée ne quitte la machine.
 | L'assistant répond seulement | L'agent surveille, alerte et agit |
 | Toutes les commandes passent par le LLM | Bypass déterministe pour les commandes critiques |
 
+</div>
+
 ---
 
 ## À propos & Objectifs
+
+<div align="center">
 
 | Objectif | Description |
 |----------|-------------|
@@ -91,9 +101,13 @@ Tout tourne en local — aucune donnée ne quitte la machine.
 | **Accessibilité** | Interface haute lisibilité, alertes vocales TTS, commandes vocales à bypass déterministe |
 | **Qualité** | 1 465 tests · 79 % coverage · ruff 0 · eslint 0 · hooks bloquants |
 
+</div>
+
 ---
 
 ## Sommaire
+
+<div align="center">
 
 | # | Document | Description | Statut | |
 |---|----------|-------------|--------|---|
@@ -104,9 +118,13 @@ Tout tourne en local — aucune donnée ne quitte la machine.
 | 05 | [Installation](DOCUMENTATION/05-INSTALLATION.md) | Pré-requis matériel · Python · Ollama · lancement · vérification | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/05-INSTALLATION.md) |
 | 06 | [MCP Server](DOCUMENTATION/06-MCP-SERVER.md) | 12 outils · Claude Desktop · watchdog · principe de séparation | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/06-MCP-SERVER.md) |
 
+</div>
+
 ---
 
 ## Stack technique
+
+<div align="center">
 
 | Couche | Technologie |
 |--------|-------------|
@@ -120,9 +138,13 @@ Tout tourne en local — aucune donnée ne quitte la machine.
 | **MCP** | 12 outils exposés à Claude Desktop · streamable-HTTP · watchdog |
 | **Qualité** | 1 465 pytest · 79 % coverage · ruff 0 · eslint 0 · hooks pré-commit/pré-push |
 
+</div>
+
 ---
 
 ## Sécurité
+
+<div align="center">
 
 | Principe | Implémentation |
 |----------|----------------|
@@ -131,6 +153,8 @@ Tout tourne en local — aucune donnée ne quitte la machine.
 | **SSH lecture seule** | 29 patterns dangereux bloqués · whitelist explicite pour l'écriture |
 | **SOC side-channel** | Le contexte sécurité n'entre jamais dans l'historique chat |
 | **Audit forensique** | Toute opération SSH d'écriture tracée dans un journal JSONL |
+
+</div>
 
 ---
 
