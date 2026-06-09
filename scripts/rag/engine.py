@@ -208,6 +208,21 @@ def _rag_query(query: str) -> list:
         return []
 
 
+def get_status() -> dict:
+    """État courant du RAG (chunks chargés, âge cache, TTL) — zéro IO."""
+    meta = _rag_mem_cache.get("meta")
+    ts   = _rag_mem_cache.get("ts", 0.0)
+    now  = time.time()
+    age  = int(now - ts) if ts > 0 else -1
+    return {
+        "chunks":        len(meta) if meta is not None else 0,
+        "loaded":        meta is not None,
+        "cache_age_s":   age,
+        "ttl_s":         int(_RAG_CACHE_TTL),
+        "ttl_remaining_s": max(0, int(_RAG_CACHE_TTL - (now - ts))) if ts > 0 else -1,
+    }
+
+
 def _rag_inject(system: str, query: str) -> str:
     """Injecte les chunks pertinents (statiques + live SOC) dans le system prompt."""
     if not query or len(query.strip()) < 10:

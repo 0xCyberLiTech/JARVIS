@@ -1187,17 +1187,33 @@ _ws_ssh_handler = _term_ws._ssh_handler
 # jarvis). Ici, l'ossature se contente d'injecter les dépendances + enregistrer
 # le Blueprint.
 _system.init(
-    speak          = lambda *a, **k: speak(*a, **k),
-    limiter        = limiter,
-    ollama_url     = OLLAMA_URL,
-    memory_file    = MEMORY_FILE,
-    nvml_handle    = _nvml_handle,
-    memory_limit   = MEMORY_LIMIT,
-    get_model      = lambda: MODEL,
-    get_voice      = lambda: VOICE,
-    get_dsp_avail  = lambda: _DSP_AVAILABLE,
-    get_dsp_params = lambda: DSP_PARAMS,
-    get_df_status  = _df.get_status,
+    speak            = lambda *a, **k: speak(*a, **k),
+    limiter          = limiter,
+    ollama_url       = OLLAMA_URL,
+    memory_file      = MEMORY_FILE,
+    nvml_handle      = _nvml_handle,
+    memory_limit     = MEMORY_LIMIT,
+    get_model        = lambda: MODEL,
+    get_voice        = lambda: VOICE,
+    get_dsp_avail    = lambda: _DSP_AVAILABLE,
+    get_dsp_params   = lambda: DSP_PARAMS,
+    get_df_status    = _df.get_status,
+    # ── Synoptique applicatif (/api/jarvis-state) ──────────────────────
+    get_mode         = lambda: _jarvis_mode,
+    get_toks_per_sec = lambda: _last_toks_per_sec,
+    get_rag_status   = _rag.engine.get_status,
+    get_stt_state    = lambda: {
+        "available": _voice.stt.is_available(),
+        "loaded":    _voice.stt.is_loaded(),
+        "model":     _voice.stt.get_model_size() if _voice.stt.is_available() else None,
+    },
+    get_speak_status = lambda: {
+        "queued":        _speak_queue.qsize(),
+        "deferred":      _speak_deferred.qsize(),
+        "stream_active": _chat_stream_active.is_set(),
+    },
+    get_soc_status   = get_soc_status,
+    get_active_tts   = lambda: DSP_PARAMS.get("tts_engine", "edge"),
 )
 app.register_blueprint(_system.bp)
 

@@ -25,7 +25,10 @@ from . import diag, routes  # noqa: E402,F401
 
 
 def init(*, speak, limiter, ollama_url, memory_file, nvml_handle, memory_limit,
-         get_model, get_voice, get_dsp_avail, get_dsp_params, get_df_status) -> None:
+         get_model, get_voice, get_dsp_avail, get_dsp_params, get_df_status,
+         get_mode=None, get_toks_per_sec=None, get_rag_status=None,
+         get_stt_state=None, get_speak_status=None, get_soc_status=None,
+         get_active_tts=None) -> None:
     """Injecte toutes les dépendances de la tuile et applique les rate limits.
 
     Doit être appelée avant `app.register_blueprint(bp)` côté ossature.
@@ -39,5 +42,13 @@ def init(*, speak, limiter, ollama_url, memory_file, nvml_handle, memory_limit,
         get_dsp_avail    = get_dsp_avail,
         get_dsp_params   = get_dsp_params,
         get_df_status    = get_df_status,
+        get_mode         = get_mode,
+        get_toks_per_sec = get_toks_per_sec,
+        get_rag_status   = get_rag_status,
+        get_stt_state    = get_stt_state,
+        get_speak_status = get_speak_status,
+        get_soc_status   = get_soc_status,
+        get_active_tts   = get_active_tts,
     )
     limiter.limit("30 per minute")(routes.api_sysdiag)
+    limiter.limit("30 per minute")(routes.api_jarvis_state)

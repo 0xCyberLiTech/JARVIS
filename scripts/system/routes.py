@@ -11,22 +11,36 @@ from . import bp, diag
 # Accesseurs (lambdas) injectés par __init__.init() — résolus à l'appel
 # pour suivre les valeurs réassignées au runtime (MODEL, VOICE) ou les
 # états mutables (DSP_PARAMS).
-_get_nvml_handle  = None
-_get_memory_limit = None
-_get_model        = None
-_get_voice        = None
-_get_dsp_avail    = None
-_get_dsp_params   = None
-_get_df_status    = None
+_get_nvml_handle      = None
+_get_memory_limit     = None
+_get_model            = None
+_get_voice            = None
+_get_dsp_avail        = None
+_get_dsp_params       = None
+_get_df_status        = None
+# ── Synoptique applicatif (/api/jarvis-state) ──────────────────────────────
+_get_mode             = None   # () → str
+_get_toks_per_sec     = None   # () → float | None
+_get_rag_status       = None   # () → dict
+_get_stt_state        = None   # () → dict
+_get_speak_status     = None   # () → dict
+_get_soc_status       = None   # () → dict
+_get_active_tts       = None   # () → str
 
 _GB_BYTES = 1 << 30
 
 
 def init_routes(*, get_nvml_handle, get_memory_limit, get_model, get_voice,
-                get_dsp_avail, get_dsp_params, get_df_status) -> None:
-    """Injecte les accesseurs transverses (LLM/voice/DSP) consommés par api_sysdiag."""
+                get_dsp_avail, get_dsp_params, get_df_status,
+                get_mode=None, get_toks_per_sec=None, get_rag_status=None,
+                get_stt_state=None, get_speak_status=None, get_soc_status=None,
+                get_active_tts=None) -> None:
+    """Injecte les accesseurs transverses (LLM/voice/DSP) consommés par api_sysdiag
+    et le synoptique applicatif /api/jarvis-state."""
     global _get_nvml_handle, _get_memory_limit, _get_model, _get_voice
     global _get_dsp_avail, _get_dsp_params, _get_df_status
+    global _get_mode, _get_toks_per_sec, _get_rag_status
+    global _get_stt_state, _get_speak_status, _get_soc_status, _get_active_tts
     _get_nvml_handle  = get_nvml_handle
     _get_memory_limit = get_memory_limit
     _get_model        = get_model
@@ -34,6 +48,13 @@ def init_routes(*, get_nvml_handle, get_memory_limit, get_model, get_voice,
     _get_dsp_avail    = get_dsp_avail
     _get_dsp_params   = get_dsp_params
     _get_df_status    = get_df_status
+    _get_mode         = get_mode
+    _get_toks_per_sec = get_toks_per_sec
+    _get_rag_status   = get_rag_status
+    _get_stt_state    = get_stt_state
+    _get_speak_status = get_speak_status
+    _get_soc_status   = get_soc_status
+    _get_active_tts   = get_active_tts
 
 
 @bp.route("/api/sysdiag")
@@ -85,5 +106,36 @@ def api_sysdiag():
     # Mémoire conversations
     data["memory_exchanges"] = diag._diag_memory_count()
     data["memory_limit"]     = _get_memory_limit()
+
+    return Response(json.dumps(data, ensure_ascii=False), mimetype="application/json")
+
+
+@bp.route("/api/jarvis-state")
+def api_jarvis_state():
+    """Synoptique applicatif temps réel — 5 couches JARVIS (LLM/RAG/STT/TTS/SOC).
+
+    Agrège en un seul appel les états des sous-systèmes JARVIS.
+    Destiné au poll 5s de gpu_monitor.js (panneau « Moteur JARVIS »).
+    """
+    data: dict = {}
+
+    # ── LLM ──────────────────────────────────────────────────────────────
+    data["mode"]       = _get_mode()   if _get_mode   else "?"
+    data["model"]      = _get_model()  if _get_model  else "?"
+    data["toks_per_s"] = round(_get_toks_per_sec(), 1) if _get_toks_per_sec and _get_toks_per_sec() else None
+
+    # ── RAG ──────────────────────────────────────────────────────────────
+    data["rag"] = _get_rag_status() if _get_rag_status else {}
+
+    # ── STT ──────────────────────────────────────────────────────────────
+    data["stt"] = _get_stt_state() if _get_stt_state else {}
+
+    # ── TTS ──────────────────────────────────────────────────────────────
+    tts: dict = _get_speak_status() if _get_speak_status else {}
+    tts["engine"] = _get_active_tts() if _get_active_tts else "?"
+    data["tts"] = tts
+
+    # ── SOC engine ───────────────────────────────────────────────────────
+    data["soc"] = _get_soc_status() if _get_soc_status else {}
 
     return Response(json.dumps(data, ensure_ascii=False), mimetype="application/json")

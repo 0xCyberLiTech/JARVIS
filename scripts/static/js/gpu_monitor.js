@@ -351,3 +351,65 @@ async function pollVramLlm() {
 function _refreshVramNow() { clearTimeout(_vramPollTimer); pollVramLlm(); }
 pollVramLlm();
 
+// ══ Synoptique Moteur JARVIS — /api/jarvis-state (poll 5s) ══════════════
+var _JARVIS_STATE_POLL_MS = 5000;
+var _jarvisStatePollTimer = null;
+
+function _jsStat(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.textContent = val !== undefined && val !== null ? String(val) : '—';
+}
+function _jsColor(id, cls) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  el.className = 'stat-val ' + (cls || '');
+}
+
+function updateJarvisState(d) {
+  // LLM & Mode
+  _jsStat('js-mode',  (d.mode || '—').toUpperCase());
+  _jsStat('js-model', d.model || '—');
+  _jsStat('js-toks',  d.toks_per_s ? d.toks_per_s + ' tok/s' : '—');
+
+  // RAG
+  var rag = d.rag || {};
+  _jsStat('js-rag-chunks', rag.chunks !== undefined ? rag.chunks + ' chunks' : '—');
+  _jsStat('js-rag-cache',  rag.loaded ? (rag.cache_age_s >= 0 ? 'chargé ' + rag.cache_age_s + 's' : 'chargé') : 'non chargé');
+  _jsColor('js-rag-cache', rag.loaded ? 'stat-val c-green' : 'stat-val c-warn');
+  _jsStat('js-rag-ttl',    rag.ttl_remaining_s >= 0 ? rag.ttl_remaining_s + 's / ' + rag.ttl_s + 's' : '—');
+
+  // STT
+  var stt = d.stt || {};
+  var sttLabel = !stt.available ? 'INDISPONIBLE' : stt.loaded ? 'PRÊT' : 'NON CHARGÉ';
+  _jsStat('js-stt-state', sttLabel);
+  _jsColor('js-stt-state', stt.loaded ? 'stat-val c-green' : 'stat-val c-warn');
+  _jsStat('js-stt-model', stt.model || (stt.available ? 'whisper' : '—'));
+
+  // TTS
+  var tts = d.tts || {};
+  _jsStat('js-tts-engine', (tts.engine || '—').toUpperCase());
+  var qTotal = (tts.queued || 0) + (tts.deferred || 0);
+  _jsStat('js-tts-queue',  qTotal + ' en attente');
+  _jsColor('js-tts-queue', qTotal > 0 ? 'stat-val c-cyan' : 'stat-val c-white');
+  _jsStat('js-tts-stream', tts.stream_active ? 'ACTIF' : 'IDLE');
+  _jsColor('js-tts-stream', tts.stream_active ? 'stat-val c-green' : 'stat-val c-white');
+
+  // SOC engine
+  var soc = d.soc || {};
+  var socOn = soc.soc_engine_active || soc.engine_active;
+  _jsStat('js-soc-engine', socOn ? 'ACTIF' : 'VEILLE');
+  _jsColor('js-soc-engine', socOn ? 'stat-val c-green' : 'stat-val c-white');
+  _jsStat('js-soc-bans',   soc.bans_24h !== undefined ? soc.bans_24h : '—');
+  _jsStat('js-soc-alerts', soc.alerts_24h !== undefined ? soc.alerts_24h : '—');
+}
+
+async function pollJarvisState() {
+  try {
+    var r = await fetch('/api/jarvis-state');
+    var d = await r.json();
+    updateJarvisState(d);
+  } catch(e) {}
+  _jarvisStatePollTimer = setTimeout(pollJarvisState, _JARVIS_STATE_POLL_MS);
+}
+pollJarvisState();
+

@@ -10,6 +10,39 @@
 
     <div class="gpu-label" id="gpu-name">INITIALISATION SYSTEME...</div>
 
+    <!-- ══ SYNOPTIQUE MOTEUR JARVIS ══ -->
+    <div class="grid-bottom jarvis-state-grid">
+      <div class="panel">
+        <div class="panel-title">LLM &amp; Mode</div>
+        <div class="stat-row"><span class="stat-name">MODE</span><span class="stat-val c-cyan" id="js-mode">—</span></div>
+        <div class="stat-row"><span class="stat-name">MODÈLE</span><span class="stat-val stat-val-sm c-white" id="js-model">—</span></div>
+        <div class="stat-row stat-sep"><span class="stat-name">VITESSE</span><span class="stat-val c-green" id="js-toks">—</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">RAG — Base documentaire</div>
+        <div class="stat-row"><span class="stat-name">CHUNKS</span><span class="stat-val c-cyan" id="js-rag-chunks">—</span></div>
+        <div class="stat-row"><span class="stat-name">CACHE</span><span class="stat-val c-white" id="js-rag-cache">—</span></div>
+        <div class="stat-row stat-sep"><span class="stat-name">TTL RESTANT</span><span class="stat-val c-green" id="js-rag-ttl">—</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">STT — Reconnaissance vocale</div>
+        <div class="stat-row"><span class="stat-name">ÉTAT</span><span class="stat-val" id="js-stt-state">—</span></div>
+        <div class="stat-row"><span class="stat-name">MODÈLE</span><span class="stat-val stat-val-sm c-white" id="js-stt-model">—</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">TTS — Synthèse vocale</div>
+        <div class="stat-row"><span class="stat-name">MOTEUR</span><span class="stat-val c-cyan" id="js-tts-engine">—</span></div>
+        <div class="stat-row"><span class="stat-name">QUEUE</span><span class="stat-val c-white" id="js-tts-queue">—</span></div>
+        <div class="stat-row stat-sep"><span class="stat-name">STREAM</span><span class="stat-val" id="js-tts-stream">—</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">SOC — Auto-engine</div>
+        <div class="stat-row"><span class="stat-name">ENGINE</span><span class="stat-val" id="js-soc-engine">—</span></div>
+        <div class="stat-row"><span class="stat-name">BANS 24H</span><span class="stat-val c-cyan" id="js-soc-bans">—</span></div>
+        <div class="stat-row stat-sep"><span class="stat-name">ALERTES 24H</span><span class="stat-val c-white" id="js-soc-alerts">—</span></div>
+      </div>
+    </div>
+
     <div class="gauge-row">
       <div class="gauge-wrap">
         <svg width="110" height="110" viewBox="0 0 110 110">
