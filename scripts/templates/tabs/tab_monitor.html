@@ -28,6 +28,9 @@
         <div class="stat-row"><span class="stat-name">CHUNKS</span><span class="stat-val c-cyan" id="js-rag-chunks">—</span></div>
         <div class="stat-row"><span class="stat-name">CACHE</span><span class="stat-val c-white" id="js-rag-cache">—</span></div>
         <div class="stat-row stat-sep"><span class="stat-name">TTL RESTANT</span><span class="stat-val c-green" id="js-rag-ttl">—</span></div>
+        <div class="hermes-actions">
+          <button class="hermes-btn" id="btn-rag-refresh" onclick="hermesRagRefresh()" title="Re-indexe les MEMORY.md maintenant">↺ Recharger</button>
+        </div>
       </div>
       <div class="panel">
         <div class="panel-title">STT — Reconnaissance vocale</div>
@@ -45,6 +48,15 @@
         <div class="stat-row"><span class="stat-name">ENGINE</span><span class="stat-val" id="js-soc-engine">—</span></div>
         <div class="stat-row"><span class="stat-name">BANS 24H</span><span class="stat-val c-cyan" id="js-soc-bans">—</span></div>
         <div class="stat-row stat-sep"><span class="stat-name">ALERTES 24H</span><span class="stat-val c-white" id="js-soc-alerts">—</span></div>
+      </div>
+      <div class="panel">
+        <div class="panel-title">MÉMOIRE — Historique</div>
+        <div class="stat-row"><span class="stat-name">ÉCHANGES</span><span class="stat-val c-cyan" id="js-mem-count">—</span></div>
+        <div class="stat-row"><span class="stat-name">FICHIER</span><span class="stat-val c-white" id="js-mem-size">—</span></div>
+        <div class="stat-row stat-sep"><span class="stat-name">RÉSUMÉS</span><span class="stat-val c-green" id="js-mem-summaries">—</span></div>
+        <div class="hermes-actions">
+          <button class="hermes-btn hermes-btn-danger" id="btn-mem-purge" onclick="hermesMemPurge()" title="Efface l'historique de conversation">✕ Purger</button>
+        </div>
       </div>
     </div>
 

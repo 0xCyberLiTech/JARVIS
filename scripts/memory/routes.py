@@ -75,6 +75,31 @@ def api_memory_summary_clear():
     return Response('{"ok":true}', mimetype="application/json")
 
 
+@bp.route("/api/memory/stats", methods=["GET"])
+def api_memory_stats():
+    """Stats légères — count échanges, taille fichier, count résumés. Zéro chargement LLM."""
+    try:
+        f = _get_memory_file()
+        if f.exists():
+            size_kb  = round(f.stat().st_size / 1024, 1)
+            msgs     = json.loads(f.read_text(encoding="utf-8-sig"))
+            count    = len(msgs) if isinstance(msgs, list) else 0
+        else:
+            size_kb, count = 0.0, 0
+    except Exception:
+        size_kb, count = 0.0, 0
+    try:
+        sf = _get_summary_file()
+        data = json.loads(sf.read_text(encoding="utf-8")) if sf.exists() else {}
+        summary_count = len(data.get("summaries", []))
+    except Exception:
+        summary_count = 0
+    return Response(
+        json.dumps({"count": count, "size_kb": size_kb, "summary_count": summary_count},
+                   ensure_ascii=False),
+        mimetype="application/json")
+
+
 @bp.route("/api/memory/summarize-session", methods=["POST"])
 def api_memory_summarize_session():
     """Résume la session courante et l'appende à jarvis_memory_summary.json.

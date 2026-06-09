@@ -156,7 +156,14 @@
   .grid-panels { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-bottom:12px; }
   .grid-bottom { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
   .grid-bottom + .grid-bottom { margin-top:12px; }
-  .jarvis-state-grid { grid-template-columns:repeat(5,1fr); margin-bottom:16px; }
+  .jarvis-state-grid { grid-template-columns:repeat(3,1fr); margin-bottom:16px; }
+  .hermes-actions { display:flex; gap:6px; margin-top:8px; }
+  .hermes-btn { font-family:'Orbitron',monospace; font-size:.45rem; letter-spacing:2px; padding:4px 10px; background:transparent; border:1px solid #00cfff44; color:#00cfff88; border-radius:3px; cursor:pointer; transition:all .2s; }
+  .hermes-btn:hover { border-color:#00cfff; color:#00cfff; background:#00cfff11; }
+  .hermes-btn:active { background:#00cfff22; }
+  .hermes-btn-danger { border-color:#ff444444; color:#ff444488; }
+  .hermes-btn-danger:hover { border-color:#ff4444; color:#ff4444; background:#ff444411; }
+  .hermes-btn.hermes-busy { opacity:.5; cursor:progress; pointer-events:none; }
   .vram-llm-grid { grid-template-columns: 1fr !important; }
   .panel-vram-llm { padding:14px 16px; }
   .vram-llm-alert { font-size:.55rem; letter-spacing:2px; color:#ff4444; animation:_vramBlink 1s ease-in-out infinite; }

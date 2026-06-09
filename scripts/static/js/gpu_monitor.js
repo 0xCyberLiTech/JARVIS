@@ -419,3 +419,45 @@ async function pollJarvisState() {
 }
 pollJarvisState();
 
+// ── Mémoire — poll 10s (/api/memory/stats) ──────────────────────────────────
+var _memStatsPollTimer = null;
+function _updateMemStats(d) {
+  _jsStat('js-mem-count',     d.count !== undefined ? d.count + ' msg' : '—');
+  _jsColor('js-mem-count',    d.count > 0 ? 'stat-val c-cyan' : 'stat-val c-white');
+  _jsStat('js-mem-size',      d.size_kb !== undefined ? d.size_kb + ' Ko' : '—');
+  _jsStat('js-mem-summaries', d.summary_count !== undefined ? d.summary_count + ' résumé(s)' : '—');
+}
+async function pollMemStats() {
+  try { var r = await fetch('/api/memory/stats'); var d = await r.json(); _updateMemStats(d); } catch(e) {}
+  _memStatsPollTimer = setTimeout(pollMemStats, 10000);
+}
+pollMemStats();
+
+// ── Actions Hermès ──────────────────────────────────────────────────────────
+async function hermesRagRefresh() {
+  var btn = document.getElementById('btn-rag-refresh');
+  if (!btn || btn.classList.contains('hermes-busy')) return;
+  btn.classList.add('hermes-busy');
+  btn.textContent = '↺ …';
+  try {
+    var r = await fetch('/api/rag/refresh', {method:'POST'});
+    var d = await r.json();
+    btn.textContent = d.chunks_added > 0 ? '↺ +' + d.chunks_added : '↺ OK';
+  } catch(e) { btn.textContent = '↺ ERR'; }
+  setTimeout(function() { if (btn) { btn.textContent = '↺ Recharger'; btn.classList.remove('hermes-busy'); } }, 2500);
+}
+
+async function hermesMemPurge() {
+  if (!confirm('Effacer tout l\'historique de conversation ?')) return;
+  var btn = document.getElementById('btn-mem-purge');
+  if (!btn || btn.classList.contains('hermes-busy')) return;
+  btn.classList.add('hermes-busy');
+  btn.textContent = '✕ …';
+  try {
+    await fetch('/api/memory', {method:'DELETE'});
+    btn.textContent = '✕ OK';
+    pollMemStats();
+  } catch(e) { btn.textContent = '✕ ERR'; }
+  setTimeout(function() { if (btn) { btn.textContent = '✕ Purger'; btn.classList.remove('hermes-busy'); } }, 2500);
+}
+
