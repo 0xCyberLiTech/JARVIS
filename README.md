@@ -55,7 +55,7 @@ Détails complets : [`DOCUMENTATION/02-ARCHITECTURE/`](DOCUMENTATION/02-ARCHITEC
 
 JARVIS n'est plus un chatbot. Avec Hermès, il devient un **agent persistant** qui observe, mémorise, apprend et agit de façon autonome.
 
-![Hermès — synoptique 6 couches actives : LLM, RAG, STT, TTS, SOC, MÉMOIRE](Images/!hermes.png)
+![Hermès — synoptique 6 couches actives : LLM, RAG, STT, TTS, SOC, MÉMOIRE](Images/hermes.png)
 
 Hermès est bâti en **5 briques** au-dessus du moteur JARVIS, sans rupture d'architecture :
 
