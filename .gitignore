@@ -1,14 +1,16 @@
 # ════════════════════════════════════════════════════════════════
 # .gitignore — JARVIS · 0xCyberLiTech
-# Dépôt 100% LOCAL — aucun remote configuré.
-# Ce fichier protège quand même les secrets au cas où un remote
-# serait ajouté un jour.
 # ════════════════════════════════════════════════════════════════
 
 # ── SECRETS / CREDENTIALS — exclusion absolue ──────────────────
 scripts/jarvis_secret.key
 scripts/jarvis_pve.json
 scripts/soc_config.json
+*.key
+*.pem
+.env
+config/*.json
+!config/*.example
 
 # ── Gros binaires (modèles, voix, embeddings) ──────────────────
 models/
@@ -17,8 +19,10 @@ scripts/voices/*.onnx.json
 scripts/jarvis_rag/embeddings.npy
 scripts/jarvis_rag/meta.json
 node_modules/
+*.bin
+*.safetensors
 
-# ── Medias volumineux (captures ecran, montages video, photos) ─────────
+# ── Medias volumineux (captures, montages video, photos) ───────
 *.mp4
 *.mov
 *.mkv
@@ -26,7 +30,11 @@ node_modules/
 Images/*.jpg
 images/*.jpg
 
-# ── Fichier leçons Hermès (mémoire privée — contient IPs/infra, généré au runtime) ──
+# ── Audio généré (TTS runtime) ─────────────────────────────────
+scripts/static/audio/*.mp3
+scripts/static/audio/*.wav
+
+# ── Fichier leçons Hermès (mémoire privée — IPs/infra, runtime) ──
 scripts/jarvis_corrections.md
 
 # ── Données runtime (changent en continu, pas du code) ─────────
@@ -36,26 +44,21 @@ scripts/jarvis_memory_summary.json
 scripts/jarvis_soc_actions.json
 scripts/jarvis_soc_autobanned.json
 scripts/jarvis_soc_cooldowns.json
-# tâches utilisateur de la tuile tasks/ (créées/éditées via UI Tâches)
 scripts/jarvis_tasks.json
-# réglages EQ/DSP réécrits à chaque clic UI · défauts dans jarvis.py:87
 scripts/jarvis_dsp_params.json
-# params LLM (num_ctx adaptatif) réécrits au runtime · défauts dans le code
 scripts/jarvis_llm_params.json
-# prompt système réécrit par _applyModeProfile à chaque switch de mode
-# (état runtime volatil — régénéré au boot via _applyModeProfile('soc'))
 scripts/jarvis_system_prompt.txt
 scripts/voice_prints/
 scripts/generated_code/
 *.log
 *.log.*
-# Logs structures JSONL (audit write ops SSH, ajoute 2026-05-17)
 logs/
 *.jsonl
 
 # ── Artefacts / caches ─────────────────────────────────────────
 __pycache__/
 *.pyc
+*.pyo
 .ruff_cache/
 .pytest_cache/
 .coverage
@@ -63,8 +66,9 @@ coverage.json
 htmlcov/
 test-results/
 playwright-report/
+venv/
 
-# ── Snapshots locaux du chantier dette (Copy-Item) ─────────────
+# ── Snapshots locaux du chantier dette ─────────────────────────
 scripts.snapshot-*/
 scripts.action*/
 scripts.matin-*/
@@ -73,6 +77,7 @@ scripts.aprem-*/
 *.bak[0-9]
 *.bak.*
 
-# ── Raccourcis Windows (.lnk) — vivent sur le Bureau, recrees par install-jarvis.ps1 ──
-# Un .lnk a chemin absolu n'est pas du code source. Ne jamais versionner.
+# ── OS / IDE ───────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
 *.lnk
