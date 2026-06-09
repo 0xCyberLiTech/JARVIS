@@ -23,14 +23,17 @@ _get_model = None              # callable → MODEL courant (SOC par défaut)
 _general_model = ""
 _code_model = ""
 _code_reasoning_model = ""
+_think_model = ""
 _ensure_vram = None            # callable(model_str) → swap VRAM
 
 
 def init(*, limiter, log, get_jarvis_mode, set_jarvis_mode, get_model,
-         general_model, code_model, code_reasoning_model, ensure_vram) -> None:
+         general_model, code_model, code_reasoning_model, think_model,
+         ensure_vram) -> None:
     """Injecte les deps nécessaires à la route /api/mode."""
     global _log, _limiter, _get_jarvis_mode, _set_jarvis_mode, _get_model
-    global _general_model, _code_model, _code_reasoning_model, _ensure_vram
+    global _general_model, _code_model, _code_reasoning_model, _think_model
+    global _ensure_vram
     _log = log
     _limiter = limiter
     _get_jarvis_mode = get_jarvis_mode
@@ -39,6 +42,7 @@ def init(*, limiter, log, get_jarvis_mode, set_jarvis_mode, get_model,
     _general_model = general_model
     _code_model = code_model
     _code_reasoning_model = code_reasoning_model
+    _think_model = think_model
     _ensure_vram = ensure_vram
     # Rate limit appliqué tardivement (route déjà enregistrée par @bp.route ci-dessous)
     _limiter.limit("30 per minute")(api_mode)
@@ -49,6 +53,7 @@ def _model_for_mode(mode: str) -> str:
     if mode == "general":         return _general_model
     if mode == "code":            return _code_model
     if mode == "code_reasoning":  return _code_reasoning_model
+    if mode == "think":           return _think_model
     return _get_model()  # soc + fallback = MODEL Ollama actif
 
 
@@ -58,9 +63,9 @@ def api_mode():
     if request.method == "POST":
         data = request.json or {}
         new_mode = data.get("mode", "").lower()
-        if new_mode not in ("soc", "general", "code", "code_reasoning"):
+        if new_mode not in ("soc", "general", "code", "code_reasoning", "think"):
             return Response(
-                json.dumps({"error": "mode invalide (soc|general|code|code_reasoning)"}),
+                json.dumps({"error": "mode invalide (soc|general|code|code_reasoning|think)"}),
                 status=400, mimetype="application/json")
         prev_mode = _get_jarvis_mode()
         if new_mode != prev_mode:

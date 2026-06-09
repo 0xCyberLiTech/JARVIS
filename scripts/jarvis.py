@@ -809,10 +809,12 @@ _load_system_prompt()
 # "soc"            → phi4:14b             (cybersécurité — jarvis_model.json)
 # "code"            → qwen2.5-coder:14b   (code + infogérance)
 # "code_reasoning"  → qwen3:8b            (code + reasoning natif)
-# "general" → gemma4:latest        (conversation générale, réponses rapides)
+# "general"         → gemma4:latest        (conversation générale, réponses rapides)
+# "think"           → qwen3:14b           (raisonnement profond natif — think=True Ollama)
 _GENERAL_MODEL: str  = "gemma4:latest"
 _CODE_MODEL:                    str = "qwen2.5-coder:14b"
 _CODE_REASONING_ANALYSIS_MODEL: str = "qwen3:8b"              # reasoning natif · ~5 GB VRAM · thinking tokens <think>
+_THINK_MODEL:                   str = "qwen3:14b"              # raisonnement profond · ~9 GB VRAM · think=True natif Ollama
 _CODE_REASONING_MODE                = "code_reasoning"         # single-pass qwen3:8b streaming (thinking masqué)
 _jarvis_mode:   str = "soc"
 # Init différé de la tuile memory + register Blueprint (refactor jarvis.py
@@ -1155,6 +1157,7 @@ _mode.routes.init(
     general_model=_GENERAL_MODEL,
     code_model=_CODE_MODEL,
     code_reasoning_model=_CODE_REASONING_ANALYSIS_MODEL,
+    think_model=_THINK_MODEL,
     ensure_vram=_ensure_vram,
 )
 app.register_blueprint(_mode.bp)
@@ -1249,6 +1252,7 @@ _health.init(
     code_reasoning_model       = _CODE_REASONING_ANALYSIS_MODEL,
     code_model                 = _CODE_MODEL,
     general_model              = _GENERAL_MODEL,
+    think_model                = _THINK_MODEL,
 )
 app.register_blueprint(_health.bp)
 
@@ -1709,6 +1713,7 @@ _chat_orch.init(
     general_model                  = _GENERAL_MODEL,
     code_model                     = _CODE_MODEL,
     code_reasoning_analysis_model  = _CODE_REASONING_ANALYSIS_MODEL,
+    think_model                    = _THINK_MODEL,
     code_system_suffix             = _CODE_SYSTEM_SUFFIX,
     ollama_url                     = OLLAMA_URL,
     llm_params                     = LLM_PARAMS,

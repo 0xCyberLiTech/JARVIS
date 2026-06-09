@@ -89,9 +89,7 @@ def test_soc_combine_avec_np_override_garde_les_deux():
 def test_modele_qwen3_reasoning_en_soc_force_plancher_768():
     """qwen3:8b matché par REASONING_RE → plancher 768 si np en dessous."""
     out = _call(np_override=300, soc_ctx_injected=True, active_model="qwen3:8b")
-    # qwen3 ne match pas REASONING_RE (qui cherche "reasoning|deepseek-r1")
-    # donc np reste à 300 (test correctif ci-dessous)
-    assert out["num_predict"] == 300
+    assert out["num_predict"] == 768
 
 
 def test_modele_phi4_reasoning_en_soc_force_plancher_768():
@@ -174,9 +172,10 @@ def test_pattern_reasoning_ne_match_pas_phi4():
     assert REASONING_RE.search("phi4:14b") is None
 
 
-def test_pattern_reasoning_ne_match_pas_qwen3():
-    """Note : qwen3:8b est utilisé en mode CR mais ne match pas le pattern actuel."""
-    assert REASONING_RE.search("qwen3:8b") is None
+def test_pattern_reasoning_match_qwen3():
+    """qwen3 est un modèle reasoning (think natif) — doit matcher REASONING_RE."""
+    assert REASONING_RE.search("qwen3:8b") is not None
+    assert REASONING_RE.search("qwen3:14b") is not None
 
 
 def test_pattern_reasoning_case_insensitive():

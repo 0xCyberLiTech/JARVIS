@@ -201,6 +201,7 @@ export default [
         _MODE_CODE: 'readonly',
         _MODE_CODE_REASONING: 'readonly',
         _MODE_GENERAL: 'readonly',
+        _MODE_THINK: 'readonly',
         _TICK_INTERVAL_MS: 'readonly',
         _VOIX_PULSE_MS: 'readonly',
         _applyModeProfile: 'writable',

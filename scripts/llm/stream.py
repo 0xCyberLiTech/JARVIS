@@ -101,6 +101,8 @@ def stream_llm(messages, model_override=None, options_override=None):
     }
     if options_override:
         opts.update(options_override)
+    # "think" appartient au payload top-level Ollama (pas à options dict) — extrait ici
+    think_val = opts.pop("think", None)
     active_model_name = model_override or _get_model()
     payload = {
         "model":      active_model_name,
@@ -108,7 +110,7 @@ def stream_llm(messages, model_override=None, options_override=None):
         "stream":     True,
         "keep_alive": "30m",
         "options":    opts,
-        "think":      llm_params.get("think", False),
+        "think":      think_val if think_val is not None else llm_params.get("think", False),
     }
     _in_think = False
     _tbuf     = ""

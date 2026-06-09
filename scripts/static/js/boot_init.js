@@ -821,7 +821,8 @@ function _jarvisInitMode() {
       _jarvisMode = d.mode;
       const profileName = d.mode === 'general' ? _MODE_GENERAL
         : d.mode === 'code' ? _MODE_CODE
-        : d.mode === 'code_reasoning' ? _MODE_CODE_REASONING : null;
+        : d.mode === 'code_reasoning' ? _MODE_CODE_REASONING
+        : d.mode === 'think' ? _MODE_THINK : null;
       if (profileName) localStorage.setItem(_LS_PROMPT_PROFILE, profileName);
       _updateModeBtn();
     }

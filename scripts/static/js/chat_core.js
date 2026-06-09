@@ -184,12 +184,13 @@ function visionClear() {
   var btn = document.getElementById('btn-vision');
   if (btn) btn.classList.remove('btn-vision--active');
 }
-// ── Mode LLM : SOC / GÉNÉRAL / CODE ──────────────────────────
+// ── Mode LLM : SOC / GÉNÉRAL / CODE / THINK ──────────────────────────
 const _MODE_SOC            = 'Phi4 — Analyse Avancée';
 const _MODE_GENERAL        = 'Gemma4 — Conversation Fluide';
 const _MODE_CODE           = '◆ CODE — Qwen2.5-Coder';
 const _MODE_CODE_REASONING = '⬡ CODE REASONING — qwen3:8b';
-const _MODE_MODELS  = { soc: 'phi4:14b', general: 'gemma4:latest', code: 'qwen2.5-coder:14b', code_reasoning: 'qwen3:8b' };
+const _MODE_THINK          = '◉ THINK — qwen3:14b';
+const _MODE_MODELS  = { soc: 'phi4:14b', general: 'gemma4:latest', code: 'qwen2.5-coder:14b', code_reasoning: 'qwen3:8b', think: 'qwen3:14b' };
 const _LS_MODE           = 'jarvis_mode';
 const _LS_PROMPT_PROFILE = 'jarvis_active_prompt_profile';
 // Mode toujours SOC au démarrage — localStorage ignoré (code/general se choisissent manuellement)
@@ -228,6 +229,7 @@ const _MODE_TARGET_MODEL = {
   general:        'gemma4:latest',
   code:           'qwen2.5-coder:14b',
   code_reasoning: 'qwen3:8b',
+  think:          'qwen3:14b',
   // soc = MODEL Ollama par défaut (phi4:14b en config standard) → résolu via /api/mode
 };
 
@@ -249,6 +251,7 @@ async function _pollModeReady(mode) {
     general:        'btn-mode-general',
     code:           'btn-mode-code',
     code_reasoning: 'btn-mode-code-reasoning',
+    think:          'btn-mode-think',
   };
   const btn = document.getElementById(btnIds[mode]);
   if (!btn) return;
@@ -286,16 +289,19 @@ async function setModeSoc()              { await _setMode('soc'); }
 async function setModeGeneral()          { await _setMode('general'); }
 async function setModeCode()             { await _setMode('code'); devTerminalOpen(); }
 async function setModeCodeReasoning()    { await _setMode('code_reasoning'); }
+async function setModeThink()            { await _setMode('think'); }
 
 async function _applyModeProfile(mode) {
   // Annonce vocale immédiate — indépendante du chargement du profil
   if (mode === 'code') queueSpeech('Mode code activé.');
   else if (mode === 'code_reasoning') queueSpeech('Mode code reasoning activé. Qwen 3 huit B.');
+  else if (mode === 'think') queueSpeech('Mode think activé. Qwen 3 quatorze B, raisonnement profond.');
   else if (mode === 'general') queueSpeech('Mode général activé.');
   else queueSpeech('Mode S O C activé.');
   const profileName = mode === 'general' ? _MODE_GENERAL
     : mode === 'code' ? _MODE_CODE
     : mode === 'code_reasoning' ? _MODE_CODE_REASONING
+    : mode === 'think' ? _MODE_THINK
     : _MODE_SOC;
   try {
     const profiles = await _fetchPromptProfiles();
@@ -332,25 +338,29 @@ var _fileCorrectFilesCount = 0;       // nombre de fichiers attendus
 var _fileCorrectHeaderAdded = false;  // header "VERSIONS CORRIGÉES" déjà ajouté
 
 function _updateModeBtn() {
-  const modeEl = document.getElementById('m-llm-mode');
-  const btnSoc = document.getElementById('btn-mode-soc');
-  const btnGen = document.getElementById('btn-mode-general');
-  const btnCode= document.getElementById('btn-mode-code');
-  if (btnSoc)  { btnSoc.classList.toggle('mode-active-soc',     _jarvisMode === 'soc'); }
-  if (btnGen)  { btnGen.classList.toggle('mode-active-general',  _jarvisMode === 'general'); }
-  if (btnCode) { btnCode.classList.toggle('mode-active-code',    _jarvisMode === 'code'); }
-  const btnCR = document.getElementById('btn-mode-code-reasoning');
-  if (btnCR)   { btnCR.classList.toggle('mode-active-code',      _jarvisMode === 'code_reasoning'); }
+  const modeEl  = document.getElementById('m-llm-mode');
+  const btnSoc  = document.getElementById('btn-mode-soc');
+  const btnGen  = document.getElementById('btn-mode-general');
+  const btnCode = document.getElementById('btn-mode-code');
+  const btnCR   = document.getElementById('btn-mode-code-reasoning');
+  const btnThink= document.getElementById('btn-mode-think');
+  if (btnSoc)   { btnSoc.classList.toggle('mode-active-soc',     _jarvisMode === 'soc'); }
+  if (btnGen)   { btnGen.classList.toggle('mode-active-general',  _jarvisMode === 'general'); }
+  if (btnCode)  { btnCode.classList.toggle('mode-active-code',    _jarvisMode === 'code'); }
+  if (btnCR)    { btnCR.classList.toggle('mode-active-code',      _jarvisMode === 'code_reasoning'); }
+  if (btnThink) { btnThink.classList.toggle('mode-active-code',   _jarvisMode === 'think'); }
   if (modeEl)  {
     modeEl.textContent = _jarvisMode === 'general'        ? 'GÉNÉRAL · gemma4'
       : _jarvisMode === 'code'                            ? 'CODE · qwen2.5-coder'
-      : _jarvisMode === 'code_reasoning'                  ? 'C·R · qwen3'
+      : _jarvisMode === 'code_reasoning'                  ? 'C·R · qwen3:8b'
+      : _jarvisMode === 'think'                           ? 'THINK · qwen3:14b'
       : 'SOC · phi4';
   }
   // Highlight le modèle que JARVIS utilisera — grise les autres même si chargés Ollama
   const jarvisTarget = _jarvisMode === 'general'       ? 'gemma4:latest'
     : _jarvisMode === 'code'                           ? 'qwen2.5-coder:14b'
     : _jarvisMode === 'code_reasoning'                 ? 'qwen3:8b'
+    : _jarvisMode === 'think'                          ? 'qwen3:14b'
     : null; // null = modèle Ollama actif (SOC → phi4:14b)
   document.querySelectorAll('.voice-card[data-model-id]').forEach(c => {
     const mid = c.dataset.modelId || '';

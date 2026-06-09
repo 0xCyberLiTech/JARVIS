@@ -82,6 +82,7 @@ _get_mode = None
 _general_model = ""
 _code_model = ""
 _code_reasoning_analysis_model = ""
+_think_model = ""
 _code_system_suffix = ""
 _ollama_url = ""
 _llm_params = None
@@ -115,7 +116,7 @@ def init(*,
          # accesseurs runtime
          get_system_prompt, get_model, get_mode,
          # constantes
-         general_model, code_model, code_reasoning_analysis_model,
+         general_model, code_model, code_reasoning_analysis_model, think_model,
          code_system_suffix, ollama_url, llm_params, llm_defaults,
          soc_temperature, soc_num_ctx, num_ctx_short, reasoning_np_min,
          tts_phrase_min, tool_call_max, tool_result_trunc,
@@ -132,7 +133,7 @@ def init(*,
     global _tool_dispatch, _apt_host_map, _pending_infra_cmd, _pending_reboot
     global _speak_deferred, _chat_stream_active
     global _get_system_prompt, _get_model, _get_mode
-    global _general_model, _code_model, _code_reasoning_analysis_model
+    global _general_model, _code_model, _code_reasoning_analysis_model, _think_model
     global _code_system_suffix, _ollama_url, _llm_params, _llm_defaults
     global _soc_temperature, _soc_num_ctx, _num_ctx_short, _reasoning_np_min
     global _tts_phrase_min, _tool_call_max, _tool_result_trunc
@@ -173,6 +174,7 @@ def init(*,
     _general_model = general_model
     _code_model = code_model
     _code_reasoning_analysis_model = code_reasoning_analysis_model
+    _think_model = think_model
     _code_system_suffix = code_system_suffix
     _ollama_url = ollama_url
     _llm_params = llm_params
@@ -371,4 +373,5 @@ def _chat_resolve_model(is_vocal: bool, no_tools: bool, model_override=None) -> 
         general_model=_general_model,
         code_model=_code_model,
         current_mode=_get_mode(),
+        think_model=_think_model,
     )

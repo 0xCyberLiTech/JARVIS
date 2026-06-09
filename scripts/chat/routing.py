@@ -19,6 +19,7 @@ def resolve_model(
     general_model: str,
     code_model: str,
     current_mode: str,
+    think_model: str = "",
 ) -> tuple[str | None, str]:
     """Retourne (active_model, route_label) selon le mode actif et les flags de la requête.
 
@@ -27,10 +28,11 @@ def resolve_model(
     - `model_override='general'` → general_model (override externe explicite)
     - `no_tools=True`            → code_model (terminal CODE direct)
     - `current_mode='code'`      → code_model (mode CODE manuel)
+    - `current_mode='think'`     → think_model (raisonnement profond qwen3:14b + think=True)
     - `is_vocal` ou mode='general' → general_model (conversation/VOCAL)
     - Sinon                      → None (MODEL défaut phi4:14b SOC)
 
-    Retour route_label : "SOC" / "GENERAL" / "CODE" / "CODE-TERM" / "VOCAL"
+    Retour route_label : "SOC" / "GENERAL" / "CODE" / "CODE-TERM" / "VOCAL" / "THINK"
     """
     if model_override == "soc":
         return None, "SOC"  # phi4:14b — dashboard SOC force le bon modèle
@@ -38,6 +40,8 @@ def resolve_model(
         return general_model, "GENERAL"
     if no_tools:
         return code_model, "CODE-TERM"
+    if current_mode == "think":
+        return think_model or None, "THINK"
     if current_mode == "code":
         return code_model, "CODE"
     if is_vocal or current_mode == "general":

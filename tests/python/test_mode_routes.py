@@ -30,6 +30,7 @@ def client():
         general_model="gemma4:latest",
         code_model="qwen2.5-coder:14b",
         code_reasoning_model="qwen3:8b",
+        think_model="qwen3:14b",
         ensure_vram=lambda m: ensure_vram_calls.append(m),
     )
     return app.test_client(), state, ensure_vram_calls

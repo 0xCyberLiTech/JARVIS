@@ -20,7 +20,10 @@ DEFAULT_NUM_CTX_SHORT   = 4096    # requête courte → économie KV cache
 DEFAULT_REASONING_NP_MIN = 768    # plancher num_predict modèles reasoning en SOC
 
 # Pattern modèles reasoning (qwen3, phi4-reasoning, deepseek-r1, etc.)
-REASONING_RE = re.compile(r'reasoning|deepseek-r1', re.I)
+REASONING_RE = re.compile(r'reasoning|deepseek-r1|qwen3', re.I)
+# Modèles avec think natif Ollama (paramètre top-level think=True) — injecté dans opts
+# pour être extracté par llm/stream.py vers le payload Ollama (hors options dict)
+THINK_NATIVE_RE = re.compile(r'\bqwen3\b', re.I)
 
 
 def build_llm_opts(
@@ -60,5 +63,9 @@ def build_llm_opts(
         opts["num_ctx"] = soc_num_ctx
     elif msg_len > 0 and msg_len < 200:
         opts["num_ctx"] = min(num_ctx_short, llm_params.get("num_ctx", num_ctx_short))
+
+    # Modèles qwen3 (think natif Ollama) — injected ici, extrait vers payload top-level dans llm/stream.py
+    if THINK_NATIVE_RE.search(active_model or default_model):
+        opts["think"] = True
 
     return opts or None

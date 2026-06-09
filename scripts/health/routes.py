@@ -38,6 +38,7 @@ _get_soc_status = None  # callable → {soc_engine_active, bans_24h, alerts_24h}
 _code_reasoning_model = ""
 _code_model = ""
 _general_model = ""
+_think_model = ""
 
 
 def init_routes(*, log, ollama_circuit,
@@ -45,7 +46,8 @@ def init_routes(*, log, ollama_circuit,
                 stats_cache, stats_ttl, sec_events, sec_lock,
                 get_boot_id, get_stats_fn, get_model, get_last_toks_per_sec,
                 get_llm_params, get_soc_status,
-                code_reasoning_model, code_model, general_model) -> None:
+                code_reasoning_model, code_model, general_model,
+                think_model="") -> None:
     globals().update({
         "_log": log,
         "_ollama_circuit": ollama_circuit,
@@ -64,6 +66,7 @@ def init_routes(*, log, ollama_circuit,
         "_code_reasoning_model": code_reasoning_model,
         "_code_model": code_model,
         "_general_model": general_model,
+        "_think_model": think_model,
     })
 
 
@@ -148,6 +151,8 @@ def api_vram():
             expires  = m.get("expires_at", "")
             if is_embed:
                 role = "RAG"
+            elif _think_model and _think_model.lower() in nl:
+                role = "THINK"
             elif _code_reasoning_model.lower().split(":")[0] in nl:
                 role = "C·R"
             elif _code_model.lower().split(":")[0] in nl:
