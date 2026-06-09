@@ -17,7 +17,7 @@ import re
 # ── Regex de détection ────────────────────────────────────────────────────────
 
 RAG_REFRESH_RE = re.compile(
-    r'\b(?:recharge(?:r)?|rafraîchi(?:s|r)?|réindexe(?:r)?|refresh|reload)'
+    r'\b(?:recharge(?:r)?|rafra[iî]chi(?:s|r)?|r[eé]indexe(?:r)?|refresh|reload)'
     r'\s+(?:le\s+|la\s+)?rag\b',
     re.I | re.U,
 )
@@ -29,8 +29,8 @@ RAG_CLEAR_RE = re.compile(
 
 MEMORY_CLEAR_RE = re.compile(
     r'\b(?:'
-    r'(?:vide(?:r)?|purge(?:r)?|efface(?:r)?|supprime(?:r)?|réinitialis[e]?r?)\s+(?:la\s+)?mémoire'
-    r'|(?:vide(?:r)?|purge(?:r)?|efface(?:r)?)\s+(?:l[\'e]\s*)?historique'
+    r'(?:vide(?:r)?|purge(?:r)?|efface(?:r)?|supprime(?:r)?|r[eé]initialis[e]?r?)\s+(?:la\s+)?m[eé]moire'
+    r'|(?:vide(?:r)?|purge(?:r)?|efface(?:r)?)\s+(?:l[\'e ]?\s*)?historique'
     r')\b',
     re.I | re.U,
 )

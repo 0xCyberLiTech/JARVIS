@@ -20,8 +20,10 @@ import re
 # ── Regex de détection ────────────────────────────────────────────────────────
 
 LEARN_RE = re.compile(
-    r'\b(?:souviens[- ]toi\s+que|retiens\s+que|mémorise\s+(?:que\s+)?'
-    r'|apprends\s+que|note\s+que|enregistre\s+que)\s*:?\s*(.+)',
+    r'\b(?:souviens[- ]toi\s+que|retiens\s+que'
+    r'|m[eé]morise(?:\s+que)?'
+    r'|apprends\s+que|note\s+que|enregistre\s+que)'
+    r'\s*:?\s*(.+)',
     re.I | re.U | re.DOTALL,
 )
 
