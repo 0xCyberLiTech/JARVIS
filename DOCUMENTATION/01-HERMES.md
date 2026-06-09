@@ -64,39 +64,39 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 ║  UTILISATEUR  (voix ou texte)                                    ║
 ╚══════════════════════════╤═══════════════════════════════════════╝
                            │
-              ┌────────────▼────────────┐
-              │                         │
-              │       H E R M È S       │
-              │ (couche agentification) │
-              │                         │
-              │  ┌─────────────────────┐│
-              │  │ 1. Bypass ?         ││  ← commande déterministe ?
-              │  │    OUI → action     ││     exécution directe < 100ms
-              │  │    NON ↓            ││     zéro LLM consommé
-              │  └─────────────────────┘│
-              │  ┌─────────────────────┐│
-              │  │ 2. Facts inject     ││  ← date/heure + leçons
-              │  │    Mémoire RAG      ││     persistées entre sessions
-              │  └─────────────────────┘│
-              │  ┌─────────────────────┐│
-              │  │ 3. RAG conditionnel ││  ← documentation locale
-              │  │    (si pertinent)   ││     injectée si besoin
-              │  └─────────────────────┘│
-              │  ┌─────────────────────┐│
-              │  │ 4. SOC inject       ││  ← contexte sécurité live
-              │  │    (mode SOC seul)  ││     side-channel, jamais
-              │  └─────────────────────┘│    dans l'historique chat
-              └────────────┬────────────┘
+              ┌────────────▼──────────────┐
+              │                           │
+              │       H E R M È S         │
+              │ (couche agentification)   │
+              │                           │
+              │  ┌─────────────────────┐  │
+              │  │ 1. Bypass ?         │  │  ← commande déterministe ?
+              │  │    OUI → action     │  │     exécution directe < 100ms
+              │  │    NON ↓            │  │     zéro LLM consommé
+              │  └─────────────────────┘  │
+              │  ┌─────────────────────┐  │
+              │  │ 2. Facts inject     │  │  ← date/heure + leçons
+              │  │    Mémoire RAG      │  │     persistées entre sessions
+              │  └─────────────────────┘  │
+              │  ┌─────────────────────┐  │
+              │  │ 3. RAG conditionnel │  │  ← documentation locale
+              │  │    (si pertinent)   │  │     injectée si besoin
+              │  └─────────────────────┘  │
+              │  ┌─────────────────────┐  │
+              │  │ 4. SOC inject       │  │  ← contexte sécurité live
+              │  │    (mode SOC seul)  │  │     side-channel, jamais
+              │  └─────────────────────┘  │    dans l'historique chat
+              └────────────┬──────────────┘
                            │
-              ┌────────────▼────────────┐
-              │          L L M          │
-              │  phi4 / gemma4 / qwen   │  ← ne voit que ce qu'Hermès
-              └────────────┬────────────┘    lui prépare
+              ┌────────────▼──────────────┐
+              │          L L M            │
+              │  phi4 / gemma4 / qwen     │  ← ne voit que ce qu'Hermès
+              └────────────┬──────────────┘    lui prépare
                            │
-              ┌────────────▼────────────┐
-              │   RÉPONSE ENRICHIE      │
-              │   + TTS vocal Antoine   │
-              └─────────────────────────┘
+              ┌────────────▼──────────────┐
+              │   RÉPONSE ENRICHIE        │
+              │   + TTS vocal Antoine     │
+              └───────────────────────────┘
 ```
 
 > **Règle fondamentale** : Hermès décide ce qui arrive au LLM. Le LLM ne voit jamais les données brutes — seulement un contexte filtré, structuré et pertinent.
