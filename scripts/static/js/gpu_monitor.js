@@ -378,11 +378,17 @@ function updateJarvisState(d) {
   _jsColor('js-rag-cache', rag.loaded ? 'stat-val c-green' : 'stat-val c-warn');
   _jsStat('js-rag-ttl',    rag.ttl_remaining_s >= 0 ? rag.ttl_remaining_s + 's / ' + rag.ttl_s + 's' : '—');
 
-  // STT
+  // STT — null = pas encore testé (boot), false = indisponible, true = ok
   var stt = d.stt || {};
-  var sttLabel = !stt.available ? 'INDISPONIBLE' : stt.loaded ? 'PRÊT' : 'NON CHARGÉ';
+  var sttLabel = stt.available === null || stt.available === undefined
+               ? 'EN VEILLE'
+               : stt.available === false ? 'INDISPONIBLE'
+               : stt.loaded ? 'PRÊT' : 'NON CHARGÉ';
+  var sttCls = (stt.available === null || stt.available === undefined) ? 'stat-val c-cyan'
+             : stt.available === false ? 'stat-val c-err'
+             : stt.loaded ? 'stat-val c-green' : 'stat-val c-warn';
   _jsStat('js-stt-state', sttLabel);
-  _jsColor('js-stt-state', stt.loaded ? 'stat-val c-green' : 'stat-val c-warn');
+  _jsColor('js-stt-state', sttCls);
   _jsStat('js-stt-model', stt.model || (stt.available ? 'whisper' : '—'));
 
   // TTS
