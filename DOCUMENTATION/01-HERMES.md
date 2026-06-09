@@ -212,7 +212,7 @@ jarvis_memory.json  (persistant sur disque)
 ├── résumés       : condensés des longues conversations
 └── contexte      : état de l'échange en cours
 
-Base vectorielle RAG  (~600 chunks)
+Base vectorielle RAG  (~1700 chunks)
 ├── documentation technique locale
 ├── leçons apprises  (injection automatique)
 └── résumés de sessions

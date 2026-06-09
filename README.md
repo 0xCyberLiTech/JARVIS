@@ -204,7 +204,7 @@ Un terminal SSH/système complet directement dans l'interface. La **palette de c
 |--------|-------------|
 | **Backend** | Python 3.11 · Flask · Blueprints autoportants · DI pur |
 | **LLM local** | Ollama · phi4:14b (SOC) · gemma4:latest (GÉNÉRAL + vision) · qwen2.5-coder:14b (CODE) |
-| **RAG** | mxbai-embed-large · BM25 hybride · ~600 chunks · TTL 5 min |
+| **RAG** | mxbai-embed-large · BM25 hybride · ~1700 chunks · TTL 5 min |
 | **TTS** | edge-tts fr-CA Antoine → Kokoro CUDA → SAPI5 (cascade automatique) |
 | **STT** | faster-whisper large-v3-turbo CUDA · vocabulaire SOC |
 | **Frontend** | Vanilla JS · 21 modules · Web Audio API · xterm.js · Monaco Editor |
