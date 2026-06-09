@@ -5,7 +5,7 @@ restent dans jarvis.py jusqu'à étape ultérieure).
 
 - POST /api/code/exec    — écrit + SCP + exec un fichier code sur srv-dev-1
 - POST /api/dev/exec     — exécute une commande shell sur srv-dev-1 (SSE)
-- GET  /api/dev/stats    — stats système srv-dev-1 (cache 12s, paramiko)
+- GET  /api/dev/stats    — stats système srv-dev-1 (cache 12s, SSH via _ssh_dev1 DI)
 - POST /api/save-code    — sauvegarde locale dans scripts/generated_code/
 """
 import json
@@ -157,20 +157,14 @@ def api_dev_exec():
 
 @bp.route("/api/dev/stats")
 def dev_stats():
-    """Stats système srv-dev-1 via SSH · cache 12s · TTY-free."""
+    """Stats système srv-dev-1 via SSH · cache 12s · utilise _ssh_dev1 DI."""
     now = time.time()
     if now - _dev_stats_cache["ts"] < 12 and _dev_stats_cache["data"]:
         return jsonify(_dev_stats_cache["data"])
     try:
-        import paramiko as _pm
-        cl = _pm.SSHClient()
-        cl.set_missing_host_key_policy(_pm.AutoAddPolicy())
-        cl.connect(hostname=_code_dev_ip, port=_code_dev_port, username="root",
-                   key_filename=_code_dev_key, timeout=5,
-                   look_for_keys=False, allow_agent=False)
-        _, out, _ = cl.exec_command(_STATS_CMD, timeout=8)
-        raw = out.read().decode().strip()
-        cl.close()
+        ok, raw = _ssh_dev1(_STATS_CMD)
+        if not ok:
+            return jsonify({"error": "SSH dev1 failed"}), 500
         data = json.loads(raw)
         _dev_stats_cache["ts"]   = time.time()
         _dev_stats_cache["data"] = data

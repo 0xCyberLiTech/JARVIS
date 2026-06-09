@@ -131,10 +131,11 @@ def _soc_actions_load():
 
 
 def _soc_actions_save():
-    """Persiste le journal sur disque (appelé à chaque nouvelle entrée)."""
+    """Persiste le journal sur disque — garde-fou _SOC_ACT_MAX appliqué avant écriture."""
     try:
+        data = _SOC_ACTIONS[-_SOC_ACT_MAX:]
         with open(_SOC_ACTIONS_FILE, "w", encoding="utf-8") as f:
-            json.dump(_SOC_ACTIONS, f, ensure_ascii=False, indent=None)
+            json.dump(data, f, ensure_ascii=False, indent=None)
     except Exception as e:
         _log.debug(f"[soc_actions_save] {e}")
 
