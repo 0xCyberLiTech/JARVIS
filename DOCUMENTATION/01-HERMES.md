@@ -67,7 +67,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 
 ```
 ╔══════════════════════════════════════════════════════════════════╗
-║  UTILISATEUR  (voix ou texte)                                    ║
+║                 UTILISATEUR  (voix ou texte)                     ║
 ╚══════════════════════════╤═══════════════════════════════════════╝
                            │
               ┌────────────▼──────────────┐
@@ -116,44 +116,44 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 > détaillées plus bas.
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                      H E R M È S                                │
-│                                                                 │
-│  ┌──────────────────┐   ┌──────────────────┐                    │
-│  │  BRIQUE 1        │   │  BRIQUE 2        │                    │
-│  │  SYNOPTIQUE      │   │  TUILE MÉMOIRE   │                    │
-│  │  TEMPS RÉEL      │   │                  │                    │
-│  │                  │   │  ● Échanges      │                    │
-│  │  ● LLM actif     │   │  ● Résumés       │                    │
-│  │  ● RAG chunks    │   │  ● Leçons        │                    │
-│  │  ● STT/TTS état  │   │  ● Conventions   │                    │
-│  │  ● Auto-engine   │   │                  │                    │
-│  │  ● Mémoire état  │   │  Persistant      │                    │
-│  │  ● Mode actif    │   │  entre sessions  │                    │
-│  └──────────────────┘   └──────────────────┘                    │
-│                                                                 │
-│  ┌──────────────────┐   ┌──────────────────┐                    │
-│  │  BRIQUE 3        │   │  BRIQUE 4        │                    │
-│  │  BYPASS          │   │  BOUCLE          │                    │
-│  │  DÉTERMINISTE    │   │  APPRENTISSAGE   │                    │
-│  │                  │   │                  │                    │
-│  │  Interception    │   │  "Souviens-toi"  │                    │
-│  │  avant LLM       │   │  → persisté RAG  │                    │
-│  │  < 100ms         │   │  → réinjecté     │                    │
-│  │  0 hallucination │   │    auto futures  │                    │
-│  └──────────────────┘   └──────────────────┘                    │
-│                                                                 │
-│  ┌──────────────────┐                                           │
-│  │  BRIQUE 5        │                                           │
-│  │  BRIEFING        │                                           │
-│  │  MATINAL         │                                           │
-│  │                  │                                           │
-│  │  "Bonjour JARVIS"│                                           │
-│  │  → menaces SOC   │                                           │
-│  │  → état machines │                                           │
-│  │  → alertes 24h   │                                           │
-│  └──────────────────┘                                           │
-└─────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────┐
+│                      H E R M È S              │
+│                                               │
+│  ┌──────────────────┐   ┌──────────────────┐  │
+│  │  BRIQUE 1        │   │  BRIQUE 2        │  │
+│  │  SYNOPTIQUE      │   │  TUILE MÉMOIRE   │  │
+│  │  TEMPS RÉEL      │   │                  │  │
+│  │                  │   │  ● Échanges      │  │
+│  │  ● LLM actif     │   │  ● Résumés       │  │
+│  │  ● RAG chunks    │   │  ● Leçons        │  │
+│  │  ● STT/TTS état  │   │  ● Conventions   │  │
+│  │  ● Auto-engine   │   │                  │  │
+│  │  ● Mémoire état  │   │  Persistant      │  │
+│  │  ● Mode actif    │   │  entre sessions  │  │
+│  └──────────────────┘   └──────────────────┘  │
+│                                               │
+│  ┌──────────────────┐   ┌──────────────────┐  │
+│  │  BRIQUE 3        │   │  BRIQUE 4        │  │
+│  │  BYPASS          │   │  BOUCLE          │  │
+│  │  DÉTERMINISTE    │   │  APPRENTISSAGE   │  │
+│  │                  │   │                  │  │
+│  │  Interception    │   │  "Souviens-toi"  │  │
+│  │  avant LLM       │   │  → persisté RAG  │  │
+│  │  < 100ms         │   │  → réinjecté     │  │
+│  │  0 hallucination │   │    auto futures  │  │
+│  └──────────────────┘   └──────────────────┘  │
+│                                               │
+│  ┌──────────────────┐                         │
+│  │  BRIQUE 5        │                         │
+│  │  BRIEFING        │                         │
+│  │  MATINAL         │                         │
+│  │                  │                         │
+│  │  "Bonjour JARVIS"│                         │
+│  │  → menaces SOC   │                         │
+│  │  → état machines │                         │
+│  │  → alertes 24h   │                         │
+│  └──────────────────┘                         │
+└───────────────────────────────────────────────┘
 ```
 
 ---
