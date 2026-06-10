@@ -59,12 +59,12 @@ SOURCE TTS (edge-tts / Kokoro / SAPI5)
        │
    Analyseur VU · pré-gain
        │
-┌──────────────────────────────────────────┐
-│  ÉTAGE 1 — VOICE CHANNEL STRIP           │
-│  EQ 4 bandes (Low · Mid · High · Air)    │
-│  Compresseur : -24 dBFS · ratio 4:1      │
+┌─────────────────────────────────────────┐
+│  ÉTAGE 1 — VOICE CHANNEL STRIP          │
+│  EQ 4 bandes (Low · Mid · High · Air)   │
+│  Compresseur : -24 dBFS · ratio 4:1     │
 │  Limiter voix : -0.5 dBFS · ratio 20:1  │
-└──────────────────┬───────────────────────┘
+└──────────────────┬──────────────────────┘
                    │
         ┌──────────┴──────────┐
         ▼                     ▼
