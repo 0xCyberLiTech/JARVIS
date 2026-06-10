@@ -121,23 +121,7 @@ Tour visuel des principaux modules de l'interface holographique JARVIS.
 
 À l'ouverture, JARVIS se présente et énumère son état opérationnel : le **modèle LLM actif** (phi-14b via Ollama), le **moteur vocal** (Edge-TTS Antoine Neural), la **chaîne de traitement DSP** (EQ, compresseur, DeepFilterNet), les **modules disponibles** (Terminal, Fichiers, Tâches, Audio) et l'**accélération matérielle CUDA** (RTX Blackwell + Whisper STT GPU). Les trois actions principales — *Lire*, *Modifier*, *Accéder au système* — sont accessibles directement, et la première interaction de la journée déclenche le briefing matinal d'Hermès.
 
-### 2 · Dashboard monitoring
-
-<div align="center">
-  <img src="Images/Jarvis-02.png" alt="Dashboard monitoring temps réel" width="880"/>
-</div>
-
-Vue d'ensemble temps réel de la machine hôte. En haut, les **courbes glissantes** GPU / CPU / VRAM / température suivent l'évolution sur la fenêtre récente ; en dessous, une grille de **tuiles métriques** détaille chaque sous-système (utilisation cœur, encodeur/décodeur NVENC, horloges GPU et mémoire, puissance, RAM système). C'est le poste de surveillance matériel — il permet de vérifier d'un coup d'œil que l'inférence locale dispose des ressources nécessaires.
-
-### 3 · Panneau de pilotage des modèles
-
-<div align="center">
-  <img src="Images/Jarvis-03.png" alt="Panneau de pilotage des modèles et télémétrie" width="420"/>
-</div>
-
-Le panneau latéral concentre le **contrôle des modèles** et la **télémétrie live**. De haut en bas : coordonnées et état général (statut *online*, Ollama actif, mode **SOC – phi4** en cours), bascule **local / cloud (Edge)**, liste des **modèles actifs** sélectionnables (qwen, phi4, gemma), et la **tuile mémoire** d'Hermès avec son bouton de purge. C'est ici que l'on choisit le moteur de raisonnement selon le besoin — cybersécurité, code ou conversation générale.
-
-### 4 · Réglages LLM & profils GPU
+### 2 · Réglages LLM & profils GPU
 
 <div align="center">
   <img src="Images/Jarvis-04.png" alt="Réglages LLM et profils GPU RTX" width="420"/>
@@ -145,7 +129,7 @@ Le panneau latéral concentre le **contrôle des modèles** et la **télémétri
 
 Le centre de configuration fin. La section **GPU Health** affiche l'état de la RTX (VRAM, charge, température, puissance) et l'**impact mémoire** de chaque modèle chargé. Les **profils RTX** (Rapide, Équilibré, Code, Créatif, Précis, RTX MAX) appliquent en un clic un préréglage cohérent. En dessous, les **paramètres LLM** ajustables — température, top-p, top-k, longueur maximale, repeat penalty, taille de contexte — avec trois modes d'**optimisation latence** (Rapide / Équilibré / Qualité).
 
-### 5 · Studio audio DSP
+### 3 · Studio audio DSP
 
 <div align="center">
   <img src="Images/Jarvis-05.png" alt="Studio audio DSP — EQ et analyseur spectral" width="460"/>
@@ -153,7 +137,7 @@ Le centre de configuration fin. La section **GPU Health** affiche l'état de la 
 
 Le rack audio professionnel de JARVIS, inspiré d'un processeur voix broadcast. On y trouve l'**égaliseur paramétrique** multibandes, l'**analyseur spectral** temps réel (waveform colorée vert→orange selon l'énergie) et les **compresseurs** de la chaîne voix. Chaque étage est réglable à la souris, avec retour visuel immédiat sur le signal traité.
 
-### 6 · Studio audio DSP — chaîne FX
+### 4 · Studio audio DSP — chaîne FX
 
 <div align="center">
   <img src="Images/Jarvis-06.png" alt="Studio audio DSP — chaîne d'effets et convolution" width="460"/>
@@ -161,21 +145,9 @@ Le rack audio professionnel de JARVIS, inspiré d'un processeur voix broadcast. 
 
 La suite de la chaîne audio : **courbe de réponse** globale, étages d'**effets par convolution** (reverb, echo, delay) avec calibration loudness, et bus master à limiteur brick-wall. C'est cette chaîne qui donne à la voix de synthèse Antoine son rendu naturel et homogène quel que soit le moteur TTS actif.
 
-### 7 · Dashboard SOC
-
-<div align="center">
-  <img src="Images/Jarvis-07.png" alt="Dashboard SOC — activité et journal d'événements" width="880"/>
-</div>
-
-L'intégration cybersécurité. La **courbe d'activité** en haut visualise les pics de trafic et de tentatives détectées sur la fenêtre récente ; le **journal d'événements** horodaté en dessous liste en continu les détections (scans, brute-force, hits honeypot, alertes IDS). C'est l'interface qui alimente l'auto-engine SOC : analyse des patterns, ban automatique et alertes vocales sur seuil de menace.
-
-### 8 · Terminal intégré
-
-<div align="center">
-  <img src="Images/Jarvis-08.png" alt="Terminal SSH/système intégré" width="880"/>
-</div>
-
-Un terminal SSH/système complet directement dans l'interface. La **palette de commandes** latérale regroupe les raccourcis usuels par catégorie (système : `ls`, `df`, `free`, `uptime`, `ports`, `htop` ; dev : `git status`, `git log`, `python`, `syslog`…), avec affichage de la **trace des process** et une **barre de statut** du serveur distant (charge, RAM, uptime). Le terminal s'appuie sur les mêmes garde-fous de sécurité que le reste de JARVIS — connexions SSH en lecture seule, patterns dangereux bloqués.
+> D'autres captures (dashboard monitoring, pilotage des modèles, SOC, terminal)
+> sont volontairement **non publiées** : elles relèvent de la doctrine de
+> sanitisation (la vitrine *décrit* le SOC, elle n'en *expose* aucune donnée live).
 
 ---
 
@@ -185,7 +157,7 @@ Un terminal SSH/système complet directement dans l'interface. La **palette de c
 
 | # | Document | Description | Statut | |
 |---|----------|-------------|--------|---|
-| 01 | [Hermès — Agent persistant](DOCUMENTATION/01-HERMES.md) | 5 briques · bypass déterministe · boucle apprentissage · briefing matinal | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/01-HERMES.md) |
+| 01 | [Hermès — Agent persistant](DOCUMENTATION/01-HERMES.md) | 5 briques fondatrices + avancées · bypass · apprentissage · briefing · mode tuteur · DR cerveau | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/01-HERMES.md) |
 | 02 | [Intégration SOC](DOCUMENTATION/02-SOC-INTEGRATION.md) | Auto-engine · ban/unban · alertes vocales · injection contexte sécurité | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/02-SOC-INTEGRATION.md) |
 | 03 | [Architecture globale](DOCUMENTATION/03-ARCHITECTURE.md) | 5 zones · Flask · Blueprints · modules · polling | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/03-ARCHITECTURE.md) |
 | 04 | [Audio DSP](DOCUMENTATION/04-AUDIO-DSP.md) | Chaîne broadcast · TTS 4 moteurs · STT faster-whisper · DSP 3 étages | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/04-AUDIO-DSP.md) |
