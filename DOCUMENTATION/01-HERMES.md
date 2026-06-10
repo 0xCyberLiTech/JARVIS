@@ -180,6 +180,12 @@ Le synoptique est le **tableau de bord live d'Hermès** — visible en permanenc
 > « vivre » — compteurs (leçons, chunks RAG, dernière sauvegarde, taille du
 > cerveau), flux des leçons récentes en haut, et l'enseignement en direct.
 
+<div align="center">
+  <img src="../Images/Jarvis-07.png" alt="JARVIS — onglet APPRENTISSAGE (observabilité Hermès)" width="760" />
+  <br/>
+  <sub>L'onglet <b>◈ APPRENTISSAGE</b> : compteurs du moteur, champ « souviens-toi que… » pour enseigner en direct, et le flux des <b>leçons apprises</b> (ici, des connaissances cyber — threat intel, triage SOC, kill chain, MITRE).</sub>
+</div>
+
 L'utilisateur sait **en un coup d'œil** si JARVIS est pleinement opérationnel, si un modèle est en cours de chargement, si le RAG est à jour, ou si l'auto-engine SOC surveille activement.
 
 ---

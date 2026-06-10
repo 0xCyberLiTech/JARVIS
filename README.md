@@ -145,6 +145,14 @@ Le rack audio professionnel de JARVIS, inspiré d'un processeur voix broadcast. 
 
 La suite de la chaîne audio : **courbe de réponse** globale, étages d'**effets par convolution** (reverb, echo, delay) avec calibration loudness, et bus master à limiteur brick-wall. C'est cette chaîne qui donne à la voix de synthèse Antoine son rendu naturel et homogène quel que soit le moteur TTS actif.
 
+### 5 · Apprentissage Hermès
+
+<div align="center">
+  <img src="Images/Jarvis-07.png" alt="Onglet APPRENTISSAGE — observabilité Hermès" width="880"/>
+</div>
+
+L'onglet **◈ APPRENTISSAGE** rend visible l'agent qui « vit » : les **compteurs du moteur** (leçons apprises, chunks RAG, dernière sauvegarde, taille du cerveau), le champ **« souviens-toi que… »** pour enseigner une règle en direct, et le **flux des leçons apprises** persistées entre sessions. Ici, des connaissances cybersécurité (threat intelligence, triage SOC, Cyber Kill Chain, MITRE ATT&CK) — c'est la boucle d'apprentissage (brique 4) et la mémoire persistante (brique 2) en action.
+
 > D'autres captures (dashboard monitoring, pilotage des modèles, SOC, terminal)
 > sont volontairement **non publiées** : elles relèvent de la doctrine de
 > sanitisation (la vitrine *décrit* le SOC, elle n'en *expose* aucune donnée live).
