@@ -83,6 +83,14 @@ SOURCE TTS (edge-tts / Kokoro / SAPI5)
         audioCtx.destination
 ```
 
+<div align="center">
+  <img src="../Images/Jarvis-05.png" alt="JARVIS — rack DSP audio broadcast" width="300" />
+  &nbsp;
+  <img src="../Images/Jarvis-06.png" alt="JARVIS — analyseur spectre et étages DSP" width="300" />
+  <br/>
+  <sub>Le rack DSP en interface : waveform, EQ, compresseur, analyseur de spectre — chaîne voix de type broadcast, entièrement en Web Audio.</sub>
+</div>
+
 ---
 
 ## Chaîne TTS — 4 moteurs en cascade

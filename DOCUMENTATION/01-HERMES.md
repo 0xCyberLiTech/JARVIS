@@ -55,6 +55,12 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 
 **Hermès est la couche d'agentification de JARVIS.** C'est lui qui transforme un assistant LLM classique en agent autonome persistant. Il s'intercale entre l'utilisateur et le moteur LLM, et prend en charge tout ce que le LLM ne devrait pas faire : la mémoire long terme, les décisions déterministes, les actions système et le briefing proactif.
 
+<div align="center">
+  <img src="../Images/Jarvis-01.png" alt="Interface holographique JARVIS — accueil" width="640" />
+  <br/>
+  <sub>Interface holographique JARVIS — état du moteur local (LLM, voix, modules, accélération GPU) en un coup d'œil.</sub>
+</div>
+
 ---
 
 ## Schéma 1 — Position d'Hermès dans l'architecture
@@ -103,7 +109,11 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 
 ---
 
-## Schéma 2 — Les 5 briques d'Hermès
+## Schéma 2 — Les 5 briques fondatrices d'Hermès
+
+> Ces 5 briques sont le socle. Elles sont complétées par des **briques avancées**
+> (mode pédagogique, infogérance orchestrée, DR du cerveau, cache vocal) —
+> détaillées plus bas.
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -161,9 +171,14 @@ Le synoptique est le **tableau de bord live d'Hermès** — visible en permanenc
 │  STT            │  large-v3-turbo  ●  EN ÉCOUTE         │
 │  TTS            │  edge-tts  Antoine fr-CA  ●  ACTIF    │
 │  AUTO-ENGINE    │  ●  ACTIF  —  dernier scan: 42s       │
-│  MÉMOIRE        │  12 leçons  ●  3 résumés  ●  SYNC     │
+│  MÉMOIRE        │  96 leçons  ●  résumés  ●  SYNC       │
 └─────────────────┴───────────────────────────────────────┘
 ```
+
+> Ce synoptique est désormais un **onglet dédié** de l'interface (`◈ APPRENTISSAGE`) :
+> un tableau de bord d'observabilité Hermès où l'on voit, en direct, le moteur
+> « vivre » — compteurs (leçons, chunks RAG, dernière sauvegarde, taille du
+> cerveau), flux des leçons récentes en haut, et l'enseignement en direct.
 
 L'utilisateur sait **en un coup d'œil** si JARVIS est pleinement opérationnel, si un modèle est en cours de chargement, si le RAG est à jour, ou si l'auto-engine SOC surveille activement.
 
@@ -343,6 +358,127 @@ Au lieu d'attendre une question, JARVIS prend l'initiative de livrer un résumé
 
 ---
 
+# Briques avancées — l'évolution d'Hermès
+
+Aux 5 briques fondatrices se sont ajoutées des briques nées de l'usage
+quotidien. Chacune suit la même philosophie : **déterminisme, sûreté,
+accessibilité** — Hermès protège le LLM et l'utilisateur.
+
+---
+
+## Brique 6 — Mode pédagogique (JARVIS tuteur)
+
+**Rôle : distinguer *expliquer* de *analyser*, et enseigner.**
+
+En mode SOC, le moteur de raisonnement tend à *analyser* la situation live à
+chaque sollicitation — y compris quand l'utilisateur veut simplement
+*comprendre* un concept. Hermès tranche cette ambiguïté **avant** le LLM.
+
+```
+"Analyse la situation"          "Explique-moi ce qu'est un WAF"
+        │                                │
+        ▼  détecteur d'intention         ▼  détecteur d'intention
+   = ANALYSE                         = EXPLICATION
+        │                                │
+        ▼                                ▼
+   Contexte SOC live injecté        Prompt PÉDAGOGIQUE neutre
+   (méthode d'analyse)              (aucune donnée live injectée)
+        │                                │
+        ▼                                ▼
+   Recommandation actionnable       Leçon claire, analogies,
+   ancrée sur les données           niveau débutant
+```
+
+Un détecteur d'intention unique (source unique, réutilisé partout) reconnaît
+les tournures pédagogiques (*explique, décris, apprends-moi, à quoi sert,
+différence entre…*). En explication, Hermès **n'injecte ni le contexte
+sécurité live ni la documentation** : il sert un prompt pédagogique neutre.
+JARVIS devient alors le **tuteur** de son utilisateur — utile pour monter en
+compétence sur la cybersécurité défensive.
+
+---
+
+## Brique 7 — Infogérance assistée (orchestration sûre)
+
+**Rôle : exécuter une opération multi-étapes risquée en un seul geste, avec garde-fous.**
+
+Mettre à jour une machine demande normalement une séquence manuelle (mise à
+jour → redémarrage → re-vérification de l'intégrité fichier). Hermès
+l'orchestre derrière **un seul bouton**, sans jamais sacrifier la sûreté.
+
+```
+1 bouton « MAJ complète »
+        │
+        ▼  1 seule confirmation OUI / NON
+        │
+   ┌────┴─────────────────────────────────────────┐
+   │  ① mise à jour des paquets                    │
+   │  ② redémarrage SI requis                       │
+   │     └─ preuve du reboot (uptime vérifié)       │
+   │  ③ re-base de l'intégrité fichier (post-reboot)│
+   └────┬─────────────────────────────────────────┘
+        │
+        ▼  FAIL-CLOSED : toute étape qui échoue STOPPE la chaîne
+        │
+   Journal horodaté (JSONL) de chaque étape
+```
+
+Trois principes non négociables :
+
+- **Fail-closed** — une étape qui échoue interrompt tout (jamais de re-base sur
+  un état non vérifié).
+- **Ordre prouvé** — la re-base d'intégrité n'a lieu **qu'après** un
+  redémarrage prouvé (uptime), jamais avant.
+- **Traçabilité** — chaque étape est journalisée (JSONL horodaté), comme toute
+  opération sensible.
+
+Pensée pour l'**accessibilité** : gros boutons, confirmation OUI/NON
+inconfondable, verdict lu à voix haute.
+
+---
+
+## Brique 8 — Mémoire protégée (DR du cerveau)
+
+**Rôle : ne jamais perdre le savoir appris.**
+
+La boucle d'apprentissage (brique 4) n'a de valeur que si la mémoire survit à
+une panne. Hermès protège son propre cerveau par une stratégie de reprise
+après sinistre, pilotable **à la voix**.
+
+```
+"Sauvegarde le cerveau"  ──►  copie légère quotidienne
+                              ├─ rotation glissante
+                              ├─ archives mensuelles PERMANENTES
+                              └─ "latest" pour restauration 1-geste
+                                   │
+"Restaure le cerveau"   ──►  retour à la dernière sauvegarde
+                              └─ vocal : "Cerveau restauré. 96 leçons."
+```
+
+Le fichier des leçons est **cumulatif** : la rotation ne supprime jamais le
+savoir, elle ne fait que dater des photos. Le bilan annoncé (nombre de leçons)
+est **extrait de la sortie réelle** du script — jamais un chiffre inventé.
+
+---
+
+## Brique 9 — Cache vocal (restitution instantanée)
+
+**Rôle : rendre la voix immédiate sur les phrases répétées.**
+
+Confirmations, menu vocal, réponses figées : ces phrases revenaient en
+re-synthèse à chaque fois. Hermès mémorise le rendu audio et le ressert
+instantanément.
+
+- **Clé** = empreinte du texte + voix + moteur + réglages DSP → un changement
+  de voix ou de DSP invalide l'entrée (jamais d'audio périmé).
+- **Best-effort intégral** : toute erreur du cache est avalée → repli sur la
+  génération normale, **la voix ne casse jamais**.
+- **Borné** (LRU) : le volume disque reste maîtrisé.
+
+> Détail technique : [04 — Audio &amp; DSP](04-AUDIO-DSP.md#cache-tts--restitution-instantanée).
+
+---
+
 ## Bilan — Ce qu'Hermès apporte à JARVIS
 
 ```
@@ -373,6 +509,16 @@ Au lieu d'attendre une question, JARVIS prend l'initiative de livrer un résumé
 │  Apprentissage limité   │  Boucle d'apprentissage : une leçon  │
 │  à la session courante  │  apprise persiste dans toutes les    │
 │                         │  sessions futures automatiquement    │
+├─────────────────────────┼──────────────────────────────────────┤
+│  Répond toujours pareil │  Mode pédagogique : sait distinguer  │
+│  (analyse même quand on │  expliquer d'analyser — devient un   │
+│  veut comprendre)       │  tuteur cybersécurité                │
+├─────────────────────────┼──────────────────────────────────────┤
+│  Opérations système     │  Infogérance orchestrée : 1 bouton,  │
+│  manuelles, risquées    │  fail-closed, ordre prouvé, journal  │
+├─────────────────────────┼──────────────────────────────────────┤
+│  La mémoire peut être   │  DR du cerveau : sauvegarde/restaure │
+│  perdue                 │  pilotable à la voix, savoir cumulatif│
 └─────────────────────────┴──────────────────────────────────────┘
 ```
 
