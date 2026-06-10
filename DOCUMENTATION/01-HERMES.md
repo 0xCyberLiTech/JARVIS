@@ -167,7 +167,7 @@ Le synoptique est le **tableau de bord live d'Hermès** — visible en permanenc
 │  ◈  HERMÈS  —  SYNOPTIQUE  MOTEUR                      │
 ├─────────────────┬───────────────────────────────────────┤
 │  LLM ACTIF      │  phi4:14b  ●  CHAUD  (en mémoire)     │
-│  RAG            │  1698 chunks  ●  PRÊT  TTL: 4m32s    │
+│  RAG            │  1698 chunks  ●  PRÊT  TTL: 4m32s     │
 │  STT            │  large-v3-turbo  ●  EN ÉCOUTE         │
 │  TTS            │  edge-tts  Antoine fr-CA  ●  ACTIF    │
 │  AUTO-ENGINE    │  ●  ACTIF  —  dernier scan: 42s       │
@@ -411,12 +411,12 @@ l'orchestre derrière **un seul bouton**, sans jamais sacrifier la sûreté.
         │
         ▼  1 seule confirmation OUI / NON
         │
-   ┌────┴─────────────────────────────────────────┐
-   │  ① mise à jour des paquets                    │
-   │  ② redémarrage SI requis                       │
-   │     └─ preuve du reboot (uptime vérifié)       │
-   │  ③ re-base de l'intégrité fichier (post-reboot)│
-   └────┬─────────────────────────────────────────┘
+   ┌────┴─────────────────────────────────────────────┐
+   │  ① mise à jour des paquets                       │
+   │  ② redémarrage SI requis                         │
+   │     └─ preuve du reboot (uptime vérifié)         │
+   │  ③ re-base de l'intégrité fichier (post-reboot)  │
+   └────┬─────────────────────────────────────────────┘
         │
         ▼  FAIL-CLOSED : toute étape qui échoue STOPPE la chaîne
         │
@@ -482,44 +482,44 @@ instantanément.
 ## Bilan — Ce qu'Hermès apporte à JARVIS
 
 ```
-┌─────────────────────────┬──────────────────────────────────────┐
-│  SANS HERMÈS            │  AVEC HERMÈS                         │
-│  (chatbot LLM classique)│  (agent persistant)                  │
-├─────────────────────────┼──────────────────────────────────────┤
-│  Chaque session repart  │  Contexte, leçons et conventions     │
-│  de zéro                │  conservés entre toutes les sessions │
-├─────────────────────────┼──────────────────────────────────────┤
-│  Toutes les commandes   │  Bypass déterministe : 29 patterns   │
-│  passent par le LLM     │  exécutés directement < 100 ms       │
-│  (latence + risque      │  sans consommer un seul token LLM    │
-│  d'hallucination)       │                                      │
-├─────────────────────────┼──────────────────────────────────────┤
-│  L'assistant attend     │  L'agent surveille en permanence,    │
-│  d'être interrogé       │  alerte vocalement si seuil dépassé, │
-│                         │  agit (ban IP, restart) si configuré │
-├─────────────────────────┼──────────────────────────────────────┤
-│  Le LLM voit toutes     │  Hermès filtre : le LLM ne reçoit    │
-│  les données brutes     │  que le contexte utile — structuré   │
-│                         │  et pertinent                        │
-├─────────────────────────┼──────────────────────────────────────┤
-│  Pas de conscience      │  Briefing matinal proactif :         │
-│  de l'état du système   │  sécurité + infra + état JARVIS      │
-│  au démarrage           │  lu vocalement sans interaction      │
-├─────────────────────────┼──────────────────────────────────────┤
-│  Apprentissage limité   │  Boucle d'apprentissage : une leçon  │
-│  à la session courante  │  apprise persiste dans toutes les    │
-│                         │  sessions futures automatiquement    │
-├─────────────────────────┼──────────────────────────────────────┤
-│  Répond toujours pareil │  Mode pédagogique : sait distinguer  │
-│  (analyse même quand on │  expliquer d'analyser — devient un   │
-│  veut comprendre)       │  tuteur cybersécurité                │
-├─────────────────────────┼──────────────────────────────────────┤
-│  Opérations système     │  Infogérance orchestrée : 1 bouton,  │
-│  manuelles, risquées    │  fail-closed, ordre prouvé, journal  │
-├─────────────────────────┼──────────────────────────────────────┤
-│  La mémoire peut être   │  DR du cerveau : sauvegarde/restaure │
-│  perdue                 │  pilotable à la voix, savoir cumulatif│
-└─────────────────────────┴──────────────────────────────────────┘
+┌─────────────────────────┬────────────────────────────────────────┐
+│  SANS HERMÈS            │  AVEC HERMÈS                           │
+│  (chatbot LLM classique)│  (agent persistant)                    │
+├─────────────────────────┼────────────────────────────────────────┤
+│  Chaque session repart  │  Contexte, leçons et conventions       │
+│  de zéro                │  conservés entre toutes les sessions   │
+├─────────────────────────┼────────────────────────────────────────┤
+│  Toutes les commandes   │  Bypass déterministe : 29 patterns     │
+│  passent par le LLM     │  exécutés directement < 100 ms         │
+│  (latence + risque      │  sans consommer un seul token LLM      │
+│  d'hallucination)       │                                        │
+├─────────────────────────┼────────────────────────────────────────┤
+│  L'assistant attend     │  L'agent surveille en permanence,      │
+│  d'être interrogé       │  alerte vocalement si seuil dépassé,   │
+│                         │  agit (ban IP, restart) si configuré   │
+├─────────────────────────┼────────────────────────────────────────┤
+│  Le LLM voit toutes     │  Hermès filtre : le LLM ne reçoit      │
+│  les données brutes     │  que le contexte utile — structuré     │
+│                         │  et pertinent                          │
+├─────────────────────────┼────────────────────────────────────────┤
+│  Pas de conscience      │  Briefing matinal proactif :           │
+│  de l'état du système   │  sécurité + infra + état JARVIS        │
+│  au démarrage           │  lu vocalement sans interaction        │
+├─────────────────────────┼────────────────────────────────────────┤
+│  Apprentissage limité   │  Boucle d'apprentissage : une leçon    │
+│  à la session courante  │  apprise persiste dans toutes les      │
+│                         │  sessions futures automatiquement      │
+├─────────────────────────┼────────────────────────────────────────┤
+│  Répond toujours pareil │  Mode pédagogique : sait distinguer    │
+│  (analyse même quand on │  expliquer d'analyser — devient un     │
+│  veut comprendre)       │  tuteur cybersécurité                  │
+├─────────────────────────┼────────────────────────────────────────┤
+│  Opérations système     │  Infogérance orchestrée : 1 bouton,    │
+│  manuelles, risquées    │  fail-closed, ordre prouvé, journal    │
+├─────────────────────────┼────────────────────────────────────────┤
+│  La mémoire peut être   │  DR du cerveau : sauvegarde/restaure   │
+│  perdue                 │  pilotable à la voix, savoir cumulatif │
+└─────────────────────────┴────────────────────────────────────────┘
 ```
 
 > Hermès ne remplace pas le LLM — il le **protège** des tâches pour lesquelles il est mauvais (déterminisme, mémoire, temps réel), et lui réserve ce pour quoi il excelle : le raisonnement, l'analyse et la réponse contextuelle.
