@@ -33,6 +33,7 @@ images/*.jpg
 # ── Audio généré (TTS runtime) ─────────────────────────────────
 scripts/static/audio/*.mp3
 scripts/static/audio/*.wav
+scripts/voice/_tts_cache/
 
 # ── Fichier leçons Hermès (mémoire privée — IPs/infra, runtime) ──
 scripts/jarvis_corrections.md

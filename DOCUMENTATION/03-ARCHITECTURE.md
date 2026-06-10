@@ -99,10 +99,10 @@
 
 | Catégorie | Modules |
 |-----------|---------|
-| **Bypass Hermès** | `bypass/morning_brief.py`, `learn.py`, `sysctrl.py`, `wrappers.py` |
+| **Bypass Hermès** | `bypass/morning_brief.py`, `learn.py`, `sysctrl.py`, `backup.py` (menu vocal : sauvegardes, cerveau, lint), `wrappers.py` |
 | **Chat / LLM** | `chat/orchestrator.py`, `routing.py`, `soc_inject.py`, `soc_context.py` |
 | **RAG** | `rag/engine.py`, `rag/indexer.py`, `rag/retriever.py` |
-| **Voice** | `voice/tts_engines.py`, `voice/stt.py`, `voice/voice_lab.py` |
+| **Voice** | `voice/tts_engines.py`, `voice/tts_cache.py` (cache WAV best-effort), `voice/stt.py`, `voice/voice_lab.py` |
 | **Infra** | `ssh/tools.py`, `proxmox/api.py`, `ollama_circuit.py` |
 | **Sécurité** | `security_whitelists.py` |
 | **Blueprint SOC** | `blueprints/soc.py` — auto-engine + routes |

@@ -98,6 +98,23 @@ La cascade est automatique. Si le moteur n° 1 échoue (hors ligne), n° 2 prend
 
 ---
 
+## Cache TTS — restitution instantanée
+
+Les phrases récurrentes (confirmations, menu vocal, réponses figées) sont
+mémorisées après leur première synthèse et resservies sans re-génération.
+
+| Aspect | Choix de conception |
+|--------|--------------------|
+| **Clé** | `sha256(texte + voix + moteur + paramètres DSP)` — un changement de voix/DSP invalide l'entrée, jamais d'audio périmé |
+| **Robustesse** | Best-effort intégral : tout échec du cache est avalé → repli sur la génération normale, la voix ne casse jamais |
+| **Volume** | LRU borné (éviction des plus anciennes par `mtime`) — disque maîtrisé |
+| **Priorité** | Interrogé *après* l'anti-double-lecture → la déduplication reste prioritaire |
+
+> Un hit cache se journalise `total=0.00s` contre ~0,5–3 s de synthèse — gain
+> net sur les interactions répétées, sans complexité ajoutée au chemin critique.
+
+---
+
 ## STT — Transcription vocale
 
 | Paramètre | Valeur |
