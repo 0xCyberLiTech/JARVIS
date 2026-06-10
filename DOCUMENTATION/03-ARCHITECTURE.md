@@ -148,9 +148,9 @@ L'interface est entièrement en **Vanilla JS** (zéro framework) :
 ```
 monitoring_gen.py ── cron 60s ──→ monitoring.json
                                         │
-  Dashboard SOC   ── 60s ──────────────┤
-  JARVIS chatbot  ── 30s ──────────────┤  (Nyquist buffer)
-  JARVIS engine   ── 10s ──────────────┘  (GPU live)
+  Dashboard SOC   ── 60s ───────────────┤
+  JARVIS chatbot  ── 30s ───────────────┤  (Nyquist buffer)
+  JARVIS engine   ── 10s ───────────────┘  (GPU live)
   Heartbeat       ── 15s → ping JARVIS
 ```
 
