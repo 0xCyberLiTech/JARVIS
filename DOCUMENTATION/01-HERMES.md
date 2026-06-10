@@ -117,7 +117,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 
 ```
 ┌───────────────────────────────────────────────┐
-│                      H E R M È S              │
+│                  H E R M È S                  │
 │                                               │
 │  ┌──────────────────┐   ┌──────────────────┐  │
 │  │  BRIQUE 1        │   │  BRIQUE 2        │  │
