@@ -153,6 +153,8 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 │  │  → état machines │                         │
 │  │  → alertes 24h   │                         │
 │  └──────────────────┘                         │
+│                                               │
+│                                               │
 └───────────────────────────────────────────────┘
 ```
 
