@@ -128,9 +128,9 @@ Fichier `.mcp.json` à la racine du workspace VSCode :
 Chaque réponse JARVIS est encadrée pour la différencier de Claude :
 
 ```
-╔══════════════════════════════════════╗
-║  ◈  JARVIS  —  phi4:14b  ◈          ║
-╚══════════════════════════════════════╝
+╔══════════════════════════════╗
+║  ◈  JARVIS  —  phi4:14b  ◈  ║
+╚══════════════════════════════╝
 [réponse de JARVIS]
 ```
 
