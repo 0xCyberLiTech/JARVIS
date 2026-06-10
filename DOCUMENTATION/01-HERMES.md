@@ -166,7 +166,7 @@ Le synoptique est le **tableau de bord live d'Hermès** — visible en permanenc
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  ◈  HERMÈS  —  SYNOPTIQUE  MOTEUR                      │
+      ◈  HERMÈS  --  SYNOPTIQUE  MOTEUR                        
 ├─────────────────┬───────────────────────────────────────┤
 │  LLM ACTIF      │  phi4:14b  ●  CHAUD  (en mémoire)     │
 │  RAG            │  1698 chunks  ●  PRÊT  TTL: 4m32s     │
@@ -302,24 +302,24 @@ UTILISATEUR :  "Souviens-toi que X"  (texte ou voix)
                     ▼
             Hermès détecte le pattern "souviens-toi"
                     │
-         ┌──────────▼──────────────────┐
-         │   PERSISTANCE               │
-         │   ├── jarvis_facts.json     │  ← écriture disque
-         │   └── jarvis_memory.json    │
-         └──────────┬──────────────────┘
+         ┌──────────▼────────────────────┐
+         │   PERSISTANCE                 │
+         │   ├── jarvis_facts.json       │  ← écriture disque
+         │   └── jarvis_memory.json      │
+         └──────────┬────────────────────┘
                     │
-         ┌──────────▼──────────────────┐
-         │   INDEXATION RAG            │
-         │   ├── embedding calculé     │  ← mxbai-embed-large
-         │   └── chunk ajouté à l'index│
-         └──────────┬──────────────────┘
+         ┌──────────▼────────────────────┐
+         │   INDEXATION RAG              │
+         │   ├── embedding calculé       │  ← mxbai-embed-large
+         │   └── chunk ajouté à l'index  │
+         └──────────┬────────────────────┘
                     │
-         ┌──────────▼──────────────────┐
-         │   INJECTION AUTOMATIQUE     │
-         │   Toute future question     │  ← sans action de
-         │   pertinente reçoit cette   │    l'utilisateur
-         │   leçon en contexte         │
-         └─────────────────────────────┘
+         ┌──────────▼────────────────────┐
+         │   INJECTION AUTOMATIQUE       │
+         │   Toute future question       │  ← sans action de
+         │   pertinente reçoit cette     │    l'utilisateur
+         │   leçon en contexte           │
+         └───────────────────────────────┘
 
   RÉSULTAT :  JARVIS connaît cette règle dans TOUTES
               les sessions suivantes — sans re-briefing
