@@ -12,6 +12,9 @@ scripts/soc_config.json
 config/*.json
 !config/*.example
 
+# ── DR opérationnel (privé — vit sur disque + coffre, jamais en vitrine) ──
+RUNBOOK.md
+
 # ── Gros binaires (modèles, voix, embeddings) ──────────────────
 models/
 scripts/voices/*.onnx
