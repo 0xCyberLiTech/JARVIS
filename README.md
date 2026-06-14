@@ -60,7 +60,7 @@ Tout tourne en local — aucune donnée ne quitte la machine.
 ## Hermès — L'agent persistant
 
 <div align="center">
-  <img src="Images/hermes.png" alt="Hermès — synoptique 6 couches actives" width="820"/>
+  <img src="Images/Jarvis-08.png" alt="Hermès — l'agent persistant, interface holographique" width="880"/>
 </div>
 
 <br/>
@@ -119,7 +119,7 @@ Tour visuel des principaux modules de l'interface holographique JARVIS.
   <img src="Images/Jarvis-01.png" alt="Écran d'accueil JARVIS" width="880"/>
 </div>
 
-À l'ouverture, JARVIS se présente et énumère son état opérationnel : le **modèle LLM actif** (phi-14b via Ollama), le **moteur vocal** (Edge-TTS Antoine Neural), la **chaîne de traitement DSP** (EQ, compresseur, DeepFilterNet), les **modules disponibles** (Terminal, Fichiers, Tâches, Audio) et l'**accélération matérielle CUDA** (RTX Blackwell + Whisper STT GPU). Les trois actions principales — *Lire*, *Modifier*, *Accéder au système* — sont accessibles directement, et la première interaction de la journée déclenche le briefing matinal d'Hermès.
+À l'ouverture, JARVIS se présente et énumère son état opérationnel : le **modèle LLM actif** (qwen3:8b via Ollama), le **moteur vocal** (Edge-TTS Antoine Neural), la **chaîne de traitement DSP** (EQ, compresseur, DeepFilterNet), les **modules disponibles** (Terminal, Fichiers, Tâches, Audio) et l'**accélération matérielle CUDA** (RTX Blackwell + Whisper STT GPU). Les trois actions principales — *Lire*, *Modifier*, *Accéder au système* — sont accessibles directement, et la première interaction de la journée déclenche le briefing matinal d'Hermès.
 
 ### 2 · Réglages LLM & profils GPU
 
@@ -145,13 +145,21 @@ Le rack audio professionnel de JARVIS, inspiré d'un processeur voix broadcast. 
 
 La suite de la chaîne audio : **courbe de réponse** globale, étages d'**effets par convolution** (reverb, echo, delay) avec calibration loudness, et bus master à limiteur brick-wall. C'est cette chaîne qui donne à la voix de synthèse Antoine son rendu naturel et homogène quel que soit le moteur TTS actif.
 
-### 5 · Apprentissage Hermès
+### 5 · Voice Lab — l'atelier de la voix
 
 <div align="center">
-  <img src="Images/Jarvis-07.png" alt="Onglet APPRENTISSAGE — observabilité Hermès" width="880"/>
+  <img src="Images/Jarvis-10.png" alt="Voice Lab — réglage des moteurs TTS et comparateur A/B" width="880"/>
 </div>
 
-L'onglet **◈ APPRENTISSAGE** rend visible l'agent qui « vit » : les **compteurs du moteur** (leçons apprises, chunks RAG, dernière sauvegarde, taille du cerveau), le champ **« souviens-toi que… »** pour enseigner une règle en direct, et le **flux des leçons apprises** persistées entre sessions. Ici, des connaissances cybersécurité (threat intelligence, triage SOC, Cyber Kill Chain, MITRE ATT&CK) — c'est la boucle d'apprentissage (brique 4) et la mémoire persistante (brique 2) en action.
+Le **Voice Lab** règle au cordeau la voix de l'assistant : choix de la **source vocale** (cascade de 4 moteurs TTS — Edge Antoine fr-CA, Kokoro CUDA, Piper, SAPI5), **paramètres vocaux** fins, **phrase de test**, **bibliothèque** de voix et **comparateur A/B**. C'est l'atelier qui donne à JARVIS sa voix naturelle et homogène, quel que soit le moteur actif.
+
+### 6 · Accès Web gouverné
+
+<div align="center">
+  <img src="Images/Jarvis-11.png" alt="Accès Web gouverné — allowlist, lecture seule, journalisé" width="880"/>
+</div>
+
+L'agent peut consulter le web — mais **sous contrôle strict**. JARVIS ne visite QUE les domaines d'une **allowlist explicite** (sites système verrouillés pour la météo et la veille IA), en **lecture seule** (jamais d'envoi de données), et **chaque accès est journalisé**. Tout le reste est **refusé et tracé**. La curiosité de l'agent reste gouvernée — même principe de moindre privilège que pour le SOC.
 
 > D'autres captures (dashboard monitoring, pilotage des modèles, SOC, terminal)
 > sont volontairement **non publiées** : elles relèvent de la doctrine de
@@ -183,7 +191,7 @@ L'onglet **◈ APPRENTISSAGE** rend visible l'agent qui « vit » : les **compte
 | Couche | Technologie |
 |--------|-------------|
 | **Backend** | Python 3.11 · Flask · Blueprints autoportants · DI pur |
-| **LLM local** | Ollama · phi4:14b (SOC) · gemma4:latest (GÉNÉRAL + vision) · qwen2.5-coder:14b (CODE) |
+| **LLM local** | Ollama · qwen3:8b (SOC+GÉNÉRAL+CR · rapide) · qwen3:14b (THINK) · qwen2.5-coder:14b (CODE) · gemma4:latest (VISION) |
 | **RAG** | mxbai-embed-large · BM25 hybride · ~1700 chunks · TTL 5 min |
 | **TTS** | edge-tts fr-CA Antoine → Kokoro CUDA → SAPI5 (cascade automatique) |
 | **STT** | faster-whisper large-v3-turbo CUDA · vocabulaire SOC |
