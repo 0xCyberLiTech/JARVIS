@@ -65,7 +65,7 @@
 | 🔒 **100 % local · zéro cloud** | LLM, voix, RAG, données — tout sur le poste. Aucune fuite, aucun abonnement. |
 | 🧠 **Un agent, pas un chatbot** | *Hermès* observe, mémorise, apprend et **agit** — sans être re-briefé à chaque session. |
 | 🛡️ **SOC autonome 24/7** | Détecte, bannit et redémarre **tout seul** · alertes vocales · contexte sécurité injecté en direct. |
-| 🎙️ **Voix qualité broadcast** | Chaîne DSP pro (débruitage IA · compresseur · FX) + 4 moteurs TTS en cascade. |
+| 🎙️ **Voix qualité broadcast** | Chaîne DSP pro (débruitage IA · compresseur · FX) + voix Edge Antoine, repli Kokoro neural local. |
 | ⚡ **RTX 5080 maîtrisée** | Modèle 100 % en VRAM, garde-fou anti-débordement, CUDA partout (Whisper · DeepFilterNet). |
 | ♿ **Pensé accessible** | Haute lisibilité, commandes vocales déterministes (< 100 ms), briefing matinal. |
 
@@ -201,7 +201,7 @@ Le **bus master** de la chaîne : gain de sortie final, **VU-mètres professionn
   <img src="Images/Jarvis-10.png" alt="Voice Lab — réglage des moteurs TTS et comparateur A/B" width="880"/>
 </div>
 
-Le **Voice Lab** règle au cordeau la voix de l'assistant : choix de la **source vocale** (cascade de 4 moteurs TTS — Edge Antoine fr-CA, Kokoro CUDA, Piper, SAPI5), **paramètres vocaux** fins, **phrase de test**, **bibliothèque** de voix et **comparateur A/B**. C'est l'atelier qui donne à JARVIS sa voix naturelle et homogène, quel que soit le moteur actif.
+Le **Voice Lab** règle au cordeau la voix de l'assistant : choix de la **source vocale** (Edge Antoine fr-CA en cloud · repli **Kokoro** CUDA neural, 100 % local), **paramètres vocaux** fins, **phrase de test**, **bibliothèque** de voix et **comparateur A/B**. C'est l'atelier qui donne à JARVIS sa voix naturelle et homogène, en ligne comme hors-ligne.
 
 <a id="sec-5"></a>
 
@@ -403,7 +403,7 @@ La **mémoire de l'agent s'accumule** : courbe des **leçons cumulées** dans le
 | **Backend** | Python 3.11 · Flask · Blueprints autoportants · DI pur |
 | **LLM local** | Ollama · qwen3:8b (SOC+GÉNÉRAL+CR · rapide) · qwen3:14b (THINK) · qwen2.5-coder:14b (CODE) · gemma4:latest (VISION) |
 | **RAG** | mxbai-embed-large · BM25 hybride · ~1700 chunks · TTL 5 min |
-| **TTS** | edge-tts fr-CA Antoine → Kokoro CUDA → SAPI5 (cascade automatique) |
+| **TTS** | edge-tts fr-CA Antoine (défaut) → repli Kokoro CUDA neural (hors-ligne, local) |
 | **STT** | faster-whisper large-v3-turbo CUDA · vocabulaire SOC |
 | **Frontend** | Vanilla JS · 21 modules · Web Audio API · xterm.js · Monaco Editor |
 | **Agent Hermès** | 5 briques · bypass regex · scheduler daemon · DI pur · indépendant du LLM |
