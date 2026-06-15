@@ -160,18 +160,18 @@ Réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penal
 ### 3 · Studio audio DSP
 
 <div align="center">
-  <img src="Images/Jarvis-05.png" alt="Studio audio DSP — EQ et analyseur spectral" width="460"/>
+  <img src="Images/Jarvis-05.png" alt="Rack DSP — chaîne de traitement vocal" width="440"/>
 </div>
 
-Le rack audio professionnel de JARVIS, inspiré d'un processeur voix broadcast. On y trouve l'**égaliseur paramétrique** multibandes, l'**analyseur spectral** temps réel (waveform colorée vert→orange selon l'énergie) et les **compresseurs** de la chaîne voix. Chaque étage est réglable à la souris, avec retour visuel immédiat sur le signal traité.
+Le **rack de traitement vocal** complet, inspiré d'un processeur broadcast : le **chemin du signal** en temps réel, puis les étages **DeepFilterNet** (débruitage IA) → **compresseur dynamique** → **stereo widener** → **FX** → **analyseur spectral** → **master**. Chaque unité se règle à la souris, avec bypass et retour visuel immédiat sur le signal traité.
 
 ### 4 · Studio audio DSP — chaîne FX
 
 <div align="center">
-  <img src="Images/Jarvis-06.png" alt="Studio audio DSP — chaîne d'effets et convolution" width="460"/>
+  <img src="Images/Jarvis-06.png" alt="FX Rack — reverb, echo, delay" width="760"/>
 </div>
 
-La suite de la chaîne audio : **courbe de réponse** globale, étages d'**effets par convolution** (reverb, echo, delay) avec calibration loudness, et bus master à limiteur brick-wall. C'est cette chaîne qui donne à la voix de synthèse Antoine son rendu naturel et homogène quel que soit le moteur TTS actif.
+Zoom sur l'unité **FX RACK** : effets par **convolution** (reverb, echo, delay…) appliqués à la voix de synthèse, avec leurs paramètres fins et la calibration loudness. C'est cette étape qui donne à la voix Antoine son rendu naturel et homogène quel que soit le moteur TTS actif.
 
 ### 5 · Voice Lab — l'atelier de la voix
 
