@@ -337,7 +337,7 @@ Les **compteurs agrégés** : actions totales, bans IP, restarts, succès / éch
 
 | # | Document | Description | Statut | |
 |---|----------|-------------|--------|---|
-| 01 | [Hermès — Agent persistant](DOCUMENTATION/01-HERMES.md) | 5 briques fondatrices + avancées · bypass · apprentissage · briefing · mode tuteur · DR cerveau | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/01-HERMES.md) |
+| 01 | [Hermès](DOCUMENTATION/01-HERMES.md) | 5 briques fondatrices + avancées · bypass · apprentissage · briefing · mode tuteur · DR cerveau | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/01-HERMES.md) |
 | 02 | [Intégration SOC](DOCUMENTATION/02-SOC-INTEGRATION.md) | Auto-engine · ban/unban · alertes vocales · injection contexte sécurité | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/02-SOC-INTEGRATION.md) |
 | 03 | [Architecture globale](DOCUMENTATION/03-ARCHITECTURE.md) | 5 zones · Flask · Blueprints · modules · polling | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/03-ARCHITECTURE.md) |
 | 04 | [Audio DSP](DOCUMENTATION/04-AUDIO-DSP.md) | Chaîne broadcast · TTS 4 moteurs · STT faster-whisper · DSP 3 étages | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/04-AUDIO-DSP.md) |
