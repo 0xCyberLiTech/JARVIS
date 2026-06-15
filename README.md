@@ -71,9 +71,7 @@
 
 </div>
 
----
-
-## 🗺️ Au sommaire — la visite en un clic
+**🗺️ La visite en un clic :**
 
 <div align="center">
 
