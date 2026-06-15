@@ -48,10 +48,21 @@
 
 > **Assistant IA local · 100 % privé · Interface holographique · SOC cybersécurité**
 
+<div align="center">
+
+![100% local](https://img.shields.io/badge/100%25-local-00d4ff?style=for-the-badge&labelColor=0b1320)
+![qwen3:8b](https://img.shields.io/badge/LLM-qwen3%3A8b-7c5cff?style=for-the-badge&labelColor=0b1320)
+![RTX 5080](https://img.shields.io/badge/GPU-RTX_5080-76b900?style=for-the-badge&labelColor=0b1320)
+![73 routes](https://img.shields.io/badge/Flask-73_routes-00d4ff?style=for-the-badge&labelColor=0b1320)
+![1465 tests](https://img.shields.io/badge/pytest-1465_tests-0aff9d?style=for-the-badge&labelColor=0b1320)
+![SOC 24/7](https://img.shields.io/badge/SOC-24%2F7_autonome-ff5470?style=for-the-badge&labelColor=0b1320)
+
+</div>
+
 **JARVIS** est un assistant IA personnel de type *Iron Man* — mais qui tourne **entièrement en local** sur un seul poste (Python/Flask + Ollama · RTX 5080). Pas un chatbot de plus : un **agent** qui voit, parle, mémorise, apprend, et **veille sur l'infrastructure 24/7**. Aucune donnée ne quitte la machine.
 
 <div align="center">
-  <img src="Images/Jarvis.png" alt="JARVIS — interface holographique principale" width="900"/>
+  <img src="Images/Jarvis-hero.gif" alt="JARVIS — cockpit holographique en direct (cœur spectral)" width="900"/>
 </div>
 
 ---
@@ -72,6 +83,21 @@
 </div>
 
 ---
+
+## 🗺️ Au sommaire — la visite en un clic
+
+<div align="center">
+
+|  |  |  |  |
+|:--:|:--:|:--:|:--:|
+| [✦<br>**Hermès**](#hermes) | [🏠<br>**Accueil**](#sec-1) | [🧠<br>**Réglages LLM**](#sec-2) | [🎛️<br>**Studio DSP**](#sec-3) |
+| [🎙️<br>**Voice Lab**](#sec-4) | [🌐<br>**Accès Web**](#sec-5) | [📊<br>**Monitoring**](#sec-6) | [🛡️<br>**SOC**](#sec-7) |
+
+</div>
+
+---
+
+<a id="hermes"></a>
 
 ## Hermès — L'agent persistant
 
@@ -147,6 +173,8 @@ La **mémoire de l'agent s'accumule** : courbe des **leçons cumulées** dans le
 
 Tour visuel des principaux modules de l'interface holographique JARVIS.
 
+<a id="sec-1"></a>
+
 ### 1 · Écran d'accueil
 
 <div align="center">
@@ -154,6 +182,8 @@ Tour visuel des principaux modules de l'interface holographique JARVIS.
 </div>
 
 À l'ouverture, JARVIS se présente et énumère son état opérationnel : le **modèle LLM actif** (qwen3:8b via Ollama), le **moteur vocal** (Edge-TTS Antoine Neural), la **chaîne de traitement DSP** (EQ, compresseur, DeepFilterNet), les **modules disponibles** (Terminal, Fichiers, Tâches, Audio) et l'**accélération matérielle CUDA** (RTX Blackwell + Whisper STT GPU). Les trois actions principales — *Lire*, *Modifier*, *Accéder au système* — sont accessibles directement, et la première interaction de la journée déclenche le briefing matinal d'Hermès.
+
+<a id="sec-2"></a>
 
 ### 2 · Réglages LLM & profils GPU
 
@@ -190,6 +220,8 @@ Six préréglages cohérents en **un clic** — *Rapide · Équilibré · Code �
 </div>
 
 Réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penalty, taille de contexte ; plus trois modes d'**optimisation latence** (Rapide / Équilibré / Qualité).
+
+<a id="sec-3"></a>
 
 ### 3 · Studio audio DSP — le rack de traitement vocal
 
@@ -243,6 +275,8 @@ Analyse **FFT temps réel** de la sortie : 8 modes d'affichage (bars, line, fill
 
 Le **bus master** de la chaîne : gain de sortie final, **VU-mètres professionnels L/R** (avec zone de crête), et boutons **Appliquer** / **Test voix**.
 
+<a id="sec-4"></a>
+
 ### 4 · Voice Lab — l'atelier de la voix
 
 <div align="center">
@@ -251,6 +285,8 @@ Le **bus master** de la chaîne : gain de sortie final, **VU-mètres professionn
 
 Le **Voice Lab** règle au cordeau la voix de l'assistant : choix de la **source vocale** (cascade de 4 moteurs TTS — Edge Antoine fr-CA, Kokoro CUDA, Piper, SAPI5), **paramètres vocaux** fins, **phrase de test**, **bibliothèque** de voix et **comparateur A/B**. C'est l'atelier qui donne à JARVIS sa voix naturelle et homogène, quel que soit le moteur actif.
 
+<a id="sec-5"></a>
+
 ### 5 · Accès Web gouverné
 
 <div align="center">
@@ -258,6 +294,8 @@ Le **Voice Lab** règle au cordeau la voix de l'assistant : choix de la **source
 </div>
 
 L'agent peut consulter le web — mais **sous contrôle strict**. JARVIS ne visite QUE les domaines d'une **allowlist explicite** (sites système verrouillés pour la météo et la veille IA), en **lecture seule** (jamais d'envoi de données), et **chaque accès est journalisé**. Tout le reste est **refusé et tracé**. La curiosité de l'agent reste gouvernée — même principe de moindre privilège que pour le SOC.
+
+<a id="sec-6"></a>
 
 ### 6 · Monitoring GPU & VRAM
 
@@ -272,6 +310,8 @@ L'onglet **Monitor** : surveillance **temps réel** de la RTX 5080 — utilisati
 </div>
 
 Zoom sur la **carte LLM VRAM** : l'empreinte du modèle actif en mémoire vidéo. La RTX 5080 a **16 Go** ; tant que le modèle **+ son contexte (cache KV)** y tiennent (ici `qwen3:8b` ≈ 5,6 Go / 35 %), l'inférence reste **pleine vitesse GPU**. S'ils débordent, Ollama « spille » en RAM système et la vitesse s'effondre — la carte affiche `MODE`, `tokens/s`, `num_ctx`, le **SWAP RAM** et une alerte **⚠ DÉBORDEMENT**. C'est le garde-fou du LLM 100 % local sur une seule carte.
+
+<a id="sec-7"></a>
 
 ### 7 · SOC — activité & réponse automatique
 
