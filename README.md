@@ -63,6 +63,8 @@
 
 <div align="center">
   <img src="Images/Jarvis-hero.gif" alt="JARVIS se présente — onde vocale active, interface holographique en direct" width="900"/>
+
+  <p>🔊 <a href="Images/Jarvis-hero.mp4"><strong>Écouter JARVIS se présenter</strong></a> — voix d'Antoine</p>
 </div>
 
 ---
