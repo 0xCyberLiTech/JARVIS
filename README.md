@@ -48,25 +48,16 @@
 
 > **Assistant IA local · 100 % privé · Interface holographique · SOC cybersécurité**
 
-<div align="center">
-
-![100% local](https://img.shields.io/badge/100%25-local-00d4ff?style=for-the-badge&labelColor=0b1320)
-![qwen3:8b](https://img.shields.io/badge/LLM-qwen3%3A8b-7c5cff?style=for-the-badge&labelColor=0b1320)
-![RTX 5080](https://img.shields.io/badge/GPU-RTX_5080-76b900?style=for-the-badge&labelColor=0b1320)
-![73 routes](https://img.shields.io/badge/Flask-73_routes-00d4ff?style=for-the-badge&labelColor=0b1320)
-![1465 tests](https://img.shields.io/badge/pytest-1465_tests-0aff9d?style=for-the-badge&labelColor=0b1320)
-![SOC 24/7](https://img.shields.io/badge/SOC-24%2F7_autonome-ff5470?style=for-the-badge&labelColor=0b1320)
-
-</div>
-
 **JARVIS** est un assistant IA personnel de type *Iron Man* — mais qui tourne **entièrement en local** sur un seul poste (Python/Flask + Ollama · RTX 5080). Pas un chatbot de plus : un **agent** qui voit, parle, mémorise, apprend, et **veille sur l'infrastructure 24/7**. Aucune donnée ne quitte la machine.
 
 <div align="center">
   <img src="Images/Jarvis-hero.gif" alt="JARVIS se présente — onde vocale active, interface holographique en direct" width="900"/>
 
-  <p>🔊 <a href="https://github.com/0xCyberLiTech/JARVIS/blob/main/Images/Jarvis-hero.mp4"><strong>▶ Écouter JARVIS se présenter — voix d'Antoine</strong></a></p>
+  <p>🔊 <strong>JARVIS se présente à voix haute</strong> — cliquez ▶ (voix d'Antoine)</p>
 
-  <sub>Ouvre le lecteur vidéo de GitHub (avec le son).</sub>
+  <video src="https://cdn.jsdelivr.net/gh/0xCyberLiTech/JARVIS@main/Images/Jarvis-hero.mp4" controls width="900"></video>
+
+  <sub>Lecteur absent ? <a href="https://github.com/0xCyberLiTech/JARVIS/blob/main/Images/Jarvis-hero.mp4">Ouvrir la vidéo sur GitHub</a> (avec le son).</sub>
 </div>
 
 ---
