@@ -77,10 +77,11 @@
 
 <div align="center">
 
-|  |  |  |  |
-|:--:|:--:|:--:|:--:|
-| [✦<br>**Hermès**](#hermes) | [🏠<br>**Accueil**](#sec-1) | [🧠<br>**Réglages LLM**](#sec-2) | [🎛️<br>**Studio DSP**](#sec-3) |
-| [🎙️<br>**Voice Lab**](#sec-4) | [🌐<br>**Accès Web**](#sec-5) | [📊<br>**Monitoring**](#sec-6) | [🛡️<br>**SOC**](#sec-7) |
+|  |  |  |
+|:--:|:--:|:--:|
+| [✦<br>**Hermès**](#hermes) | [🏠<br>**Accueil**](#sec-1) | [🧠<br>**Réglages**](#sec-2) |
+| [🎛️<br>**Studio DSP**](#sec-3) | [🎙️<br>**Voice Lab**](#sec-4) | [🌐<br>**Accès Web**](#sec-5) |
+| [📊<br>**Monitoring**](#sec-6) | [🛡️<br>**SOC**](#sec-7) | [🕹️<br>**Pilotage**](#sec-8) |
 
 </div>
 
@@ -320,18 +321,76 @@ Les **compteurs agrégés** : actions totales, bans IP, restarts, succès / éch
 
 ---
 
+<a id="sec-8"></a>
+
+### 8 · Le poste de pilotage — navigation & contrôles
+
+**Le menu** — 11 modules, accessibles d'un clic :
+
+<div align="center">
+  <img src="Images/Jarvis-26.png" alt="JARVIS — barre de navigation : les 11 modules" width="900"/>
+</div>
+
+| Module | Rôle |
+|---|---|
+| **Monitor** | supervision GPU / VRAM / CPU / réseau en temps réel |
+| **JARVIS AI** | cockpit de dialogue — chat, voix, onde vocale |
+| **Settings** | réglages LLM, RAG, prompt système, profils |
+| **DSP Audio** | studio de traitement vocal (EQ · FX · TTS) |
+| **Tâches** | gestionnaire de tâches + terminal code |
+| **Voice Lab** | atelier de la voix — STT / TTS, tests |
+| **SOC** | sécurité : auto-engine, bans, alertes |
+| **Apprentissage** | cerveau — mémoire, faits, leçons (RAG) |
+| **Infogérance** | maintenance des VMs (MAJ · reboot · AIDE) |
+| **Alarmes** | alarmes, rappels, agenda |
+| **Accès Web** | passerelle web gouvernée (veille, météo) |
+
+**La voix** — bascule des moteurs TTS + choix de la voix :
+
+<div align="center">
+  <img src="Images/Jarvis-27.png" alt="Sélecteur de voix TTS" width="540"/>
+</div>
+
+**Edge (cloud Microsoft) ↔ Kokoro (neural, 100 % local)** · 7 voix (Antoine FR-CA par défaut). La synthèse est traitée par le Studio DSP (§3).
+
+**Le modèle** — bascule à chaud entre 4 LLM **100 % locaux (Ollama)** :
+
+<div align="center">
+  <img src="Images/Jarvis-28.png" alt="Sélecteur de modèle LLM actif" width="540"/>
+</div>
+
+`qwen3:8b` par défaut (SOC + général) · `qwen2.5-coder` (code) · `gemma4` (vision). Bouton **TEST LLM** pour valider le modèle actif.
+
+**La mémoire** — contexte conversationnel maîtrisé :
+
+<div align="center">
+  <img src="Images/Jarvis-29.png" alt="Mémoire conversationnelle" width="540"/>
+</div>
+
+Le compteur **CTX** affiche les échanges gardés en contexte ; **Purger mémoire** repart à zéro. (La mémoire longue — faits + leçons RAG — vit dans l'onglet Apprentissage.)
+
+**Le prompt système** — la gouvernance de l'agent *(données anonymisées)* :
+
+<div align="center">
+  <img src="Images/Jarvis-30.png" alt="Prompt système gouverné + profils sauvegardés (données anonymisées)" width="760"/>
+</div>
+
+Le **prompt système** encode les règles de comportement : méthodologie SOC, **anti-hallucination** (cite les chiffres exacts, jamais d'invention), distinction analyse / explication. Plusieurs **profils** sont sauvegardés et chargeables à la volée (SOC · Code · Think…). 🔒 *IP, clés, noms : intégralement anonymisés sur cette capture.*
+
+---
+
 ## Sommaire
 
 <div align="center">
 
 | # | Document | Description | Statut | |
 |---|----------|-------------|--------|---|
-| 01 | [Hermès](DOCUMENTATION/01-HERMES.md) | 5 briques fondatrices + avancées · bypass · apprentissage · briefing · mode tuteur · DR cerveau | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/01-HERMES.md) |
-| 02 | [Intégration&nbsp;SOC](DOCUMENTATION/02-SOC-INTEGRATION.md) | Auto-engine · ban/unban · alertes vocales · injection contexte sécurité | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/02-SOC-INTEGRATION.md) |
-| 03 | [Architecture&nbsp;globale](DOCUMENTATION/03-ARCHITECTURE.md) | 5 zones · Flask · Blueprints · modules · polling | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/03-ARCHITECTURE.md) |
-| 04 | [Audio&nbsp;DSP](DOCUMENTATION/04-AUDIO-DSP.md) | Chaîne broadcast · TTS 4 moteurs · STT faster-whisper · DSP 3 étages | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/04-AUDIO-DSP.md) |
-| 05 | [Installation](DOCUMENTATION/05-INSTALLATION.md) | Pré-requis matériel · Python · Ollama · lancement · vérification | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/05-INSTALLATION.md) |
-| 06 | [MCP&nbsp;Server](DOCUMENTATION/06-MCP-SERVER.md) | 12 outils · Claude Desktop · watchdog · principe de séparation | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/06-MCP-SERVER.md) |
+| 01 | [Hermès](DOCUMENTATION/01-HERMES.md) | 5 briques · bypass · apprentissage · DR | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/01-HERMES.md) |
+| 02 | [Intégration&nbsp;SOC](DOCUMENTATION/02-SOC-INTEGRATION.md) | Auto-engine · ban/unban · alertes vocales | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/02-SOC-INTEGRATION.md) |
+| 03 | [Architecture&nbsp;globale](DOCUMENTATION/03-ARCHITECTURE.md) | 5 zones · Flask · Blueprints · modules | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/03-ARCHITECTURE.md) |
+| 04 | [Audio&nbsp;DSP](DOCUMENTATION/04-AUDIO-DSP.md) | Chaîne broadcast · TTS 4 moteurs · STT | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/04-AUDIO-DSP.md) |
+| 05 | [Installation](DOCUMENTATION/05-INSTALLATION.md) | Matériel · Python · Ollama · lancement | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/05-INSTALLATION.md) |
+| 06 | [MCP&nbsp;Server](DOCUMENTATION/06-MCP-SERVER.md) | 12 outils · Claude Desktop · watchdog | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/06-MCP-SERVER.md) |
 
 </div>
 
