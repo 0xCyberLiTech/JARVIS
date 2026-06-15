@@ -62,6 +62,14 @@ Tout tourne en local — aucune donnée ne quitte la machine.
 > **Hermès transforme un assistant en agent.**
 > Là où un assistant répond à des questions, un agent **observe, mémorise, apprend et agit** — sans être re-briefé à chaque session.
 
+### ◈ Le cœur de l'agent
+
+<div align="center">
+  <img src="Images/Jarvis-23.png" alt="Le cœur de l'agent — réacteur vivant + diagnostic" width="900"/>
+</div>
+
+Le **cœur** d'Hermès — un réacteur qui « **respire** » tant que l'agent tourne. Autour : le **diagnostic vivant** (RAG, mémoire, connaissance) et l'**état moteur** (mode actif, modèle `qwen3:8b`, niveau de menace, dernière sauvegarde du cerveau). D'un coup d'œil : l'agent est **vivant, alimenté et conscient de son état**.
+
 ### ◈ L'architecture de l'agent
 
 <div align="center">
