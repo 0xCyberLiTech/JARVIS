@@ -110,7 +110,7 @@ Le centre de contrôle fin de l'inférence locale, découpé en **quatre blocs**
 **① GPU Health — RTX 5080**
 
 <div align="center">
-  <img src="Images/Jarvis-04.png" alt="GPU Health — VRAM, charge, température, puissance" width="460"/>
+  <img src="Images/Jarvis-04b.png" alt="GPU Health — VRAM, charge, température, puissance" width="460"/>
 </div>
 
 État **temps réel** de la carte : VRAM utilisée / 16 Go, charge GPU, température, puissance (W). Le voyant vire à l'orange/rouge dès qu'une limite est approchée.
@@ -240,7 +240,7 @@ Maîtrise les écarts de volume de la voix : **seuil, ratio, attaque, relâche**
 **⑤ Analyseur spectral**
 
 <div align="center">
-  <img src="Images/Jarvis-17.png" alt="Analyseur spectral — FFT temps réel, 8 modes" width="880"/>
+  <img src="Images/Jarvis-17b.png" alt="Analyseur spectral — FFT temps réel, 8 modes" width="880"/>
 </div>
 
 Analyse **FFT temps réel** de la sortie : 8 modes d'affichage (bars, line, fill, mirror, waterfall, wave, dots, radial) + **goniomètre de phase** et crêtes L/R. L'œil sur le signal.

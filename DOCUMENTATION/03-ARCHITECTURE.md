@@ -92,7 +92,7 @@
 > phi4:14b est toujours chaud (défaut SOC). Le switch vers gemma4 ou qwen2.5-coder entraîne un swap VRAM — accepté car c'est un changement de mode explicite.
 
 <div align="center">
-  <img src="../Images/Jarvis-04.png" alt="JARVIS — santé GPU RTX 5080 et paramètres LLM" width="340" />
+  <img src="../Images/Jarvis-04b.png" alt="JARVIS — santé GPU RTX 5080 et paramètres LLM" width="340" />
   <br/>
   <sub>Monitoring GPU (VRAM, température, puissance) et profils LLM — l'optimisation matérielle RTX 5080 est pilotable depuis l'interface.</sub>
 </div>
