@@ -51,13 +51,7 @@
 **JARVIS** est un assistant IA personnel de type *Iron Man* — mais qui tourne **entièrement en local** sur un seul poste (Python/Flask + Ollama · RTX 5080). Pas un chatbot de plus : un **agent** qui voit, parle, mémorise, apprend, et **veille sur l'infrastructure 24/7**. Aucune donnée ne quitte la machine.
 
 <div align="center">
-  <img src="Images/Jarvis-hero.gif" alt="JARVIS se présente — onde vocale active, interface holographique en direct" width="900"/>
-
-  <p>🔊 <strong>JARVIS se présente à voix haute</strong> — cliquez ▶ (voix d'Antoine)</p>
-
-  <video src="https://cdn.jsdelivr.net/gh/0xCyberLiTech/JARVIS@main/Images/Jarvis-hero.mp4" controls width="900"></video>
-
-  <sub>Lecteur absent ? <a href="https://github.com/0xCyberLiTech/JARVIS/blob/main/Images/Jarvis-hero.mp4">Ouvrir la vidéo sur GitHub</a> (avec le son).</sub>
+  <img src="Images/Jarvis-hero.gif" alt="JARVIS — interface holographique en direct (onde vocale active)" width="900"/>
 </div>
 
 ---
