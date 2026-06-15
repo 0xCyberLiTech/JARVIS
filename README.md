@@ -48,11 +48,27 @@
 
 > **Assistant IA local · 100 % privé · Interface holographique · SOC cybersécurité**
 
-JARVIS est un assistant IA personnel de type Iron Man construit sur Python/Flask + Ollama.
-Tout tourne en local — aucune donnée ne quitte la machine.
+**JARVIS** est un assistant IA personnel de type *Iron Man* — mais qui tourne **entièrement en local** sur un seul poste (Python/Flask + Ollama · RTX 5080). Pas un chatbot de plus : un **agent** qui voit, parle, mémorise, apprend, et **veille sur l'infrastructure 24/7**. Aucune donnée ne quitte la machine.
 
 <div align="center">
   <img src="Images/Jarvis.png" alt="JARVIS — interface holographique principale" width="900"/>
+</div>
+
+---
+
+## ✦ Ce qui rend JARVIS unique
+
+<div align="center">
+
+| | |
+|---|---|
+| 🔒 **100 % local · zéro cloud** | LLM, voix, RAG, données — tout sur le poste. Aucune fuite, aucun abonnement. |
+| 🧠 **Un agent, pas un chatbot** | *Hermès* observe, mémorise, apprend et **agit** — sans être re-briefé à chaque session. |
+| 🛡️ **SOC autonome 24/7** | Détecte, bannit et redémarre **tout seul** · alertes vocales · contexte sécurité injecté en direct. |
+| 🎙️ **Voix qualité broadcast** | Chaîne DSP pro (débruitage IA · compresseur · FX) + 4 moteurs TTS en cascade. |
+| ⚡ **RTX 5080 maîtrisée** | Modèle 100 % en VRAM, garde-fou anti-débordement, CUDA partout (Whisper · DeepFilterNet). |
+| ♿ **Pensé accessible** | Haute lisibilité, commandes vocales déterministes (< 100 ms), briefing matinal. |
+
 </div>
 
 ---
