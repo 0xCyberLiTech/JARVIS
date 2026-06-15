@@ -333,17 +333,17 @@ Les **compteurs agrégés** : actions totales, bans IP, restarts, succès / éch
 
 | Module | Rôle |
 |---|---|
-| **Monitor** | supervision GPU / VRAM / CPU / réseau en temps réel |
-| **JARVIS AI** | cockpit de dialogue — chat, voix, onde vocale |
-| **Settings** | réglages LLM, RAG, prompt système, profils |
-| **DSP Audio** | studio de traitement vocal (EQ · FX · TTS) |
-| **Tâches** | gestionnaire de tâches + terminal code |
-| **Voice Lab** | atelier de la voix — STT / TTS, tests |
-| **SOC** | sécurité : auto-engine, bans, alertes |
-| **Apprentissage** | cerveau — mémoire, faits, leçons (RAG) |
-| **Infogérance** | maintenance des VMs (MAJ · reboot · AIDE) |
-| **Alarmes** | alarmes, rappels, agenda |
-| **Accès Web** | passerelle web gouvernée (veille, météo) |
+| **Monitor** | GPU · VRAM · CPU · réseau (live) |
+| **JARVIS AI** | cockpit chat + voix + onde |
+| **Settings** | LLM · RAG · prompt · profils |
+| **DSP Audio** | studio vocal · EQ · FX · TTS |
+| **Tâches** | tâches + terminal code |
+| **Voice Lab** | atelier STT / TTS |
+| **SOC** | auto-engine · bans · alertes |
+| **Apprentissage** | mémoire · faits · leçons (RAG) |
+| **Infogérance** | MAJ · reboot · AIDE (VMs) |
+| **Alarmes** | alarmes · rappels · agenda |
+| **Accès Web** | passerelle web gouvernée |
 
 **La voix** — bascule des moteurs TTS + choix de la voix :
 
@@ -385,12 +385,12 @@ Le **prompt système** encode les règles de comportement : méthodologie SOC, *
 
 | # | Document | Description | Statut | |
 |---|----------|-------------|--------|---|
-| 01 | [Hermès](DOCUMENTATION/01-HERMES.md) | 5 briques · bypass · apprentissage · DR | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/01-HERMES.md) |
-| 02 | [Intégration&nbsp;SOC](DOCUMENTATION/02-SOC-INTEGRATION.md) | Auto-engine · ban/unban · alertes vocales | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/02-SOC-INTEGRATION.md) |
-| 03 | [Architecture&nbsp;globale](DOCUMENTATION/03-ARCHITECTURE.md) | 5 zones · Flask · Blueprints · modules | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/03-ARCHITECTURE.md) |
-| 04 | [Audio&nbsp;DSP](DOCUMENTATION/04-AUDIO-DSP.md) | Chaîne broadcast · TTS 4 moteurs · STT | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/04-AUDIO-DSP.md) |
-| 05 | [Installation](DOCUMENTATION/05-INSTALLATION.md) | Matériel · Python · Ollama · lancement | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/05-INSTALLATION.md) |
-| 06 | [MCP&nbsp;Server](DOCUMENTATION/06-MCP-SERVER.md) | 12 outils · Claude Desktop · watchdog | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/06-MCP-SERVER.md) |
+| 01 | [Hermès](DOCUMENTATION/01-HERMES.md) | Mémoire · bypass · RAG · DR | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/01-HERMES.md) |
+| 02 | [Intégration&nbsp;SOC](DOCUMENTATION/02-SOC-INTEGRATION.md) | Auto-engine · bans · alertes | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/02-SOC-INTEGRATION.md) |
+| 03 | [Architecture&nbsp;globale](DOCUMENTATION/03-ARCHITECTURE.md) | Flask · Blueprints · modules | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/03-ARCHITECTURE.md) |
+| 04 | [Audio&nbsp;DSP](DOCUMENTATION/04-AUDIO-DSP.md) | Broadcast · TTS · STT · DSP | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/04-AUDIO-DSP.md) |
+| 05 | [Installation](DOCUMENTATION/05-INSTALLATION.md) | Python · Ollama · setup | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/05-INSTALLATION.md) |
+| 06 | [MCP&nbsp;Server](DOCUMENTATION/06-MCP-SERVER.md) | 12 outils · MCP · watchdog | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/06-MCP-SERVER.md) |
 
 </div>
 
