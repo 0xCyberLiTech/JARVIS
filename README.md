@@ -306,16 +306,10 @@ Zoom sur la **carte LLM VRAM** : l'empreinte du modèle actif en mémoire vidéo
 ### 7 · SOC — activité & réponse automatique
 
 <div align="center">
-  <img src="Images/Jarvis-24.png" alt="SOC — activité sur 30 jours" width="880"/>
+  <img src="Images/Jarvis-24.png" alt="SOC — tuiles d'activité et compteurs en temps réel" width="900"/>
 </div>
 
-L'auto-engine SOC en chiffres : **activité sur 30 jours** (détections, bans, restarts) par semaine et par jour. JARVIS surveille nginx / CrowdSec / fail2ban / Suricata en continu et **agit seul** (ban, restart de service) selon des seuils — l'agent ne se contente pas d'alerter, il **répond**.
-
-<div align="center">
-  <img src="Images/Jarvis-25.png" alt="SOC — compteurs agrégés" width="880"/>
-</div>
-
-Les **compteurs agrégés** : actions totales, bans IP, restarts, succès / échecs, détections **IDS**. La preuve que l'agent **détecte et réagit en autonomie** — sans exposer la moindre IP.
+Les **tuiles SOC en activité** : courbes de détection sur 30 jours (**en rouge** les pics offensifs) + **compteurs en direct** — actions, **bans IP**, restarts, succès / échecs, détections **IDS**. JARVIS surveille nginx / CrowdSec / fail2ban / Suricata en continu et **agit seul** (ban, restart) selon des seuils : l'agent ne se contente pas d'alerter, il **répond** — sans jamais exposer la moindre IP.
 
 > 🔒 Volontairement **non publiés** : le **journal des IP** d'attaquants, le **terminal** et les **leçons apprises**. La vitrine *décrit* le SOC et montre son activité **agrégée**, mais n'expose **aucune donnée actionnable**.
 
@@ -331,6 +325,8 @@ Les **compteurs agrégés** : actions totales, bans IP, restarts, succès / éch
   <img src="Images/Jarvis-26.png" alt="JARVIS — barre de navigation : les 11 modules" width="900"/>
 </div>
 
+<div align="center">
+
 | Module | Rôle |
 |---|---|
 | **Monitor** | GPU · VRAM · CPU · réseau (live) |
@@ -344,6 +340,8 @@ Les **compteurs agrégés** : actions totales, bans IP, restarts, succès / éch
 | **Infogérance** | MAJ · reboot · AIDE (VMs) |
 | **Alarmes** | alarmes · rappels · agenda |
 | **Accès Web** | passerelle web gouvernée |
+
+</div>
 
 **La voix** — bascule des moteurs TTS + choix de la voix :
 
