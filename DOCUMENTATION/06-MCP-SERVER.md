@@ -134,7 +134,7 @@ Chaque réponse JARVIS est encadrée pour la différencier de Claude :
 [réponse de JARVIS]
 ```
 
-Différence visuelle immédiate — essentiel pour l'utilisateur malvoyant.
+Différence visuelle immédiate : une réponse de JARVIS se distingue d'un coup d'œil d'une réponse de Claude.
 
 ---
 
