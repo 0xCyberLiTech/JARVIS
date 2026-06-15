@@ -59,14 +59,24 @@ Tout tourne en local — aucune donnée ne quitte la machine.
 
 ## Hermès — L'agent persistant
 
-<div align="center">
-  <img src="Images/Jarvis-08.png" alt="Hermès — l'agent persistant, interface holographique" width="880"/>
-</div>
-
-<br/>
-
 > **Hermès transforme un assistant en agent.**
 > Là où un assistant répond à des questions, un agent **observe, mémorise, apprend et agit** — sans être re-briefé à chaque session.
+
+### ◈ L'architecture de l'agent
+
+<div align="center">
+  <img src="Images/Jarvis-21.png" alt="Schéma Hermès — flux et briques de l'agent" width="900"/>
+</div>
+
+Le **schéma vivant** de l'agent : le flux **entrée → Hermès → LLM → réponse**, et les briques branchées en temps réel — **Mémoire** (faits + leçons RAG), **SOC live** (niveau de menace), **Web** (à la demande), **Proxmox** (état des VMs), **Bypass** (commandes < 100 ms), **Vision**, **MCP**, **Apprentissage**, **Réflexion**, **DR cerveau**, **Briefing**, **Alarmes**. Chaque brique affiche son état réel — c'est la « salle des machines » de l'agent.
+
+### ◈ Le cerveau qui grandit
+
+<div align="center">
+  <img src="Images/Jarvis-22.png" alt="Croissance du cerveau — leçons cumulées dans le temps" width="780"/>
+</div>
+
+La **mémoire de l'agent s'accumule** : courbe des **leçons cumulées** dans le temps (et leur rythme par heure). Chaque `"souviens-toi que…"` ou correction ajoute une leçon **persistée, indexée dans le RAG et réinjectée** automatiquement — l'agent ne repart jamais de zéro.
 
 <div align="center">
 
@@ -225,9 +235,23 @@ Le **Voice Lab** règle au cordeau la voix de l'assistant : choix de la **source
 
 L'agent peut consulter le web — mais **sous contrôle strict**. JARVIS ne visite QUE les domaines d'une **allowlist explicite** (sites système verrouillés pour la météo et la veille IA), en **lecture seule** (jamais d'envoi de données), et **chaque accès est journalisé**. Tout le reste est **refusé et tracé**. La curiosité de l'agent reste gouvernée — même principe de moindre privilège que pour le SOC.
 
-> D'autres captures (dashboard monitoring, pilotage des modèles, SOC, terminal)
-> sont volontairement **non publiées** : elles relèvent de la doctrine de
-> sanitisation (la vitrine *décrit* le SOC, elle n'en *expose* aucune donnée live).
+### 6 · Monitoring GPU & VRAM
+
+<div align="center">
+  <img src="Images/Jarvis-19.png" alt="Monitor — GPU, CPU, RAM, VRAM temps réel" width="880"/>
+</div>
+
+L'onglet **Monitor** : surveillance **temps réel** de la RTX 5080 — utilisation GPU, VRAM, température, puissance, CPU, RAM système — plus les caractéristiques de la carte (Blackwell GB203, 16 Go GDDR7, sm_120, 960 Go/s).
+
+<div align="center">
+  <img src="Images/Jarvis-20.png" alt="Carte LLM VRAM — empreinte du modèle en mémoire vidéo" width="780"/>
+</div>
+
+Zoom sur la **carte LLM VRAM** : l'empreinte du modèle actif en mémoire vidéo. La RTX 5080 a **16 Go** ; tant que le modèle **+ son contexte (cache KV)** y tiennent (ici `qwen3:8b` ≈ 5,6 Go / 35 %), l'inférence reste **pleine vitesse GPU**. S'ils débordent, Ollama « spille » en RAM système et la vitesse s'effondre — la carte affiche `MODE`, `tokens/s`, `num_ctx`, le **SWAP RAM** et une alerte **⚠ DÉBORDEMENT**. C'est le garde-fou du LLM 100 % local sur une seule carte.
+
+> Les captures **SOC live** (IP d'attaquants), le **terminal** et les **leçons apprises**
+> restent volontairement **non publiés** : la vitrine *décrit* le SOC, elle n'en
+> *expose* aucune donnée sensible.
 
 ---
 
