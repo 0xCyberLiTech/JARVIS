@@ -129,16 +129,13 @@ Tour visuel des principaux modules de l'interface holographique JARVIS.
 
 Le centre de contrôle fin de l'inférence locale, organisé en **quatre blocs** :
 
-<div align="center">
+**① GPU Health — RTX 5080** — état **temps réel** de la carte : VRAM utilisée / 16 Go, charge GPU, température, puissance (W). Le voyant vire à l'orange/rouge dès qu'une limite est approchée.
 
-| Bloc | Description |
-|------|-------------|
-| **① GPU Health — RTX 5080** | État **temps réel** de la carte : VRAM utilisée / 16 Go, charge GPU, température, puissance (W). Le voyant vire à l'orange/rouge dès qu'une limite est approchée. |
-| **② Impact sur la RTX** | Estime *avant* de lancer le **coût mémoire** des réglages courants (poids du modèle + cache KV) et la **VRAM libre restante** — pour rester en « zone sûre » sans saturer la carte. |
-| **③ Profils RTX 5080** | Six préréglages cohérents en **un clic** — *Rapide · Équilibré · Code · Créatif · Précis · RTX 5080 MAX* — qui ajustent d'un coup créativité, longueur et contexte selon l'usage. |
-| **④ Paramètres LLM** | Réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penalty, taille de contexte — plus trois modes d'**optimisation latence** (Rapide / Équilibré / Qualité). |
+**② Impact sur la RTX** — estime *avant* de lancer le **coût mémoire** des réglages (poids du modèle + cache KV) et la **VRAM libre restante**, pour rester en « zone sûre » sans saturer la carte.
 
-</div>
+**③ Profils RTX 5080** — six préréglages cohérents en **un clic** (*Rapide · Équilibré · Code · Créatif · Précis · RTX 5080 MAX*) qui ajustent d'un coup créativité, longueur et contexte selon l'usage.
+
+**④ Paramètres LLM** — réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penalty, taille de contexte ; plus trois modes d'**optimisation latence** (Rapide / Équilibré / Qualité).
 
 ### 3 · Studio audio DSP
 
