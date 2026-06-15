@@ -334,44 +334,7 @@ Le **schéma vivant** de l'agent : le flux **entrée → Hermès → LLM → ré
 
 La **mémoire de l'agent s'accumule** : courbe des **leçons cumulées** dans le temps (et leur rythme par heure). Chaque `"souviens-toi que…"` ou correction ajoute une leçon **persistée, indexée dans le RAG et réinjectée** automatiquement — l'agent ne repart jamais de zéro.
 
-<div align="center">
-
-| Brique | Rôle |
-|--------|------|
-| **Synoptique temps réel** | 6 couches moteur visibles dans l'interface : LLM actif, RAG, STT/TTS, auto-engine SOC, état mémoire |
-| **Tuile Mémoire** | Mémoire vectorielle persistante — échanges, résumés, leçons apprises — rechargeable sans redémarrage |
-| **Bypass déterministe** | Commandes critiques interceptées avant le LLM : exécution instantanée < 100 ms, 0 hallucination |
-| **Boucle d'apprentissage** | `"Souviens-toi que X"` → leçon persistée, indexée, réinjectée automatiquement dans les futures réponses |
-| **Briefing matinal** | `"Bonjour JARVIS"` → niveau de menace SOC, état des machines, alertes des 24 dernières heures |
-
-</div>
-
-<div align="center">
-
-| Avant Hermès | Après Hermès |
-|--------------|--------------|
-| Chaque session recommence à zéro | Contexte conservé entre les sessions |
-| Le contexte disparaît au redémarrage | Leçons et conventions indexées dans le RAG |
-| L'assistant répond seulement | L'agent surveille, alerte et agit |
-| Toutes les commandes passent par le LLM | Bypass déterministe pour les commandes critiques |
-
-</div>
-
----
-
-## À propos & Objectifs
-
-<div align="center">
-
-| Objectif | Description |
-|----------|-------------|
-| **100 % local** | LLM, STT, TTS, RAG, données — tout sur le poste de travail (GPU NVIDIA CUDA) |
-| **Agentification** | Hermès — mémoire longue durée, apprentissage inter-sessions, briefing automatique |
-| **SOC cybersécurité** | Auto-engine de détection, ban automatique, alertes vocales, injection contexte sécurité live |
-| **Accessibilité** | Interface haute lisibilité, alertes vocales TTS, commandes vocales à bypass déterministe |
-| **Qualité** | 1 465 tests · 79 % coverage · ruff 0 · eslint 0 · hooks bloquants |
-
-</div>
+> **Les 5 briques** (synoptique temps réel · mémoire vectorielle persistante · bypass déterministe < 100 ms · boucle d'apprentissage · briefing matinal) et le comparatif **Avant / Après Hermès** sont détaillés dans **[01 — Hermès](DOCUMENTATION/01-HERMES.md)**.
 
 ---
 
