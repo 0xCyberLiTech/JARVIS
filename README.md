@@ -64,11 +64,9 @@
 <div align="center">
   <img src="Images/Jarvis-hero.gif" alt="JARVIS se présente — onde vocale active, interface holographique en direct" width="900"/>
 
-  <p>🔊 <strong>JARVIS se présente à voix haute</strong> — cliquez ▶ (voix d'Antoine)</p>
+  <p>🔊 <a href="https://github.com/0xCyberLiTech/JARVIS/blob/main/Images/Jarvis-hero.mp4"><strong>▶ Écouter JARVIS se présenter — voix d'Antoine</strong></a></p>
 
-  <video src="https://github.com/0xCyberLiTech/JARVIS/raw/main/Images/Jarvis-hero.mp4" controls width="900"></video>
-
-  <sub>Le son ne se lance pas tout seul (GitHub) — cliquez ▶. Sinon : <a href="Images/Jarvis-hero.mp4">ouvrir la vidéo</a>.</sub>
+  <sub>Ouvre le lecteur vidéo de GitHub (avec le son).</sub>
 </div>
 
 ---
