@@ -55,8 +55,8 @@
 | **Stockage** | 50 GB SSD | NVMe — modèles Ollama ~29 GB |
 | **OS** | Windows 11 | Windows 11 Pro |
 
-> Avec 8 GB VRAM, seul un modèle 7B fonctionne sans swap.
-> Pour phi4:14b (9.1 GB) + mxbai-embed (0.7 GB), il faut **minimum 12 GB VRAM**.
+> Avec 8 GB VRAM, le modèle par défaut qwen3:8b (~5.6 GB) + mxbai-embed (0.7 GB) tient sans swap.
+> Pour les modèles 14B (qwen3:14b THINK · qwen2.5-coder CODE · gemma4 VISION, ~9 GB chacun), prévoir **12 GB+ de VRAM**.
 
 ---
 
@@ -85,14 +85,17 @@ pip install -r requirements.txt
 ## Étape 2 — Modèles Ollama
 
 ```bash
-# Modèle SOC (défaut — toujours chaud)
-ollama pull phi4:14b
+# Modèle SOC + GÉNÉRAL + Code-Reasoning (défaut — toujours chaud)
+ollama pull qwen3:8b
 
-# Modèle GÉNÉRAL + vision
-ollama pull gemma4:latest
+# Modèle THINK (raisonnement profond)
+ollama pull qwen3:14b
 
 # Modèle CODE
 ollama pull qwen2.5-coder:14b
+
+# Modèle VISION (multimodal)
+ollama pull gemma4:latest
 
 # Modèle RAG (embeddings)
 ollama pull mxbai-embed-large
@@ -128,7 +131,7 @@ Ce script : active le venv · vérifie Ollama · lance Flask · ouvre localhost:
 
 Dans l'interface, vérifier :
 - Synoptique Hermès : 6 briques vertes
-- Modèle actif : `phi4:14b`
+- Modèle actif : `qwen3:8b`
 - RAG : `ready` · chunks chargés
 - TTS : `edge-tts` · voix `fr-CA-AntoineNeural`
 - STT : microphone disponible

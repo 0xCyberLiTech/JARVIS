@@ -55,7 +55,7 @@ La chaîne audio de JARVIS est inspirée d'un **processeur voix broadcast** (Sym
 ## Topologie des 3 étages
 
 ```
-SOURCE TTS (edge-tts / Kokoro / SAPI5)
+SOURCE TTS (edge-tts Antoine / Kokoro)
        │
    Analyseur VU · pré-gain
        │
@@ -93,16 +93,14 @@ SOURCE TTS (edge-tts / Kokoro / SAPI5)
 
 ---
 
-## Chaîne TTS — 4 moteurs en cascade
+## Chaîne TTS — cascade automatique
 
 | # | Moteur | Mode | Notes |
 |---|--------|------|-------|
 | 1 | **edge-tts** fr-CA-AntoineNeural | Défaut | Voix naturelle — nécessite internet |
-| 2 | **Kokoro** ff_siwis CUDA | Fallback auto | 100 % local — GPU NVIDIA |
-| 3 | **XTTS v2** | Optionnel | 58 voix + voice prints clonés |
-| 4 | **SAPI5** pyttsx3 | Fallback final | Hors ligne absolu — voix système |
+| 2 | **Kokoro** ff_siwis CUDA | Repli local | 100 % local — GPU NVIDIA, fonctionne hors-ligne |
 
-La cascade est automatique. Si le moteur n° 1 échoue (hors ligne), n° 2 prend le relais sans interruption.
+La cascade est automatique : si Edge échoue (hors ligne), Kokoro neural prend le relais sans interruption.
 
 ---
 

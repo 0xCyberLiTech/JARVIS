@@ -64,7 +64,7 @@ jarvis_mcp_server.py  (pythonw — arrière-plan Windows)
 JARVIS (Flask)
     │  SSH local + Ollama + fichiers
     ▼
-Données SOC · Infrastructure · LLM phi4:14b
+Données SOC · Infrastructure · LLM qwen3:8b
 ```
 
 **Principe fondamental** : JARVIS filtre et agrège localement.
@@ -129,7 +129,7 @@ Chaque réponse JARVIS est encadrée pour la différencier de Claude :
 
 ```
 ╔══════════════════════════════╗
-║  ◈  JARVIS  —  phi4:14b  ◈  ║
+║  ◈  JARVIS  —  qwen3:8b  ◈  ║
 ╚══════════════════════════════╝
 [réponse de JARVIS]
 ```

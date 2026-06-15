@@ -96,7 +96,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
                            │
               ┌────────────▼──────────────┐
               │          L L M            │
-              │  phi4 / gemma4 / qwen     │  ← ne voit que ce qu'Hermès
+              │  qwen3 / coder / gemma4   │  ← ne voit que ce qu'Hermès
               └────────────┬──────────────┘    lui prépare
                            │
               ┌────────────▼──────────────┐
@@ -168,7 +168,7 @@ Le synoptique est le **tableau de bord live d'Hermès** — visible en permanenc
 ┌─────────────────────────────────────────────────────────┐
       ◈  HERMÈS  --  SYNOPTIQUE  MOTEUR                        
 ├─────────────────┬───────────────────────────────────────┤
-│  LLM ACTIF      │  phi4:14b  ●  CHAUD  (en mémoire)     │
+│  LLM ACTIF      │  qwen3:8b  ●  CHAUD  (en mémoire)     │
 │  RAG            │  1698 chunks  ●  PRÊT  TTL: 4m32s     │
 │  STT            │  large-v3-turbo  ●  EN ÉCOUTE         │
 │  TTS            │  edge-tts  Antoine fr-CA  ●  ACTIF    │

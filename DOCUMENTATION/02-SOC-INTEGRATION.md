@@ -51,7 +51,7 @@ JARVIS devient le bras armé du dashboard SOC :
 - Il lit les métriques de sécurité en temps réel
 - Il déclenche des actions défensives (ban IP, restart service)
 - Il envoie des alertes vocales si le niveau de menace monte
-- Il analyse les patterns d'attaque avec le LLM local (phi4:14b)
+- Il analyse les patterns d'attaque avec le LLM local (qwen3:8b)
 
 ---
 
@@ -62,7 +62,7 @@ Dashboard SOC (monitoring.json)
     │ poll 30s
     ▼
 JARVIS (localhost:5000)
-    ├── Mode SOC (phi4:14b) — injection contexte live
+    ├── Mode SOC (qwen3:8b) — injection contexte live
     ├── Auto-engine Python (poll 60s) — bans/restarts automatiques
     └── Alertes vocales TTS (seuils ÉLEVÉ / CRITIQUE)
 ```

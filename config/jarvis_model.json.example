@@ -1,4 +1,4 @@
 {
-    "model": "phi4",
+    "model": "qwen3:8b",
     "_comment": "Copier en jarvis_model.json — modèle Ollama actif. Changer via l'interface web ou /models/select"
 }

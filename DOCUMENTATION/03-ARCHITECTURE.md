@@ -73,8 +73,8 @@
             ▼                                 ▼
    ┌───────────────────┐              ┌────────────────────┐
    │  Ollama local     │              │  Dashboard SOC     │
-   │  phi4:14b (SOC)   │              │  CrowdSec · F2B    │
-   │  gemma4 (GÉNÉRAL) │              │  Suricata · nginx  │
+   │  qwen3:8b (SOC)   │              │  CrowdSec · F2B    │
+   │  gemma4 (VISION)  │              │  Suricata · nginx  │
    └───────────────────┘              └────────────────────┘
 ```
 
@@ -84,12 +84,14 @@
 
 | Mode | Modèle | VRAM | Usage |
 |------|--------|------|-------|
-| **SOC** (défaut · toujours chaud) | phi4:14b | 9.1 GB | Cybersécurité · raisonnement |
-| **GÉNÉRAL** | gemma4:latest | 9.6 GB | Conversation · vision native |
+| **SOC** (défaut · toujours chaud) | qwen3:8b | 5.6 GB | Cybersécurité · raisonnement |
+| **GÉNÉRAL** | qwen3:8b | 5.6 GB | Conversation (même modèle que SOC — zéro swap) |
+| **THINK** | qwen3:14b | ~9 GB | Raisonnement profond (think natif) |
 | **CODE** | qwen2.5-coder:14b | 9.0 GB | Développement · infogérance |
+| **VISION** | gemma4:latest | 9.6 GB | Multimodal — analyse d'images |
 | **RAG** (keep_alive 10m) | mxbai-embed-large | 0.7 GB | Embeddings vectoriels |
 
-> phi4:14b est toujours chaud (défaut SOC). Le switch vers gemma4 ou qwen2.5-coder entraîne un swap VRAM — accepté car c'est un changement de mode explicite.
+> qwen3:8b est toujours chaud (défaut SOC + GÉNÉRAL + Code-Reasoning — un seul modèle, zéro swap entre ces modes). Le switch vers qwen3:14b (THINK), qwen2.5-coder (CODE) ou gemma4 (VISION) entraîne un swap VRAM — accepté car c'est un changement de mode explicite.
 
 <div align="center">
   <img src="../Images/Jarvis-04b.png" alt="JARVIS — santé GPU RTX 5080 et paramètres LLM" width="340" />
