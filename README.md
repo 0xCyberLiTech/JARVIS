@@ -96,7 +96,7 @@ Tour visuel des principaux modules de l'interface holographique JARVIS.
 ### 1 · Écran d'accueil
 
 <div align="center">
-  <img src="Images/Jarvis-01.png" alt="Écran d'accueil JARVIS" width="880"/>
+  <img src="Images/Jarvis-01b.png" alt="Écran d'accueil JARVIS" width="880"/>
 </div>
 
 À l'ouverture, JARVIS se présente et énumère son état opérationnel : le **modèle LLM actif** (qwen3:8b via Ollama), le **moteur vocal** (Edge-TTS Antoine Neural), la **chaîne de traitement DSP** (EQ, compresseur, DeepFilterNet), les **modules disponibles** (Terminal, Fichiers, Tâches, Audio) et l'**accélération matérielle CUDA** (RTX Blackwell + Whisper STT GPU). Les trois actions principales — *Lire*, *Modifier*, *Accéder au système* — sont accessibles directement, et la première interaction de la journée déclenche le briefing matinal d'Hermès.

@@ -56,7 +56,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 **Hermès est la couche d'agentification de JARVIS.** C'est lui qui transforme un assistant LLM classique en agent autonome persistant. Il s'intercale entre l'utilisateur et le moteur LLM, et prend en charge tout ce que le LLM ne devrait pas faire : la mémoire long terme, les décisions déterministes, les actions système et le briefing proactif.
 
 <div align="center">
-  <img src="../Images/Jarvis-01.png" alt="Interface holographique JARVIS — accueil" width="640" />
+  <img src="../Images/Jarvis-01b.png" alt="Interface holographique JARVIS — accueil" width="640" />
   <br/>
   <sub>Interface holographique JARVIS — état du moteur local (LLM, voix, modules, accélération GPU) en un coup d'œil.</sub>
 </div>
