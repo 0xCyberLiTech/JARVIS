@@ -87,78 +87,6 @@
 
 ---
 
-<a id="hermes"></a>
-
-## Hermès — L'agent persistant
-
-> **Hermès transforme un assistant en agent.**
-> Là où un assistant répond à des questions, un agent **observe, mémorise, apprend et agit** — sans être re-briefé à chaque session.
-
-### ◈ Le cœur de l'agent
-
-<div align="center">
-  <img src="Images/Jarvis-23.png" alt="Le cœur de l'agent — réacteur vivant + diagnostic" width="900"/>
-</div>
-
-Le **cœur** d'Hermès — un réacteur qui « **respire** » tant que l'agent tourne. Autour : le **diagnostic vivant** (RAG, mémoire, connaissance) et l'**état moteur** (mode actif, modèle `qwen3:8b`, niveau de menace, dernière sauvegarde du cerveau). D'un coup d'œil : l'agent est **vivant, alimenté et conscient de son état**.
-
-### ◈ L'architecture de l'agent
-
-<div align="center">
-  <img src="Images/Jarvis-21.png" alt="Schéma Hermès — flux et briques de l'agent" width="900"/>
-</div>
-
-Le **schéma vivant** de l'agent : le flux **entrée → Hermès → LLM → réponse**, et les briques branchées en temps réel — **Mémoire** (faits + leçons RAG), **SOC live** (niveau de menace), **Web** (à la demande), **Proxmox** (état des VMs), **Bypass** (commandes < 100 ms), **Vision**, **MCP**, **Apprentissage**, **Réflexion**, **DR cerveau**, **Briefing**, **Alarmes**. Chaque brique affiche son état réel — c'est la « salle des machines » de l'agent.
-
-### ◈ Le cerveau qui grandit
-
-<div align="center">
-  <img src="Images/Jarvis-22.png" alt="Croissance du cerveau — leçons cumulées dans le temps" width="780"/>
-</div>
-
-La **mémoire de l'agent s'accumule** : courbe des **leçons cumulées** dans le temps (et leur rythme par heure). Chaque `"souviens-toi que…"` ou correction ajoute une leçon **persistée, indexée dans le RAG et réinjectée** automatiquement — l'agent ne repart jamais de zéro.
-
-<div align="center">
-
-| Brique | Rôle |
-|--------|------|
-| **Synoptique temps réel** | 6 couches moteur visibles dans l'interface : LLM actif, RAG, STT/TTS, auto-engine SOC, état mémoire |
-| **Tuile Mémoire** | Mémoire vectorielle persistante — échanges, résumés, leçons apprises — rechargeable sans redémarrage |
-| **Bypass déterministe** | Commandes critiques interceptées avant le LLM : exécution instantanée < 100 ms, 0 hallucination |
-| **Boucle d'apprentissage** | `"Souviens-toi que X"` → leçon persistée, indexée, réinjectée automatiquement dans les futures réponses |
-| **Briefing matinal** | `"Bonjour JARVIS"` → niveau de menace SOC, état des machines, alertes des 24 dernières heures |
-
-</div>
-
-<div align="center">
-
-| Avant Hermès | Après Hermès |
-|--------------|--------------|
-| Chaque session recommence à zéro | Contexte conservé entre les sessions |
-| Le contexte disparaît au redémarrage | Leçons et conventions indexées dans le RAG |
-| L'assistant répond seulement | L'agent surveille, alerte et agit |
-| Toutes les commandes passent par le LLM | Bypass déterministe pour les commandes critiques |
-
-</div>
-
----
-
-## À propos & Objectifs
-
-<div align="center">
-
-| Objectif | Description |
-|----------|-------------|
-| **100 % local** | LLM, STT, TTS, RAG, données — tout sur le poste de travail (GPU NVIDIA CUDA) |
-| **Agentification** | Hermès — mémoire longue durée, apprentissage inter-sessions, briefing automatique |
-| **SOC cybersécurité** | Auto-engine de détection, ban automatique, alertes vocales, injection contexte sécurité live |
-| **Accessibilité** | Interface haute lisibilité, alertes vocales TTS, commandes vocales à bypass déterministe |
-| **Qualité** | 1 465 tests · 79 % coverage · ruff 0 · eslint 0 · hooks bloquants |
-
-</div>
-
----
-
 ## Galerie — L'interface en images
 
 Tour visuel des principaux modules de l'interface holographique JARVIS.
@@ -374,6 +302,78 @@ Le compteur **CTX** affiche les échanges gardés en contexte ; **Purger mémoir
 </div>
 
 Le **prompt système** encode les règles de comportement : méthodologie SOC, **anti-hallucination** (cite les chiffres exacts, jamais d'invention), distinction analyse / explication. Plusieurs **profils** sont sauvegardés et chargeables à la volée (SOC · Code · Think…). 🔒 *IP, clés, noms : intégralement anonymisés sur cette capture.*
+
+---
+
+<a id="hermes"></a>
+
+## Hermès — L'agent persistant
+
+> **Hermès transforme un assistant en agent.**
+> Là où un assistant répond à des questions, un agent **observe, mémorise, apprend et agit** — sans être re-briefé à chaque session.
+
+### ◈ Le cœur de l'agent
+
+<div align="center">
+  <img src="Images/Jarvis-23.png" alt="Le cœur de l'agent — réacteur vivant + diagnostic" width="900"/>
+</div>
+
+Le **cœur** d'Hermès — un réacteur qui « **respire** » tant que l'agent tourne. Autour : le **diagnostic vivant** (RAG, mémoire, connaissance) et l'**état moteur** (mode actif, modèle `qwen3:8b`, niveau de menace, dernière sauvegarde du cerveau). D'un coup d'œil : l'agent est **vivant, alimenté et conscient de son état**.
+
+### ◈ L'architecture de l'agent
+
+<div align="center">
+  <img src="Images/Jarvis-21.png" alt="Schéma Hermès — flux et briques de l'agent" width="900"/>
+</div>
+
+Le **schéma vivant** de l'agent : le flux **entrée → Hermès → LLM → réponse**, et les briques branchées en temps réel — **Mémoire** (faits + leçons RAG), **SOC live** (niveau de menace), **Web** (à la demande), **Proxmox** (état des VMs), **Bypass** (commandes < 100 ms), **Vision**, **MCP**, **Apprentissage**, **Réflexion**, **DR cerveau**, **Briefing**, **Alarmes**. Chaque brique affiche son état réel — c'est la « salle des machines » de l'agent.
+
+### ◈ Le cerveau qui grandit
+
+<div align="center">
+  <img src="Images/Jarvis-22.png" alt="Croissance du cerveau — leçons cumulées dans le temps" width="780"/>
+</div>
+
+La **mémoire de l'agent s'accumule** : courbe des **leçons cumulées** dans le temps (et leur rythme par heure). Chaque `"souviens-toi que…"` ou correction ajoute une leçon **persistée, indexée dans le RAG et réinjectée** automatiquement — l'agent ne repart jamais de zéro.
+
+<div align="center">
+
+| Brique | Rôle |
+|--------|------|
+| **Synoptique temps réel** | 6 couches moteur visibles dans l'interface : LLM actif, RAG, STT/TTS, auto-engine SOC, état mémoire |
+| **Tuile Mémoire** | Mémoire vectorielle persistante — échanges, résumés, leçons apprises — rechargeable sans redémarrage |
+| **Bypass déterministe** | Commandes critiques interceptées avant le LLM : exécution instantanée < 100 ms, 0 hallucination |
+| **Boucle d'apprentissage** | `"Souviens-toi que X"` → leçon persistée, indexée, réinjectée automatiquement dans les futures réponses |
+| **Briefing matinal** | `"Bonjour JARVIS"` → niveau de menace SOC, état des machines, alertes des 24 dernières heures |
+
+</div>
+
+<div align="center">
+
+| Avant Hermès | Après Hermès |
+|--------------|--------------|
+| Chaque session recommence à zéro | Contexte conservé entre les sessions |
+| Le contexte disparaît au redémarrage | Leçons et conventions indexées dans le RAG |
+| L'assistant répond seulement | L'agent surveille, alerte et agit |
+| Toutes les commandes passent par le LLM | Bypass déterministe pour les commandes critiques |
+
+</div>
+
+---
+
+## À propos & Objectifs
+
+<div align="center">
+
+| Objectif | Description |
+|----------|-------------|
+| **100 % local** | LLM, STT, TTS, RAG, données — tout sur le poste de travail (GPU NVIDIA CUDA) |
+| **Agentification** | Hermès — mémoire longue durée, apprentissage inter-sessions, briefing automatique |
+| **SOC cybersécurité** | Auto-engine de détection, ban automatique, alertes vocales, injection contexte sécurité live |
+| **Accessibilité** | Interface haute lisibilité, alertes vocales TTS, commandes vocales à bypass déterministe |
+| **Qualité** | 1 465 tests · 79 % coverage · ruff 0 · eslint 0 · hooks bloquants |
+
+</div>
 
 ---
 
