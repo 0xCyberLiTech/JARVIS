@@ -79,9 +79,9 @@
 
 |  |  |  |
 |:--:|:--:|:--:|
-| [✦<br>**Hermès**](#hermes) | [🏠<br>**Accueil**](#sec-1) | [🧠<br>**Réglages**](#sec-2) |
-| [🎛️<br>**Studio DSP**](#sec-3) | [🎙️<br>**Voice Lab**](#sec-4) | [🌐<br>**Accès Web**](#sec-5) |
-| [📊<br>**Monitoring**](#sec-6) | [🛡️<br>**SOC**](#sec-7) | [🕹️<br>**Pilotage**](#sec-8) |
+| [🏠<br>**Accueil**](#sec-1) | [🧠<br>**Réglages**](#sec-2) | [🎛️<br>**Studio DSP**](#sec-3) |
+| [🎙️<br>**Voice Lab**](#sec-4) | [🌐<br>**Accès Web**](#sec-5) | [📊<br>**Monitoring**](#sec-6) |
+| [🛡️<br>**SOC**](#sec-7) | [🕹️<br>**Pilotage**](#sec-8) | [✦<br>**Hermès**](#hermes) |
 
 </div>
 
@@ -377,7 +377,7 @@ La **mémoire de l'agent s'accumule** : courbe des **leçons cumulées** dans le
 
 ---
 
-## Sommaire
+## Documentation
 
 <div align="center">
 
