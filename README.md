@@ -17,8 +17,8 @@
     <a href="https://github.com/0xCyberLiTech">
       <img src="https://img.shields.io/badge/Profil-GitHub-181717?logo=github&style=flat-square" alt="Profil GitHub" />
     </a>
-    <a href="https://github.com/0xCyberLiTech/JARVIS/releases/latest">
-      <img src="https://img.shields.io/github/v/release/0xCyberLiTech/JARVIS?label=version&style=flat-square&color=blue" alt="Dernière version" />
+    <a href="https://github.com/0xCyberLiTech/JARVIS/tags">
+      <img src="https://img.shields.io/github/v/tag/0xCyberLiTech/JARVIS?sort=semver&label=version&style=flat-square&color=blue" alt="Dernière version" />
     </a>
     <a href="https://github.com/0xCyberLiTech/JARVIS/blob/main/CHANGELOG.md">
       <img src="https://img.shields.io/badge/%F0%9F%93%84%20Changelog-JARVIS-blue?style=flat-square" alt="Changelog" />
@@ -87,7 +87,7 @@
 
 ---
 
-## Galerie — L'interface en images
+## 🖼️ Galerie — L'interface en images
 
 Tour visuel des principaux modules de l'interface holographique JARVIS.
 
@@ -143,7 +143,7 @@ Réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penal
 
 ### 3 · Le poste de pilotage — navigation & contrôles
 
-**Le menu** — 11 modules, accessibles d'un clic :
+**① Le menu** — 11 modules, accessibles d'un clic :
 
 <div align="center">
   <img src="Images/Jarvis-26.png" alt="JARVIS — barre de navigation : les 11 modules" width="900"/>
@@ -167,7 +167,7 @@ Réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penal
 
 </div>
 
-**La voix** — bascule des moteurs TTS + choix de la voix :
+**② La voix** — bascule des moteurs TTS + choix de la voix :
 
 <div align="center">
   <img src="Images/Jarvis-27.png" alt="Sélecteur de voix TTS" width="540"/>
@@ -175,7 +175,7 @@ Réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penal
 
 **Edge (cloud Microsoft) ↔ Kokoro (neural, 100 % local)** · 7 voix (Antoine FR-CA par défaut). La synthèse est traitée par le Studio DSP (§4).
 
-**Le modèle** — bascule à chaud entre 4 LLM **100 % locaux (Ollama)** :
+**③ Le modèle** — bascule à chaud entre 4 LLM **100 % locaux (Ollama)** :
 
 <div align="center">
   <img src="Images/Jarvis-28.png" alt="Sélecteur de modèle LLM actif" width="540"/>
@@ -183,7 +183,7 @@ Réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penal
 
 `qwen3:8b` par défaut (SOC + général) · `qwen2.5-coder` (code) · `gemma4` (vision). Bouton **TEST LLM** pour valider le modèle actif.
 
-**La mémoire** — contexte conversationnel maîtrisé :
+**④ La mémoire** — contexte conversationnel maîtrisé :
 
 <div align="center">
   <img src="Images/Jarvis-29.png" alt="Mémoire conversationnelle" width="540"/>
@@ -191,7 +191,7 @@ Réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penal
 
 Le compteur **CTX** affiche les échanges gardés en contexte ; **Purger mémoire** repart à zéro. (La mémoire longue — faits + leçons RAG — vit dans l'onglet Apprentissage.)
 
-**Le prompt système** — la gouvernance de l'agent *(données anonymisées)* :
+**⑤ Le prompt système** — la gouvernance de l'agent *(données anonymisées)* :
 
 <div align="center">
   <img src="Images/Jarvis-30.png" alt="Prompt système gouverné + profils sauvegardés (données anonymisées)" width="760"/>
@@ -315,7 +315,7 @@ Au-delà de l'interface web, JARVIS se pilote depuis une **console de maintenanc
 
 <a id="hermes"></a>
 
-## Hermès — L'agent persistant
+## ◈ Hermès — L'agent persistant
 
 > **Hermès transforme un assistant en agent.**
 > Là où un assistant répond à des questions, un agent **observe, mémorise, apprend et agit** — sans être re-briefé à chaque session.
@@ -348,7 +348,7 @@ La **mémoire de l'agent s'accumule** : courbe des **leçons cumulées** dans le
 
 ---
 
-## Documentation
+## 📚 Documentation
 
 <div align="center">
 
@@ -365,7 +365,7 @@ La **mémoire de l'agent s'accumule** : courbe des **leçons cumulées** dans le
 
 ---
 
-## Stack technique
+## 🧩 Stack technique
 
 <div align="center">
 
@@ -385,7 +385,7 @@ La **mémoire de l'agent s'accumule** : courbe des **leçons cumulées** dans le
 
 ---
 
-## Sécurité
+## 🛡️ Sécurité
 
 <div align="center">
 

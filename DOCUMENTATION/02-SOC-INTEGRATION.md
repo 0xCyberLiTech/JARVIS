@@ -17,8 +17,8 @@
     <a href="https://github.com/0xCyberLiTech">
       <img src="https://img.shields.io/badge/Profil-GitHub-181717?logo=github&style=flat-square" alt="Profil GitHub" />
     </a>
-    <a href="https://github.com/0xCyberLiTech/JARVIS/releases/latest">
-      <img src="https://img.shields.io/github/v/release/0xCyberLiTech/JARVIS?label=version&style=flat-square&color=blue" alt="Dernière version" />
+    <a href="https://github.com/0xCyberLiTech/JARVIS/tags">
+      <img src="https://img.shields.io/github/v/tag/0xCyberLiTech/JARVIS?sort=semver&label=version&style=flat-square&color=blue" alt="Dernière version" />
     </a>
     <a href="https://github.com/0xCyberLiTech/JARVIS/blob/main/CHANGELOG.md">
       <img src="https://img.shields.io/badge/%F0%9F%93%84%20Changelog-JARVIS-blue?style=flat-square" alt="Changelog" />
