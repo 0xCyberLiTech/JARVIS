@@ -303,6 +303,16 @@ Les **tuiles SOC en activité** : courbes de détection sur 30 jours (**en rouge
 
 ---
 
+## ⌨️ Console de maintenance & reprise après sinistre
+
+<div align="center">
+  <img src="Images/Jarvis-menu.png" alt="Console de maintenance JARVIS — menu terminal : statut, modèles, DSP, sauvegarde, restauration" width="720"/>
+</div>
+
+Au-delà de l'interface web, JARVIS se pilote depuis une **console de maintenance** (PowerShell) : **17 actions** — statut complet (Flask · Ollama · GPU · modèle · DSP), gestion des **modèles LLM**, paramètres, profils de prompt, DSP/TTS, logs, **sauvegarde & restauration complètes** (réinstallation 100 % hors-ligne), test des routes API. Le bandeau d'état montre en direct l'état des services et le **modèle actif** (`qwen3:8b`). **Ce menu est également accessible à la voix.**
+
+---
+
 <a id="hermes"></a>
 
 ## Hermès — L'agent persistant
