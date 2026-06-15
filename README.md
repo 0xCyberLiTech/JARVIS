@@ -257,9 +257,21 @@ L'onglet **Monitor** : surveillance **temps réel** de la RTX 5080 — utilisati
 
 Zoom sur la **carte LLM VRAM** : l'empreinte du modèle actif en mémoire vidéo. La RTX 5080 a **16 Go** ; tant que le modèle **+ son contexte (cache KV)** y tiennent (ici `qwen3:8b` ≈ 5,6 Go / 35 %), l'inférence reste **pleine vitesse GPU**. S'ils débordent, Ollama « spille » en RAM système et la vitesse s'effondre — la carte affiche `MODE`, `tokens/s`, `num_ctx`, le **SWAP RAM** et une alerte **⚠ DÉBORDEMENT**. C'est le garde-fou du LLM 100 % local sur une seule carte.
 
-> Les captures **SOC live** (IP d'attaquants), le **terminal** et les **leçons apprises**
-> restent volontairement **non publiés** : la vitrine *décrit* le SOC, elle n'en
-> *expose* aucune donnée sensible.
+### 7 · SOC — activité & réponse automatique
+
+<div align="center">
+  <img src="Images/Jarvis-24.png" alt="SOC — activité sur 30 jours" width="880"/>
+</div>
+
+L'auto-engine SOC en chiffres : **activité sur 30 jours** (détections, bans, restarts) par semaine et par jour. JARVIS surveille nginx / CrowdSec / fail2ban / Suricata en continu et **agit seul** (ban, restart de service) selon des seuils — l'agent ne se contente pas d'alerter, il **répond**.
+
+<div align="center">
+  <img src="Images/Jarvis-25.png" alt="SOC — compteurs agrégés" width="880"/>
+</div>
+
+Les **compteurs agrégés** : actions totales, bans IP, restarts, succès / échecs, détections **IDS**. La preuve que l'agent **détecte et réagit en autonomie** — sans exposer la moindre IP.
+
+> 🔒 Volontairement **non publiés** : le **journal des IP** d'attaquants, le **terminal** et les **leçons apprises**. La vitrine *décrit* le SOC et montre son activité **agrégée**, mais n'expose **aucune donnée actionnable**.
 
 ---
 
