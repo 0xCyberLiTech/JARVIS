@@ -79,9 +79,9 @@
 
 |  |  |  |
 |:--:|:--:|:--:|
-| [🏠<br>**Accueil**](#sec-1) | [🧠<br>**Réglages**](#sec-2) | [🎛️<br>**Studio DSP**](#sec-3) |
-| [🎙️<br>**Voice Lab**](#sec-4) | [🌐<br>**Accès Web**](#sec-5) | [📊<br>**Monitoring**](#sec-6) |
-| [🛡️<br>**SOC**](#sec-7) | [🕹️<br>**Pilotage**](#sec-8) | [✦<br>**Hermès**](#hermes) |
+| [🏠<br>**Accueil**](#sec-1) | [🧠<br>**Réglages**](#sec-2) | [🕹️<br>**Pilotage**](#sec-3) |
+| [🎛️<br>**Studio DSP**](#sec-4) | [🎙️<br>**Voice Lab**](#sec-5) | [🌐<br>**Accès Web**](#sec-6) |
+| [📊<br>**Monitoring**](#sec-7) | [🛡️<br>**SOC**](#sec-8) | [✦<br>**Hermès**](#hermes) |
 
 </div>
 
@@ -141,7 +141,67 @@ Réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penal
 
 <a id="sec-3"></a>
 
-### 3 · Studio audio DSP — le rack de traitement vocal
+### 3 · Le poste de pilotage — navigation & contrôles
+
+**Le menu** — 11 modules, accessibles d'un clic :
+
+<div align="center">
+  <img src="Images/Jarvis-26.png" alt="JARVIS — barre de navigation : les 11 modules" width="900"/>
+</div>
+
+<div align="center">
+
+| Module | Rôle |
+|---|---|
+| **Monitor** | GPU · VRAM · CPU · réseau (live) |
+| **JARVIS AI** | cockpit chat + voix + onde |
+| **Settings** | LLM · RAG · prompt · profils |
+| **DSP Audio** | studio vocal · EQ · FX · TTS |
+| **Tâches** | tâches + terminal code |
+| **Voice Lab** | atelier STT / TTS |
+| **SOC** | auto-engine · bans · alertes |
+| **Apprentissage** | mémoire · faits · leçons (RAG) |
+| **Infogérance** | MAJ · reboot · AIDE (VMs) |
+| **Alarmes** | alarmes · rappels · agenda |
+| **Accès Web** | passerelle web gouvernée |
+
+</div>
+
+**La voix** — bascule des moteurs TTS + choix de la voix :
+
+<div align="center">
+  <img src="Images/Jarvis-27.png" alt="Sélecteur de voix TTS" width="540"/>
+</div>
+
+**Edge (cloud Microsoft) ↔ Kokoro (neural, 100 % local)** · 7 voix (Antoine FR-CA par défaut). La synthèse est traitée par le Studio DSP (§4).
+
+**Le modèle** — bascule à chaud entre 4 LLM **100 % locaux (Ollama)** :
+
+<div align="center">
+  <img src="Images/Jarvis-28.png" alt="Sélecteur de modèle LLM actif" width="540"/>
+</div>
+
+`qwen3:8b` par défaut (SOC + général) · `qwen2.5-coder` (code) · `gemma4` (vision). Bouton **TEST LLM** pour valider le modèle actif.
+
+**La mémoire** — contexte conversationnel maîtrisé :
+
+<div align="center">
+  <img src="Images/Jarvis-29.png" alt="Mémoire conversationnelle" width="540"/>
+</div>
+
+Le compteur **CTX** affiche les échanges gardés en contexte ; **Purger mémoire** repart à zéro. (La mémoire longue — faits + leçons RAG — vit dans l'onglet Apprentissage.)
+
+**Le prompt système** — la gouvernance de l'agent *(données anonymisées)* :
+
+<div align="center">
+  <img src="Images/Jarvis-30.png" alt="Prompt système gouverné + profils sauvegardés (données anonymisées)" width="760"/>
+</div>
+
+Le **prompt système** encode les règles de comportement : méthodologie SOC, **anti-hallucination** (cite les chiffres exacts, jamais d'invention), distinction analyse / explication. Plusieurs **profils** sont sauvegardés et chargeables à la volée (SOC · Code · Think…). 🔒 *IP, clés, noms : intégralement anonymisés sur cette capture.*
+
+<a id="sec-4"></a>
+
+### 4 · Studio audio DSP — le rack de traitement vocal
 
 Une chaîne broadcast appliquée à la voix de synthèse, **découpée en 6 unités** — chacune avec sa fonctionnalité propre :
 
@@ -193,9 +253,9 @@ Analyse **FFT temps réel** de la sortie : 8 modes d'affichage (bars, line, fill
 
 Le **bus master** de la chaîne : gain de sortie final, **VU-mètres professionnels L/R** (avec zone de crête), et boutons **Appliquer** / **Test voix**.
 
-<a id="sec-4"></a>
+<a id="sec-5"></a>
 
-### 4 · Voice Lab — l'atelier de la voix
+### 5 · Voice Lab — l'atelier de la voix
 
 <div align="center">
   <img src="Images/Jarvis-10.png" alt="Voice Lab — réglage des moteurs TTS et comparateur A/B" width="880"/>
@@ -203,9 +263,9 @@ Le **bus master** de la chaîne : gain de sortie final, **VU-mètres professionn
 
 Le **Voice Lab** règle au cordeau la voix de l'assistant : choix de la **source vocale** (Edge Antoine fr-CA en cloud · repli **Kokoro** CUDA neural, 100 % local), **paramètres vocaux** fins, **phrase de test**, **bibliothèque** de voix et **comparateur A/B**. C'est l'atelier qui donne à JARVIS sa voix naturelle et homogène, en ligne comme hors-ligne.
 
-<a id="sec-5"></a>
+<a id="sec-6"></a>
 
-### 5 · Accès Web gouverné
+### 6 · Accès Web gouverné
 
 <div align="center">
   <img src="Images/Jarvis-11.png" alt="Accès Web gouverné — allowlist, lecture seule, journalisé" width="880"/>
@@ -213,9 +273,9 @@ Le **Voice Lab** règle au cordeau la voix de l'assistant : choix de la **source
 
 L'agent peut consulter le web — mais **sous contrôle strict**. JARVIS ne visite QUE les domaines d'une **allowlist explicite** (sites système verrouillés pour la météo et la veille IA), en **lecture seule** (jamais d'envoi de données), et **chaque accès est journalisé**. Tout le reste est **refusé et tracé**. La curiosité de l'agent reste gouvernée — même principe de moindre privilège que pour le SOC.
 
-<a id="sec-6"></a>
+<a id="sec-7"></a>
 
-### 6 · Monitoring GPU & VRAM
+### 7 · Monitoring GPU & VRAM
 
 <div align="center">
   <img src="Images/Jarvis-19.png" alt="Monitor — GPU, CPU, RAM, VRAM temps réel" width="880"/>
@@ -229,9 +289,9 @@ L'onglet **Monitor** : surveillance **temps réel** de la RTX 5080 — utilisati
 
 Zoom sur la **carte LLM VRAM** : l'empreinte du modèle actif en mémoire vidéo. La RTX 5080 a **16 Go** ; tant que le modèle **+ son contexte (cache KV)** y tiennent (ici `qwen3:8b` ≈ 5,6 Go / 35 %), l'inférence reste **pleine vitesse GPU**. S'ils débordent, Ollama « spille » en RAM système et la vitesse s'effondre — la carte affiche `MODE`, `tokens/s`, `num_ctx`, le **SWAP RAM** et une alerte **⚠ DÉBORDEMENT**. C'est le garde-fou du LLM 100 % local sur une seule carte.
 
-<a id="sec-7"></a>
+<a id="sec-8"></a>
 
-### 7 · SOC — activité & réponse automatique
+### 8 · SOC — activité & réponse automatique
 
 <div align="center">
   <img src="Images/Jarvis-24.png" alt="SOC — tuiles d'activité et compteurs en temps réel" width="900"/>
@@ -240,68 +300,6 @@ Zoom sur la **carte LLM VRAM** : l'empreinte du modèle actif en mémoire vidéo
 Les **tuiles SOC en activité** : courbes de détection sur 30 jours (**en rouge** les pics offensifs) + **compteurs en direct** — actions, **bans IP**, restarts, succès / échecs, détections **IDS**. JARVIS surveille nginx / CrowdSec / fail2ban / Suricata en continu et **agit seul** (ban, restart) selon des seuils : l'agent ne se contente pas d'alerter, il **répond** — sans jamais exposer la moindre IP.
 
 > 🔒 Volontairement **non publiés** : le **journal des IP** d'attaquants, le **terminal** et les **leçons apprises**. La vitrine *décrit* le SOC et montre son activité **agrégée**, mais n'expose **aucune donnée actionnable**.
-
----
-
-<a id="sec-8"></a>
-
-### 8 · Le poste de pilotage — navigation & contrôles
-
-**Le menu** — 11 modules, accessibles d'un clic :
-
-<div align="center">
-  <img src="Images/Jarvis-26.png" alt="JARVIS — barre de navigation : les 11 modules" width="900"/>
-</div>
-
-<div align="center">
-
-| Module | Rôle |
-|---|---|
-| **Monitor** | GPU · VRAM · CPU · réseau (live) |
-| **JARVIS AI** | cockpit chat + voix + onde |
-| **Settings** | LLM · RAG · prompt · profils |
-| **DSP Audio** | studio vocal · EQ · FX · TTS |
-| **Tâches** | tâches + terminal code |
-| **Voice Lab** | atelier STT / TTS |
-| **SOC** | auto-engine · bans · alertes |
-| **Apprentissage** | mémoire · faits · leçons (RAG) |
-| **Infogérance** | MAJ · reboot · AIDE (VMs) |
-| **Alarmes** | alarmes · rappels · agenda |
-| **Accès Web** | passerelle web gouvernée |
-
-</div>
-
-**La voix** — bascule des moteurs TTS + choix de la voix :
-
-<div align="center">
-  <img src="Images/Jarvis-27.png" alt="Sélecteur de voix TTS" width="540"/>
-</div>
-
-**Edge (cloud Microsoft) ↔ Kokoro (neural, 100 % local)** · 7 voix (Antoine FR-CA par défaut). La synthèse est traitée par le Studio DSP (§3).
-
-**Le modèle** — bascule à chaud entre 4 LLM **100 % locaux (Ollama)** :
-
-<div align="center">
-  <img src="Images/Jarvis-28.png" alt="Sélecteur de modèle LLM actif" width="540"/>
-</div>
-
-`qwen3:8b` par défaut (SOC + général) · `qwen2.5-coder` (code) · `gemma4` (vision). Bouton **TEST LLM** pour valider le modèle actif.
-
-**La mémoire** — contexte conversationnel maîtrisé :
-
-<div align="center">
-  <img src="Images/Jarvis-29.png" alt="Mémoire conversationnelle" width="540"/>
-</div>
-
-Le compteur **CTX** affiche les échanges gardés en contexte ; **Purger mémoire** repart à zéro. (La mémoire longue — faits + leçons RAG — vit dans l'onglet Apprentissage.)
-
-**Le prompt système** — la gouvernance de l'agent *(données anonymisées)* :
-
-<div align="center">
-  <img src="Images/Jarvis-30.png" alt="Prompt système gouverné + profils sauvegardés (données anonymisées)" width="760"/>
-</div>
-
-Le **prompt système** encode les règles de comportement : méthodologie SOC, **anti-hallucination** (cite les chiffres exacts, jamais d'invention), distinction analyse / explication. Plusieurs **profils** sont sauvegardés et chargeables à la volée (SOC · Code · Think…). 🔒 *IP, clés, noms : intégralement anonymisés sur cette capture.*
 
 ---
 
