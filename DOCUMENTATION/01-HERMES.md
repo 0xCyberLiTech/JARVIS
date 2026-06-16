@@ -481,6 +481,54 @@ instantanément.
 
 ---
 
+## Brique 10 — Connaissance vérifiable (mémoire de référence anti-dérive)
+
+**Rôle : que l'agent parle de lui-même et de l'infrastructure SANS jamais inventer.**
+
+Quand on demande à un agent « explique ton architecture » ou « comment est faite
+telle brique ? », il ne doit pas *deviner*. Un LLM local, seul, ne peut pas le
+garantir : il produit du **plausible**, pas du **certain**. Hermès ajoute donc une
+couche de **connaissance vérifiable** — pour qu'on puisse **s'appuyer** sur ses
+réponses, pas seulement les lire.
+
+```
+Question « sur soi-même / sur l'infra »
+        │
+        ▼   Hermès fait REMONTER la fiche de référence concernée
+        │   (prioritaire — les autres sources ne la noient pas)
+        ▼
+   Réponse ANCRÉE sur la source  +  CITATION du fichier
+        │
+        └─►  info absente ?  →  « ce n'est pas dans ma documentation »
+                                 (jamais d'invention)
+```
+
+Trois principes :
+
+- **Source de vérité** — la connaissance de l'agent (sur lui-même ET sur chaque
+  brique de l'infra) vit dans des **fichiers de référence dédiés**, indexés
+  localement. Une seule source par brique, pas de copie éparpillée.
+- **Réponse ancrée + citée** — sur une question le concernant, sa propre fiche est
+  **prioritaire** dans la recherche ; il **cite** d'où vient l'info, et s'il ne la
+  trouve pas, il le **dit** plutôt que de combler le vide.
+- **Garde-fou anti-dérive** — un **gardien** vérifie en continu que ces sources
+  restent **justes** (présentes, cohérentes, bien rattachées) et **signale** toute
+  dérive dans une file d'attente, sans jamais corriger seul.
+
+La correction suit une règle non négociable :
+
+```
+DÉTECTION   =  autonome, locale, en continu       (le gardien)
+CORRECTION  =  déclenchée par l'humain, par lots   (jugement requis)
+```
+
+> **Autonome pour surveiller et signaler — pas pour inventer la vérité.** La
+> détection ne dépend de personne ; la correction reste un **acte de jugement**,
+> jamais une réécriture silencieuse. C'est ce qui sépare un agent **fiable** d'un
+> agent simplement **bavard**.
+
+---
+
 ## Bilan — Ce qu'Hermès apporte à JARVIS
 
 ```

@@ -15,6 +15,9 @@ config/*.json
 # ── DR opérationnel (privé — vit sur disque + coffre, jamais en vitrine) ──
 RUNBOOK.md
 
+# ── Mémoire interne (source de vérité RAG — privée, jamais en vitrine) ──
+MEMORY.md
+
 # ── Gros binaires (modèles, voix, embeddings) ──────────────────
 models/
 scripts/voices/*.onnx
