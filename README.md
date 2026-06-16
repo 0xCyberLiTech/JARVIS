@@ -51,8 +51,8 @@
 **JARVIS** est un assistant IA personnel de type *Iron Man* — mais qui tourne **entièrement en local** sur un seul poste (Python/Flask + Ollama · RTX 5080). Pas un chatbot de plus : un **agent** qui voit, parle, mémorise, apprend, et **veille sur l'infrastructure 24/7**. Aucune donnée ne quitte la machine.
 
 > [!IMPORTANT]
-> **Vitrine — et non une procédure d'installation.**
-> Ce dépôt **présente** mon projet personnel JARVIS : son architecture, ses choix de conception et ses capacités. Ce **n'est pas** un guide d'installation reproductible. Le **code opérationnel** et certains **détails d'implémentation** restent **volontairement non publiés** (propriété intellectuelle et sécurité). Les schémas et descriptions sont **conceptuels** — ils expliquent le *quoi* et le *pourquoi*, pas le *comment* exact.
+> **Vitrine — et non une procédure d'installation reproductible.**
+> Ce dépôt **présente** mon projet JARVIS (architecture, conception, capacités) et son **environnement** (Python · Ollama). En revanche, le **code opérationnel** reste **privé** : JARVIS **n'est pas reproductible en l'état** depuis ce seul dépôt (propriété intellectuelle, sécurité). Schémas et descriptions **conceptuels** — le *quoi* et le *pourquoi*, pas le *comment* exact.
 
 <div align="center">
   <img src="Images/Jarvis-hero.png" alt="JARVIS — interface holographique : cockpit, onde vocale et présentation" width="900"/>
