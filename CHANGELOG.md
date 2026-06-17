@@ -17,7 +17,7 @@ Première version publique de la vitrine.
 ### Caractéristiques présentées
 - LLM 100 % local via Ollama : `qwen3:8b` (défaut) · `qwen3:14b` (think) · `qwen2.5-coder` (code) · `gemma4` (vision).
 - Voix Edge Antoine → repli Kokoro neural local · STT faster-whisper `large-v3-turbo`.
-- RAG hybride (~1700 chunks) · MCP 12 outils · auto-engine SOC.
+- RAG hybride (~1150 chunks) · MCP 12 outils · auto-engine SOC.
 - Accélération CUDA (RTX 5080) avec garde-fou anti-débordement VRAM.
 
 ### Sécurité

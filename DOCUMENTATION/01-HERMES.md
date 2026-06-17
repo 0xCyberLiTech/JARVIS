@@ -169,7 +169,7 @@ Le synoptique est le **tableau de bord live d'Hermès** — visible en permanenc
       ◈  HERMÈS  --  SYNOPTIQUE  MOTEUR                        
 ├─────────────────┬───────────────────────────────────────┤
 │  LLM ACTIF      │  qwen3:8b  ●  CHAUD  (en mémoire)     │
-│  RAG            │  1698 chunks  ●  PRÊT  TTL: 4m32s     │
+│  RAG            │  1151 chunks  ●  PRÊT  TTL: 4m32s     │
 │  STT            │  large-v3-turbo  ●  EN ÉCOUTE         │
 │  TTS            │  edge-tts  Antoine fr-CA  ●  ACTIF    │
 │  AUTO-ENGINE    │  ●  ACTIF  —  dernier scan: 42s       │
@@ -229,7 +229,7 @@ jarvis_memory.json  (persistant sur disque)
 ├── résumés       : condensés des longues conversations
 └── contexte      : état de l'échange en cours
 
-Base vectorielle RAG  (~1700 chunks)
+Base vectorielle RAG  (~1150 chunks)
 ├── documentation technique locale
 ├── leçons apprises  (injection automatique)
 └── résumés de sessions

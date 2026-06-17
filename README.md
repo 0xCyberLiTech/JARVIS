@@ -183,7 +183,7 @@ Réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penal
   <img src="Images/Jarvis-28.png" alt="Sélecteur de modèle LLM actif" width="540"/>
 </div>
 
-`qwen3:8b` par défaut (SOC + général) · `qwen2.5-coder` (code) · `gemma4` (vision). Bouton **TEST LLM** pour valider le modèle actif.
+`qwen3:8b` par défaut (SOC + général + CR) · `qwen3:14b` (think) · `qwen2.5-coder` (code) · `gemma4` (vision). Bouton **TEST LLM** pour valider le modèle actif.
 
 **④ La mémoire** — contexte conversationnel maîtrisé :
 
@@ -375,7 +375,7 @@ La **mémoire de l'agent s'accumule** : courbe des **leçons cumulées** dans le
 |--------|-------------|
 | **Backend** | Python 3.11 · Flask · Blueprints autoportants · DI pur |
 | **LLM local** | Ollama · qwen3:8b (SOC+GÉNÉRAL+CR · rapide) · qwen3:14b (THINK) · qwen2.5-coder:14b (CODE) · gemma4:latest (VISION) |
-| **RAG** | mxbai-embed-large · BM25 hybride · ~1700 chunks · TTL 5 min |
+| **RAG** | mxbai-embed-large · BM25 hybride · ~1150 chunks · TTL 5 min |
 | **TTS** | edge-tts fr-CA Antoine (défaut) → repli Kokoro CUDA neural (hors-ligne, local) |
 | **STT** | faster-whisper large-v3-turbo CUDA · vocabulaire SOC |
 | **Frontend** | Vanilla JS · 21 modules · Web Audio API · xterm.js · Monaco Editor |
