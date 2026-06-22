@@ -56,10 +56,11 @@ et d'accéder aux données SOC en temps réel — sans exposer les données brut
 
 ```
 Claude Code (VSCode)
-    │  MCP stdio JSON-RPC
+    │  MCP streamable-HTTP — POST/GET/DELETE http://127.0.0.1:5010/mcp
+    │  (SSE legacy /sse + /messages/ conservés pour compat)
     ▼
-jarvis_mcp_server.py  (pythonw — arrière-plan Windows)
-    │  HTTP localhost:5000
+jarvis_mcp_server.py  (uvicorn + Starlette — port 5010)
+    │  HTTP 127.0.0.1:5000
     ▼
 JARVIS (Flask)
     │  SSH local + Ollama + fichiers
@@ -67,8 +68,22 @@ JARVIS (Flask)
 Données SOC · Infrastructure · LLM qwen3:8b
 ```
 
+**Transport réel = streamable-HTTP** (MCP 1.6+). Le serveur expose, via uvicorn/Starlette
+sur `127.0.0.1:5010` :
+
+| Route | Méthodes | Rôle |
+|-------|----------|------|
+| `/mcp` | GET · POST · DELETE | Transport principal streamable-HTTP (session stateless) |
+| `/sse` | GET | Transport SSE legacy (rétrocompat) |
+| `/messages/` | POST | Canal POST associé au SSE legacy |
+| `/health` | GET | Sonde de vie `{ok, service, port, auth}` — toujours ouverte |
+
+> Le serveur ne fait **pas** de stdio/JSON-RPC : tout passe par HTTP sur le port 5010.
+
 **Principe fondamental** : JARVIS filtre et agrège localement.
 Claude ne voit que **l'escalade** — jamais les données brutes (logs, IPs, configurations).
+Garde-fou de sortie unique : toute réponse renvoyée à Claude est masquée (IPv4 → `[IP]`)
+et bornée en taille avant émission.
 
 ---
 
@@ -79,7 +94,7 @@ Claude ne voit que **l'escalade** — jamais les données brutes (logs, IPs, con
 | `jarvis_chat` | Envoyer un message à JARVIS (chat complet avec contexte LLM) |
 | `jarvis_soc_status` | État temps réel : bans actifs, ThreatScore, alertes récentes |
 | `jarvis_soc_ask` | Question SOC enrichie — injecte l'historique 30j si une IPv4 est détectée |
-| `jarvis_stats` | Stats système : CPU, GPU, VRAM, RAM, température |
+| `jarvis_stats` | Stats JARVIS : uptime, sessions de chat, appels TTS/STT, modèle actif, état RAG |
 | `jarvis_infra_status` | État des serveurs SSH (nginx, clt, pa85, Proxmox) |
 | `jarvis_proxmox_vms` | État des VMs Proxmox (`qm list` live) |
 | `jarvis_read_file` | Lire un fichier sur un serveur via SSH (lecture seule) |
@@ -87,7 +102,7 @@ Claude ne voit que **l'escalade** — jamais les données brutes (logs, IPs, con
 | `jarvis_last_response` | Derniers échanges de la conversation JARVIS en cours |
 | `jarvis_code_exec` | Écrire + SCP + exécuter un fichier sur le serveur de dev |
 | `jarvis_defense_24h` | Résumé défense SOC 24 h : bans, Kill Chain, IDS, WAF |
-| `jarvis_ioc_status` | Statut IOC — enrichissement réputation IP |
+| `jarvis_ioc_status` | Score IoC **post-compromission** (0-100, niveau OK/WARN/CRIT) + 6 signaux : AIDE drift, C2 alerts, SSH anomaly, webshells, AppArmor denials, sudo events |
 
 ---
 
@@ -105,21 +120,54 @@ Claude ne voit que **l'escalade** — jamais les données brutes (logs, IPs, con
 
 ## Configuration
 
-Fichier `.mcp.json` à la racine du workspace VSCode :
+Fichier `.mcp.json` à la racine du workspace VSCode (`0xCyberLiTech/.mcp.json`) — transport HTTP :
 
 ```json
 {
   "mcpServers": {
     "jarvis": {
-      "command": "pythonw",
-      "args": ["chemin/absolu/vers/scripts/jarvis_mcp_server.py"],
-      "env": {}
+      "type": "http",
+      "url": "http://127.0.0.1:5010/mcp"
     }
   }
 }
 ```
 
-> `pythonw` : supprime la fenêtre console Windows, maintient les pipes stdio — requis pour MCP sur Windows.
+> Le client se connecte au transport streamable-HTTP sur le port 5010. Le serveur est
+> lancé séparément (`python jarvis_mcp_server.py` — ou relancé par le watchdog) ; il n'est
+> **pas** démarré par le client MCP via stdio.
+
+---
+
+## Authentification (Bearer — opt-in)
+
+Le port 5010 bind `127.0.0.1` (jamais exposé au LAN). En défense en profondeur, un token
+Bearer **optionnel** protège `/mcp`, `/sse` et `/messages/` (`/health` reste toujours ouvert).
+
+- **Source unique du token** : fichier local `scripts/jarvis_mcp_token.txt` (gitignoré),
+  **ou** variable d'environnement `JARVIS_MCP_TOKEN` (prioritaire sur le fichier).
+- **Comportement** : si aucun token n'est configuré → middleware **no-op** (le bind localhost
+  reste la seule barrière, aucune connexion existante n'est cassée). Si un token existe → toute
+  requête sur les routes protégées doit porter `Authorization: Bearer <token>` (sinon `401`).
+  Comparaison en temps constant (anti timing-attack).
+
+**Activer l'auth (2 étapes)** :
+
+1. Créer le fichier token : écrire le secret dans `scripts/jarvis_mcp_token.txt` (ou exporter
+   `JARVIS_MCP_TOKEN`), puis relancer le serveur MCP.
+2. Ajouter l'en-tête dans `.mcp.json` :
+
+```json
+{
+  "mcpServers": {
+    "jarvis": {
+      "type": "http",
+      "url": "http://127.0.0.1:5010/mcp",
+      "headers": { "Authorization": "Bearer <token>" }
+    }
+  }
+}
+```
 
 ---
 
@@ -140,8 +188,19 @@ Différence visuelle immédiate : une réponse de JARVIS se distingue d'un coup 
 
 ## Watchdog
 
-Le MCP Server inclut un watchdog automatique qui relance le processus en cas de crash.
-Port streamable-HTTP actif en parallèle du transport stdio.
+Le watchdog (`jarvis_watchdog.ps1`) sonde JARVIS (`localhost:5000/api/health`) **et**, depuis
+l'audit 2026-06-22, le MCP via `http://127.0.0.1:5010/health`. Si JARVIS tourne mais que le MCP
+ne répond pas, le watchdog relance `jarvis_mcp_server.py --port 5010`.
+
+---
+
+## Observabilité — log applicatif
+
+Le serveur écrit un log applicatif borné `scripts/jarvis_mcp.log`
+(`RotatingFileHandler`, 512 Ko × 3 fichiers). Il trace le démarrage (port + état de l'auth),
+les erreurs d'outil et les cas où JARVIS:5000 est injoignable.
+Avant l'audit 2026-06-22 le MCP n'avait aucun log (uvicorn `log_level=error`, sortie redirigée
+vers `DEVNULL`) — toute panne était invisible.
 
 ---
 
