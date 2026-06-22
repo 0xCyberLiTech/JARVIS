@@ -191,7 +191,7 @@ Réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penal
   <img src="Images/Jarvis-29.png" alt="Mémoire conversationnelle" width="540"/>
 </div>
 
-Le compteur **CTX** affiche les échanges gardés en contexte ; **Purger mémoire** repart à zéro. (La mémoire longue — faits + leçons RAG — vit dans l'onglet Apprentissage.)
+Le compteur **CTX** affiche les échanges gardés en contexte ; **Purger mémoire** repart à zéro. Ça, c'est la mémoire **courte** (la conversation en cours) ; la mémoire **longue** de l'agent — faits, leçons RAG, santé et croissance du cerveau — est détaillée plus bas dans **[◈ Hermès — l'agent persistant](#hermes)**.
 
 **⑤ Le prompt système** — la gouvernance de l'agent *(données anonymisées)* :
 
@@ -333,18 +333,40 @@ Le **cœur** d'Hermès — un réacteur qui « **respire** » tant que l'agent t
 ### ◈ L'architecture de l'agent
 
 <div align="center">
-  <img src="Images/Jarvis-21.png" alt="Schéma Hermès — flux et briques de l'agent" width="900"/>
+  <img src="Images/Hermes-schema.png" alt="Schéma Hermès — pipeline d'agentification et briques temps réel" width="900"/>
 </div>
 
-Le **schéma vivant** de l'agent : le flux **entrée → Hermès → LLM → réponse**, et les briques branchées en temps réel — **Mémoire** (faits + leçons RAG), **SOC live** (niveau de menace), **Web** (à la demande), **Proxmox** (état des VMs), **Bypass** (commandes < 100 ms), **Vision**, **MCP**, **Apprentissage**, **Réflexion**, **DR cerveau**, **Briefing**, **Alarmes**. Chaque brique affiche son état réel — c'est la « salle des machines » de l'agent.
+La **« salle des machines »** d'Hermès, en temps réel. Le **chemin d'une requête** : `ENTRÉE` (voix STT · texte · image) → **`BYPASS`** (commandes directes, **< 100 ms, zéro LLM**) → **`MÉMOIRE`** (faits + leçons RAG, ~1600 / 4000 chunks) → **`SOC LIVE`** (contexte sécurité) → **`WEB`** (recherche à la demande) → **`PVE`** (Proxmox temps réel) → **`LLM LOCAL`** (`qwen3:8b`, raisonnement) → **`OUTILS`** (appelés par le LLM : fichiers / SSH) → **`RÉPONSE`** (texte + voix, cache TTS). Autour gravitent les **briques transversales** : `VISION` (gemma4), `MCP` (pont Claude Desktop · 12 outils), `APPRENTISSAGE`, `RÉFLEXION`, `DR CERVEAU`, `BRIEFING` matinal, `ALARMES`, `PÉDAGOGIE`, `INFOGÉRANCE` (MAJ des 4 VMs, fail-closed). **Chaque brique affiche sa métrique live** — l'agentification rendue visible.
+
+### ◈ Le tableau de bord vivant
+
+<div align="center">
+  <img src="Images/Hermes-grid.png" alt="Dashboard Hermès — six panneaux synoptiques de l'état de l'agent" width="900"/>
+</div>
+
+Le **synoptique de santé** de l'agent, six panneaux d'un coup d'œil :
+- **◈ Cerveau — Mémoire** — leçons apprises, résumés de session, taille du cerveau.
+- **◈ Sauvegarde du cerveau** — dernier instantané + **sauvegarde automatique quotidienne (21 h)**, boutons Sauvegarder / Restaurer.
+- **◈ Santé mémoire** — **verdict GO / NO-GO** monitoré, date de dernière réparation, intégrité de structure, avec le **bouton ⛑ Réparer la mémoire** (déclenche le moteur d'entretien Hermès — une sauvegarde est créée avant, la mémoire ne peut pas être corrompue).
+- **◈ SOC — Auto-engine** — état du moteur de réponse + bans et alertes sur 24 h.
+- **◈ Mémoire — Historique** — échanges persistés sur disque (survivent au redémarrage).
+- **◈ Réflexion — Auto-apprentissage** — corrections **proposées** vs **apprises** + **taux d'apprentissage** : l'agent apprend de tes retours.
+
+### ◈ Auto-maintenance de la mémoire
+
+<div align="center">
+  <img src="Images/Hermes-nondrift.png" alt="Non-dérive des leçons — file d'auto-maintenance Hermès" width="900"/>
+</div>
+
+Hermès **surveille la qualité de son propre savoir**. Chaque leçon porte un **statut** (`active`, `promouvable`, `doublon`, `représentant`, `périmée`) et une **file d'auto-maintenance** ne fait remonter que ce qui demande une action — dédoublonnage, promotion en fait durable, terme périmé. Corpus sain → bandeau **« AUCUNE DÉRIVE »**. La mémoire ne gonfle pas en silence : elle se **consolide** toute seule.
 
 ### ◈ Le cerveau qui grandit
 
 <div align="center">
-  <img src="Images/Jarvis-22.png" alt="Croissance du cerveau — leçons cumulées dans le temps" width="780"/>
+  <img src="Images/Hermes-croissance.png" alt="Croissance du cerveau — leçons cumulées et rythme d'apprentissage" width="880"/>
 </div>
 
-La **mémoire de l'agent s'accumule** : courbe des **leçons cumulées** dans le temps (et leur rythme par heure). Chaque `"souviens-toi que…"` ou correction ajoute une leçon **persistée, indexée dans le RAG et réinjectée** automatiquement — l'agent ne repart jamais de zéro.
+La **mémoire de l'agent s'accumule** : deux courbes à échelles distinctes — le **`CUMUL`** (total de leçons accumulées dans le temps, axe « leçons ») et le **`RYTHME`** (leçons ajoutées par période, axe « leçons/jour »). Chaque `"souviens-toi que…"` ou correction ajoute une leçon **persistée, indexée dans le RAG et réinjectée** automatiquement — l'agent ne repart jamais de zéro.
 
 > **Les 5 briques** (synoptique temps réel · mémoire vectorielle persistante · bypass déterministe < 100 ms · boucle d'apprentissage · briefing matinal) et le comparatif **Avant / Après Hermès** sont détaillés dans **[01 — Hermès](DOCUMENTATION/01-HERMES.md)**.
 
