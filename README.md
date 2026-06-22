@@ -457,7 +457,7 @@ flowchart TB
 | **Frontend** | Vanilla JS · 21 modules · Web Audio API · xterm.js · Monaco Editor |
 | **Agent Hermès** | 5 briques · bypass regex · scheduler daemon · DI pur · indépendant du LLM |
 | **MCP** | 12 outils exposés à Claude Desktop · streamable-HTTP · watchdog |
-| **Qualité** | 1 465 pytest · 79 % coverage · ruff 0 · eslint 0 · hooks pré-commit/pré-push |
+| **Qualité** | 1 888 pytest · 82 % coverage · ruff 0 · eslint 0 · hooks pré-commit/pré-push |
 
 </div>
 
