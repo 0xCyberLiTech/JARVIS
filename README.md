@@ -336,7 +336,7 @@ Le **cœur** d'Hermès — un réacteur qui « **respire** » tant que l'agent t
   <img src="Images/Hermes-schema.png" alt="Schéma Hermès — pipeline d'agentification et briques temps réel" width="900"/>
 </div>
 
-La **« salle des machines »** d'Hermès, en temps réel. Le **chemin d'une requête** : `ENTRÉE` (voix STT · texte · image) → **`BYPASS`** (commandes directes, **< 100 ms, zéro LLM**) → **`MÉMOIRE`** (faits + leçons RAG, ~1600 / 4000 chunks) → **`SOC LIVE`** (contexte sécurité) → **`WEB`** (recherche à la demande) → **`PVE`** (Proxmox temps réel) → **`LLM LOCAL`** (`qwen3:8b`, raisonnement) → **`OUTILS`** (appelés par le LLM : fichiers / SSH) → **`RÉPONSE`** (texte + voix, cache TTS). Autour gravitent les **briques transversales** : `VISION` (gemma4), `MCP` (pont Claude Desktop · 12 outils), `APPRENTISSAGE`, `RÉFLEXION`, `DR CERVEAU`, `BRIEFING` matinal, `ALARMES`, `PÉDAGOGIE`, `INFOGÉRANCE` (MAJ des 4 VMs, fail-closed). **Chaque brique affiche sa métrique live** — l'agentification rendue visible.
+La **« salle des machines »** d'Hermès, en temps réel. Le **chemin d'une requête** : `ENTRÉE` (voix STT · texte · image) → **`BYPASS`** (commandes directes, **< 100 ms, zéro LLM**) → **`MÉMOIRE`** (faits + leçons RAG · plafond **4 000 chunks**, auto-borné) → **`SOC LIVE`** (contexte sécurité) → **`WEB`** (recherche à la demande) → **`PVE`** (Proxmox temps réel) → **`LLM LOCAL`** (`qwen3:8b`, raisonnement) → **`OUTILS`** (appelés par le LLM : fichiers / SSH) → **`RÉPONSE`** (texte + voix, cache TTS). Autour gravitent les **briques transversales** : `VISION` (gemma4), `MCP` (pont Claude Desktop · 12 outils), `APPRENTISSAGE`, `RÉFLEXION`, `DR CERVEAU`, `BRIEFING` matinal, `ALARMES`, `PÉDAGOGIE`, `INFOGÉRANCE` (MAJ des 4 VMs, fail-closed). **Chaque brique affiche sa métrique live** — l'agentification rendue visible.
 
 ### ◈ Le tableau de bord vivant
 
@@ -368,6 +368,60 @@ Hermès **surveille la qualité de son propre savoir**. Chaque leçon porte un *
 
 La **mémoire de l'agent s'accumule** : deux courbes à échelles distinctes — le **`CUMUL`** (total de leçons accumulées dans le temps, axe « leçons ») et le **`RYTHME`** (leçons ajoutées par période, axe « leçons/jour »). Chaque `"souviens-toi que…"` ou correction ajoute une leçon **persistée, indexée dans le RAG et réinjectée** automatiquement — l'agent ne repart jamais de zéro.
 
+### ◈ Le maintien en vie autonome
+
+> **Le pari : un agent qui ne se contente pas d'apprendre — il se maintient lui-même en vie.**
+> Je voulais qu'Hermès reste *sain* indéfiniment **sans intervention manuelle** : qu'il se **diagnostique**, se **répare**, se **borne**, et surtout qu'il **alerte tout seul** si sa propre mécanique d'entretien venait à s'arrêter. Un agent réellement vivant ne doit pas dépendre de moi pour le rester.
+
+**L'architecture — une boucle d'entretien fermée.** Un **moteur d'entretien autonome** s'exécute périodiquement et enchaîne, dans l'ordre, des étapes **idempotentes et réversibles** :
+
+| # | Étape | Rôle |
+|---|-------|------|
+| 1 | **Intégrité** | vérifie la cohérence de la mémoire et de ses index |
+| 2 | **Santé** | recalcule le verdict `GO / NO-GO`, la taille, la fraîcheur (état relu par le cockpit) |
+| 3 | **Consolidation** | dédoublonne les leçons, promeut les récurrentes en faits durables |
+| 4 | **Ré-indexation auto-bornée** | régénère l'index **et abaisse sa densité** tant que la mémoire dépasse son budget → la taille ne peut **jamais déborder en silence** |
+| 5 | **Ressources & purge** | purge le RAG périmé, surveille la charge |
+| 6 | **Anti-dérive** | refuse les termes/références périmés — verdict **en dernier**, *fail-closed* |
+
+Toute étape qui échoue **force une sortie en erreur** (*fail-closed cumulatif*) : un entretien partiel ne se fait **jamais** passer pour un succès.
+
+**Les garde-fous — l'autonomie qui se surveille elle-même.** Le vrai danger d'un système autonome, c'est de **tomber en silence**. Hermès est donc doublé de **sentinelles** :
+
+- un **gardien de connaissance** vérifie que les sources de vérité restent câblées et saines (verdict `GO / DÉRIVE`) ;
+- une **sentinelle d'autonomie** détecte si le moteur d'entretien **n'a plus tourné** (désactivé, en panne, machine éteinte) et **déclenche une alerte** — la panne ne peut pas rester invisible ;
+- un **rafraîchissement vectoriel** périodique régénère le RAG en tâche de fond ;
+- côté humain, un **bouton d'urgence** dans le cockpit déclenche *le même moteur* à la demande — avec **sauvegarde créée avant toute écriture** : la mémoire ne peut pas être corrompue.
+
+```mermaid
+flowchart TB
+    subgraph CYCLE["♻️ Boucle d'entretien autonome"]
+        direction LR
+        A["1 · Intégrité"] --> B["2 · Santé<br/>GO / NO-GO"]
+        B --> C["3 · Consolidation<br/>des leçons"]
+        C --> D["4 · Ré-indexation<br/>auto-bornée"]
+        D --> E["5 · Ressources<br/>+ purge RAG"]
+        E --> F["6 · Anti-dérive<br/>fail-closed"]
+    end
+    F --> V{"Toutes les<br/>étapes OK ?"}
+    V -->|oui| OK["✅ Mémoire saine<br/>état publié au cockpit"]
+    V -->|non| ERR["🛑 Sortie en erreur<br/>entretien invalidé"]
+    OK --> COCK[("◈ Cockpit Hermès<br/>santé · leçons · croissance")]
+    GARD["🛡️ Gardien de connaissance<br/>GO / DÉRIVE"] -.-> ALERT["🔔 ALERTE"]
+    SENT["🛰️ Sentinelle d'autonomie<br/>le moteur tourne-t-il ?"] -.->|inactif| ALERT
+    URG["⛑ Bouton d'urgence<br/>sauvegarde AVANT écriture"] -.->|déclenche le moteur| A
+```
+
+**Ce qui en résulte.**
+
+- 🧠 **Une mémoire qui ne dérive pas** — elle se consolide, se borne et se purge toute seule ; elle ne gonfle ni ne pourrit.
+- ⛑ **L'auto-réparation** — le moteur régénère les états de santé et ré-indexe la connaissance **sans moi**.
+- 🚨 **Aucune panne silencieuse** — si l'entretien lui-même s'arrête, une sentinelle **alerte** ; l'autonomie ne peut pas « capoter » sans que je le sache.
+- 🔒 **Fail-closed de bout en bout** — au moindre doute, le système **refuse** plutôt que d'avancer à l'aveugle, et une **sauvegarde précède** toute opération destructive.
+- ✅ **Zéro intervention en régime nominal** — je n'interviens **que sur alerte**. Le reste du temps, Hermès **se maintient en vie tout seul**.
+
+> Le détail technique complet (moteur d'entretien, états publiés, garde-fous outillés) est dans **[01 — Hermès](DOCUMENTATION/01-HERMES.md)**.
+
 > **Les 5 briques** (synoptique temps réel · mémoire vectorielle persistante · bypass déterministe < 100 ms · boucle d'apprentissage · briefing matinal) et le comparatif **Avant / Après Hermès** sont détaillés dans **[01 — Hermès](DOCUMENTATION/01-HERMES.md)**.
 
 ---
@@ -397,7 +451,7 @@ La **mémoire de l'agent s'accumule** : deux courbes à échelles distinctes —
 |--------|-------------|
 | **Backend** | Python 3.11 · Flask · Blueprints autoportants · DI pur |
 | **LLM local** | Ollama · qwen3:8b (SOC+GÉNÉRAL+CR · rapide) · qwen3:14b (THINK) · qwen2.5-coder:14b (CODE) · gemma4:latest (VISION) |
-| **RAG** | mxbai-embed-large · BM25 hybride · ~1150 chunks · TTL 5 min |
+| **RAG** | mxbai-embed-large · BM25 hybride · plafond 4 000 chunks (auto-borné) · TTL 5 min |
 | **TTS** | edge-tts fr-CA Antoine (défaut) → repli Kokoro CUDA neural (hors-ligne, local) |
 | **STT** | faster-whisper large-v3-turbo CUDA · vocabulaire SOC |
 | **Frontend** | Vanilla JS · 21 modules · Web Audio API · xterm.js · Monaco Editor |
