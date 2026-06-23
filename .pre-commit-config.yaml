@@ -37,12 +37,21 @@ repos:
         require_serial: true
         stages: [pre-commit]
 
-      # ── Pytest — suite tests Python (stage pre-push uniquement) ─
-      # Lance les 933 tests unitaires avant chaque push.
-      # Bloque si tests rouges. Pas en pre-commit (trop lent à chaque commit).
+      # ── Pytest + GATE couverture — suite tests Python (stage pre-push uniquement) ─
+      # Lance la suite unitaire (1952 tests au 2026-06-23) avant chaque push.
+      # Bloque si tests rouges OU si la couverture régresse sous le plancher.
+      # GATE --cov-fail-under (ajouté 2026-06-23, audit adverse dimension Code&tests) :
+      # la couverture n'était PAS gatée côté JARVIS (asymétrie vs SOC gaté à 88) → un
+      # module pouvait régresser sans garde-fou. Couverture RÉELLE ≈ 81,8–82,0 % (9886 stmts ;
+      # léger flottement ±0,2 pt selon l'env — gardes torch/CUDA/ollama ; s'affiche « 82 % »
+      # par arrondi entier). Plancher posé à 81 = anti-régression honnête AVEC marge ~1 pt sous
+      # le réel (même philosophie que SOC : gate 88 pour un réel 88,7),
+      # pour ne PAS flaker sur 0,01 % de bruit de mesure tout en bloquant une VRAIE régression
+      # (un module perdant ses tests chute de plusieurs points). Relever le plancher uniquement
+      # par action documentée (cf. feedback_scores_marbre). Pas en pre-commit (trop lent).
       - id: pytest
-        name: pytest (suite tests Python)
-        entry: python -m pytest -q --tb=short
+        name: pytest + gate couverture (suite tests Python)
+        entry: python -m pytest -q --tb=short --cov=scripts --cov-report=term-missing:skip-covered --cov-fail-under=81
         language: system
         pass_filenames: false
         always_run: true

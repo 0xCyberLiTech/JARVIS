@@ -2,7 +2,13 @@ import globals from 'globals';
 
 export default [
   {
-    files: ['scripts/static/jarvis_main.js', 'scripts/static/jarvis_mixing.js', 'scripts/static/recorder.js', 'scripts/static/voice_print.js', 'scripts/static/js/terminal_code.js', 'scripts/static/js/voice_lab.js', 'scripts/static/js/stt.js', 'scripts/static/js/tasks_tab.js', 'scripts/static/js/welcome.js', 'scripts/static/js/eq_parametric.js', 'scripts/static/js/audio_mire.js', 'scripts/static/js/eq_music.js', 'scripts/static/js/audio_viz.js', 'scripts/static/js/gpu_monitor.js', 'scripts/static/js/settings_llm.js', 'scripts/static/js/dsp_audio.js', 'scripts/static/js/audio_rack.js', 'scripts/static/js/soc_tab.js', 'scripts/static/js/settings_ui.js', 'scripts/static/js/chat_ui.js', 'scripts/static/js/chat_core.js', 'scripts/static/js/boot_init.js'],
+    // SOURCE UNIQUE de couverture lint (durci 2026-06-23, audit adverse) : GLOB de TOUT
+    // le JS applicatif, pas une liste blanche. Une liste explicite DÉRIVAIT à chaque nouveau
+    // fichier (10 modules — http.js, sse_stream.js, audio_math.js, acces_web.js, alarmes.js,
+    // appr_heart.js, apprentissage.js, core_wave.js, infogerance.js, reduce_motion.js —
+    // échappaient silencieusement au lint → 56 no-undef masqués). Le glob ferme la CLASSE :
+    // un fichier ajouté est couvert par construction. Le vendored/bundle est exclu par `ignores`.
+    files: ['scripts/static/**/*.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -14,6 +20,14 @@ export default [
         Terminal: 'readonly',
         FitAddon: 'readonly',
         monaco: 'readonly',
+        // Helpers utilitaires source-unique chargés via <script> (modules ajoutés à la
+        // couverture lint par le glob 2026-06-23) : http.js, sse_stream.js, audio_math.js,
+        // chat_core.js. Déclarés ici pour le mode script (pas de bundler → résolution cross-file).
+        postJSON: 'writable',       // js/http.js
+        sseForEach: 'writable',     // js/sse_stream.js
+        linToDb: 'readonly',        // js/audio_math.js
+        dbStr: 'readonly',          // js/audio_math.js
+        _modeRegistry: 'writable',  // js/chat_core.js
         // Symboles partagés cross-file entre jarvis_main.js et jarvis_mixing.js
         // (audio nodes, helpers, fonctions globales)
         _cssVar: 'writable',

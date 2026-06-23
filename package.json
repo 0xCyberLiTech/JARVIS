@@ -7,7 +7,7 @@
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:ui": "playwright test --ui",
-    "lint:js": "eslint scripts/static/jarvis_main.js scripts/static/jarvis_mixing.js",
+    "lint:js": "eslint \"scripts/static/**/*.js\"",
     "lint:py": "ruff check scripts/"
   },
   "devDependencies": {
