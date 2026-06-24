@@ -454,10 +454,10 @@ flowchart TB
 | **RAG** | mxbai-embed-large · BM25 hybride · plafond 4 000 chunks (auto-borné) · TTL 5 min |
 | **TTS** | edge-tts fr-CA Antoine (défaut) → repli Kokoro CUDA neural (hors-ligne, local) |
 | **STT** | faster-whisper large-v3-turbo CUDA · vocabulaire SOC |
-| **Frontend** | Vanilla JS · 21 modules · Web Audio API · xterm.js · Monaco Editor |
+| **Frontend** | Vanilla JS · 28 modules · Web Audio API · xterm.js · Monaco Editor |
 | **Agent Hermès** | 5 briques · bypass regex · scheduler daemon · DI pur · indépendant du LLM |
 | **MCP** | 12 outils exposés à Claude Desktop · streamable-HTTP · watchdog |
-| **Qualité** | 1 888 pytest · 82 % coverage · ruff 0 · eslint 0 · hooks pré-commit/pré-push |
+| **Qualité** | 1 987 pytest · 82 % coverage · ruff 0 · eslint 0 · hooks pré-commit/pré-push |
 
 </div>
 
@@ -471,7 +471,7 @@ flowchart TB
 |----------|----------------|
 | **100 % local** | JARVIS filtre et agrège localement — rien ne part vers un LLM cloud |
 | **RFC1918 immuable** | Les plages IP privées ne peuvent jamais être bannies |
-| **SSH lecture seule** | 29 patterns dangereux bloqués · whitelist explicite pour l'écriture |
+| **SSH lecture seule** | 67 patterns dangereux bloqués · whitelist explicite pour l'écriture |
 | **SOC side-channel** | Le contexte sécurité n'entre jamais dans l'historique chat |
 | **Audit forensique** | Toute opération SSH d'écriture tracée dans un journal JSONL |
 

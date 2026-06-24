@@ -32,6 +32,9 @@ export default [
         // (audio nodes, helpers, fonctions globales)
         _cssVar: 'writable',
         _esc: 'writable',
+        // jarvis_main.js — helper a11y source-unique (role+tabindex+aria-label+keydown),
+        // appelé cross-file (settings_ui/soc_tab/terminal_code/voice_print) · chantier a11y 2026-06-24
+        _jvA11yButton: 'readonly',
         _ctx: 'writable',
         audioCtx: 'writable',
         analyserL: 'writable',

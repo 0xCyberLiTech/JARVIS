@@ -56,3 +56,25 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-push]
+
+      # ── Gardiens DOCTRINE (stage pre-push) — anti-dérive LLM-config + termes périmés doc ──
+      # Ajout 2026-06-24 (re-audit doctrine F4) : ces gardiens ne tournaient QUE dans audit-all
+      # (manuel) → une dérive (modèle LLM incohérent / hardcodé UI, « phi4 » ré-apparu dans la doc)
+      # passait le push sans alerte. On les gate au pre-push : statiques, 100% LOCAUX, 0 réseau.
+      # Source unique : les outils vivent dans DEV/TOOLS (chemin relatif depuis la racine JARVIS,
+      # où pre-commit s'exécute). doc-drift cible `docs` (= JARVIS/docs, aligné sur audit-all §7).
+      - id: jarvis-llm-audit
+        name: jarvis-llm-audit (cohérence config LLM, anti-hardcode)
+        entry: python ../DEV/TOOLS/jarvis-llm-audit/jarvis-llm-audit.py --no-ollama
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      - id: doc-drift-lint-jarvis
+        name: doc-drift-lint (termes périmés — JARVIS/docs)
+        entry: bash ../DEV/TOOLS/doc-drift-lint/doc-drift-lint.sh docs
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
