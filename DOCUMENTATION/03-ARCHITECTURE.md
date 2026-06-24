@@ -134,6 +134,17 @@ L'interface est entièrement en **Vanilla JS** (zéro framework) :
 
 ---
 
+## Accessibilité — conçue pour la basse vision
+
+L'interface est pensée dès la conception pour un usage en **basse vision** :
+
+- **Navigation clavier complète + ARIA** — la barre d'onglets se pilote entièrement au clavier (flèches, Entrée/Espace, Début/Fin, focus roving) ; la touche **Échap** ramène à l'écran principal, ferme une fenêtre ou quitte un champ. Onglets et panneaux sont exposés aux technologies d'assistance (`role=tablist`/`tab`/`tabpanel`).
+- **Lecteur d'écran** — libellés accessibles (`aria-label`) en français sur les contrôles, annonces vocales discrètes (`aria-live`) sur les zones de résultat, jamais sur le fil de conversation.
+- **Contraste & lisibilité** — palette de texte lisible centralisée et tailles de police dérivées d'un jeu de tokens unique : confort de lecture garanti sur fond sombre, sans texte trop petit.
+- **Garde-fous automatisés** — des vérificateurs d'accessibilité intégrés à la CI (fail-closed) empêchent toute régression de la navigation clavier/ARIA, du contraste et de la lisibilité au fil des évolutions.
+
+---
+
 ## Modules centralisés — source unique
 
 | Module | Centralise | Règle |

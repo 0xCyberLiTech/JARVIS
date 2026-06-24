@@ -4,6 +4,24 @@ Toutes les évolutions notables de la vitrine **JARVIS** sont consignées dans c
 
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [1.1.0] — 2026-06-24
+
+Accessibilité — l'interface pensée pour un usage en **basse vision**.
+
+### Ajouté
+- **Navigation clavier complète + ARIA** — barre d'onglets entièrement pilotable au clavier (flèches, Entrée/Espace, Début/Fin, focus roving) et touche **Échap** pour revenir à l'écran principal, fermer une fenêtre ou quitter un champ. Onglets et panneaux exposés aux technologies d'assistance (`role=tablist`/`tab`/`tabpanel`).
+- **Support lecteur d'écran** — libellés accessibles (`aria-label`) en français sur les contrôles, et annonces vocales discrètes (`aria-live`) sur les zones de résultat (jamais sur le fil de conversation).
+- **Aide intégrée** — un bouton **Aide** affiche la liste des commandes, générée dynamiquement, et JARVIS peut la **lire à voix haute**.
+
+### Modifié
+- **Contraste renforcé** — textes pâles remplacés par une palette lisible centralisée, pour rester confortables sur fond sombre.
+- **Lisibilité des polices** — élimination des textes trop petits ; toutes les tailles dérivent désormais d'un jeu de tokens unique, garantissant une lecture confortable.
+
+### Sécurité
+- **Vérificateurs d'accessibilité intégrés à la CI** — des contrôles automatisés (fail-closed) vérifient à chaque évolution que la navigation clavier/ARIA, le contraste et la lisibilité ne régressent jamais.
+
+[1.1.0]: https://github.com/0xCyberLiTech/JARVIS/releases/tag/v1.1.0
+
 ## [1.0.0] — 2026-06-15
 
 Première version publique de la vitrine.
