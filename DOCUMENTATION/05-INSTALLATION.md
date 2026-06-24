@@ -143,7 +143,7 @@ Dans l'interface, vérifier :
 ```powershell
 cd scripts
 python -m pytest ../tests/python/ -v
-# → 1 465 tests · 0 fail · 79 % coverage
+# → suite complète · 0 fail · coverage gate pré-push ≥ 81 % (compte LIVE, jamais figé)
 ```
 
 ---
