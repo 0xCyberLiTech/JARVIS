@@ -174,6 +174,7 @@ export default [
         _setAllReplayBusy: 'writable',
         _specBinMap: 'writable',
         _specColorTable: 'writable',
+        _specUpdateMetrics: 'writable',
         _stereoActive: 'writable',
         busy: 'writable',
         ttsEnabled: 'writable',
