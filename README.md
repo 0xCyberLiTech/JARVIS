@@ -255,6 +255,14 @@ Analyse **FFT temps réel** de la sortie : 8 modes d'affichage (bars, line, fill
 
 Le **bus master** de la chaîne : gain de sortie final, **VU-mètres professionnels L/R** (avec zone de crête), et boutons **Appliquer** / **Test voix**.
 
+**⑦ EQ Paramétrique — couplé voix**
+
+<div align="center">
+  <img src="Images/Jarvis-eq.png" alt="Analyseur spectral + EQ paramétrique 4 bandes, couplé à la voix JARVIS" width="880"/>
+</div>
+
+L'**égaliseur paramétrique 4 bandes** (LOW/MID/HIGH/AIR) superposé à l'**analyseur spectral temps réel**, avec ses presets (Flat, Voix, Radio, Studio…) et le **couplage direct à la voix de JARVIS**. Le modelage fin du timbre.
+
 <a id="sec-5"></a>
 
 ### 5 · Voice Lab — l'atelier de la voix
