@@ -58,10 +58,6 @@
   <img src="Images/Jarvis-boot.png" alt="Écran de démarrage JARVIS — séquence SYS.INIT (NEURAL CORE, VOICE ENGINE, AUDIO DSP, KNOWLEDGE BASE) + briefing de session" width="780"/>
 </div>
 
-<div align="center">
-  <img src="Images/Jarvis-hero.png" alt="JARVIS — interface holographique : cockpit, onde vocale et présentation" width="900"/>
-</div>
-
 ---
 
 ## ✦ Ce qui rend JARVIS unique
