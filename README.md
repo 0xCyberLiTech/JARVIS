@@ -55,6 +55,10 @@
 > Ce dépôt **présente** mon projet JARVIS (architecture, conception, capacités) et son **environnement** (Python · Ollama). En revanche, le **code opérationnel** reste **privé** : JARVIS **n'est pas reproductible en l'état** depuis ce seul dépôt (propriété intellectuelle, sécurité). Schémas et descriptions **conceptuels** — le *quoi* et le *pourquoi*, pas le *comment* exact.
 
 <div align="center">
+  <img src="Images/Jarvis-boot.png" alt="Écran de démarrage JARVIS — séquence SYS.INIT (NEURAL CORE, VOICE ENGINE, AUDIO DSP, KNOWLEDGE BASE) + briefing de session" width="780"/>
+</div>
+
+<div align="center">
   <img src="Images/Jarvis-hero.png" alt="JARVIS — interface holographique : cockpit, onde vocale et présentation" width="900"/>
 </div>
 
@@ -344,6 +348,12 @@ Le **cœur** d'Hermès — un réacteur qui « **respire** » tant que l'agent t
 
 Et quand JARVIS **parle**, le réacteur **s'illumine** au rythme de la voix — le statut bascule de « VIVANT » à « **JE PARLE** ». L'agent prend littéralement vie sous tes yeux.
 
+<div align="center">
+  <img src="Images/Jarvis-23c.png" alt="Le cœur en menace élevée — réacteur or/ambre + état moteur complet" width="900"/>
+</div>
+
+Et quand une **menace s'élève** (ici `SOC · Suricata`), le réacteur vire à l'**or/ambre** et l'**état moteur** s'affiche en clair — `MODE SOC`, `qwen3:8b`, échanges, **cause de l'alerte**. Le cœur **reflète la posture de sécurité en temps réel**.
+
 ### ◈ L'architecture de l'agent
 
 <div align="center">
@@ -351,6 +361,20 @@ Et quand JARVIS **parle**, le réacteur **s'illumine** au rythme de la voix — 
 </div>
 
 La **« salle des machines »** d'Hermès, en temps réel. Le **chemin d'une requête** : `ENTRÉE` (voix STT · texte · image) → **`BYPASS`** (commandes directes, **< 100 ms, zéro LLM**) → **`MÉMOIRE`** (faits + leçons RAG · plafond **4 000 chunks**, auto-borné) → **`SOC LIVE`** (contexte sécurité) → **`WEB`** (recherche à la demande) → **`PVE`** (Proxmox temps réel) → **`LLM LOCAL`** (`qwen3:8b`, raisonnement) → **`OUTILS`** (appelés par le LLM : fichiers / SSH) → **`RÉPONSE`** (texte + voix, cache TTS). Autour gravitent les **briques transversales** : `VISION` (gemma4), `MCP` (pont Claude Desktop · 12 outils), `APPRENTISSAGE`, `RÉFLEXION`, `DR CERVEAU`, `BRIEFING` matinal, `ALARMES`, `PÉDAGOGIE`, `INFOGÉRANCE` (MAJ des 4 VMs, fail-closed). **Chaque brique affiche sa métrique live** — l'agentification rendue visible.
+
+> **Hermès en action** — le synoptique s'illumine au passage du flux et **réagit à la menace** :
+
+<div align="center">
+  <img src="Images/Jarvis-synoptique.png" alt="Synoptique Hermès en action — flux pipeline allumé, menace ÉLEVÉE (or)" width="900"/>
+</div>
+
+Le **chemin réel d'une requête** s'allume brique par brique (`ENTRÉE → MÉMOIRE → SOC → WEB → PVE…`) — ici en **or**, car la menace est **ÉLEVÉE**. Les briques **transversales restent calmes** : on voit *exactement* le trajet emprunté.
+
+<div align="center">
+  <img src="Images/Jarvis-synoptique-crit.png" alt="Synoptique Hermès sous menace CRITIQUE — flux en rouge" width="900"/>
+</div>
+
+Et si la menace passe **CRITIQUE**, le flux vire au **rouge** — même source de couleur que le cœur (`hermesHeartColor`, source unique cœur ↔ schéma). Le synoptique **change de teinte avec le niveau d'alerte** : l'agent affiche sa vigilance d'un seul coup d'œil.
 
 ### ◈ Le tableau de bord vivant
 
