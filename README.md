@@ -333,10 +333,16 @@ Au-delà de l'interface web, JARVIS se pilote depuis une **console de maintenanc
 ### ◈ Le cœur de l'agent
 
 <div align="center">
-  <img src="Images/Jarvis-23.png" alt="Le cœur de l'agent — réacteur vivant + diagnostic" width="900"/>
+  <img src="Images/Jarvis-23.png" alt="Le cœur de l'agent au repos — réacteur VIVANT + diagnostic" width="900"/>
 </div>
 
 Le **cœur** d'Hermès — un réacteur qui « **respire** » tant que l'agent tourne. Autour : le **diagnostic vivant** (RAG, mémoire, connaissance) et l'**état moteur** (mode actif, modèle `qwen3:8b`, niveau de menace, dernière sauvegarde du cerveau). D'un coup d'œil : l'agent est **vivant, alimenté et conscient de son état**.
+
+<div align="center">
+  <img src="Images/Jarvis-23b.png" alt="Le cœur quand JARVIS parle — réacteur illuminé, statut JE PARLE" width="900"/>
+</div>
+
+Et quand JARVIS **parle**, le réacteur **s'illumine** au rythme de la voix — le statut bascule de « VIVANT » à « **JE PARLE** ». L'agent prend littéralement vie sous tes yeux.
 
 ### ◈ L'architecture de l'agent
 
