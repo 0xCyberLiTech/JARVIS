@@ -44,7 +44,7 @@
 </div>
 
 ---
-# MCP Server — 12 outils Claude Desktop
+# MCP Server — 11 outils Claude Desktop
 
 ## Objectif
 Le MCP Server est le pont qui permet à **Claude Code** (dans VSCode) d'interroger JARVIS
@@ -87,7 +87,7 @@ et bornée en taille avant émission.
 
 ---
 
-## Les 12 outils
+## Les 11 outils
 
 | Outil | Description |
 |-------|-------------|
