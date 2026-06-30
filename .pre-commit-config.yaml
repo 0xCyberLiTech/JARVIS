@@ -38,20 +38,19 @@ repos:
         stages: [pre-commit]
 
       # ── Pytest + GATE couverture — suite tests Python (stage pre-push uniquement) ─
-      # Lance la suite unitaire (1952 tests au 2026-06-23) avant chaque push.
+      # Lance la suite unitaire complète avant chaque push (compte LIVE — ne pas figer
+      # ici : un nombre codé en dur dérive, cf. audit doctrine 2026-06-30).
       # Bloque si tests rouges OU si la couverture régresse sous le plancher.
-      # GATE --cov-fail-under (ajouté 2026-06-23, audit adverse dimension Code&tests) :
-      # la couverture n'était PAS gatée côté JARVIS (asymétrie vs SOC gaté à 88) → un
-      # module pouvait régresser sans garde-fou. Couverture RÉELLE ≈ 81,8–82,0 % (9886 stmts ;
-      # léger flottement ±0,2 pt selon l'env — gardes torch/CUDA/ollama ; s'affiche « 82 % »
-      # par arrondi entier). Plancher posé à 81 = anti-régression honnête AVEC marge ~1 pt sous
-      # le réel (même philosophie que SOC : gate 88 pour un réel 88,7),
-      # pour ne PAS flaker sur 0,01 % de bruit de mesure tout en bloquant une VRAIE régression
-      # (un module perdant ses tests chute de plusieurs points). Relever le plancher uniquement
-      # par action documentée (cf. feedback_scores_marbre). Pas en pre-commit (trop lent).
+      # GATE --cov-fail-under : la couverture RÉELLE est ≈ 99 % (10329 stmts, mesurée
+      # 2026-06-30 après la campagne de couverture qui a porté la suite à ~2805 tests ;
+      # léger flottement selon l'env — gardes torch/CUDA/ollama). Plancher posé à 95 =
+      # anti-régression honnête AVEC ~4 pts de marge sous le réel (absorbe le bruit de
+      # mesure sans flaker, tout en bloquant une VRAIE régression). Aligné/supérieur au
+      # gate SOC (88) → l'asymétrie signalée par l'audit 06-24 est levée.
+      # Relever le plancher uniquement par action documentée (cf. feedback_scores_marbre).
       - id: pytest
         name: pytest + gate couverture (suite tests Python)
-        entry: python -m pytest -q --tb=short --cov=scripts --cov-report=term-missing:skip-covered --cov-fail-under=81
+        entry: python -m pytest -q --tb=short --cov=scripts --cov-report=term-missing:skip-covered --cov-fail-under=95
         language: system
         pass_filenames: false
         always_run: true
@@ -74,6 +73,65 @@ repos:
       - id: doc-drift-lint-jarvis
         name: doc-drift-lint (termes périmés — JARVIS/docs)
         entry: bash ../DEV/TOOLS/doc-drift-lint/doc-drift-lint.sh docs
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      # ── Gardiens ACCESSIBILITÉ (stage pre-push) — Marc MALVOYANT = règle ABSOLUE ──
+      # Ajout 2026-06-30 (audit doctrine F1) : ces 2 gardiens ne tournaient QUE dans
+      # audit-all (§12 + §24, manuel) → une régression a11y (contraste sous-plancher,
+      # fonte < 10px, canvas/contrôle sans nom accessible, JS-clic non clavier) passait
+      # le push sans alerte. On les gate au pre-push : statiques, 100% LOCAUX, 0 réseau.
+      # scan-inline-a11y : couleurs/alphas/fontes (inline JS + CSS). jarvis-a11y-audit :
+      # nav tabs/panels + labels (I4) + data-action clavier (I5) + JS-clic clavier (I6).
+      - id: scan-inline-a11y
+        name: scan-inline-a11y (contraste/fonte — accessibilité)
+        entry: python ../DEV/TOOLS/scan-inline-a11y/scan-inline-a11y.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      - id: jarvis-a11y-audit
+        name: jarvis-a11y-audit (nav/labels/clavier — accessibilité)
+        entry: python ../DEV/TOOLS/jarvis-a11y-audit/jarvis-a11y-audit.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      # ── Gardiens SÉCURITÉ (stage pre-push) — anti-SSRF + anti-exfiltration ──
+      # Ajout 2026-06-30 (audit doctrine HAUTE) : ces gardiens sécurité ne tournaient QU'en
+      # audit-all manuel → une régression (passerelle web SSRF contournée, secret non
+      # caviardé par redact_secrets) passait le push sans alerte. On les gate au pre-push :
+      # statiques, 100% LOCAUX, 0 réseau. web-audit = porte web gouvernée (allowlist, 0 appel
+      # direct, journal). secret-redact-audit = redact_secrets attrape la CLASSE de secrets.
+      - id: web-audit
+        name: web-audit (passerelle web gouvernée — anti-SSRF)
+        entry: python ../DEV/TOOLS/web-audit/web-audit.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      - id: secret-redact-audit
+        name: secret-redact-audit (caviardage secrets — anti-exfiltration)
+        entry: python ../DEV/TOOLS/secret-redact-audit/secret-redact-audit.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      # ── ANTI-COMPLAISANCE (stage pre-push) — le verrou §32 voyage avec le push ──
+      # Ajout 2026-06-30 (audit doctrine) : le --self-check fault-injection (PROUVE qu'un
+      # détecteur n'est pas neutralisé par une exclusion sur-mesure) ne tournait QU'en
+      # audit-all manuel → un gardien neutralisé passait le push. La doctrine 06-24 acte
+      # qu'un gardien neutralisé est « PIRE que pas de gardien ». On exécute donc le
+      # self-check des 3 gardiens DÉJÀ gatés ici (a11y ×2 + llm-audit). Échec = push bloqué.
+      - id: guardians-self-check
+        name: self-check gardiens (anti-complaisance fault-injection)
+        entry: bash -c 'for t in scan-inline-a11y/scan-inline-a11y jarvis-a11y-audit/jarvis-a11y-audit jarvis-llm-audit/jarvis-llm-audit secret-redact-audit/secret-redact-audit; do python "../DEV/TOOLS/$t.py" --self-check || exit 1; done'
         language: system
         pass_filenames: false
         always_run: true

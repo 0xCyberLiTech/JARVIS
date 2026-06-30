@@ -145,6 +145,7 @@ export default [
         _syncDefaultEngineButtons: 'writable',
         _syncRangeSlider: 'writable',
         addMessage: 'writable',
+        srAnnounce: 'writable',
         datEqSetFreq: 'writable',
         datEqSetQ: 'writable',
         datEqSetType: 'writable',
