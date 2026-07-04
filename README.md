@@ -200,7 +200,19 @@ L'agent peut consulter le web — mais **sous contrôle strict**. JARVIS ne visi
 
 Le **centre de défense** de JARVIS. Courbe d'**activité sur 30 jours** (pics offensifs) et **compteurs en direct** — actions, **bans IP**, restarts, succès / échecs, détections **IDS**. JARVIS surveille nginx / CrowdSec / fail2ban / Suricata en continu et **agit seul** (ban, restart) selon des seuils : l'agent ne se contente pas d'alerter, il **répond**.
 
-> 🔒 Volontairement **non publiés** : le journal des IP d'attaquants, le terminal, les leçons apprises. La vitrine *décrit* le SOC et montre son activité **agrégée** — **aucune donnée actionnable, aucune IP**.
+> 🔒 Volontairement **non publiés** : le journal des IP d'attaquants, le terminal d'actions SOC, les leçons apprises. La vitrine *décrit* le SOC et montre son activité **agrégée** — **aucune donnée actionnable, aucune IP**.
+
+---
+
+## ⌨️ Terminal SSH intégré (mode Code)
+
+<div align="center">
+  <img src="Images/terminal.png" alt="Terminal SSH JARVIS — PTY xterm-256color, raccourcis, HUD ressources, chat inline" width="920"/>
+</div>
+
+Un **vrai terminal SSH interactif** (PTY `xterm-256color`) intégré à JARVIS — pour piloter le serveur de dev **sans quitter l'interface**. À gauche, des **raccourcis en un clic** (SYS : `ls`, `df`, `uptime`, `ports`, `ps`, `top`… · DEV : `git`, `python3`, `find`, `syslog`…). En bas, un **HUD ressources en direct** (load · RAM · disque · réseau · uptime) et une barre **« Demandez à JARVIS depuis le terminal »** : l'agent lit la sortie et propose la commande suivante. Sortie **couleur** complète, redimensionnement à chaud.
+
+> 🔒 **Gouverné** : le PTY est **loopback-only** — bind `127.0.0.1` + contrôle d'origine WebSocket + anti-DNS-rebinding, jamais exposé hors la machine. L'IP réelle est masquée sur cette capture (`192.168.x.x`).
 
 ---
 
