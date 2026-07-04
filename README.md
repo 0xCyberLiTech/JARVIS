@@ -144,6 +144,32 @@ Une **chaîne broadcast complète** appliquée à la voix de synthèse, accélé
 </tr>
 </table>
 
+#### Schéma logique du circuit — état des étages & CUDA
+
+*Le signal vocal traverse une chaîne de circuits : un étage **CUDA (GPU)** pour le débruitage IA, le reste en **Web Audio** temps réel dans le navigateur.*
+
+```mermaid
+flowchart LR
+    TTS["🎙️ TTS<br/>Edge · Kokoro"] --> DFN
+    subgraph CUDA["⚡ CUDA — GPU RTX 5080"]
+        DFN["DeepFilterNet3<br/>débruitage IA"]
+    end
+    DFN --> CMP["Compresseur<br/>VCA"] --> STE["Stereo<br/>Widener"] --> EQ["EQ<br/>4 bandes"] --> FX["FX Rack<br/>convolution"] --> AN["Analyseur<br/>FFT + phase"] --> OUT["🎚️ Output L+R<br/>gain · VU"]
+```
+
+| Étage | Rôle logique | Circuit |
+|---|---|---|
+| **TTS** | synthèse vocale — Edge Antoine / Kokoro neural local | source |
+| **DeepFilterNet3** | débruitage IA — retire bruit de fond + artefacts TTS | **⚡ CUDA (GPU)** |
+| **Compresseur** | homogénéise le volume (seuil · ratio · attaque · relâche, VCA) | Web Audio |
+| **Stereo Widener** | élargit l'image stéréo (effet Haas), compatibilité mono | Web Audio |
+| **EQ** | modelage du timbre — bandes LOW · MID · HIGH · AIR | Web Audio |
+| **FX Rack** | reverb · echo · delay · chorus (convolution) | Web Audio |
+| **Analyseur** | FFT temps réel + goniomètre de phase | Web Audio |
+| **Output L+R** | bus master : gain de sortie + VU-mètres | Web Audio |
+
+> Côté **entrée**, la reconnaissance vocale (STT `faster-whisper large-v3-turbo`) est elle aussi **accélérée CUDA** — le GPU couvre toute la chaîne voix.
+
 <a id="sec-5"></a>
 
 ### 5 · Voice Lab
@@ -190,6 +216,41 @@ Le **centre de défense** de JARVIS. Courbe d'**activité sur 30 jours** (pics o
 </div>
 
 Le tableau de bord vivant de l'agent. Au centre, le **cœur** qui « respire » tant que JARVIS tourne — il **s'illumine** quand il parle (*JE PARLE*), vire à l'**or/ambre** quand la menace monte. Autour, le **diagnostic** (RAG, mémoire, connaissance) et l'**état moteur** (mode, modèle `qwen3.5:9b`, niveau de menace + sa cause). En bas, le **pipeline temps réel** : `ENTRÉE → BYPASS (< 100 ms, zéro LLM) → MÉMOIRE (RAG auto-borné à 4 000 chunks) → SOC LIVE → WEB → PVE → LLM LOCAL → OUTILS → RÉPONSE` — **chaque brique affiche sa métrique live**. L'agentification rendue visible.
+
+### Schéma logique de la pile — le rôle de chaque tuile
+
+*Le chemin d'une requête à travers les circuits de l'agent — chaque tuile a un rôle précis et affiche sa métrique en direct.*
+
+```mermaid
+flowchart LR
+    IN["ENTRÉE"] --> BY["BYPASS<br/>&lt; 100 ms"] --> MEM["MÉMOIRE<br/>RAG"] --> SOC["SOC<br/>LIVE"] --> WEB["WEB"] --> PVE["PVE"] --> LLM["LLM LOCAL<br/>qwen3.5:9b"] --> TL["OUTILS"] --> OUT["RÉPONSE<br/>texte + voix"]
+```
+
+| Tuile du flux | Rôle logique |
+|---|---|
+| **ENTRÉE** | voix (STT Whisper) · texte · image (vision multimodale) |
+| **BYPASS** | commandes directes **déterministes**, < 100 ms, **zéro LLM** |
+| **MÉMOIRE** | faits + leçons **RAG**, auto-borné à 4 000 chunks |
+| **SOC LIVE** | injecte le **contexte sécurité** temps réel |
+| **WEB** | recherche **gouvernée** (allowlist, lecture seule) |
+| **PVE** | état **Proxmox** temps réel |
+| **LLM LOCAL** | raisonnement `qwen3.5:9b` — **100 % local** |
+| **OUTILS** | fichiers / SSH — **appelés par le LLM** |
+| **RÉPONSE** | texte + voix (cache TTS) |
+
+Autour du flux, les **briques transversales** (enrichissent · protègent · agissent), chacune une tuile d'état :
+
+| Brique transversale | Rôle logique |
+|---|---|
+| **VISION** | analyse d'images (`qwen3.5:9b` multimodal natif) |
+| **MCP** | pont gouverné vers Claude Desktop (outils exposés) |
+| **APPRENTISSAGE** | mémorise les leçons (« souviens-toi… ») |
+| **RÉFLEXION** | apprend de tes corrections (proposées → validées) |
+| **DR CERVEAU** | sauvegarde / restauration de la mémoire |
+| **BRIEFING** | résumé proactif au réveil |
+| **ALARMES** | rappels à l'heure |
+| **PÉDAGOGIE** | explique vs analyse (mode tuteur) |
+| **INFOGÉRANCE** | mise à jour des VMs, fail-closed |
 
 ### Les capacités de l'agent
 
