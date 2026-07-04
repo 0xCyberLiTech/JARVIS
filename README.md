@@ -157,16 +157,17 @@ flowchart LR
     DFN --> CMP["Compresseur<br/>VCA"] --> STE["Stereo<br/>Widener"] --> EQ["EQ<br/>4 bandes"] --> FX["FX Rack<br/>convolution"] --> AN["Analyseur<br/>FFT + phase"] --> OUT["🎚️ Output L+R<br/>gain · VU"]
 ```
 
-| Étage | Rôle logique | Circuit |
-|---|---|---|
-| **TTS** | synthèse vocale — Edge Antoine / Kokoro neural local | source |
-| **DeepFilterNet3** | débruitage IA — retire bruit de fond + artefacts TTS | **⚡ CUDA (GPU)** |
-| **Compresseur** | homogénéise le volume (seuil · ratio · attaque · relâche, VCA) | Web Audio |
-| **Stereo Widener** | élargit l'image stéréo (effet Haas), compatibilité mono | Web Audio |
-| **EQ** | modelage du timbre — bandes LOW · MID · HIGH · AIR | Web Audio |
-| **FX Rack** | reverb · echo · delay · chorus (convolution) | Web Audio |
-| **Analyseur** | FFT temps réel + goniomètre de phase | Web Audio |
-| **Output L+R** | bus master : gain de sortie + VU-mètres | Web Audio |
+<table align="center">
+<tr><th>Étage</th><th>Rôle logique</th><th>Circuit</th></tr>
+<tr><td><b>TTS</b></td><td>synthèse vocale — Edge Antoine / Kokoro neural local</td><td>source</td></tr>
+<tr><td><b>DeepFilterNet3</b></td><td>débruitage IA — retire bruit de fond + artefacts TTS</td><td><b>⚡ CUDA (GPU)</b></td></tr>
+<tr><td><b>Compresseur</b></td><td>homogénéise le volume (seuil · ratio · attaque · relâche, VCA)</td><td>Web Audio</td></tr>
+<tr><td><b>Stereo Widener</b></td><td>élargit l'image stéréo (effet Haas), compatibilité mono</td><td>Web Audio</td></tr>
+<tr><td><b>EQ</b></td><td>modelage du timbre — bandes LOW · MID · HIGH · AIR</td><td>Web Audio</td></tr>
+<tr><td><b>FX Rack</b></td><td>reverb · echo · delay · chorus (convolution)</td><td>Web Audio</td></tr>
+<tr><td><b>Analyseur</b></td><td>FFT temps réel + goniomètre de phase</td><td>Web Audio</td></tr>
+<tr><td><b>Output L+R</b></td><td>bus master : gain de sortie + VU-mètres</td><td>Web Audio</td></tr>
+</table>
 
 > Côté **entrée**, la reconnaissance vocale (STT `faster-whisper large-v3-turbo`) est elle aussi **accélérée CUDA** — le GPU couvre toute la chaîne voix.
 
@@ -238,31 +239,33 @@ flowchart LR
     IN["ENTRÉE"] --> BY["BYPASS<br/>&lt; 100 ms"] --> MEM["MÉMOIRE<br/>RAG"] --> SOC["SOC<br/>LIVE"] --> WEB["WEB"] --> PVE["PVE"] --> LLM["LLM LOCAL<br/>qwen3.5:9b"] --> TL["OUTILS"] --> OUT["RÉPONSE<br/>texte + voix"]
 ```
 
-| Tuile du flux | Rôle logique |
-|---|---|
-| **ENTRÉE** | voix (STT Whisper) · texte · image (vision multimodale) |
-| **BYPASS** | commandes directes **déterministes**, < 100 ms, **zéro LLM** |
-| **MÉMOIRE** | faits + leçons **RAG**, auto-borné à 4 000 chunks |
-| **SOC LIVE** | injecte le **contexte sécurité** temps réel |
-| **WEB** | recherche **gouvernée** (allowlist, lecture seule) |
-| **PVE** | état **Proxmox** temps réel |
-| **LLM LOCAL** | raisonnement `qwen3.5:9b` — **100 % local** |
-| **OUTILS** | fichiers / SSH — **appelés par le LLM** |
-| **RÉPONSE** | texte + voix (cache TTS) |
+<table align="center">
+<tr><th>Tuile du flux</th><th>Rôle logique</th></tr>
+<tr><td><b>ENTRÉE</b></td><td>voix (STT Whisper) · texte · image (vision multimodale)</td></tr>
+<tr><td><b>BYPASS</b></td><td>commandes directes <b>déterministes</b>, &lt; 100 ms, <b>zéro LLM</b></td></tr>
+<tr><td><b>MÉMOIRE</b></td><td>faits + leçons <b>RAG</b>, auto-borné à 4 000 chunks</td></tr>
+<tr><td><b>SOC LIVE</b></td><td>injecte le <b>contexte sécurité</b> temps réel</td></tr>
+<tr><td><b>WEB</b></td><td>recherche <b>gouvernée</b> (allowlist, lecture seule)</td></tr>
+<tr><td><b>PVE</b></td><td>état <b>Proxmox</b> temps réel</td></tr>
+<tr><td><b>LLM LOCAL</b></td><td>raisonnement <code>qwen3.5:9b</code> — <b>100 % local</b></td></tr>
+<tr><td><b>OUTILS</b></td><td>fichiers / SSH — <b>appelés par le LLM</b></td></tr>
+<tr><td><b>RÉPONSE</b></td><td>texte + voix (cache TTS)</td></tr>
+</table>
 
 Autour du flux, les **briques transversales** (enrichissent · protègent · agissent), chacune une tuile d'état :
 
-| Brique transversale | Rôle logique |
-|---|---|
-| **VISION** | analyse d'images (`qwen3.5:9b` multimodal natif) |
-| **MCP** | pont gouverné vers Claude Desktop (outils exposés) |
-| **APPRENTISSAGE** | mémorise les leçons (« souviens-toi… ») |
-| **RÉFLEXION** | apprend de tes corrections (proposées → validées) |
-| **DR CERVEAU** | sauvegarde / restauration de la mémoire |
-| **BRIEFING** | résumé proactif au réveil |
-| **ALARMES** | rappels à l'heure |
-| **PÉDAGOGIE** | explique vs analyse (mode tuteur) |
-| **INFOGÉRANCE** | mise à jour des VMs, fail-closed |
+<table align="center">
+<tr><th>Brique transversale</th><th>Rôle logique</th></tr>
+<tr><td><b>VISION</b></td><td>analyse d'images (<code>qwen3.5:9b</code> multimodal natif)</td></tr>
+<tr><td><b>MCP</b></td><td>pont gouverné vers Claude Desktop (outils exposés)</td></tr>
+<tr><td><b>APPRENTISSAGE</b></td><td>mémorise les leçons (« souviens-toi… »)</td></tr>
+<tr><td><b>RÉFLEXION</b></td><td>apprend de tes corrections (proposées → validées)</td></tr>
+<tr><td><b>DR CERVEAU</b></td><td>sauvegarde / restauration de la mémoire</td></tr>
+<tr><td><b>BRIEFING</b></td><td>résumé proactif au réveil</td></tr>
+<tr><td><b>ALARMES</b></td><td>rappels à l'heure</td></tr>
+<tr><td><b>PÉDAGOGIE</b></td><td>explique vs analyse (mode tuteur)</td></tr>
+<tr><td><b>INFOGÉRANCE</b></td><td>mise à jour des VMs, fail-closed</td></tr>
+</table>
 
 ### Les capacités de l'agent
 
