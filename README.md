@@ -41,8 +41,8 @@
 > Ce dépôt **présente** le projet (architecture, conception, capacités). Le **code opérationnel reste privé** : JARVIS n'est **pas déployable** depuis ce dépôt. On y montre le *quoi* et le *pourquoi* — jamais le *comment* exact.
 
 <div align="center">
-  <img src="Images/Jarvis-boot.png" alt="Écran de démarrage JARVIS — séquence SYS.INIT" width="680"/>
-  <br/><sub><em>Séquence <code>SYS.INIT</code> — NEURAL CORE · VOICE ENGINE · AUDIO DSP · KNOWLEDGE BASE, puis briefing de session.</em></sub>
+  <img src="Images/accueil.png" alt="Écran de démarrage JARVIS — séquence SYS.INIT" width="820"/>
+  <br/><sub><em>Au démarrage, JARVIS s'auto-diagnostique — <b>NEURAL CORE · VOICE ENGINE · AUDIO DSP · KNOWLEDGE BASE</b> à 100 % — puis annonce son état : modèle <code>qwen3.5:9b</code> via Ollama, voix Edge Antoine, DSP (EQ · compresseur · DeepFilterNet), accélération CUDA sm_120 Blackwell.</em></sub>
 </div>
 
 ---
@@ -64,145 +64,85 @@
 
 <div align="center">
 
-**Visite guidée** &nbsp;·&nbsp; [🏠 Accueil](#sec-1) &nbsp;·&nbsp; [🧠 Réglages](#sec-2) &nbsp;·&nbsp; [🕹️ Pilotage](#sec-3) &nbsp;·&nbsp; [🎛️ Studio DSP](#sec-4) &nbsp;·&nbsp; [🎙️ Voice Lab](#sec-5) &nbsp;·&nbsp; [🌐 Accès Web](#sec-6) &nbsp;·&nbsp; [📊 Monitoring](#sec-7) &nbsp;·&nbsp; [🛡️ SOC](#sec-8) &nbsp;·&nbsp; [✦ Hermès](#hermes)
+**Visite guidée** &nbsp;·&nbsp; [🕹️ Cockpit](#sec-1) &nbsp;·&nbsp; [🧠 Réglages](#sec-2) &nbsp;·&nbsp; [📊 Monitoring](#sec-3) &nbsp;·&nbsp; [🎛️ Studio DSP](#sec-4) &nbsp;·&nbsp; [🎙️ Voice Lab](#sec-5) &nbsp;·&nbsp; [🌐 Accès Web](#sec-6) &nbsp;·&nbsp; [🛡️ SOC](#sec-7) &nbsp;·&nbsp; [✦ Hermès](#hermes)
 
 </div>
 
 ---
 
-## 🖼️ L'interface
+## 🖼️ L'interface en action
 
 <a id="sec-1"></a>
 
-### 1 · Écran d'accueil
+### 1 · Le cockpit
 
 <div align="center">
-  <img src="Images/Jarvis-01b.png" alt="Écran d'accueil JARVIS" width="720"/>
-  <br/><sub><em>Au démarrage, JARVIS annonce son état — modèle actif, moteur vocal, chaîne DSP, accélération CUDA — et déclenche le briefing matinal d'Hermès.</em></sub>
+  <img src="Images/interface.png" alt="Cockpit JARVIS — interface neurale, modes de routage, télémétrie live" width="900"/>
 </div>
+
+Le poste de pilotage complet. À gauche, **l'interface neurale** (canal chiffré AES-256) et la barre de commande avec ses **modes de routage** — `SOC · GÉN · CODE · THINK` + entrées `MIC`, `IMG` (vision), `WEB`, `AIDE` — qui orientent chaque requête vers le bon comportement, **un seul modèle `qwen3.5:9b`, zéro swap**. À droite, la **télémétrie temps réel** : cœur d'intégrité, coordonnées, **GPU** (VRAM, température, watts), système et modèle neural. Onze modules accessibles d'un clic depuis la barre du haut.
 
 <a id="sec-2"></a>
 
 ### 2 · Réglages LLM & profils GPU
 
-*Le centre de contrôle fin de l'inférence locale — état carte, coût mémoire, préréglages, paramètres.*
+<div align="center">
+  <img src="Images/reglages.png" alt="Réglages — GPU Health, impact VRAM, profils RTX 5080" width="380"/>
+</div>
 
-<table>
-<tr>
-<td width="50%" align="center"><img src="Images/Jarvis-04b.png" width="430" alt="GPU Health"/><br/><sub><b>GPU Health</b> — VRAM / 16 Go, charge, température, watts en temps réel.</sub></td>
-<td width="50%" align="center"><img src="Images/Jarvis-12.png" width="430" alt="Impact VRAM"/><br/><sub><b>Impact VRAM</b> — coût mémoire estimé <em>avant</em> lancement, zone sûre garantie.</sub></td>
-</tr>
-<tr>
-<td width="50%" align="center"><img src="Images/Jarvis-13.png" width="430" alt="Profils RTX 5080"/><br/><sub><b>Profils RTX 5080</b> — 6 préréglages en un clic (Rapide → MAX).</sub></td>
-<td width="50%" align="center"><img src="Images/Jarvis-14.png" width="430" alt="Paramètres LLM"/><br/><sub><b>Paramètres LLM</b> — température, top-p/k, contexte, 3 modes de latence.</sub></td>
-</tr>
-</table>
+Le centre de contrôle fin de l'inférence locale. **GPU Health** suit la RTX 5080 en direct (VRAM / 16 Go, charge, température, puissance). **Impact sur la RTX** estime *avant* de lancer le coût mémoire des réglages — poids du modèle (~9 Go) + cache KV — et garantit qu'on reste en **« zone sûre »** sans saturer la carte. Les **profils** (Rapide · Équilibré · Code · Créatif · Précis · RTX 5080 MAX) ajustent créativité, longueur et contexte en un clic. *(Le prompt système gouverné — anti-hallucination, méthodologie SOC — vit dans le même onglet, volontairement non exposé ici.)*
 
 <a id="sec-3"></a>
 
-### 3 · Le poste de pilotage
+### 3 · Monitoring GPU · CPU · VRAM
 
 <div align="center">
-  <img src="Images/Jarvis-26.png" alt="Barre de navigation — les modules" width="760"/>
-  <br/><sub><em>Une barre, tous les modules — accessibles d'un clic.</em></sub>
+  <img src="Images/monitor.png" alt="Moniteur RTX 5080 — GPU, VRAM, température, CPU, RAM temps réel" width="900"/>
 </div>
 
-<div align="center">
-
-| | | |
-|---|---|---|
-| **Monitor** · GPU/CPU live | **JARVIS AI** · chat + voix | **Settings** · LLM/RAG/prompt |
-| **DSP Audio** · studio vocal | **Tâches** · terminal code | **Voice Lab** · STT/TTS |
-| **SOC** · bans/alertes | **Apprentissage** · mémoire RAG | **Infogérance** · MAJ VMs |
-| **Alarmes** · rappels/agenda | **Accès Web** · passerelle | |
-
-</div>
-
-<table>
-<tr>
-<td width="50%" align="center"><img src="Images/Jarvis-27.png" width="430" alt="Sélecteur de voix TTS"/><br/><sub><b>Voix</b> — Edge ↔ Kokoro neural local, 7 voix, traitées par le Studio DSP.</sub></td>
-<td width="50%" align="center"><img src="Images/Jarvis-28.png" width="430" alt="Sélecteur de modèle LLM"/><br/><sub><b>Modèle</b> — bascule à chaud entre LLM 100 % locaux (Ollama), bouton TEST.</sub></td>
-</tr>
-<tr>
-<td width="50%" align="center"><img src="Images/Jarvis-29.png" width="430" alt="Mémoire conversationnelle"/><br/><sub><b>Mémoire courte</b> — compteur CTX des échanges gardés, purge en un clic.</sub></td>
-<td width="50%" align="center"><img src="Images/Jarvis-30.png" width="430" alt="Prompt système gouverné"/><br/><sub><b>Prompt système</b> — règles anti-hallucination + profils. 🔒 <em>anonymisé.</em></sub></td>
-</tr>
-</table>
+Surveillance **temps réel** de toute la machine : six jauges (GPU, VRAM / 16 Go, température, puissance, CPU, RAM) puis le détail — **GPU Core** (horloges, encodeur/décodeur), **thermique & puissance**, **mémoire VRAM** (utilisée / libre), processeur (32 cœurs, fréquence, uptime), réseau et disque I/O. C'est le garde-fou du LLM 100 % local : tant que le modèle **+ son cache KV** tiennent dans les 16 Go, l'inférence reste **pleine vitesse GPU**.
 
 <a id="sec-4"></a>
 
 ### 4 · Studio audio DSP
 
-*Une chaîne broadcast appliquée à la voix de synthèse — sept unités, chacune sa fonction.*
-
-<table>
-<tr>
-<td width="50%" align="center"><img src="Images/Jarvis-05.png" width="430" alt="DeepFilterNet"/><br/><sub><b>DeepFilterNet</b> — débruitage IA temps réel (DeepFilterNet3).</sub></td>
-<td width="50%" align="center"><img src="Images/Jarvis-06.png" width="430" alt="Compresseur dynamique"/><br/><sub><b>Compresseur</b> — seuil/ratio/attaque/relâche, afficheur de réduction VCA.</sub></td>
-</tr>
-<tr>
-<td width="50%" align="center"><img src="Images/Jarvis-15.png" width="430" alt="Stereo Widener"/><br/><sub><b>Stereo Widener</b> — image stéréo élargie, corrélation de phase.</sub></td>
-<td width="50%" align="center"><img src="Images/Jarvis-16.png" width="430" alt="FX Rack"/><br/><sub><b>FX Rack</b> — reverb, echo, delay, chorus, flanger par convolution.</sub></td>
-</tr>
-<tr>
-<td width="50%" align="center"><img src="Images/Jarvis-17b.png" width="430" alt="Analyseur spectral"/><br/><sub><b>Analyseur spectral</b> — FFT temps réel, 8 modes + goniomètre de phase.</sub></td>
-<td width="50%" align="center"><img src="Images/Jarvis-18.png" width="430" alt="Output Gain Master"/><br/><sub><b>Output</b> — bus master, VU-mètres L/R pro, gain de sortie final.</sub></td>
-</tr>
-</table>
-
 <div align="center">
-  <img src="Images/Jarvis-eq.png" alt="EQ paramétrique couplé voix" width="720"/>
-  <br/><sub><em><b>EQ paramétrique 4 bandes</b> (LOW/MID/HIGH/AIR) superposé à l'analyseur spectral, couplé en direct à la voix de JARVIS.</em></sub>
+  <img src="Images/studio-dsp.png" alt="Studio DSP — chaîne broadcast CUDA : DeepFilterNet, compresseur, stereo widener, FX" width="900"/>
 </div>
+
+Une **chaîne broadcast complète** appliquée à la voix de synthèse, accélérée **CUDA** : `TTS → DeepFilterNet → Compresseur → Gain → Stereo → Analyseur → FX Rack → Output L+R`. **DeepFilterNet3** (réseau de neurones) supprime bruit de fond et artefacts TTS ; le **compresseur VCA** homogénéise le volume (seuil, ratio, attaque, relâche) ; le **Stereo Widener** (effet Haas) élargit l'image sans casser la compatibilité mono. Chaque étage a ses paramètres fins et son analyseur spectral — une voix de qualité studio, en local.
 
 <a id="sec-5"></a>
 
 ### 5 · Voice Lab
 
 <div align="center">
-  <img src="Images/Jarvis-10.png" alt="Voice Lab — atelier TTS et comparateur A/B" width="720"/>
-  <br/><sub><em>L'atelier de la voix — source (Edge cloud · Kokoro CUDA local), paramètres fins, bibliothèque et comparateur A/B.</em></sub>
+  <img src="Images/voice-lab.png" alt="Voice Lab — moteurs TTS, paramètres vocaux, bibliothèque, comparateur A/B" width="900"/>
 </div>
+
+L'atelier de la voix de l'assistant. **Source** commutable — **Edge** (Antoine fr-CA) ↔ **Kokoro** neural CUDA, 100 % local hors-ligne — puis **paramètres vocaux** fins (vitesse, hauteur, volume + égalisation LOW/MID/HIGH/AIR synchronisée au DSP), une **bibliothèque** de voix (JARVIS Standard, Grave, Aiguë, Radio FM, Kokoro Neural) et un **comparateur A/B** pour trancher à l'oreille. C'est ce qui donne à JARVIS une voix naturelle et homogène, en ligne comme hors-ligne.
 
 <a id="sec-6"></a>
 
 ### 6 · Accès Web gouverné
 
 <div align="center">
-  <img src="Images/Jarvis-11.png" alt="Accès Web gouverné" width="720"/>
-  <br/><sub><em>L'agent consulte le web <b>sous contrôle strict</b> — allowlist explicite, lecture seule, chaque accès journalisé. Tout le reste : refusé et tracé.</em></sub>
+  <img src="Images/acces-web.png" alt="Accès Web gouverné — allowlist explicite, lecture seule, journalisé" width="900"/>
 </div>
+
+L'agent peut consulter le web — mais **sous contrôle strict**. JARVIS ne visite QUE les domaines d'une **allowlist explicite** : des **sites système verrouillés** (météo, veille IA, recherche — non supprimables) plus ceux que *tu* autorises nommément. Tout est en **lecture seule**, **chaque accès est journalisé**, et tout le reste est **refusé**. Même principe de moindre privilège que pour le SOC : la curiosité de l'agent reste gouvernée.
 
 <a id="sec-7"></a>
 
-### 7 · Monitoring GPU & VRAM
-
-<table>
-<tr>
-<td width="50%" align="center"><img src="Images/Jarvis-19.png" width="430" alt="Monitor temps réel"/><br/><sub><b>Monitor</b> — RTX 5080 en direct : GPU, VRAM, température, watts, CPU, RAM.</sub></td>
-<td width="50%" align="center"><img src="Images/Jarvis-20.png" width="430" alt="Carte LLM VRAM"/><br/><sub><b>Empreinte LLM</b> — modèle + cache KV en VRAM, alerte ⚠ DÉBORDEMENT si spill RAM.</sub></td>
-</tr>
-</table>
-
-<a id="sec-8"></a>
-
-### 8 · SOC — réponse automatique
+### 7 · SOC — réponse automatique
 
 <div align="center">
-  <img src="Images/Jarvis-24.png" alt="SOC — tuiles d'activité temps réel" width="800"/>
-  <br/><sub><em>Détection sur 30 jours (pics offensifs en rouge) + compteurs live — bans IP, restarts, IDS. JARVIS surveille nginx / CrowdSec / fail2ban / Suricata et <b>agit seul</b>, sans jamais exposer une IP.</em></sub>
+  <img src="Images/soc.png" alt="SOC — activité 30 jours et compteurs de défense temps réel" width="920"/>
 </div>
 
-> 🔒 Volontairement **non publiés** : le journal des IP d'attaquants, le terminal, les leçons apprises. La vitrine *décrit* le SOC et montre son activité **agrégée** — **aucune donnée actionnable**.
+Le **centre de défense** de JARVIS. Courbe d'**activité sur 30 jours** (pics offensifs) et **compteurs en direct** — actions, **bans IP**, restarts, succès / échecs, détections **IDS**. JARVIS surveille nginx / CrowdSec / fail2ban / Suricata en continu et **agit seul** (ban, restart) selon des seuils : l'agent ne se contente pas d'alerter, il **répond**.
 
----
-
-## ⌨️ Console de maintenance & reprise après sinistre
-
-<div align="center">
-  <img src="Images/Jarvis-menu.png" alt="Console de maintenance PowerShell" width="680"/>
-  <br/><sub><em>Au-delà du web, un pilotage terminal (PowerShell) — statut complet, gestion des modèles, DSP/TTS, logs, <b>sauvegarde & reprise après sinistre</b>. Accessible à la voix.</em></sub>
-</div>
+> 🔒 Volontairement **non publiés** : le journal des IP d'attaquants, le terminal, les leçons apprises. La vitrine *décrit* le SOC et montre son activité **agrégée** — **aucune donnée actionnable, aucune IP**.
 
 ---
 
@@ -213,38 +153,11 @@
 > **Hermès transforme un assistant en agent.**
 > Là où un assistant répond, un agent **observe, mémorise, apprend et agit** — sans être re-briefé à chaque session.
 
-### Le cœur de l'agent
-
-<table>
-<tr>
-<td width="33%" align="center"><img src="Images/Jarvis-23.png" width="300" alt="Cœur au repos"/><br/><sub><b>VIVANT</b> — le réacteur « respire » tant que l'agent tourne.</sub></td>
-<td width="33%" align="center"><img src="Images/Jarvis-23b.png" width="300" alt="Cœur quand JARVIS parle"/><br/><sub><b>JE PARLE</b> — il s'illumine au rythme de la voix.</sub></td>
-<td width="33%" align="center"><img src="Images/Jarvis-23c.png" width="300" alt="Cœur en menace élevée"/><br/><sub><b>MENACE</b> — or/ambre + cause de l'alerte en clair.</sub></td>
-</tr>
-</table>
-
-<div align="center"><sub><em>Le cœur reflète la posture de sécurité <b>en temps réel</b> — vivant, alimenté, conscient de son état.</em></sub></div>
-
-### L'architecture de l'agent
-
 <div align="center">
-  <img src="Images/Hermes-schema.png" alt="Schéma Hermès — pipeline temps réel" width="820"/>
-  <br/><sub><em>La « salle des machines ». Le chemin d'une requête : <code>ENTRÉE → BYPASS (&lt; 100 ms, zéro LLM) → MÉMOIRE (RAG auto-borné) → SOC LIVE → WEB → PVE → LLM LOCAL → OUTILS → RÉPONSE</code>. Chaque brique affiche sa métrique live.</em></sub>
+  <img src="Images/hermes.png" alt="Hermès — cœur de l'agent, état moteur et pipeline temps réel" width="920"/>
 </div>
 
-<table>
-<tr>
-<td width="50%" align="center"><img src="Images/Jarvis-synoptique.png" width="430" alt="Synoptique menace élevée"/><br/><sub><b>Menace ÉLEVÉE</b> — le flux réel s'allume brique par brique, en or.</sub></td>
-<td width="50%" align="center"><img src="Images/Jarvis-synoptique-crit.png" width="430" alt="Synoptique menace critique"/><br/><sub><b>Menace CRITIQUE</b> — le flux vire au rouge, même source que le cœur.</sub></td>
-</tr>
-</table>
-
-### Le tableau de bord vivant
-
-<div align="center">
-  <img src="Images/Hermes-grid.png" alt="Dashboard Hermès — six panneaux" width="820"/>
-  <br/><sub><em>Six panneaux d'un coup d'œil — Cerveau/Mémoire, Sauvegarde (auto quotidienne 21 h), Santé mémoire (verdict GO/NO-GO + ⛑ Réparer), Auto-engine SOC, Historique persisté, Réflexion (taux d'apprentissage).</em></sub>
-</div>
+Le tableau de bord vivant de l'agent. Au centre, le **cœur** qui « respire » tant que JARVIS tourne — il **s'illumine** quand il parle (*JE PARLE*), vire à l'**or/ambre** quand la menace monte. Autour, le **diagnostic** (RAG, mémoire, connaissance) et l'**état moteur** (mode, modèle `qwen3.5:9b`, niveau de menace + sa cause). En bas, le **pipeline temps réel** : `ENTRÉE → BYPASS (< 100 ms, zéro LLM) → MÉMOIRE (RAG auto-borné à 4 000 chunks) → SOC LIVE → WEB → PVE → LLM LOCAL → OUTILS → RÉPONSE` — **chaque brique affiche sa métrique live**. L'agentification rendue visible.
 
 ### Le maintien en vie autonome
 
