@@ -35,6 +35,13 @@ export default [
         // jarvis_main.js — helper a11y source-unique (role+tabindex+aria-label+keydown),
         // appelé cross-file (settings_ui/soc_tab/terminal_code/voice_print) · chantier a11y 2026-06-24
         _jvA11yButton: 'readonly',
+        // chat_ui.js — helpers a11y source-unique des bascules DSP/Voice Lab (classe + aria-pressed
+        // + annonce SR), appelés cross-file (audio_rack/eq_music/eq_parametric/dsp_audio) · audit dette 07-04
+        dspApplyToggle: 'readonly',
+        dspPressed: 'readonly',
+        dspBypassToggle: 'readonly',
+        a11ySetPressed: 'readonly',
+        revealConfirmA11y: 'readonly',
         _ctx: 'writable',
         audioCtx: 'writable',
         analyserL: 'writable',
@@ -212,6 +219,8 @@ export default [
         _updateDspChainStatus: 'writable',
         eqSetType: 'writable',
         eqToggleBypass: 'writable',
+        setSpecMode: 'writable',
+        setRackSpecMode: 'writable',
         rackInitFaders: 'writable',
         rackSyncHaasDelay: 'writable',
         rackSyncStereoWidth: 'writable',

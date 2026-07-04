@@ -61,12 +61,12 @@
             │ HTTP / SSE            │ Web Audio API      │ poll 30s
             ▼                       ▼                    ▼
 ┌───────────────────────────────────────────────────────────────────────┐
-│  SERVEUR FLASK  (jarvis.py — 75 routes)   localhost:5000              │
+│  SERVEUR FLASK  (jarvis.py)   localhost:5000                          │
 │                                                                       │
 │  ┌──────────────────────┐   ┌──────────────────────────────────────┐  │
 │  │  ZONE IA             │   │  ZONE SOC SERVEUR                    │  │
 │  │  Orchestrateur Flask │   │  auto-engine SOC (thread 60s)        │  │
-│  │  31 modules Python   │   │  ban/unban · restart · journal       │  │
+│  │  modules Python   │   │  ban/unban · restart · journal       │     │
 │  └──────────────────────┘   └──────────────────────────────────────┘  │
 └───────────────────────────────────────────────────────────────────────┘
             │ Ollama API                      │ monitoring.json
@@ -103,7 +103,7 @@
 
 ## Architecture modulaire
 
-`jarvis.py` est l'**orchestrateur Flask** — il délègue à **31 modules Python** :
+`jarvis.py` est l'**orchestrateur Flask** — il délègue à **ses modules Python** :
 
 | Catégorie | Modules |
 |-----------|---------|
@@ -117,7 +117,7 @@
 
 ---
 
-## Frontend — 21 modules JS
+## Frontend — modules JS
 
 L'interface est entièrement en **Vanilla JS** (zéro framework) :
 

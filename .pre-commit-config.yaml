@@ -37,6 +37,20 @@ repos:
         require_serial: true
         stages: [pre-commit]
 
+      # ── Ruff ARBRE ENTIER (stage pre-push) — anti-accumulation dette lint ──
+      # Le hook `ruff-check` (pre-commit, types:[python]) ne lint QUE les fichiers TOUCHÉS
+      # dans un commit → un .py sale jamais re-touché (ex. tests/ : 63 erreurs accumulées,
+      # nettoyées audit dette 07-04) échappe au gate. Ce hook lint scripts/ ET tests/ EN
+      # ENTIER à chaque push (always_run) : aucun .py sale ne peut plus être poussé, où qu'il
+      # soit. Ferme la CLASSE « lint qui re-dérive dans un répertoire non re-touché ».
+      - id: ruff-check-tree
+        name: ruff check arbre entier (scripts + tests)
+        entry: python -m ruff check scripts tests
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
       # ── Pytest + GATE couverture — suite tests Python (stage pre-push uniquement) ─
       # Lance la suite unitaire complète avant chaque push (compte LIVE — ne pas figer
       # ici : un nombre codé en dur dérive, cf. audit doctrine 2026-06-30).
@@ -156,6 +170,32 @@ repos:
       - id: guardians-self-check
         name: self-check gardiens (anti-complaisance fault-injection)
         entry: bash -c 'for t in scan-inline-a11y/scan-inline-a11y jarvis-a11y-audit/jarvis-a11y-audit jarvis-llm-audit/jarvis-llm-audit jarvis-llm-registry-audit/jarvis-llm-registry-audit jarvis-persona-audit/jarvis-persona-audit secret-redact-audit/secret-redact-audit jarvis-read-denylist-guard/jarvis-read-denylist-guard; do python "../DEV/TOOLS/$t.py" --self-check || exit 1; done; bash ../DEV/TOOLS/doc-drift-lint/doc-drift-lint.sh --self-check || exit 1; powershell -NoProfile -ExecutionPolicy Bypass -File ../DEV/TOOLS/jarvis-watchdog-audit/jarvis-watchdog-audit.ps1 -SelfCheck || exit 1'
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      # ── Gate SSH read-only (allowlist fail-closed) — anti-RCE root du tool-calling LLM ──
+      # Incident 2026-07-04 : le gate SSH était une DENYLIST → RCE root via injection de prompt (7 red-teams
+      # indépendants). Réécrit en ALLOWLIST fail-closed + méta-garde-fou (tout verbe doit être classé
+      # pur-lecture XOR multiplexeur-gaté). `--self-check` exécute le corpus (153 attaques : LOLBins,
+      # assemblage, pipe→interpréteur, exfil DNS, sous-commandes write) + le méta-garde-fou de classification.
+      # Un gate RCE ne doit JAMAIS re-dériver → gaté à CHAQUE push (avant : audit-all manuel seulement).
+      - id: jarvis-ssh-gate-guard
+        name: jarvis-ssh-gate-guard (allowlist SSH read-only — anti-RCE, corpus red-team + méta-garde-fou)
+        entry: python ../DEV/TOOLS/jarvis-ssh-gate-guard/jarvis-ssh-gate-guard.py --self-check
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+      # ── Confinement exec root (audit indépendant Q2, 2026-07-04) ──
+      # /api/code/exec + MCP jarvis_code_exec EXÉCUTENT du code root sur srv-dev-1. Risque résiduel
+      # (injection de prompt → code arbitraire) ASSUMÉ car la cible est une VM dev JETABLE SANS PIVOT.
+      # Ce gardien verrouille la condition d'acceptation : la cible reste srv-dev-1, jamais une IP prod
+      # (I3) ni en dur (I2). Sécurité-critique (blast-radius) → gaté à CHAQUE push. --self-check = live.
+      - id: jarvis-code-exec-confinement-guard
+        name: jarvis-code-exec-confinement-guard (exec root confiné à la VM dev jetable srv-dev-1)
+        entry: python ../DEV/TOOLS/jarvis-code-exec-confinement-guard/jarvis-code-exec-confinement-guard.py
         language: system
         pass_filenames: false
         always_run: true
