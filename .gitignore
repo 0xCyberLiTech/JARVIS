@@ -96,3 +96,10 @@ tools/
 docs/
 CLAUDE.md
 build_vitrine.py
+
+# ── Audits de dette internes (constats datés, infra réelle) — LOCAL ──
+AUDIT-DETTE-*.md
+
+# ── Doc interne / déploiement — LOCAL uniquement (vitrine = showcase, pas déployable) ──
+DOCUMENTATION/05-INSTALLATION.md
+DOCTRINE.md

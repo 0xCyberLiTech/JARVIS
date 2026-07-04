@@ -178,7 +178,7 @@ dry_gain = cos(wet × π/2)
 
 ---
 
-**Précédent ←** [03 — Architecture](03-ARCHITECTURE.md) &nbsp;&nbsp; **Suivant →** [05 — Installation](05-INSTALLATION.md)
+**Précédent ←** [03 — Architecture](03-ARCHITECTURE.md) &nbsp;&nbsp; **Suivant →** [06 — MCP Server](06-MCP-SERVER.md)
 
 ---
 

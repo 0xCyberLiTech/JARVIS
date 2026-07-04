@@ -96,7 +96,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
                            │
               ┌────────────▼──────────────┐
               │          L L M            │
-              │  qwen3 / coder / gemma4   │  ← ne voit que ce qu'Hermès
+              │  qwen3.5:9b (unifié)   │  ← ne voit que ce qu'Hermès
               └────────────┬──────────────┘    lui prépare
                            │
               ┌────────────▼──────────────┐
@@ -168,7 +168,7 @@ Le synoptique est le **tableau de bord live d'Hermès** — visible en permanenc
 ┌─────────────────────────────────────────────────────────┐
       ◈  HERMÈS  --  SYNOPTIQUE  MOTEUR                        
 ├─────────────────┬───────────────────────────────────────┤
-│  LLM ACTIF      │  qwen3:8b  ●  CHAUD  (en mémoire)     │
+│  LLM ACTIF      │  qwen3.5:9b  ●  CHAUD  (en mémoire)  │
 │  RAG            │  1151 chunks  ●  PRÊT  TTL: 4m32s     │
 │  STT            │  large-v3-turbo  ●  EN ÉCOUTE         │
 │  TTS            │  edge-tts  Antoine fr-CA  ●  ACTIF    │
@@ -304,7 +304,7 @@ UTILISATEUR :  "Souviens-toi que X"  (texte ou voix)
                     │
          ┌──────────▼────────────────────┐
          │   INDEXATION RAG              │
-         │   ├── embedding calculé       │  ← mxbai-embed-large
+         │   ├── embedding calculé       │  ← qwen3-embedding:4b
          │   └── chunk ajouté à l'index  │
          └──────────┬────────────────────┘
                     │

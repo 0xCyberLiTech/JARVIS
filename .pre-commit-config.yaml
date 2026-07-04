@@ -70,6 +70,30 @@ repos:
         always_run: true
         stages: [pre-push]
 
+      - id: jarvis-llm-registry-audit
+        name: jarvis-llm-registry-audit (registre source-unique modes→LLM, anti-hardcode .py/.js)
+        entry: python ../DEV/TOOLS/jarvis-llm-registry-audit/jarvis-llm-registry-audit.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      - id: jarvis-persona-audit
+        name: jarvis-persona-audit (persona source-unique — messages temporels, tutoiement, anti-hardcode)
+        entry: python ../DEV/TOOLS/jarvis-persona-audit/jarvis-persona-audit.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      - id: jarvis-read-denylist-guard
+        name: jarvis-read-denylist-guard (route lisant un fichier-requête → denylist is_sensitive_read obligatoire)
+        entry: python ../DEV/TOOLS/jarvis-read-denylist-guard/jarvis-read-denylist-guard.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
       - id: doc-drift-lint-jarvis
         name: doc-drift-lint (termes périmés — JARVIS/docs)
         entry: bash ../DEV/TOOLS/doc-drift-lint/doc-drift-lint.sh docs
@@ -131,7 +155,7 @@ repos:
       # self-check des 3 gardiens DÉJÀ gatés ici (a11y ×2 + llm-audit). Échec = push bloqué.
       - id: guardians-self-check
         name: self-check gardiens (anti-complaisance fault-injection)
-        entry: bash -c 'for t in scan-inline-a11y/scan-inline-a11y jarvis-a11y-audit/jarvis-a11y-audit jarvis-llm-audit/jarvis-llm-audit secret-redact-audit/secret-redact-audit; do python "../DEV/TOOLS/$t.py" --self-check || exit 1; done'
+        entry: bash -c 'for t in scan-inline-a11y/scan-inline-a11y jarvis-a11y-audit/jarvis-a11y-audit jarvis-llm-audit/jarvis-llm-audit jarvis-llm-registry-audit/jarvis-llm-registry-audit jarvis-persona-audit/jarvis-persona-audit secret-redact-audit/secret-redact-audit jarvis-read-denylist-guard/jarvis-read-denylist-guard; do python "../DEV/TOOLS/$t.py" --self-check || exit 1; done; bash ../DEV/TOOLS/doc-drift-lint/doc-drift-lint.sh --self-check || exit 1; powershell -NoProfile -ExecutionPolicy Bypass -File ../DEV/TOOLS/jarvis-watchdog-audit/jarvis-watchdog-audit.ps1 -SelfCheck || exit 1'
         language: system
         pass_filenames: false
         always_run: true

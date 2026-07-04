@@ -6,56 +6,43 @@
     <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=50&duration=6000&pause=1000000000&color=8B5CF6&center=true&vCenter=true&width=1100&lines=%3EJARVIS_" alt="Titre dynamique JARVIS" />
   </a>
 
-  <br></br>
-
-  <h2>Assistant IA local · voix · interface holographique · automatisation SOC 24/7</h2>
+  <h2>Assistant IA 100 % local · voix broadcast · interface holographique · SOC autonome 24/7</h2>
 
   <p align="center">
     <a href="https://0xcyberlitech.github.io/">
       <img src="https://img.shields.io/badge/Portfolio-0xCyberLiTech-181717?logo=github&style=flat-square" alt="Portfolio" />
     </a>
-    <a href="https://github.com/0xCyberLiTech">
-      <img src="https://img.shields.io/badge/Profil-GitHub-181717?logo=github&style=flat-square" alt="Profil GitHub" />
-    </a>
     <a href="https://github.com/0xCyberLiTech/JARVIS/tags">
-      <img src="https://img.shields.io/github/v/tag/0xCyberLiTech/JARVIS?sort=semver&label=version&style=flat-square&color=blue" alt="Dernière version" />
+      <img src="https://img.shields.io/github/v/tag/0xCyberLiTech/JARVIS?sort=semver&label=version&style=flat-square&color=8B5CF6" alt="Dernière version" />
     </a>
     <a href="https://github.com/0xCyberLiTech/JARVIS/blob/main/CHANGELOG.md">
-      <img src="https://img.shields.io/badge/%F0%9F%93%84%20Changelog-JARVIS-blue?style=flat-square" alt="Changelog" />
+      <img src="https://img.shields.io/badge/%F0%9F%93%84%20Changelog-JARVIS-8B5CF6?style=flat-square" alt="Changelog" />
     </a>
-    <a href="https://github.com/0xCyberLiTech?tab=repositories">
-      <img src="https://img.shields.io/badge/D%C3%A9p%C3%B4ts-publics-blue?style=flat-square" alt="Dépôts publics" />
-    </a>
-    <a href="https://github.com/0xCyberLiTech/JARVIS/graphs/contributors">
-      <img src="https://img.shields.io/badge/%F0%9F%91%A5%20Contributeurs-cliquez%20ici-007ec6?style=flat-square" alt="Contributeurs" />
-    </a>
+    <img src="https://img.shields.io/badge/local-100%25-0a7d33?style=flat-square" alt="100% local" />
+    <img src="https://img.shields.io/badge/cloud-0%25-c0392b?style=flat-square" alt="0% cloud" />
   </p>
 
-</div>
+  <sub><strong>IA 100 % locale</strong> &nbsp;·&nbsp; <strong>Voix naturelle STT / TTS</strong> &nbsp;·&nbsp; <strong>Automatisation SOC</strong> &nbsp;·&nbsp; <strong>RTX 5080</strong></sub>
 
-<div align="center">
-  <img src="https://img.icons8.com/fluency/96/000000/cyber-security.png" alt="CyberSec" width="80"/>
-</div>
-
-<div align="center">
-  <p>
-    <strong>IA 100% locale</strong> <img src="https://img.icons8.com/color/24/000000/lock--v1.png"/> &nbsp;•&nbsp; <strong>Voix naturelle · STT · TTS</strong> <img src="https://img.icons8.com/color/24/000000/linux.png"/> &nbsp;•&nbsp; <strong>Automatisation SOC</strong> <img src="https://img.icons8.com/color/24/000000/shield-security.png"/>
-  </p>
 </div>
 
 ---
-# J.A.R.V.I.S
-
-> **Assistant IA local · 100 % privé · Interface holographique · SOC cybersécurité**
-
-**JARVIS** est un assistant IA personnel de type *Iron Man* — mais qui tourne **entièrement en local** sur un seul poste (Python/Flask + Ollama · RTX 5080). Pas un chatbot de plus : un **agent** qui voit, parle, mémorise, apprend, et **veille sur l'infrastructure 24/7**. Aucune donnée ne quitte la machine.
-
-> [!IMPORTANT]
-> **Vitrine — et non une procédure d'installation reproductible.**
-> Ce dépôt **présente** mon projet JARVIS (architecture, conception, capacités) et son **environnement** (Python · Ollama). En revanche, le **code opérationnel** reste **privé** : JARVIS **n'est pas reproductible en l'état** depuis ce seul dépôt (propriété intellectuelle, sécurité). Schémas et descriptions **conceptuels** — le *quoi* et le *pourquoi*, pas le *comment* exact.
 
 <div align="center">
-  <img src="Images/Jarvis-boot.png" alt="Écran de démarrage JARVIS — séquence SYS.INIT (NEURAL CORE, VOICE ENGINE, AUDIO DSP, KNOWLEDGE BASE) + briefing de session" width="780"/>
+
+### *Une IA qui vit sur votre machine — elle voit, parle, se souvient, apprend et veille. Seule.*
+
+</div>
+
+**JARVIS** est un assistant IA personnel de type *Iron Man* qui tourne **entièrement en local** sur un seul poste — Python/Flask + Ollama, RTX 5080. Pas un chatbot de plus : un **agent** doté d'une voix broadcast, d'une mémoire qui ne s'efface pas, d'une vision multimodale, et d'un **SOC qui défend l'infrastructure 24/7 sans intervention**. Zéro cloud, zéro abonnement — **aucune donnée ne quitte la machine.**
+
+> [!IMPORTANT]
+> **Vitrine — pas une procédure d'installation.**
+> Ce dépôt **présente** le projet (architecture, conception, capacités). Le **code opérationnel reste privé** : JARVIS n'est **pas déployable** depuis ce dépôt. On y montre le *quoi* et le *pourquoi* — jamais le *comment* exact.
+
+<div align="center">
+  <img src="Images/Jarvis-boot.png" alt="Écran de démarrage JARVIS — séquence SYS.INIT" width="680"/>
+  <br/><sub><em>Séquence <code>SYS.INIT</code> — NEURAL CORE · VOICE ENGINE · AUDIO DSP · KNOWLEDGE BASE, puis briefing de session.</em></sub>
 </div>
 
 ---
@@ -68,364 +55,203 @@
 |---|---|
 | 🔒 **100 % local · zéro cloud** | LLM, voix, RAG, données — tout sur le poste. Aucune fuite, aucun abonnement. |
 | 🧠 **Un agent, pas un chatbot** | *Hermès* observe, mémorise, apprend et **agit** — sans être re-briefé à chaque session. |
-| 🛡️ **SOC autonome 24/7** | Détecte, bannit et redémarre **tout seul** · alertes vocales · contexte sécurité injecté en direct. |
-| 🎙️ **Voix qualité broadcast** | Chaîne DSP pro (débruitage IA · compresseur · FX) + voix Edge Antoine, repli Kokoro neural local. |
+| 🛡️ **SOC autonome 24/7** | Détecte, bannit et redémarre **seul** · alertes vocales · contexte sécurité en direct. |
+| 🎙️ **Voix qualité broadcast** | Chaîne DSP pro (débruitage IA · compresseur · FX) + voix Edge, repli Kokoro neural local. |
 | ⚡ **RTX 5080 maîtrisée** | Modèle 100 % en VRAM, garde-fou anti-débordement, CUDA partout (Whisper · DeepFilterNet). |
 | ♿ **Pensé accessible** | Haute lisibilité, commandes vocales déterministes (< 100 ms), briefing matinal. |
 
 </div>
 
-**🗺️ La visite en un clic :**
-
 <div align="center">
 
-|  |  |  |
-|:--:|:--:|:--:|
-| [🏠<br>**Accueil**](#sec-1) | [🧠<br>**Réglages**](#sec-2) | [🕹️<br>**Pilotage**](#sec-3) |
-| [🎛️<br>**Studio DSP**](#sec-4) | [🎙️<br>**Voice Lab**](#sec-5) | [🌐<br>**Accès Web**](#sec-6) |
-| [📊<br>**Monitoring**](#sec-7) | [🛡️<br>**SOC**](#sec-8) | [✦<br>**Hermès**](#hermes) |
+**Visite guidée** &nbsp;·&nbsp; [🏠 Accueil](#sec-1) &nbsp;·&nbsp; [🧠 Réglages](#sec-2) &nbsp;·&nbsp; [🕹️ Pilotage](#sec-3) &nbsp;·&nbsp; [🎛️ Studio DSP](#sec-4) &nbsp;·&nbsp; [🎙️ Voice Lab](#sec-5) &nbsp;·&nbsp; [🌐 Accès Web](#sec-6) &nbsp;·&nbsp; [📊 Monitoring](#sec-7) &nbsp;·&nbsp; [🛡️ SOC](#sec-8) &nbsp;·&nbsp; [✦ Hermès](#hermes)
 
 </div>
 
 ---
 
-## 🖼️ Galerie — L'interface en images
-
-Tour visuel des principaux modules de l'interface holographique JARVIS.
+## 🖼️ L'interface
 
 <a id="sec-1"></a>
 
 ### 1 · Écran d'accueil
 
 <div align="center">
-  <img src="Images/Jarvis-01b.png" alt="Écran d'accueil JARVIS" width="880"/>
+  <img src="Images/Jarvis-01b.png" alt="Écran d'accueil JARVIS" width="720"/>
+  <br/><sub><em>Au démarrage, JARVIS annonce son état — modèle actif, moteur vocal, chaîne DSP, accélération CUDA — et déclenche le briefing matinal d'Hermès.</em></sub>
 </div>
-
-À l'ouverture, JARVIS se présente et énumère son état opérationnel : le **modèle LLM actif** (qwen3:8b via Ollama), le **moteur vocal** (Edge-TTS Antoine Neural), la **chaîne de traitement DSP** (EQ, compresseur, DeepFilterNet), les **modules disponibles** (Terminal, Fichiers, Tâches, Audio) et l'**accélération matérielle CUDA** (RTX Blackwell + Whisper STT GPU). Les trois actions principales — *Lire*, *Modifier*, *Accéder au système* — sont accessibles directement, et la première interaction de la journée déclenche le briefing matinal d'Hermès.
 
 <a id="sec-2"></a>
 
 ### 2 · Réglages LLM & profils GPU
 
-Le centre de contrôle fin de l'inférence locale, découpé en **quatre blocs** :
+*Le centre de contrôle fin de l'inférence locale — état carte, coût mémoire, préréglages, paramètres.*
 
-**① GPU Health — RTX 5080**
-
-<div align="center">
-  <img src="Images/Jarvis-04b.png" alt="GPU Health — VRAM, charge, température, puissance" width="460"/>
-</div>
-
-État **temps réel** de la carte : VRAM utilisée / 16 Go, charge GPU, température, puissance (W). Le voyant vire à l'orange/rouge dès qu'une limite est approchée.
-
-**② Impact sur la RTX**
-
-<div align="center">
-  <img src="Images/Jarvis-12.png" alt="Impact VRAM des réglages — zone sûre" width="460"/>
-</div>
-
-Estime *avant* de lancer le **coût mémoire** des réglages (poids du modèle + cache KV) et la **VRAM libre restante**, pour rester en « zone sûre » sans saturer la carte.
-
-**③ Profils RTX 5080**
-
-<div align="center">
-  <img src="Images/Jarvis-13.png" alt="Profils RTX 5080 — 6 préréglages" width="560"/>
-</div>
-
-Six préréglages cohérents en **un clic** — *Rapide · Équilibré · Code · Créatif · Précis · RTX 5080 MAX* — qui ajustent d'un coup créativité, longueur et contexte selon l'usage.
-
-**④ Paramètres LLM**
-
-<div align="center">
-  <img src="Images/Jarvis-14.png" alt="Paramètres LLM — sliders + optimisation latence" width="380"/>
-</div>
-
-Réglage **manuel fin** : température, top-p, top-k, longueur max, repeat penalty, taille de contexte ; plus trois modes d'**optimisation latence** (Rapide / Équilibré / Qualité).
+<table>
+<tr>
+<td width="50%" align="center"><img src="Images/Jarvis-04b.png" width="430" alt="GPU Health"/><br/><sub><b>GPU Health</b> — VRAM / 16 Go, charge, température, watts en temps réel.</sub></td>
+<td width="50%" align="center"><img src="Images/Jarvis-12.png" width="430" alt="Impact VRAM"/><br/><sub><b>Impact VRAM</b> — coût mémoire estimé <em>avant</em> lancement, zone sûre garantie.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><img src="Images/Jarvis-13.png" width="430" alt="Profils RTX 5080"/><br/><sub><b>Profils RTX 5080</b> — 6 préréglages en un clic (Rapide → MAX).</sub></td>
+<td width="50%" align="center"><img src="Images/Jarvis-14.png" width="430" alt="Paramètres LLM"/><br/><sub><b>Paramètres LLM</b> — température, top-p/k, contexte, 3 modes de latence.</sub></td>
+</tr>
+</table>
 
 <a id="sec-3"></a>
 
-### 3 · Le poste de pilotage — navigation & contrôles
-
-**① Le menu** — 11 modules, accessibles d'un clic :
+### 3 · Le poste de pilotage
 
 <div align="center">
-  <img src="Images/Jarvis-26.png" alt="JARVIS — barre de navigation : les 11 modules" width="900"/>
+  <img src="Images/Jarvis-26.png" alt="Barre de navigation — les modules" width="760"/>
+  <br/><sub><em>Une barre, tous les modules — accessibles d'un clic.</em></sub>
 </div>
 
 <div align="center">
 
-| Module | Rôle |
-|---|---|
-| **Monitor** | GPU · VRAM · CPU · réseau (live) |
-| **JARVIS AI** | cockpit chat + voix + onde |
-| **Settings** | LLM · RAG · prompt · profils |
-| **DSP Audio** | studio vocal · EQ · FX · TTS |
-| **Tâches** | tâches + terminal code |
-| **Voice Lab** | atelier STT / TTS |
-| **SOC** | auto-engine · bans · alertes |
-| **Apprentissage** | mémoire · faits · leçons (RAG) |
-| **Infogérance** | MAJ · reboot · AIDE (VMs) |
-| **Alarmes** | alarmes · rappels · agenda |
-| **Accès Web** | passerelle web gouvernée |
+| | | |
+|---|---|---|
+| **Monitor** · GPU/CPU live | **JARVIS AI** · chat + voix | **Settings** · LLM/RAG/prompt |
+| **DSP Audio** · studio vocal | **Tâches** · terminal code | **Voice Lab** · STT/TTS |
+| **SOC** · bans/alertes | **Apprentissage** · mémoire RAG | **Infogérance** · MAJ VMs |
+| **Alarmes** · rappels/agenda | **Accès Web** · passerelle | |
 
 </div>
 
-**② La voix** — bascule des moteurs TTS + choix de la voix :
-
-<div align="center">
-  <img src="Images/Jarvis-27.png" alt="Sélecteur de voix TTS" width="540"/>
-</div>
-
-**Edge (cloud Microsoft) ↔ Kokoro (neural, 100 % local)** · 7 voix (Antoine FR-CA par défaut). La synthèse est traitée par le Studio DSP (§4).
-
-**③ Le modèle** — bascule à chaud entre 4 LLM **100 % locaux (Ollama)** :
-
-<div align="center">
-  <img src="Images/Jarvis-28.png" alt="Sélecteur de modèle LLM actif" width="540"/>
-</div>
-
-`qwen3:8b` par défaut (SOC + général + CR) · `qwen3:14b` (think) · `qwen2.5-coder` (code) · `gemma4` (vision). Bouton **TEST LLM** pour valider le modèle actif.
-
-**④ La mémoire** — contexte conversationnel maîtrisé :
-
-<div align="center">
-  <img src="Images/Jarvis-29.png" alt="Mémoire conversationnelle" width="540"/>
-</div>
-
-Le compteur **CTX** affiche les échanges gardés en contexte ; **Purger mémoire** repart à zéro. Ça, c'est la mémoire **courte** (la conversation en cours) ; la mémoire **longue** de l'agent — faits, leçons RAG, santé et croissance du cerveau — est détaillée plus bas dans **[◈ Hermès — l'agent persistant](#hermes)**.
-
-**⑤ Le prompt système** — la gouvernance de l'agent *(données anonymisées)* :
-
-<div align="center">
-  <img src="Images/Jarvis-30.png" alt="Prompt système gouverné + profils sauvegardés (données anonymisées)" width="760"/>
-</div>
-
-Le **prompt système** encode les règles de comportement : méthodologie SOC, **anti-hallucination** (cite les chiffres exacts, jamais d'invention), distinction analyse / explication. Plusieurs **profils** sont sauvegardés et chargeables à la volée (SOC · Code · Think…). 🔒 *IP, clés, noms : intégralement anonymisés sur cette capture.*
+<table>
+<tr>
+<td width="50%" align="center"><img src="Images/Jarvis-27.png" width="430" alt="Sélecteur de voix TTS"/><br/><sub><b>Voix</b> — Edge ↔ Kokoro neural local, 7 voix, traitées par le Studio DSP.</sub></td>
+<td width="50%" align="center"><img src="Images/Jarvis-28.png" width="430" alt="Sélecteur de modèle LLM"/><br/><sub><b>Modèle</b> — bascule à chaud entre LLM 100 % locaux (Ollama), bouton TEST.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><img src="Images/Jarvis-29.png" width="430" alt="Mémoire conversationnelle"/><br/><sub><b>Mémoire courte</b> — compteur CTX des échanges gardés, purge en un clic.</sub></td>
+<td width="50%" align="center"><img src="Images/Jarvis-30.png" width="430" alt="Prompt système gouverné"/><br/><sub><b>Prompt système</b> — règles anti-hallucination + profils. 🔒 <em>anonymisé.</em></sub></td>
+</tr>
+</table>
 
 <a id="sec-4"></a>
 
-### 4 · Studio audio DSP — le rack de traitement vocal
+### 4 · Studio audio DSP
 
-Une chaîne broadcast appliquée à la voix de synthèse, **découpée en 6 unités** — chacune avec sa fonctionnalité propre :
+*Une chaîne broadcast appliquée à la voix de synthèse — sept unités, chacune sa fonction.*
 
-**① DeepFilterNet — débruitage IA**
-
-<div align="center">
-  <img src="Images/Jarvis-05.png" alt="DeepFilterNet — débruitage IA" width="880"/>
-</div>
-
-Réseau de neurones profond (**DeepFilterNet3**) qui supprime en temps réel le **bruit de fond**, les **artefacts TTS** et les imperfections spectrales. Atténuation réglable, post-filtre, traitement CPU (repli si le GPU est occupé).
-
-**② Compresseur dynamique**
-
-<div align="center">
-  <img src="Images/Jarvis-06.png" alt="Compresseur dynamique — seuil, ratio, attaque, relâche" width="880"/>
-</div>
-
-Maîtrise les écarts de volume de la voix : **seuil, ratio, attaque, relâche** réglables, avec afficheur de **réduction de gain** (style VCA). Une voix homogène, sans pics ni creux.
-
-**③ Stereo Widener**
+<table>
+<tr>
+<td width="50%" align="center"><img src="Images/Jarvis-05.png" width="430" alt="DeepFilterNet"/><br/><sub><b>DeepFilterNet</b> — débruitage IA temps réel (DeepFilterNet3).</sub></td>
+<td width="50%" align="center"><img src="Images/Jarvis-06.png" width="430" alt="Compresseur dynamique"/><br/><sub><b>Compresseur</b> — seuil/ratio/attaque/relâche, afficheur de réduction VCA.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><img src="Images/Jarvis-15.png" width="430" alt="Stereo Widener"/><br/><sub><b>Stereo Widener</b> — image stéréo élargie, corrélation de phase.</sub></td>
+<td width="50%" align="center"><img src="Images/Jarvis-16.png" width="430" alt="FX Rack"/><br/><sub><b>FX Rack</b> — reverb, echo, delay, chorus, flanger par convolution.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><img src="Images/Jarvis-17b.png" width="430" alt="Analyseur spectral"/><br/><sub><b>Analyseur spectral</b> — FFT temps réel, 8 modes + goniomètre de phase.</sub></td>
+<td width="50%" align="center"><img src="Images/Jarvis-18.png" width="430" alt="Output Gain Master"/><br/><sub><b>Output</b> — bus master, VU-mètres L/R pro, gain de sortie final.</sub></td>
+</tr>
+</table>
 
 <div align="center">
-  <img src="Images/Jarvis-15.png" alt="Stereo Widener — largeur, délai, corrélation de phase" width="880"/>
+  <img src="Images/Jarvis-eq.png" alt="EQ paramétrique couplé voix" width="720"/>
+  <br/><sub><em><b>EQ paramétrique 4 bandes</b> (LOW/MID/HIGH/AIR) superposé à l'analyseur spectral, couplé en direct à la voix de JARVIS.</em></sub>
 </div>
-
-Élargit l'**image stéréo** de la voix (largeur + délai inter-canal) avec contrôle de **corrélation de phase** — présence spatiale sans casser la compatibilité mono.
-
-**④ FX Rack**
-
-<div align="center">
-  <img src="Images/Jarvis-16.png" alt="FX Rack — reverb, echo, delay, chorus…" width="880"/>
-</div>
-
-Étages d'**effets par convolution** — reverb, echo, delay, chorus, flanger, phaser… — avec leurs paramètres fins (wet, decay, pre-delay, diffusion). Le **caractère sonore** de la voix.
-
-**⑤ Analyseur spectral**
-
-<div align="center">
-  <img src="Images/Jarvis-17b.png" alt="Analyseur spectral — FFT temps réel, 8 modes" width="880"/>
-</div>
-
-Analyse **FFT temps réel** de la sortie : 8 modes d'affichage (bars, line, fill, mirror, waterfall, wave, dots, radial) + **goniomètre de phase** et crêtes L/R. L'œil sur le signal.
-
-**⑥ Output — Gain Master**
-
-<div align="center">
-  <img src="Images/Jarvis-18.png" alt="Output — gain master + VU-mètres L/R" width="880"/>
-</div>
-
-Le **bus master** de la chaîne : gain de sortie final, **VU-mètres professionnels L/R** (avec zone de crête), et boutons **Appliquer** / **Test voix**.
-
-**⑦ EQ Paramétrique — couplé voix**
-
-<div align="center">
-  <img src="Images/Jarvis-eq.png" alt="Analyseur spectral + EQ paramétrique 4 bandes, couplé à la voix JARVIS" width="880"/>
-</div>
-
-L'**égaliseur paramétrique 4 bandes** (LOW/MID/HIGH/AIR) superposé à l'**analyseur spectral temps réel**, avec ses presets (Flat, Voix, Radio, Studio…) et le **couplage direct à la voix de JARVIS**. Le modelage fin du timbre.
 
 <a id="sec-5"></a>
 
-### 5 · Voice Lab — l'atelier de la voix
+### 5 · Voice Lab
 
 <div align="center">
-  <img src="Images/Jarvis-10.png" alt="Voice Lab — réglage des moteurs TTS et comparateur A/B" width="880"/>
+  <img src="Images/Jarvis-10.png" alt="Voice Lab — atelier TTS et comparateur A/B" width="720"/>
+  <br/><sub><em>L'atelier de la voix — source (Edge cloud · Kokoro CUDA local), paramètres fins, bibliothèque et comparateur A/B.</em></sub>
 </div>
-
-Le **Voice Lab** règle au cordeau la voix de l'assistant : choix de la **source vocale** (Edge Antoine fr-CA en cloud · repli **Kokoro** CUDA neural, 100 % local), **paramètres vocaux** fins, **phrase de test**, **bibliothèque** de voix et **comparateur A/B**. C'est l'atelier qui donne à JARVIS sa voix naturelle et homogène, en ligne comme hors-ligne.
 
 <a id="sec-6"></a>
 
 ### 6 · Accès Web gouverné
 
 <div align="center">
-  <img src="Images/Jarvis-11.png" alt="Accès Web gouverné — allowlist, lecture seule, journalisé" width="880"/>
+  <img src="Images/Jarvis-11.png" alt="Accès Web gouverné" width="720"/>
+  <br/><sub><em>L'agent consulte le web <b>sous contrôle strict</b> — allowlist explicite, lecture seule, chaque accès journalisé. Tout le reste : refusé et tracé.</em></sub>
 </div>
-
-L'agent peut consulter le web — mais **sous contrôle strict**. JARVIS ne visite QUE les domaines d'une **allowlist explicite** (sites système verrouillés pour la météo et la veille IA), en **lecture seule** (jamais d'envoi de données), et **chaque accès est journalisé**. Tout le reste est **refusé et tracé**. La curiosité de l'agent reste gouvernée — même principe de moindre privilège que pour le SOC.
 
 <a id="sec-7"></a>
 
 ### 7 · Monitoring GPU & VRAM
 
-<div align="center">
-  <img src="Images/Jarvis-19.png" alt="Monitor — GPU, CPU, RAM, VRAM temps réel" width="880"/>
-</div>
-
-L'onglet **Monitor** : surveillance **temps réel** de la RTX 5080 — utilisation GPU, VRAM, température, puissance, CPU, RAM système — plus les caractéristiques de la carte (Blackwell GB203, 16 Go GDDR7, sm_120, 960 Go/s).
-
-<div align="center">
-  <img src="Images/Jarvis-20.png" alt="Carte LLM VRAM — empreinte du modèle en mémoire vidéo" width="780"/>
-</div>
-
-Zoom sur la **carte LLM VRAM** : l'empreinte du modèle actif en mémoire vidéo. La RTX 5080 a **16 Go** ; tant que le modèle **+ son contexte (cache KV)** y tiennent (ici `qwen3:8b` ≈ 5,6 Go / 35 %), l'inférence reste **pleine vitesse GPU**. S'ils débordent, Ollama « spille » en RAM système et la vitesse s'effondre — la carte affiche `MODE`, `tokens/s`, `num_ctx`, le **SWAP RAM** et une alerte **⚠ DÉBORDEMENT**. C'est le garde-fou du LLM 100 % local sur une seule carte.
+<table>
+<tr>
+<td width="50%" align="center"><img src="Images/Jarvis-19.png" width="430" alt="Monitor temps réel"/><br/><sub><b>Monitor</b> — RTX 5080 en direct : GPU, VRAM, température, watts, CPU, RAM.</sub></td>
+<td width="50%" align="center"><img src="Images/Jarvis-20.png" width="430" alt="Carte LLM VRAM"/><br/><sub><b>Empreinte LLM</b> — modèle + cache KV en VRAM, alerte ⚠ DÉBORDEMENT si spill RAM.</sub></td>
+</tr>
+</table>
 
 <a id="sec-8"></a>
 
-### 8 · SOC — activité & réponse automatique
+### 8 · SOC — réponse automatique
 
 <div align="center">
-  <img src="Images/Jarvis-24.png" alt="SOC — tuiles d'activité et compteurs en temps réel" width="900"/>
+  <img src="Images/Jarvis-24.png" alt="SOC — tuiles d'activité temps réel" width="800"/>
+  <br/><sub><em>Détection sur 30 jours (pics offensifs en rouge) + compteurs live — bans IP, restarts, IDS. JARVIS surveille nginx / CrowdSec / fail2ban / Suricata et <b>agit seul</b>, sans jamais exposer une IP.</em></sub>
 </div>
 
-Les **tuiles SOC en activité** : courbes de détection sur 30 jours (**en rouge** les pics offensifs) + **compteurs en direct** — actions, **bans IP**, restarts, succès / échecs, détections **IDS**. JARVIS surveille nginx / CrowdSec / fail2ban / Suricata en continu et **agit seul** (ban, restart) selon des seuils : l'agent ne se contente pas d'alerter, il **répond** — sans jamais exposer la moindre IP.
-
-> 🔒 Volontairement **non publiés** : le **journal des IP** d'attaquants, le **terminal** et les **leçons apprises**. La vitrine *décrit* le SOC et montre son activité **agrégée**, mais n'expose **aucune donnée actionnable**.
+> 🔒 Volontairement **non publiés** : le journal des IP d'attaquants, le terminal, les leçons apprises. La vitrine *décrit* le SOC et montre son activité **agrégée** — **aucune donnée actionnable**.
 
 ---
 
 ## ⌨️ Console de maintenance & reprise après sinistre
 
 <div align="center">
-  <img src="Images/Jarvis-menu.png" alt="Console de maintenance JARVIS — menu terminal : statut, modèles, DSP, sauvegarde, restauration" width="720"/>
+  <img src="Images/Jarvis-menu.png" alt="Console de maintenance PowerShell" width="680"/>
+  <br/><sub><em>Au-delà du web, un pilotage terminal (PowerShell) — statut complet, gestion des modèles, DSP/TTS, logs, <b>sauvegarde & reprise après sinistre</b>. Accessible à la voix.</em></sub>
 </div>
-
-Au-delà de l'interface web, JARVIS se pilote depuis une **console de maintenance** (PowerShell) : **17 actions** — statut complet (Flask · Ollama · GPU · modèle · DSP), gestion des **modèles LLM**, paramètres, profils de prompt, DSP/TTS, logs, **sauvegarde & restauration complètes** (réinstallation 100 % hors-ligne), test des routes API. Le bandeau d'état montre en direct l'état des services et le **modèle actif** (`qwen3:8b`). **Ce menu est également accessible à la voix.**
 
 ---
 
 <a id="hermes"></a>
 
-## ◈ Hermès — L'agent persistant
+## ◈ Hermès — l'agent persistant
 
 > **Hermès transforme un assistant en agent.**
-> Là où un assistant répond à des questions, un agent **observe, mémorise, apprend et agit** — sans être re-briefé à chaque session.
+> Là où un assistant répond, un agent **observe, mémorise, apprend et agit** — sans être re-briefé à chaque session.
 
-### ◈ Le cœur de l'agent
+### Le cœur de l'agent
 
-<div align="center">
-  <img src="Images/Jarvis-23.png" alt="Le cœur de l'agent au repos — réacteur VIVANT + diagnostic" width="900"/>
-</div>
+<table>
+<tr>
+<td width="33%" align="center"><img src="Images/Jarvis-23.png" width="300" alt="Cœur au repos"/><br/><sub><b>VIVANT</b> — le réacteur « respire » tant que l'agent tourne.</sub></td>
+<td width="33%" align="center"><img src="Images/Jarvis-23b.png" width="300" alt="Cœur quand JARVIS parle"/><br/><sub><b>JE PARLE</b> — il s'illumine au rythme de la voix.</sub></td>
+<td width="33%" align="center"><img src="Images/Jarvis-23c.png" width="300" alt="Cœur en menace élevée"/><br/><sub><b>MENACE</b> — or/ambre + cause de l'alerte en clair.</sub></td>
+</tr>
+</table>
 
-Le **cœur** d'Hermès — un réacteur qui « **respire** » tant que l'agent tourne. Autour : le **diagnostic vivant** (RAG, mémoire, connaissance) et l'**état moteur** (mode actif, modèle `qwen3:8b`, niveau de menace, dernière sauvegarde du cerveau). D'un coup d'œil : l'agent est **vivant, alimenté et conscient de son état**.
+<div align="center"><sub><em>Le cœur reflète la posture de sécurité <b>en temps réel</b> — vivant, alimenté, conscient de son état.</em></sub></div>
 
-<div align="center">
-  <img src="Images/Jarvis-23b.png" alt="Le cœur quand JARVIS parle — réacteur illuminé, statut JE PARLE" width="900"/>
-</div>
-
-Et quand JARVIS **parle**, le réacteur **s'illumine** au rythme de la voix — le statut bascule de « VIVANT » à « **JE PARLE** ». L'agent prend littéralement vie sous tes yeux.
-
-<div align="center">
-  <img src="Images/Jarvis-23c.png" alt="Le cœur en menace élevée — réacteur or/ambre + état moteur complet" width="900"/>
-</div>
-
-Et quand une **menace s'élève** (ici `SOC · Suricata`), le réacteur vire à l'**or/ambre** et l'**état moteur** s'affiche en clair — `MODE SOC`, `qwen3:8b`, échanges, **cause de l'alerte**. Le cœur **reflète la posture de sécurité en temps réel**.
-
-### ◈ L'architecture de l'agent
+### L'architecture de l'agent
 
 <div align="center">
-  <img src="Images/Hermes-schema.png" alt="Schéma Hermès — pipeline d'agentification et briques temps réel" width="900"/>
+  <img src="Images/Hermes-schema.png" alt="Schéma Hermès — pipeline temps réel" width="820"/>
+  <br/><sub><em>La « salle des machines ». Le chemin d'une requête : <code>ENTRÉE → BYPASS (&lt; 100 ms, zéro LLM) → MÉMOIRE (RAG auto-borné) → SOC LIVE → WEB → PVE → LLM LOCAL → OUTILS → RÉPONSE</code>. Chaque brique affiche sa métrique live.</em></sub>
 </div>
 
-La **« salle des machines »** d'Hermès, en temps réel. Le **chemin d'une requête** : `ENTRÉE` (voix STT · texte · image) → **`BYPASS`** (commandes directes, **< 100 ms, zéro LLM**) → **`MÉMOIRE`** (faits + leçons RAG · plafond **4 000 chunks**, auto-borné) → **`SOC LIVE`** (contexte sécurité) → **`WEB`** (recherche à la demande) → **`PVE`** (Proxmox temps réel) → **`LLM LOCAL`** (`qwen3:8b`, raisonnement) → **`OUTILS`** (appelés par le LLM : fichiers / SSH) → **`RÉPONSE`** (texte + voix, cache TTS). Autour gravitent les **briques transversales** : `VISION` (gemma4), `MCP` (pont Claude Desktop · 12 outils), `APPRENTISSAGE`, `RÉFLEXION`, `DR CERVEAU`, `BRIEFING` matinal, `ALARMES`, `PÉDAGOGIE`, `INFOGÉRANCE` (MAJ des 4 VMs, fail-closed). **Chaque brique affiche sa métrique live** — l'agentification rendue visible.
+<table>
+<tr>
+<td width="50%" align="center"><img src="Images/Jarvis-synoptique.png" width="430" alt="Synoptique menace élevée"/><br/><sub><b>Menace ÉLEVÉE</b> — le flux réel s'allume brique par brique, en or.</sub></td>
+<td width="50%" align="center"><img src="Images/Jarvis-synoptique-crit.png" width="430" alt="Synoptique menace critique"/><br/><sub><b>Menace CRITIQUE</b> — le flux vire au rouge, même source que le cœur.</sub></td>
+</tr>
+</table>
 
-> **Hermès en action** — le synoptique s'illumine au passage du flux et **réagit à la menace** :
+### Le tableau de bord vivant
 
 <div align="center">
-  <img src="Images/Jarvis-synoptique.png" alt="Synoptique Hermès en action — flux pipeline allumé, menace ÉLEVÉE (or)" width="900"/>
+  <img src="Images/Hermes-grid.png" alt="Dashboard Hermès — six panneaux" width="820"/>
+  <br/><sub><em>Six panneaux d'un coup d'œil — Cerveau/Mémoire, Sauvegarde (auto quotidienne 21 h), Santé mémoire (verdict GO/NO-GO + ⛑ Réparer), Auto-engine SOC, Historique persisté, Réflexion (taux d'apprentissage).</em></sub>
 </div>
 
-Le **chemin réel d'une requête** s'allume brique par brique (`ENTRÉE → MÉMOIRE → SOC → WEB → PVE…`) — ici en **or**, car la menace est **ÉLEVÉE**. Les briques **transversales restent calmes** : on voit *exactement* le trajet emprunté.
-
-<div align="center">
-  <img src="Images/Jarvis-synoptique-crit.png" alt="Synoptique Hermès sous menace CRITIQUE — flux en rouge" width="900"/>
-</div>
-
-Et si la menace passe **CRITIQUE**, le flux vire au **rouge** — même source de couleur que le cœur (`hermesHeartColor`, source unique cœur ↔ schéma). Le synoptique **change de teinte avec le niveau d'alerte** : l'agent affiche sa vigilance d'un seul coup d'œil.
-
-### ◈ Le tableau de bord vivant
-
-<div align="center">
-  <img src="Images/Hermes-grid.png" alt="Dashboard Hermès — six panneaux synoptiques de l'état de l'agent" width="900"/>
-</div>
-
-Le **synoptique de santé** de l'agent, six panneaux d'un coup d'œil :
-- **◈ Cerveau — Mémoire** — leçons apprises, résumés de session, taille du cerveau.
-- **◈ Sauvegarde du cerveau** — dernier instantané + **sauvegarde automatique quotidienne (21 h)**, boutons Sauvegarder / Restaurer.
-- **◈ Santé mémoire** — **verdict GO / NO-GO** monitoré, date de dernière réparation, intégrité de structure, avec le **bouton ⛑ Réparer la mémoire** (déclenche le moteur d'entretien Hermès — une sauvegarde est créée avant, la mémoire ne peut pas être corrompue).
-- **◈ SOC — Auto-engine** — état du moteur de réponse + bans et alertes sur 24 h.
-- **◈ Mémoire — Historique** — échanges persistés sur disque (survivent au redémarrage).
-- **◈ Réflexion — Auto-apprentissage** — corrections **proposées** vs **apprises** + **taux d'apprentissage** : l'agent apprend de tes retours.
-
-### ◈ Auto-maintenance de la mémoire
-
-<div align="center">
-  <img src="Images/Hermes-nondrift.png" alt="Non-dérive des leçons — file d'auto-maintenance Hermès" width="900"/>
-</div>
-
-Hermès **surveille la qualité de son propre savoir**. Chaque leçon porte un **statut** (`active`, `promouvable`, `doublon`, `représentant`, `périmée`) et une **file d'auto-maintenance** ne fait remonter que ce qui demande une action — dédoublonnage, promotion en fait durable, terme périmé. Corpus sain → bandeau **« AUCUNE DÉRIVE »**. La mémoire ne gonfle pas en silence : elle se **consolide** toute seule.
-
-### ◈ Le cerveau qui grandit
-
-<div align="center">
-  <img src="Images/Hermes-croissance.png" alt="Croissance du cerveau — leçons cumulées et rythme d'apprentissage" width="880"/>
-</div>
-
-La **mémoire de l'agent s'accumule** : deux courbes à échelles distinctes — le **`CUMUL`** (total de leçons accumulées dans le temps, axe « leçons ») et le **`RYTHME`** (leçons ajoutées par période, axe « leçons/jour »). Chaque `"souviens-toi que…"` ou correction ajoute une leçon **persistée, indexée dans le RAG et réinjectée** automatiquement — l'agent ne repart jamais de zéro.
-
-### ◈ Le maintien en vie autonome
+### Le maintien en vie autonome
 
 > **Le pari : un agent qui ne se contente pas d'apprendre — il se maintient lui-même en vie.**
-> Je voulais qu'Hermès reste *sain* indéfiniment **sans intervention manuelle** : qu'il se **diagnostique**, se **répare**, se **borne**, et surtout qu'il **alerte tout seul** si sa propre mécanique d'entretien venait à s'arrêter. Un agent réellement vivant ne doit pas dépendre de moi pour le rester.
+> Hermès reste *sain* indéfiniment **sans intervention** : il se diagnostique, se répare, se borne, et **alerte seul** si sa propre mécanique d'entretien s'arrête.
 
-**L'architecture — une boucle d'entretien fermée.** Un **moteur d'entretien autonome** s'exécute périodiquement et enchaîne, dans l'ordre, des étapes **idempotentes et réversibles** :
-
-| # | Étape | Rôle |
-|---|-------|------|
-| 1 | **Intégrité** | vérifie la cohérence de la mémoire et de ses index |
-| 2 | **Santé** | recalcule le verdict `GO / NO-GO`, la taille, la fraîcheur (état relu par le cockpit) |
-| 3 | **Consolidation** | dédoublonne les leçons, promeut les récurrentes en faits durables |
-| 4 | **Ré-indexation auto-bornée** | régénère l'index **et abaisse sa densité** tant que la mémoire dépasse son budget → la taille ne peut **jamais déborder en silence** |
-| 5 | **Ressources & purge** | purge le RAG périmé, surveille la charge |
-| 6 | **Anti-dérive** | refuse les termes/références périmés — verdict **en dernier**, *fail-closed* |
-
-Toute étape qui échoue **force une sortie en erreur** (*fail-closed cumulatif*) : un entretien partiel ne se fait **jamais** passer pour un succès.
-
-**Les garde-fous — l'autonomie qui se surveille elle-même.** Le vrai danger d'un système autonome, c'est de **tomber en silence**. Hermès est donc doublé de **sentinelles** :
-
-- un **gardien de connaissance** vérifie que les sources de vérité restent câblées et saines (verdict `GO / DÉRIVE`) ;
-- une **sentinelle d'autonomie** détecte si le moteur d'entretien **n'a plus tourné** (désactivé, en panne, machine éteinte) et **déclenche une alerte** — la panne ne peut pas rester invisible ;
-- un **rafraîchissement vectoriel** périodique régénère le RAG en tâche de fond ;
-- côté humain, un **bouton d'urgence** dans le cockpit déclenche *le même moteur* à la demande — avec **sauvegarde créée avant toute écriture** : la mémoire ne peut pas être corrompue.
+Un **moteur d'entretien autonome** enchaîne des étapes **idempotentes et réversibles** — chaque échec force une sortie en erreur (*fail-closed cumulatif*) : un entretien partiel ne se fait **jamais** passer pour un succès.
 
 ```mermaid
 flowchart TB
@@ -446,17 +272,12 @@ flowchart TB
     URG["⛑ Bouton d'urgence<br/>sauvegarde AVANT écriture"] -.->|déclenche le moteur| A
 ```
 
-**Ce qui en résulte.**
+- 🧠 **Mémoire qui ne dérive pas** — se consolide, se borne, se purge seule.
+- ⛑ **Auto-réparation** — régénère les états de santé et ré-indexe la connaissance sans moi.
+- 🚨 **Aucune panne silencieuse** — si l'entretien s'arrête, une sentinelle alerte.
+- 🔒 **Fail-closed de bout en bout** — au moindre doute, refuser ; sauvegarde avant toute écriture.
 
-- 🧠 **Une mémoire qui ne dérive pas** — elle se consolide, se borne et se purge toute seule ; elle ne gonfle ni ne pourrit.
-- ⛑ **L'auto-réparation** — le moteur régénère les états de santé et ré-indexe la connaissance **sans moi**.
-- 🚨 **Aucune panne silencieuse** — si l'entretien lui-même s'arrête, une sentinelle **alerte** ; l'autonomie ne peut pas « capoter » sans que je le sache.
-- 🔒 **Fail-closed de bout en bout** — au moindre doute, le système **refuse** plutôt que d'avancer à l'aveugle, et une **sauvegarde précède** toute opération destructive.
-- ✅ **Zéro intervention en régime nominal** — je n'interviens **que sur alerte**. Le reste du temps, Hermès **se maintient en vie tout seul**.
-
-> Le détail technique complet (moteur d'entretien, états publiés, garde-fous outillés) est dans **[01 — Hermès](DOCUMENTATION/01-HERMES.md)**.
-
-> **Les 5 briques** (synoptique temps réel · mémoire vectorielle persistante · bypass déterministe < 100 ms · boucle d'apprentissage · briefing matinal) et le comparatif **Avant / Après Hermès** sont détaillés dans **[01 — Hermès](DOCUMENTATION/01-HERMES.md)**.
+> Détail technique complet — moteur d'entretien, états publiés, garde-fous outillés, les 5 briques, comparatif Avant / Après — dans **[01 — Hermès](DOCUMENTATION/01-HERMES.md)**.
 
 ---
 
@@ -464,14 +285,13 @@ flowchart TB
 
 <div align="center">
 
-| # | Document | Description | Statut | |
-|---|----------|-------------|--------|---|
-| 01 | [Hermès](DOCUMENTATION/01-HERMES.md) | Mémoire · bypass · RAG · DR | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/01-HERMES.md) |
-| 02 | [Intégration&nbsp;SOC](DOCUMENTATION/02-SOC-INTEGRATION.md) | Auto-engine · bans · alertes | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/02-SOC-INTEGRATION.md) |
-| 03 | [Architecture&nbsp;globale](DOCUMENTATION/03-ARCHITECTURE.md) | Flask · Blueprints · modules | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/03-ARCHITECTURE.md) |
-| 04 | [Audio&nbsp;DSP](DOCUMENTATION/04-AUDIO-DSP.md) | Broadcast · TTS · STT · DSP | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/04-AUDIO-DSP.md) |
-| 05 | [Installation](DOCUMENTATION/05-INSTALLATION.md) | Python · Ollama · setup | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/05-INSTALLATION.md) |
-| 06 | [MCP&nbsp;Server](DOCUMENTATION/06-MCP-SERVER.md) | 12 outils · MCP · watchdog | 🟢 | [<img src="https://img.shields.io/badge/EXPLORER-8B5CF6?style=for-the-badge&logo=github&logoColor=white">](DOCUMENTATION/06-MCP-SERVER.md) |
+| # | Document | Description |
+|---|----------|-------------|
+| 01 | [Hermès](DOCUMENTATION/01-HERMES.md) | Mémoire · bypass · RAG · DR |
+| 02 | [Intégration&nbsp;SOC](DOCUMENTATION/02-SOC-INTEGRATION.md) | Auto-engine · bans · alertes |
+| 03 | [Architecture&nbsp;globale](DOCUMENTATION/03-ARCHITECTURE.md) | Flask · Blueprints · modules |
+| 04 | [Audio&nbsp;DSP](DOCUMENTATION/04-AUDIO-DSP.md) | Broadcast · TTS · STT · DSP |
+| 06 | [MCP&nbsp;Server](DOCUMENTATION/06-MCP-SERVER.md) | Outils exposés · conception |
 
 </div>
 
@@ -484,14 +304,13 @@ flowchart TB
 | Couche | Technologie |
 |--------|-------------|
 | **Backend** | Python 3.11 · Flask · Blueprints autoportants · DI pur |
-| **LLM local** | Ollama · qwen3:8b (SOC+GÉNÉRAL+CR · rapide) · qwen3:14b (THINK) · qwen2.5-coder:14b (CODE) · gemma4:latest (VISION) |
-| **RAG** | mxbai-embed-large · BM25 hybride · plafond 4 000 chunks (auto-borné) · TTL 5 min |
-| **TTS** | edge-tts fr-CA Antoine (défaut) → repli Kokoro CUDA neural (hors-ligne, local) |
+| **LLM local** | Ollama · qwen3.5:9b (SOC + général + code + think + **vision** multimodal · un seul modèle, zéro swap) |
+| **RAG** | qwen3-embedding:4b (dim 2560) · BM25 hybride · auto-borné · TTL 5 min |
+| **TTS** | edge-tts fr-CA Antoine → repli Kokoro CUDA neural (hors-ligne, local) |
 | **STT** | faster-whisper large-v3-turbo CUDA · vocabulaire SOC |
-| **Frontend** | Vanilla JS · 28 modules · Web Audio API · xterm.js · Monaco Editor |
-| **Agent Hermès** | 5 briques · bypass regex · scheduler daemon · DI pur · indépendant du LLM |
-| **MCP** | 12 outils exposés à Claude Desktop · streamable-HTTP · watchdog |
-| **Qualité** | suite pytest complète · ~82 % coverage (gate pré-push ≥ 81 %) · ruff 0 · eslint 0 · hooks pré-commit/pré-push |
+| **Frontend** | Vanilla JS · Web Audio API · xterm.js · Monaco Editor |
+| **Agent Hermès** | synoptique · bypass regex · scheduler daemon · indépendant du LLM |
+| **Qualité** | suite pytest · gate de couverture pré-push · ruff 0 · eslint 0 · hooks pré-commit/pré-push |
 
 </div>
 
@@ -505,15 +324,11 @@ flowchart TB
 |----------|----------------|
 | **100 % local** | JARVIS filtre et agrège localement — rien ne part vers un LLM cloud |
 | **RFC1918 immuable** | Les plages IP privées ne peuvent jamais être bannies |
-| **SSH lecture seule** | 67 patterns dangereux bloqués · whitelist explicite pour l'écriture |
+| **SSH lecture seule** | Patterns dangereux bloqués · whitelist explicite pour l'écriture |
 | **SOC side-channel** | Le contexte sécurité n'entre jamais dans l'historique chat |
 | **Audit forensique** | Toute opération SSH d'écriture tracée dans un journal JSONL |
 
 </div>
-
----
-
-**Commencer →** [01 — Hermès, l'agent persistant](DOCUMENTATION/01-HERMES.md)
 
 ---
 
@@ -553,6 +368,6 @@ flowchart TB
 
 <br/>
 
-<sub>🔒 Projets proposés par <a href="https://github.com/0xCyberLiTech">0xCyberLiTech</a> · Développés en collaboration avec <a href="https://claude.ai">Claude AI</a> (Anthropic) 🔒</sub>
+<sub>🔒 Projet proposé par <a href="https://github.com/0xCyberLiTech">0xCyberLiTech</a> · développé en collaboration avec <a href="https://claude.ai">Claude AI</a> (Anthropic) 🔒</sub>
 
 </div>

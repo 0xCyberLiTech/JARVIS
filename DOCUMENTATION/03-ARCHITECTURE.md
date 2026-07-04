@@ -73,8 +73,8 @@
             ▼                                 ▼
    ┌───────────────────┐              ┌────────────────────┐
    │  Ollama local     │              │  Dashboard SOC     │
-   │  qwen3:8b (SOC)   │              │  CrowdSec · F2B    │
-   │  gemma4 (VISION)  │              │  Suricata · nginx  │
+   │  qwen3.5:9b (SOC) │              │  CrowdSec · F2B    │
+   │  qwen3.5 (VISION)  │              │  Suricata · nginx  │
    └───────────────────┘              └────────────────────┘
 ```
 
@@ -84,14 +84,14 @@
 
 | Mode | Modèle | VRAM | Usage |
 |------|--------|------|-------|
-| **SOC** (défaut · toujours chaud) | qwen3:8b | 5.6 GB | Cybersécurité · raisonnement |
-| **GÉNÉRAL** | qwen3:8b | 5.6 GB | Conversation (même modèle que SOC — zéro swap) |
-| **THINK** | qwen3:14b | ~9 GB | Raisonnement profond (think natif) |
-| **CODE** | qwen2.5-coder:14b | 9.0 GB | Développement · infogérance |
-| **VISION** | gemma4:latest | 9.6 GB | Multimodal — analyse d'images |
-| **RAG** (keep_alive 10m) | mxbai-embed-large | 0.7 GB | Embeddings vectoriels |
+| **SOC** (défaut · toujours chaud) | qwen3.5:9b | ~6.6 GB | Cybersécurité · raisonnement |
+| **GÉNÉRAL** | qwen3.5:9b | ~6.6 GB | Conversation (même modèle que SOC — zéro swap) |
+| **THINK** | qwen3.5:9b | ~6.6 GB | Raisonnement profond (think natif) |
+| **CODE** | qwen3.5:9b | ~6.6 GB | Développement · infogérance (même modèle — zéro swap) |
+| **VISION** | qwen3.5:9b | 6.6 GB | Multimodal natif — analyse d'images (même modèle que SOC/GÉNÉRAL/CODE/THINK) |
+| **RAG** (keep_alive 10m) | qwen3-embedding:4b | ~2.6 GB | Embeddings vectoriels (dim 2560) |
 
-> qwen3:8b est toujours chaud (défaut SOC + GÉNÉRAL + Code-Reasoning — un seul modèle, zéro swap entre ces modes). Le switch vers qwen3:14b (THINK), qwen2.5-coder (CODE) ou gemma4 (VISION) entraîne un swap VRAM — accepté car c'est un changement de mode explicite.
+> qwen3.5:9b est toujours chaud (défaut SOC + GÉNÉRAL + CODE + THINK — un seul modèle, zéro swap entre tous les modes de raisonnement). La VISION utilise le même qwen3.5:9b (multimodal natif) — donc aucun swap VRAM, même pour l'analyse d'image.
 
 <div align="center">
   <img src="../Images/Jarvis-04b.png" alt="JARVIS — santé GPU RTX 5080 et paramètres LLM" width="340" />
