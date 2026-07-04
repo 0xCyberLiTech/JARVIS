@@ -47,7 +47,7 @@
 
 ---
 
-## ✦ Ce qui rend JARVIS unique
+<h2 align="center">✦ Ce qui rend JARVIS unique</h2>
 
 <div align="center">
 
@@ -70,11 +70,11 @@
 
 ---
 
-## 🖼️ L'interface en action
+<h2 align="center">🖼️ L'interface en action</h2>
 
 <a id="sec-1"></a>
 
-### 1 · Le cockpit
+<h3 align="center">1 · Le cockpit</h3>
 
 <div align="center">
   <img src="Images/interface.png" alt="Cockpit JARVIS — interface neurale, modes de routage, télémétrie live" width="900"/>
@@ -84,7 +84,7 @@ Le poste de pilotage complet. À gauche, **l'interface neurale** (loopback-only 
 
 <a id="sec-2"></a>
 
-### 2 · Réglages LLM & profils GPU
+<h3 align="center">2 · Réglages LLM & profils GPU</h3>
 
 *Le centre de contrôle fin de l'inférence locale — chaque carte pilote un aspect de la RTX 5080 et du modèle.*
 
@@ -103,7 +103,7 @@ Le poste de pilotage complet. À gauche, **l'interface neurale** (loopback-only 
 
 <a id="sec-3"></a>
 
-### 3 · Monitoring GPU · CPU · VRAM
+<h3 align="center">3 · Monitoring GPU · CPU · VRAM</h3>
 
 <div align="center">
   <img src="Images/monitor.png" alt="Moniteur RTX 5080 — GPU, VRAM, température, CPU, RAM temps réel" width="900"/>
@@ -120,7 +120,7 @@ C'est le garde-fou du LLM 100 % local : tant que le modèle **+ son cache KV** t
 
 <a id="sec-4"></a>
 
-### 4 · Studio audio DSP — le rack broadcast
+<h3 align="center">4 · Studio audio DSP — le rack broadcast</h3>
 
 Une **chaîne broadcast complète** appliquée à la voix de synthèse, accélérée **CUDA** :
 `TTS → DeepFilterNet → Compresseur → Stereo → Analyseur → FX → EQ → Output`. **Huit étages**, chacun sa fonction — tout en Web Audio, temps réel, en local.
@@ -144,7 +144,7 @@ Une **chaîne broadcast complète** appliquée à la voix de synthèse, accélé
 </tr>
 </table>
 
-#### Schéma logique du circuit — état des étages & CUDA
+<h4 align="center">Schéma logique du circuit — état des étages & CUDA</h4>
 
 *Le signal vocal traverse une chaîne de circuits : un étage **CUDA (GPU)** pour le débruitage IA, le reste en **Web Audio** temps réel dans le navigateur.*
 
@@ -177,7 +177,7 @@ flowchart LR
 
 <a id="sec-5"></a>
 
-### 5 · Voice Lab
+<h3 align="center">5 · Voice Lab</h3>
 
 <div align="center">
   <img src="Images/voice-lab.png" alt="Voice Lab — moteurs TTS, paramètres vocaux, bibliothèque, comparateur A/B" width="900"/>
@@ -187,7 +187,7 @@ L'atelier de la voix de l'assistant. **Source** commutable — **Edge** (Antoine
 
 <a id="sec-6"></a>
 
-### 6 · Accès Web gouverné
+<h3 align="center">6 · Accès Web gouverné</h3>
 
 <div align="center">
   <img src="Images/acces-web.png" alt="Accès Web gouverné — allowlist explicite, lecture seule, journalisé" width="900"/>
@@ -197,7 +197,7 @@ L'agent peut consulter le web — mais **sous contrôle strict**. JARVIS ne visi
 
 <a id="sec-7"></a>
 
-### 7 · SOC — réponse automatique
+<h3 align="center">7 · SOC — réponse automatique</h3>
 
 <div align="center">
   <img src="Images/soc.png" alt="SOC — activité 30 jours et compteurs de défense temps réel" width="920"/>
@@ -209,7 +209,7 @@ Le **centre de défense** de JARVIS. Courbe d'**activité sur 30 jours** (pics o
 
 ---
 
-## ⌨️ Terminal SSH intégré (mode Code)
+<h2 align="center">⌨️ Terminal SSH intégré (mode Code)</h2>
 
 <div align="center">
   <img src="Images/terminal.png" alt="Terminal SSH JARVIS — PTY xterm-256color, raccourcis, HUD ressources, chat inline" width="920"/>
@@ -223,7 +223,7 @@ Un **vrai terminal SSH interactif** (PTY `xterm-256color`) intégré à JARVIS �
 
 <a id="hermes"></a>
 
-## ◈ Hermès — l'agent persistant
+<h2 align="center">◈ Hermès — l'agent persistant</h2>
 
 > **Hermès transforme un assistant en agent.**
 > Là où un assistant répond, un agent **observe, mémorise, apprend et agit** — sans être re-briefé à chaque session.
@@ -234,7 +234,7 @@ Un **vrai terminal SSH interactif** (PTY `xterm-256color`) intégré à JARVIS �
 
 Le tableau de bord vivant de l'agent. Au centre, le **cœur** qui « respire » tant que JARVIS tourne — il **s'illumine** quand il parle (*JE PARLE*), vire à l'**or/ambre** quand la menace monte. Autour, le **diagnostic** (RAG, mémoire, connaissance) et l'**état moteur** (mode, modèle `qwen3.5:9b`, niveau de menace + sa cause). En bas, le **pipeline temps réel** : `ENTRÉE → BYPASS (< 100 ms, zéro LLM) → MÉMOIRE (RAG auto-borné à 4 000 chunks) → SOC LIVE → WEB → PVE → LLM LOCAL → OUTILS → RÉPONSE` — **chaque brique affiche sa métrique live**. L'agentification rendue visible.
 
-### Schéma logique de la pile — le rôle de chaque tuile
+<h3 align="center">Schéma logique de la pile — le rôle de chaque tuile</h3>
 
 *Le chemin d'une requête à travers les circuits de l'agent — chaque tuile a un rôle précis et affiche sa métrique en direct.*
 
@@ -279,14 +279,14 @@ Autour du flux, les **briques transversales** (enrichissent · protègent · agi
 
 </div>
 
-### Les capacités de l'agent
+<h3 align="center">Les capacités de l'agent</h3>
 
 <div align="center">
   <img src="Images/hermes-briques.png" alt="Briques transversales de l'agent" width="920"/>
   <br/><sub><em>Les <b>briques transversales</b> qui enrichissent, protègent et prolongent l'agent — <b>Vision</b> (analyse d'images), <b>MCP</b> (pont gouverné vers Claude Desktop), <b>Apprentissage</b>, <b>Réflexion</b>, <b>DR Cerveau</b> (sauvegarde/restauration), <b>Briefing</b> matinal proactif, <b>Alarmes</b>, <b>Pédagogie</b> (explique vs analyse), <b>Infogérance</b> (MAJ des VMs, fail-closed). Chacune affiche sa métrique live.</em></sub>
 </div>
 
-### Le tableau de bord vivant
+<h3 align="center">Le tableau de bord vivant</h3>
 
 <div align="center">
   <img src="Images/hermes-sante.png" alt="Six panneaux de santé de l'agent" width="920"/>
@@ -300,7 +300,7 @@ Autour du flux, les **briques transversales** (enrichissent · protègent · agi
 </tr>
 </table>
 
-### Le maintien en vie autonome
+<h3 align="center">Le maintien en vie autonome</h3>
 
 > **Le pari : un agent qui ne se contente pas d'apprendre — il se maintient lui-même en vie.**
 > Hermès reste *sain* indéfiniment **sans intervention** : il se diagnostique, se répare, se borne, et **alerte seul** si sa propre mécanique d'entretien s'arrête.
@@ -335,7 +335,7 @@ flowchart TB
 
 ---
 
-## 📚 Documentation
+<h2 align="center">📚 Documentation</h2>
 
 <div align="center">
 
@@ -352,7 +352,7 @@ flowchart TB
 
 ---
 
-## 🧩 Stack technique
+<h2 align="center">🧩 Stack technique</h2>
 
 <div align="center">
 
@@ -372,7 +372,7 @@ flowchart TB
 
 ---
 
-## 🛡️ Sécurité
+<h2 align="center">🛡️ Sécurité</h2>
 
 <div align="center">
 
