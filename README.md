@@ -157,6 +157,8 @@ flowchart LR
     DFN --> CMP["Compresseur<br/>VCA"] --> STE["Stereo<br/>Widener"] --> EQ["EQ<br/>4 bandes"] --> FX["FX Rack<br/>convolution"] --> AN["Analyseur<br/>FFT + phase"] --> OUT["🎚️ Output L+R<br/>gain · VU"]
 ```
 
+<div align="center">
+
 <table align="center">
 <tr><th>Étage</th><th>Rôle logique</th><th>Circuit</th></tr>
 <tr><td><b>TTS</b></td><td>synthèse vocale — Edge Antoine / Kokoro neural local</td><td>source</td></tr>
@@ -168,6 +170,8 @@ flowchart LR
 <tr><td><b>Analyseur</b></td><td>FFT temps réel + goniomètre de phase</td><td>Web Audio</td></tr>
 <tr><td><b>Output L+R</b></td><td>bus master : gain de sortie + VU-mètres</td><td>Web Audio</td></tr>
 </table>
+
+</div>
 
 > Côté **entrée**, la reconnaissance vocale (STT `faster-whisper large-v3-turbo`) est elle aussi **accélérée CUDA** — le GPU couvre toute la chaîne voix.
 
@@ -239,6 +243,8 @@ flowchart LR
     IN["ENTRÉE"] --> BY["BYPASS<br/>&lt; 100 ms"] --> MEM["MÉMOIRE<br/>RAG"] --> SOC["SOC<br/>LIVE"] --> WEB["WEB"] --> PVE["PVE"] --> LLM["LLM LOCAL<br/>qwen3.5:9b"] --> TL["OUTILS"] --> OUT["RÉPONSE<br/>texte + voix"]
 ```
 
+<div align="center">
+
 <table align="center">
 <tr><th>Tuile du flux</th><th>Rôle logique</th></tr>
 <tr><td><b>ENTRÉE</b></td><td>voix (STT Whisper) · texte · image (vision multimodale)</td></tr>
@@ -252,7 +258,11 @@ flowchart LR
 <tr><td><b>RÉPONSE</b></td><td>texte + voix (cache TTS)</td></tr>
 </table>
 
+</div>
+
 Autour du flux, les **briques transversales** (enrichissent · protègent · agissent), chacune une tuile d'état :
+
+<div align="center">
 
 <table align="center">
 <tr><th>Brique transversale</th><th>Rôle logique</th></tr>
@@ -266,6 +276,8 @@ Autour du flux, les **briques transversales** (enrichissent · protègent · agi
 <tr><td><b>PÉDAGOGIE</b></td><td>explique vs analyse (mode tuteur)</td></tr>
 <tr><td><b>INFOGÉRANCE</b></td><td>mise à jour des VMs, fail-closed</td></tr>
 </table>
+
+</div>
 
 ### Les capacités de l'agent
 
