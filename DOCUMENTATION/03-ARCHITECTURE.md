@@ -94,7 +94,7 @@
 > qwen3.5:9b est toujours chaud (défaut SOC + GÉNÉRAL + CODE + THINK — un seul modèle, zéro swap entre tous les modes de raisonnement). La VISION utilise le même qwen3.5:9b (multimodal natif) — donc aucun swap VRAM, même pour l'analyse d'image.
 
 <div align="center">
-  <img src="../Images/Jarvis-04b.png" alt="JARVIS — santé GPU RTX 5080 et paramètres LLM" width="340" />
+  <img src="../Images/reglages.png" alt="JARVIS — santé GPU RTX 5080 et paramètres LLM" width="340" />
   <br/>
   <sub>Monitoring GPU (VRAM, température, puissance) et profils LLM — l'optimisation matérielle RTX 5080 est pilotable depuis l'interface.</sub>
 </div>
