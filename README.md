@@ -18,8 +18,8 @@
     <a href="https://github.com/0xCyberLiTech/JARVIS/blob/main/CHANGELOG.md">
       <img src="https://img.shields.io/badge/%F0%9F%93%84%20Changelog-JARVIS-8B5CF6?style=flat-square" alt="Changelog" />
     </a>
-    <img src="https://img.shields.io/badge/local-100%25-0a7d33?style=flat-square" alt="100% local" />
-    <img src="https://img.shields.io/badge/cloud-0%25-c0392b?style=flat-square" alt="0% cloud" />
+    <img src="https://img.shields.io/badge/LLM-100%25%20local-0a7d33?style=flat-square" alt="LLM 100% local" />
+    <img src="https://img.shields.io/badge/LLM%20cloud-0%25-0a7d33?style=flat-square" alt="0% LLM cloud" />
   </p>
 
   <sub><strong>IA 100 % locale</strong> &nbsp;·&nbsp; <strong>Voix naturelle STT / TTS</strong> &nbsp;·&nbsp; <strong>Automatisation SOC</strong> &nbsp;·&nbsp; <strong>RTX 5080</strong></sub>
@@ -34,7 +34,7 @@
 
 </div>
 
-**JARVIS** est un assistant IA personnel de type *Iron Man* qui tourne **entièrement en local** sur un seul poste — Python/Flask + Ollama, RTX 5080. Pas un chatbot de plus : un **agent** doté d'une voix broadcast, d'une mémoire qui ne s'efface pas, d'une vision multimodale, et d'un **SOC qui défend l'infrastructure 24/7 sans intervention**. Zéro cloud, zéro abonnement — **aucune donnée ne quitte la machine.**
+**JARVIS** est un assistant IA personnel de type *Iron Man* qui tourne **entièrement en local** sur un seul poste — Python/Flask + Ollama, RTX 5080. Pas un chatbot de plus : un **agent** doté d'une voix broadcast, d'une mémoire qui ne s'efface pas, d'une vision multimodale, et d'un **SOC qui défend l'infrastructure 24/7 sans intervention**. Zéro LLM cloud, zéro abonnement — **le raisonnement, la mémoire et les données restent sur le poste** *(voix edge-tts en ligne au choix, repli Kokoro neural local hors-ligne)*.
 
 > [!IMPORTANT]
 > **Vitrine — pas une procédure d'installation.**
@@ -51,14 +51,14 @@
 
 <div align="center">
 
-| | |
-|---|---|
-| 🔒 **100 % local · zéro cloud** | LLM, voix, RAG, données — tout sur le poste. Aucune fuite, aucun abonnement. |
-| 🧠 **Un agent, pas un chatbot** | *Hermès* observe, mémorise, apprend et **agit** — sans être re-briefé à chaque session. |
-| 🛡️ **SOC autonome 24/7** | Détecte, bannit et redémarre **seul** · alertes vocales · contexte sécurité en direct. |
-| 🎙️ **Voix qualité broadcast** | Chaîne DSP pro (débruitage IA · compresseur · FX) + voix Edge, repli Kokoro neural local. |
-| ⚡ **RTX 5080 maîtrisée** | Modèle 100 % en VRAM, garde-fou anti-débordement, CUDA partout (Whisper · DeepFilterNet). |
-| ♿ **Pensé accessible** | Haute lisibilité, commandes vocales déterministes (< 100 ms), briefing matinal. |
+<table align="center">
+<tr><td>🔒 <b>IA 100 % locale</b></td><td>LLM, RAG, mémoire, données sur le poste — zéro LLM cloud, zéro abonnement. Voix edge-tts en ligne (repli Kokoro local).</td></tr>
+<tr><td>🧠 <b>Un agent, pas un chatbot</b></td><td><em>Hermès</em> observe, mémorise, apprend et <b>agit</b> — sans être re-briefé à chaque session.</td></tr>
+<tr><td>🛡️ <b>SOC autonome 24/7</b></td><td>Détecte, bannit et redémarre <b>seul</b> · alertes vocales · contexte sécurité en direct.</td></tr>
+<tr><td>🎙️ <b>Voix qualité broadcast</b></td><td>Chaîne DSP pro (débruitage IA · compresseur · FX) + voix Edge, repli Kokoro neural local.</td></tr>
+<tr><td>⚡ <b>RTX 5080 maîtrisée</b></td><td>Modèle 100 % en VRAM, garde-fou anti-débordement, CUDA partout (Whisper · DeepFilterNet).</td></tr>
+<tr><td>♿ <b>Pensé accessible</b></td><td>Haute lisibilité, commandes vocales déterministes (&lt; 100 ms), briefing matinal.</td></tr>
+</table>
 
 </div>
 
@@ -80,7 +80,7 @@
   <img src="Images/interface.png" alt="Cockpit JARVIS — interface neurale, modes de routage, télémétrie live" width="900"/>
 </div>
 
-Le poste de pilotage complet. À gauche, **l'interface neurale** (canal chiffré AES-256) et la barre de commande avec ses **modes de routage** — `SOC · GÉN · CODE · THINK` + entrées `MIC`, `IMG` (vision), `WEB`, `AIDE` — qui orientent chaque requête vers le bon comportement, **un seul modèle `qwen3.5:9b`, zéro swap**. À droite, la **télémétrie temps réel** : cœur d'intégrité, coordonnées, **GPU** (VRAM, température, watts), système et modèle neural. Onze modules accessibles d'un clic depuis la barre du haut.
+Le poste de pilotage complet. À gauche, **l'interface neurale** (loopback-only · bind `127.0.0.1`) et la barre de commande avec ses **modes de routage** — `SOC · GÉN · CODE · THINK` + entrées `MIC`, `IMG` (vision), `WEB`, `AIDE` — qui orientent chaque requête vers le bon comportement, **un seul modèle `qwen3.5:9b`, zéro swap**. À droite, la **télémétrie temps réel** : cœur d'intégrité, coordonnées, **GPU** (VRAM, température, watts), système et modèle neural. Onze modules accessibles d'un clic depuis la barre du haut.
 
 <a id="sec-2"></a>
 
@@ -91,7 +91,7 @@ Le poste de pilotage complet. À gauche, **l'interface neurale** (canal chiffré
 <table>
 <tr>
 <td width="50%" align="center"><img src="Images/set-gpu-health.png" width="410" alt="GPU Health"/><br/><sub><b>GPU Health</b> — VRAM / 16 Go, charge, température et puissance de la RTX 5080, en direct.</sub></td>
-<td width="50%" align="center"><img src="Images/set-impact.png" width="410" alt="Impact VRAM"/><br/><sub><b>Impact VRAM</b> — coût mémoire estimé <em>avant</em> lancement (modèle ~9 Go + cache KV), garde la « zone sûre ».</sub></td>
+<td width="50%" align="center"><img src="Images/set-impact.png" width="410" alt="Impact VRAM"/><br/><sub><b>Impact VRAM</b> — coût mémoire estimé <em>avant</em> lancement (~9 Go : modèle ~5,5 Go + cache KV), garde la « zone sûre ».</sub></td>
 </tr>
 <tr>
 <td width="50%" align="center"><img src="Images/set-profils.png" width="410" alt="Profils RTX 5080"/><br/><sub><b>Profils RTX 5080</b> — 6 préréglages en un clic : Rapide · Équilibré · Code · Créatif · Précis · MAX.</sub></td>
@@ -140,7 +140,7 @@ Une **chaîne broadcast complète** appliquée à la voix de synthèse, accélé
 </tr>
 <tr>
 <td width="50%" align="center"><img src="Images/dsp-voice-engine.png" width="410" alt="Moteur vocal"/><br/><sub><b>⑦ Moteur vocal</b> — bascule Edge (cloud) ↔ Kokoro (neural local), voix Antoine CA, test à la volée.</sub></td>
-<td width="50%" align="center"><img src="Images/dsp-voice-print.png" width="410" alt="Voice Print"/><br/><sub><b>⑧ Voice Print</b> — analyse vocale (librosa/scipy) : forme d'onde, pitch F0, spectre Mel + clonage vocal.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-voice-print.png" width="410" alt="Voice Print"/><br/><sub><b>⑧ Voice Print</b> — analyse vocale (librosa/scipy) : forme d'onde, pitch F0, spectre Mel.</sub></td>
 </tr>
 </table>
 
@@ -324,13 +324,14 @@ flowchart TB
 
 <div align="center">
 
-| # | Document | Description |
-|---|----------|-------------|
-| 01 | [Hermès](DOCUMENTATION/01-HERMES.md) | Mémoire · bypass · RAG · DR |
-| 02 | [Intégration&nbsp;SOC](DOCUMENTATION/02-SOC-INTEGRATION.md) | Auto-engine · bans · alertes |
-| 03 | [Architecture&nbsp;globale](DOCUMENTATION/03-ARCHITECTURE.md) | Flask · Blueprints · modules |
-| 04 | [Audio&nbsp;DSP](DOCUMENTATION/04-AUDIO-DSP.md) | Broadcast · TTS · STT · DSP |
-| 06 | [MCP&nbsp;Server](DOCUMENTATION/06-MCP-SERVER.md) | Outils exposés · conception |
+<table align="center">
+<tr><th>#</th><th>Document</th><th>Description</th></tr>
+<tr><td>01</td><td><a href="DOCUMENTATION/01-HERMES.md">Hermès</a></td><td>Mémoire · bypass · RAG · DR</td></tr>
+<tr><td>02</td><td><a href="DOCUMENTATION/02-SOC-INTEGRATION.md">Intégration&nbsp;SOC</a></td><td>Auto-engine · bans · alertes</td></tr>
+<tr><td>03</td><td><a href="DOCUMENTATION/03-ARCHITECTURE.md">Architecture&nbsp;globale</a></td><td>Flask · Blueprints · modules</td></tr>
+<tr><td>04</td><td><a href="DOCUMENTATION/04-AUDIO-DSP.md">Audio&nbsp;DSP</a></td><td>Broadcast · TTS · STT · DSP</td></tr>
+<tr><td>06</td><td><a href="DOCUMENTATION/06-MCP-SERVER.md">MCP&nbsp;Server</a></td><td>Outils exposés · conception</td></tr>
+</table>
 
 </div>
 
@@ -340,16 +341,17 @@ flowchart TB
 
 <div align="center">
 
-| Couche | Technologie |
-|--------|-------------|
-| **Backend** | Python 3.11 · Flask · Blueprints autoportants · DI pur |
-| **LLM local** | Ollama · qwen3.5:9b (SOC + général + code + think + **vision** multimodal · un seul modèle, zéro swap) |
-| **RAG** | qwen3-embedding:4b (dim 2560) · BM25 hybride · auto-borné · TTL 5 min |
-| **TTS** | edge-tts fr-CA Antoine → repli Kokoro CUDA neural (hors-ligne, local) |
-| **STT** | faster-whisper large-v3-turbo CUDA · vocabulaire SOC |
-| **Frontend** | Vanilla JS · Web Audio API · xterm.js · Monaco Editor |
-| **Agent Hermès** | synoptique · bypass regex · scheduler daemon · indépendant du LLM |
-| **Qualité** | suite pytest · gate de couverture pré-push · ruff 0 · eslint 0 · hooks pré-commit/pré-push |
+<table align="center">
+<tr><th>Couche</th><th>Technologie</th></tr>
+<tr><td><b>Backend</b></td><td>Python 3.11 · Flask · Blueprints autoportants · DI pur</td></tr>
+<tr><td><b>LLM local</b></td><td>Ollama · qwen3.5:9b (SOC + général + code + think + <b>vision</b> multimodal · un seul modèle, zéro swap)</td></tr>
+<tr><td><b>RAG</b></td><td>qwen3-embedding:4b (dim 2560) · BM25 hybride · auto-borné · TTL 5 min</td></tr>
+<tr><td><b>TTS</b></td><td>edge-tts fr-CA Antoine → repli Kokoro CUDA neural (hors-ligne, local)</td></tr>
+<tr><td><b>STT</b></td><td>faster-whisper large-v3-turbo CUDA · vocabulaire SOC</td></tr>
+<tr><td><b>Frontend</b></td><td>Vanilla JS · Web Audio API · xterm.js · Monaco Editor</td></tr>
+<tr><td><b>Agent Hermès</b></td><td>synoptique · bypass regex · scheduler daemon · indépendant du LLM</td></tr>
+<tr><td><b>Qualité</b></td><td>suite pytest · gate de couverture pré-push · ruff 0 · eslint 0 · hooks pré-commit/pré-push</td></tr>
+</table>
 
 </div>
 
@@ -359,13 +361,14 @@ flowchart TB
 
 <div align="center">
 
-| Principe | Implémentation |
-|----------|----------------|
-| **100 % local** | JARVIS filtre et agrège localement — rien ne part vers un LLM cloud |
-| **RFC1918 immuable** | Les plages IP privées ne peuvent jamais être bannies |
-| **SSH lecture seule** | Patterns dangereux bloqués · whitelist explicite pour l'écriture |
-| **SOC side-channel** | Le contexte sécurité n'entre jamais dans l'historique chat |
-| **Audit forensique** | Toute opération SSH d'écriture tracée dans un journal JSONL |
+<table align="center">
+<tr><th>Principe</th><th>Implémentation</th></tr>
+<tr><td><b>100 % local</b></td><td>JARVIS filtre et agrège localement — rien ne part vers un LLM cloud</td></tr>
+<tr><td><b>RFC1918 immuable</b></td><td>Les plages IP privées ne peuvent jamais être bannies</td></tr>
+<tr><td><b>SSH lecture seule</b></td><td>Patterns dangereux bloqués · whitelist explicite pour l'écriture</td></tr>
+<tr><td><b>SOC side-channel</b></td><td>Le contexte sécurité n'entre jamais dans l'historique chat</td></tr>
+<tr><td><b>Audit forensique</b></td><td>Toute opération SSH d'écriture tracée dans un journal JSONL</td></tr>
+</table>
 
 </div>
 
