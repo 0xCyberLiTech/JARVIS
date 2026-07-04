@@ -86,11 +86,20 @@ Le poste de pilotage complet. À gauche, **l'interface neurale** (canal chiffré
 
 ### 2 · Réglages LLM & profils GPU
 
-<div align="center">
-  <img src="Images/reglages.png" alt="Réglages — GPU Health, impact VRAM, profils RTX 5080" width="380"/>
-</div>
+*Le centre de contrôle fin de l'inférence locale — chaque carte pilote un aspect de la RTX 5080 et du modèle.*
 
-Le centre de contrôle fin de l'inférence locale. **GPU Health** suit la RTX 5080 en direct (VRAM / 16 Go, charge, température, puissance). **Impact sur la RTX** estime *avant* de lancer le coût mémoire des réglages — poids du modèle (~9 Go) + cache KV — et garantit qu'on reste en **« zone sûre »** sans saturer la carte. Les **profils** (Rapide · Équilibré · Code · Créatif · Précis · RTX 5080 MAX) ajustent créativité, longueur et contexte en un clic. *(Le prompt système gouverné — anti-hallucination, méthodologie SOC — vit dans le même onglet, volontairement non exposé ici.)*
+<table>
+<tr>
+<td width="50%" align="center"><img src="Images/set-gpu-health.png" width="410" alt="GPU Health"/><br/><sub><b>GPU Health</b> — VRAM / 16 Go, charge, température et puissance de la RTX 5080, en direct.</sub></td>
+<td width="50%" align="center"><img src="Images/set-impact.png" width="410" alt="Impact VRAM"/><br/><sub><b>Impact VRAM</b> — coût mémoire estimé <em>avant</em> lancement (modèle ~9 Go + cache KV), garde la « zone sûre ».</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><img src="Images/set-profils.png" width="410" alt="Profils RTX 5080"/><br/><sub><b>Profils RTX 5080</b> — 6 préréglages en un clic : Rapide · Équilibré · Code · Créatif · Précis · MAX.</sub></td>
+<td width="50%" align="center"><img src="Images/set-params.png" width="410" alt="Paramètres LLM"/><br/><sub><b>Paramètres LLM</b> — température, top-p/k, contexte, repeat penalty + 3 modes d'optimisation latence.</sub></td>
+</tr>
+</table>
+
+> Le **prompt système gouverné** (anti-hallucination, méthodologie SOC, profils sauvegardés) vit dans le même onglet — volontairement non exposé ici (il contient des références internes).
 
 <a id="sec-3"></a>
 
@@ -104,13 +113,29 @@ Surveillance **temps réel** de toute la machine : six jauges (GPU, VRAM / 16 Go
 
 <a id="sec-4"></a>
 
-### 4 · Studio audio DSP
+### 4 · Studio audio DSP — le rack broadcast
 
-<div align="center">
-  <img src="Images/studio-dsp.png" alt="Studio DSP — chaîne broadcast CUDA : DeepFilterNet, compresseur, stereo widener, FX" width="900"/>
-</div>
+Une **chaîne broadcast complète** appliquée à la voix de synthèse, accélérée **CUDA** :
+`TTS → DeepFilterNet → Compresseur → Stereo → Analyseur → FX → EQ → Output`. **Huit étages**, chacun sa fonction — tout en Web Audio, temps réel, en local.
 
-Une **chaîne broadcast complète** appliquée à la voix de synthèse, accélérée **CUDA** : `TTS → DeepFilterNet → Compresseur → Gain → Stereo → Analyseur → FX Rack → Output L+R`. **DeepFilterNet3** (réseau de neurones) supprime bruit de fond et artefacts TTS ; le **compresseur VCA** homogénéise le volume (seuil, ratio, attaque, relâche) ; le **Stereo Widener** (effet Haas) élargit l'image sans casser la compatibilité mono. Chaque étage a ses paramètres fins et son analyseur spectral — une voix de qualité studio, en local.
+<table>
+<tr>
+<td width="50%" align="center"><img src="Images/dsp-deepfilter.png" width="410" alt="DeepFilterNet"/><br/><sub><b>① DeepFilterNet</b> — débruitage IA (DeepFilterNet3) : supprime bruit de fond et artefacts TTS.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-compressor.png" width="410" alt="Compresseur dynamique"/><br/><sub><b>② Compresseur</b> — dynamique VCA (seuil · ratio · attaque · relâche) : voix homogène, sans pics.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><img src="Images/dsp-stereo.png" width="410" alt="Stereo Widener"/><br/><sub><b>③ Stereo Widener</b> — effet Haas : élargit l'image stéréo, compatibilité mono préservée.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-fx.png" width="410" alt="FX Rack"/><br/><sub><b>④ FX Rack</b> — reverb · echo · delay · chorus · flanger par convolution : le caractère sonore.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><img src="Images/dsp-analyser.png" width="410" alt="Analyseur spectral"/><br/><sub><b>⑤ Analyseur spectral</b> — FFT temps réel, plusieurs modes d'affichage + goniomètre de phase.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-eq.png" width="410" alt="EQ paramétrique"/><br/><sub><b>⑥ EQ paramétrique</b> — 4 bandes (LOW/MID/HIGH/AIR) couplées à la voix, avec presets.</sub></td>
+</tr>
+<tr>
+<td width="50%" align="center"><img src="Images/dsp-voice-engine.png" width="410" alt="Moteur vocal"/><br/><sub><b>⑦ Moteur vocal</b> — bascule Edge (cloud) ↔ Kokoro (neural local), voix Antoine CA, test à la volée.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-voice-print.png" width="410" alt="Voice Print"/><br/><sub><b>⑧ Voice Print</b> — analyse vocale (librosa/scipy) : forme d'onde, pitch F0, spectre Mel + clonage vocal.</sub></td>
+</tr>
+</table>
 
 <a id="sec-5"></a>
 
