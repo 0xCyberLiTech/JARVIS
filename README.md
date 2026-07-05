@@ -41,7 +41,7 @@
 > Ce dépôt **présente** le projet (architecture, conception, capacités). Le **code opérationnel reste privé** : JARVIS n'est **pas déployable** depuis ce dépôt. On y montre le *quoi* et le *pourquoi* — jamais le *comment* exact.
 
 <div align="center">
-  <img src="Images/accueil.png" alt="Écran de démarrage JARVIS — séquence SYS.INIT" width="820"/>
+  <img src="Images/accueil.webp" alt="Écran de démarrage JARVIS — séquence SYS.INIT" width="820"/>
   <br/><sub><em>Au démarrage, JARVIS s'auto-diagnostique — <b>NEURAL CORE · VOICE ENGINE · AUDIO DSP · KNOWLEDGE BASE</b> à 100 % — puis annonce son état : modèle <code>qwen3.5:9b</code> via Ollama, voix Edge Antoine, DSP (EQ · compresseur · DeepFilterNet), accélération CUDA sm_120 Blackwell.</em></sub>
 </div>
 
@@ -77,7 +77,7 @@
 <h3 align="center">1 · Le cockpit</h3>
 
 <div align="center">
-  <img src="Images/interface.png" alt="Cockpit JARVIS — interface neurale, modes de routage, télémétrie live" width="900"/>
+  <img src="Images/interface.webp" alt="Cockpit JARVIS — interface neurale, modes de routage, télémétrie live" width="900"/>
 </div>
 
 Le poste de pilotage complet. À gauche, **l'interface neurale** (loopback-only · bind `127.0.0.1`) et la barre de commande avec ses **modes de routage** — `SOC · GÉN · CODE · THINK` + entrées `MIC`, `IMG` (vision), `WEB`, `AIDE` — qui orientent chaque requête vers le bon comportement, **un seul modèle `qwen3.5:9b`, zéro swap**. À droite, la **télémétrie temps réel** : cœur d'intégrité, coordonnées, **GPU** (VRAM, température, watts), système et modèle neural. Onze modules accessibles d'un clic depuis la barre du haut.
@@ -90,12 +90,12 @@ Le poste de pilotage complet. À gauche, **l'interface neurale** (loopback-only 
 
 <table>
 <tr>
-<td width="50%" align="center"><img src="Images/set-gpu-health.png" width="410" alt="GPU Health"/><br/><sub><b>GPU Health</b> — VRAM / 16 Go, charge, température et puissance de la RTX 5080, en direct.</sub></td>
-<td width="50%" align="center"><img src="Images/set-impact.png" width="410" alt="Impact VRAM"/><br/><sub><b>Impact VRAM</b> — coût mémoire estimé <em>avant</em> lancement (~9 Go : modèle ~5,5 Go + cache KV), garde la « zone sûre ».</sub></td>
+<td width="50%" align="center"><img src="Images/set-gpu-health.webp" width="410" alt="GPU Health"/><br/><sub><b>GPU Health</b> — VRAM / 16 Go, charge, température et puissance de la RTX 5080, en direct.</sub></td>
+<td width="50%" align="center"><img src="Images/set-impact.webp" width="410" alt="Impact VRAM"/><br/><sub><b>Impact VRAM</b> — coût mémoire estimé <em>avant</em> lancement (~9 Go : modèle ~5,5 Go + cache KV), garde la « zone sûre ».</sub></td>
 </tr>
 <tr>
-<td width="50%" align="center"><img src="Images/set-profils.png" width="410" alt="Profils RTX 5080"/><br/><sub><b>Profils RTX 5080</b> — 6 préréglages en un clic : Rapide · Équilibré · Code · Créatif · Précis · MAX.</sub></td>
-<td width="50%" align="center"><img src="Images/set-params.png" width="410" alt="Paramètres LLM"/><br/><sub><b>Paramètres LLM</b> — température, top-p/k, contexte, repeat penalty + 3 modes d'optimisation latence.</sub></td>
+<td width="50%" align="center"><img src="Images/set-profils.webp" width="410" alt="Profils RTX 5080"/><br/><sub><b>Profils RTX 5080</b> — 6 préréglages en un clic : Rapide · Équilibré · Code · Créatif · Précis · MAX.</sub></td>
+<td width="50%" align="center"><img src="Images/set-params.webp" width="410" alt="Paramètres LLM"/><br/><sub><b>Paramètres LLM</b> — température, top-p/k, contexte, repeat penalty + 3 modes d'optimisation latence.</sub></td>
 </tr>
 </table>
 
@@ -106,13 +106,13 @@ Le poste de pilotage complet. À gauche, **l'interface neurale** (loopback-only 
 <h3 align="center">3 · Monitoring GPU · CPU · VRAM</h3>
 
 <div align="center">
-  <img src="Images/monitor.png" alt="Moniteur RTX 5080 — GPU, VRAM, température, CPU, RAM temps réel" width="900"/>
+  <img src="Images/monitor.webp" alt="Moniteur RTX 5080 — GPU, VRAM, température, CPU, RAM temps réel" width="900"/>
 </div>
 
 Surveillance **temps réel** de toute la machine : six jauges (GPU, VRAM / 16 Go, température, puissance, CPU, RAM) puis le détail — **GPU Core** (horloges, encodeur/décodeur), **thermique & puissance**, **mémoire VRAM** (utilisée / libre), processeur (32 cœurs, fréquence, uptime), réseau et disque I/O.
 
 <div align="center">
-  <img src="Images/monitor-llm-vram.png" alt="Empreinte LLM en VRAM — qwen3.5:9b + embedding RAG" width="900"/>
+  <img src="Images/monitor-llm-vram.webp" alt="Empreinte LLM en VRAM — qwen3.5:9b + embedding RAG" width="900"/>
   <br/><sub><em><b>Empreinte LLM en VRAM</b> — le modèle <code>qwen3.5:9b</code> (~5,5 Go) et l'embedding RAG <code>qwen3-embedding:4b</code> (~4,1 Go) cohabitent dans les 16 Go, ~40 % libre. Débit live (tok/s), <code>num_ctx</code> et <b>SWAP RAM = 0</b> : tout tient sur la carte, pleine vitesse.</em></sub>
 </div>
 
@@ -127,20 +127,20 @@ Une **chaîne broadcast complète** appliquée à la voix de synthèse, accélé
 
 <table>
 <tr>
-<td width="50%" align="center"><img src="Images/dsp-deepfilter.png" width="410" alt="DeepFilterNet"/><br/><sub><b>① DeepFilterNet</b> — débruitage IA (DeepFilterNet3) : supprime bruit de fond et artefacts TTS.</sub></td>
-<td width="50%" align="center"><img src="Images/dsp-compressor.png" width="410" alt="Compresseur dynamique"/><br/><sub><b>② Compresseur</b> — dynamique VCA (seuil · ratio · attaque · relâche) : voix homogène, sans pics.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-deepfilter.webp" width="410" alt="DeepFilterNet"/><br/><sub><b>① DeepFilterNet</b> — débruitage IA (DeepFilterNet3) : supprime bruit de fond et artefacts TTS.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-compressor.webp" width="410" alt="Compresseur dynamique"/><br/><sub><b>② Compresseur</b> — dynamique VCA (seuil · ratio · attaque · relâche) : voix homogène, sans pics.</sub></td>
 </tr>
 <tr>
-<td width="50%" align="center"><img src="Images/dsp-stereo.png" width="410" alt="Stereo Widener"/><br/><sub><b>③ Stereo Widener</b> — effet Haas : élargit l'image stéréo, compatibilité mono préservée.</sub></td>
-<td width="50%" align="center"><img src="Images/dsp-fx.png" width="410" alt="FX Rack"/><br/><sub><b>④ FX Rack</b> — reverb · echo · delay · chorus · flanger par convolution : le caractère sonore.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-stereo.webp" width="410" alt="Stereo Widener"/><br/><sub><b>③ Stereo Widener</b> — effet Haas : élargit l'image stéréo, compatibilité mono préservée.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-fx.webp" width="410" alt="FX Rack"/><br/><sub><b>④ FX Rack</b> — reverb · echo · delay · chorus · flanger par convolution : le caractère sonore.</sub></td>
 </tr>
 <tr>
-<td width="50%" align="center"><img src="Images/dsp-analyser.png" width="410" alt="Analyseur spectral"/><br/><sub><b>⑤ Analyseur spectral</b> — FFT temps réel, plusieurs modes d'affichage + goniomètre de phase.</sub></td>
-<td width="50%" align="center"><img src="Images/dsp-eq.png" width="410" alt="EQ paramétrique"/><br/><sub><b>⑥ EQ paramétrique</b> — 4 bandes (LOW/MID/HIGH/AIR) couplées à la voix, avec presets.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-analyser.webp" width="410" alt="Analyseur spectral"/><br/><sub><b>⑤ Analyseur spectral</b> — FFT temps réel, plusieurs modes d'affichage + goniomètre de phase.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-eq.webp" width="410" alt="EQ paramétrique"/><br/><sub><b>⑥ EQ paramétrique</b> — 4 bandes (LOW/MID/HIGH/AIR) couplées à la voix, avec presets.</sub></td>
 </tr>
 <tr>
-<td width="50%" align="center"><img src="Images/dsp-voice-engine.png" width="410" alt="Moteur vocal"/><br/><sub><b>⑦ Moteur vocal</b> — bascule Edge (cloud) ↔ Kokoro (neural local), voix Antoine CA, test à la volée.</sub></td>
-<td width="50%" align="center"><img src="Images/dsp-voice-print.png" width="410" alt="Voice Print"/><br/><sub><b>⑧ Voice Print</b> — analyse vocale (librosa/scipy) : forme d'onde, pitch F0, spectre Mel.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-voice-engine.webp" width="410" alt="Moteur vocal"/><br/><sub><b>⑦ Moteur vocal</b> — bascule Edge (cloud) ↔ Kokoro (neural local), voix Antoine CA, test à la volée.</sub></td>
+<td width="50%" align="center"><img src="Images/dsp-voice-print.webp" width="410" alt="Voice Print"/><br/><sub><b>⑧ Voice Print</b> — analyse vocale (librosa/scipy) : forme d'onde, pitch F0, spectre Mel.</sub></td>
 </tr>
 </table>
 
@@ -180,7 +180,7 @@ flowchart LR
 <h3 align="center">5 · Voice Lab</h3>
 
 <div align="center">
-  <img src="Images/voice-lab.png" alt="Voice Lab — moteurs TTS, paramètres vocaux, bibliothèque, comparateur A/B" width="900"/>
+  <img src="Images/voice-lab.webp" alt="Voice Lab — moteurs TTS, paramètres vocaux, bibliothèque, comparateur A/B" width="900"/>
 </div>
 
 L'atelier de la voix de l'assistant. **Source** commutable — **Edge** (Antoine fr-CA) ↔ **Kokoro** neural CUDA, 100 % local hors-ligne — puis **paramètres vocaux** fins (vitesse, hauteur, volume + égalisation LOW/MID/HIGH/AIR synchronisée au DSP), une **bibliothèque** de voix (JARVIS Standard, Grave, Aiguë, Radio FM, Kokoro Neural) et un **comparateur A/B** pour trancher à l'oreille. C'est ce qui donne à JARVIS une voix naturelle et homogène, en ligne comme hors-ligne.
@@ -190,7 +190,7 @@ L'atelier de la voix de l'assistant. **Source** commutable — **Edge** (Antoine
 <h3 align="center">6 · Accès Web gouverné</h3>
 
 <div align="center">
-  <img src="Images/acces-web.png" alt="Accès Web gouverné — allowlist explicite, lecture seule, journalisé" width="900"/>
+  <img src="Images/acces-web.webp" alt="Accès Web gouverné — allowlist explicite, lecture seule, journalisé" width="900"/>
 </div>
 
 L'agent peut consulter le web — mais **sous contrôle strict**. JARVIS ne visite QUE les domaines d'une **allowlist explicite** : des **sites système verrouillés** (météo, veille IA, recherche — non supprimables) plus ceux que *tu* autorises nommément. Tout est en **lecture seule**, **chaque accès est journalisé**, et tout le reste est **refusé**. Même principe de moindre privilège que pour le SOC : la curiosité de l'agent reste gouvernée.
@@ -200,7 +200,7 @@ L'agent peut consulter le web — mais **sous contrôle strict**. JARVIS ne visi
 <h3 align="center">7 · SOC — réponse automatique</h3>
 
 <div align="center">
-  <img src="Images/soc.png" alt="SOC — activité 30 jours et compteurs de défense temps réel" width="920"/>
+  <img src="Images/soc.webp" alt="SOC — activité 30 jours et compteurs de défense temps réel" width="920"/>
 </div>
 
 Le **centre de défense** de JARVIS. Courbe d'**activité sur 30 jours** (pics offensifs) et **compteurs en direct** — actions, **bans IP**, restarts, succès / échecs, détections **IDS**. JARVIS surveille nginx / CrowdSec / fail2ban / Suricata en continu et **agit seul** (ban, restart) selon des seuils : l'agent ne se contente pas d'alerter, il **répond**.
@@ -212,7 +212,7 @@ Le **centre de défense** de JARVIS. Courbe d'**activité sur 30 jours** (pics o
 <h2 align="center">⌨️ Terminal SSH intégré (mode Code)</h2>
 
 <div align="center">
-  <img src="Images/terminal.png" alt="Terminal SSH JARVIS — PTY xterm-256color, raccourcis, HUD ressources, chat inline" width="920"/>
+  <img src="Images/terminal.webp" alt="Terminal SSH JARVIS — PTY xterm-256color, raccourcis, HUD ressources, chat inline" width="920"/>
 </div>
 
 Un **vrai terminal SSH interactif** (PTY `xterm-256color`) intégré à JARVIS — pour piloter le serveur de dev **sans quitter l'interface**. À gauche, des **raccourcis en un clic** (SYS : `ls`, `df`, `uptime`, `ports`, `ps`, `top`… · DEV : `git`, `python3`, `find`, `syslog`…). En bas, un **HUD ressources en direct** (load · RAM · disque · réseau · uptime) et une barre **« Demandez à JARVIS depuis le terminal »** : l'agent lit la sortie et propose la commande suivante. Sortie **couleur** complète, redimensionnement à chaud.
@@ -229,7 +229,7 @@ Un **vrai terminal SSH interactif** (PTY `xterm-256color`) intégré à JARVIS �
 > Là où un assistant répond, un agent **observe, mémorise, apprend et agit** — sans être re-briefé à chaque session.
 
 <div align="center">
-  <img src="Images/hermes.png" alt="Hermès — cœur de l'agent, état moteur et pipeline temps réel" width="920"/>
+  <img src="Images/hermes.webp" alt="Hermès — cœur de l'agent, état moteur et pipeline temps réel" width="920"/>
 </div>
 
 Le tableau de bord vivant de l'agent. Au centre, le **cœur** qui « respire » tant que JARVIS tourne — il **s'illumine** quand il parle (*JE PARLE*), vire à l'**or/ambre** quand la menace monte. Autour, le **diagnostic** (RAG, mémoire, connaissance) et l'**état moteur** (mode, modèle `qwen3.5:9b`, niveau de menace + sa cause). En bas, le **pipeline temps réel** : `ENTRÉE → BYPASS (< 100 ms, zéro LLM) → MÉMOIRE (RAG auto-borné à 4 000 chunks) → SOC LIVE → WEB → PVE → LLM LOCAL → OUTILS → RÉPONSE` — **chaque brique affiche sa métrique live**. L'agentification rendue visible.
@@ -282,21 +282,21 @@ Autour du flux, les **briques transversales** (enrichissent · protègent · agi
 <h3 align="center">Les capacités de l'agent</h3>
 
 <div align="center">
-  <img src="Images/hermes-briques.png" alt="Briques transversales de l'agent" width="920"/>
+  <img src="Images/hermes-briques.webp" alt="Briques transversales de l'agent" width="920"/>
   <br/><sub><em>Les <b>briques transversales</b> qui enrichissent, protègent et prolongent l'agent — <b>Vision</b> (analyse d'images), <b>MCP</b> (pont gouverné vers Claude Desktop), <b>Apprentissage</b>, <b>Réflexion</b>, <b>DR Cerveau</b> (sauvegarde/restauration), <b>Briefing</b> matinal proactif, <b>Alarmes</b>, <b>Pédagogie</b> (explique vs analyse), <b>Infogérance</b> (MAJ des VMs, fail-closed). Chacune affiche sa métrique live.</em></sub>
 </div>
 
 <h3 align="center">Le tableau de bord vivant</h3>
 
 <div align="center">
-  <img src="Images/hermes-sante.png" alt="Six panneaux de santé de l'agent" width="920"/>
+  <img src="Images/hermes-sante.webp" alt="Six panneaux de santé de l'agent" width="920"/>
   <br/><sub><em>Six panneaux d'auto-diagnostic d'un coup d'œil — <b>Cerveau/Mémoire</b> (leçons apprises, rythme), <b>Sauvegarde</b> (instantané + auto quotidien 21 h), <b>Santé mémoire</b> (verdict GO/NO-GO, intégrité : 0 orphelin, 0 lien cassé), <b>SOC Auto-engine</b>, <b>Historique</b> persisté, <b>Réflexion</b> (corrections proposées vs apprises, taux d'apprentissage).</em></sub>
 </div>
 
 <table>
 <tr>
-<td width="50%" align="center"><img src="Images/hermes-growth.png" width="430" alt="Croissance du cerveau"/><br/><sub><b>Croissance du cerveau</b> — cumul des leçons + rythme d'apprentissage : la mémoire s'accumule, persistée et réinjectée, jamais repartie de zéro.</sub></td>
-<td width="50%" align="center"><img src="Images/hermes-nodrift.png" width="430" alt="Non-dérive des leçons"/><br/><sub><b>Non-dérive</b> — chaque leçon porte un statut (active · promouvable · doublon · périmée) ; corpus sain → bandeau <b>« AUCUNE DÉRIVE »</b>.</sub></td>
+<td width="50%" align="center"><img src="Images/hermes-growth.webp" width="430" alt="Croissance du cerveau"/><br/><sub><b>Croissance du cerveau</b> — cumul des leçons + rythme d'apprentissage : la mémoire s'accumule, persistée et réinjectée, jamais repartie de zéro.</sub></td>
+<td width="50%" align="center"><img src="Images/hermes-nodrift.webp" width="430" alt="Non-dérive des leçons"/><br/><sub><b>Non-dérive</b> — chaque leçon porte un statut (active · promouvable · doublon · périmée) ; corpus sain → bandeau <b>« AUCUNE DÉRIVE »</b>.</sub></td>
 </tr>
 </table>
 

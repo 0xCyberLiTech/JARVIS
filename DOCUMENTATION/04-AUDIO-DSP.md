@@ -84,7 +84,7 @@ SOURCE TTS (edge-tts Antoine / Kokoro)
 ```
 
 <div align="center">
-  <img src="../Images/studio-dsp.png" alt="JARVIS — rack DSP audio broadcast : DeepFilterNet, compresseur, stereo, analyseur" width="720" />
+  <img src="../Images/studio-dsp.webp" alt="JARVIS — rack DSP audio broadcast : DeepFilterNet, compresseur, stereo, analyseur" width="720" />
   <br/>
   <sub>Le rack DSP en interface : waveform, EQ, compresseur, analyseur de spectre — chaîne voix de type broadcast, entièrement en Web Audio.</sub>
 </div>
