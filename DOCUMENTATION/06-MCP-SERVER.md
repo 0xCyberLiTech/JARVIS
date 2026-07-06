@@ -155,6 +155,24 @@ LAN). En défense en profondeur, un token Bearer protège `/mcp`, `/sse` et `/me
   « no-op » : sans le bon `Authorization: Bearer`, la requête reçoit `401`. Comparaison en temps
   constant (anti timing-attack).
 
+### Rotation du token (procédure)
+
+Le serveur **fige le token au démarrage** (`_load_mcp_token()` lu une fois). Une rotation doit donc
+**synchroniser 3 choses** puis **redémarrer le MCP** — sinon `.mcp.json` (client) et le serveur en
+mémoire divergent (→ `401`). Ordre atomique :
+
+1. Écrire un nouveau token dans `jarvis_mcp_token.txt` (`secrets.token_urlsafe(32)` ; **gitignoré**).
+2. Synchroniser le `Authorization: Bearer <token>` dans **`.mcp.json`** (à la **racine du workspace**,
+   pas dans `scripts/`).
+3. Redémarrer le MCP : **tuer le process** écoutant sur `5010` → le watchdog `_mcp_liveness_watch`
+   le **respawn** (< 15 s) en relisant le fichier. (Si `JARVIS_MCP_TOKEN` est défini en env, il
+   **prime** sur le fichier → roter l'env à la place.)
+4. Vérifier : `curl -X POST -H "Authorization: Bearer <ancien>" http://127.0.0.1:5010/mcp` → **401** ;
+   avec le nouveau → **non-401**.
+
+> Rotation effectuée le 2026-07-06 (l'ancien token traînait dans l'historique `scripts/.git`, sans
+> remote donc sans fuite publique, mais invalidé par principe).
+
 ---
 
 ## Identifiant visuel dans VSCode
