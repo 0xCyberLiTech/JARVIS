@@ -331,7 +331,7 @@ flowchart TB
 - 🚨 **Aucune panne silencieuse** — si l'entretien s'arrête, une sentinelle alerte.
 - 🔒 **Fail-closed de bout en bout** — au moindre doute, refuser ; sauvegarde avant toute écriture.
 
-> Détail technique complet — moteur d'entretien, états publiés, garde-fous outillés, les 5 briques, comparatif Avant / Après — dans **[01 — Hermès](DOCUMENTATION/01-HERMES.md)**.
+> Détail technique complet — moteur d'entretien, états publiés, garde-fous outillés, l'inventaire des briques, comparatif Avant / Après — dans **[01 — Hermès](DOCUMENTATION/01-HERMES.md)**.
 
 ---
 

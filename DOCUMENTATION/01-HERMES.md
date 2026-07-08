@@ -109,11 +109,14 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 
 ---
 
-## Schéma 2 — Les 5 briques fondatrices d'Hermès
+## Schéma 2 — Les briques fondatrices d'Hermès
 
-> Ces 5 briques sont le socle. Elles sont complétées par des **briques avancées**
-> (mode pédagogique, infogérance orchestrée, DR du cerveau, cache vocal) —
-> détaillées plus bas.
+> Ces briques sont le socle historique. Elles sont complétées par des **briques avancées**
+> (mode pédagogique, infogérance orchestrée, DR du cerveau, cache vocal) — détaillées plus
+> bas — et par des briques nées de l'usage (web, PVE, vision, MCP, alarmes). **Le compte
+> exact des briques n'est PAS figé ici : il VIT dans le schéma d'agentification (interface,
+> onglet APPRENTISSAGE → SCHÉMA HERMÈS, nœuds `data-brick`)** — cf. l'inventaire live ci-dessous.
+> Doctrine « compté LIVE, jamais figé » ; verrou : garde-fou `jarvis-frozen-count-guard`.
 
 ```
 ┌───────────────────────────────────────────────┐
@@ -157,6 +160,58 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 │                                               │
 └───────────────────────────────────────────────┘
 ```
+
+---
+
+## Inventaire LIVE des briques
+
+> **Source de vérité = le SCHÉMA HERMÈS** rendu dans l'interface (onglet APPRENTISSAGE),
+> pas ce tableau. Il est reproduit ici pour référence, dérivé des nœuds `data-brick` réels ;
+> le **compte n'est jamais figé** dans la prose (verrou `jarvis-frozen-count-guard`).
+> Les briques marquées ✎ ont une section détaillée plus bas ; les autres, nées de l'usage,
+> sont opérationnelles et instrumentées mais pas (encore) déroulées en profondeur.
+
+**Flux d'une requête** : `ENTRÉE` → **Hermès** → `LLM LOCAL` → `OUTILS` → `RÉPONSE`
+(`ENTRÉE` et `RÉPONSE` sont les E/S du flux, pas des briques).
+
+**Couche Hermès — enrichit / filtre le contexte avant le LLM :**
+
+| Brique | Rôle | Détaillée |
+|--------|------|:---------:|
+| BYPASS | commandes directes déterministes · 0 LLM (< 100 ms) | ✎ |
+| MÉMOIRE | faits + leçons (RAG) · persistance inter-sessions | ✎ |
+| SOC LIVE | contexte sécurité — injection avant LLM (détail : `02-SOC-INTEGRATION.md`) | — |
+| WEB | recherche internet à la demande | — |
+| PVE | état Proxmox temps réel | — |
+
+**Traitement :** `LLM LOCAL` (raisonnement) → `OUTILS` (fichiers / SSH appelés par le LLM).
+
+**Briques transversales — enrichissent / protègent / agissent :**
+
+| Brique | Rôle | Détaillée |
+|--------|------|:---------:|
+| VISION | analyse d'images (multimodal) | — |
+| MCP | pont vers Claude Desktop | — |
+| APPRENTISSAGE | « souviens-toi » → leçons du cerveau | ✎ |
+| RÉFLEXION | apprend de tes corrections (cumul) · famille de la boucle d'apprentissage | — |
+| DR CERVEAU | sauvegarde / restaure la mémoire | ✎ |
+| BRIEFING | résumé proactif au réveil | ✎ |
+| ALARMES | rappels à l'heure · 0 LLM | — |
+| PÉDAGOGIE | tuteur : explique vs analyse | ✎ |
+| INFOGÉRANCE | MAJ VM orchestrée · fail-closed | ✎ |
+
+Le **cache vocal** (restitution TTS instantanée) agit sur la brique `RÉPONSE` (détaillé plus bas).
+
+**Sections détaillées sans nœud `data-brick`** (capacités réelles, hors schéma live) : *Brique 1 —
+Synoptique* (le tableau de bord d'observabilité lui-même, pas une brique du pipeline), *Brique 9 —
+Cache vocal* (agit sur `RÉPONSE`), *Brique 10 — Connaissance vérifiable / anti-dérive* (moteur de
+non-dérive, `memory-audit`).
+
+**Capacités agentiques présentes côté backend / autres tuiles mais ABSENTES du SCHÉMA HERMÈS**
+(le schéma sous-représente donc l'agent — à trancher : les promouvoir en nœuds `data-brick` ou les
+noter explicitement hors schéma) : **AUTO-ENGINE SOC** (ban/restart proactif — tuile dédiée du même
+onglet), **moniteurs proactifs** (alertes vocales GPU chaud / VM-PVE en arrêt), **AIDE** (JARVIS
+explique ses propres outils).
 
 ---
 
@@ -263,7 +318,7 @@ Entrée utilisateur
 │   ● recharge RAG → rag.reload()  │
 │   ● briefing mat → brief()       │
 │   ● menu-lint    → lint()        │
-│   ● ... (29 patterns)            │
+│   ● ... (+ autres patterns)      │
 └──────────┬───────────────────────┘
            │ Match ?
     ┌──────┴──────┐
@@ -362,7 +417,7 @@ Au lieu d'attendre une question, JARVIS prend l'initiative de livrer un résumé
 
 # Briques avancées — l'évolution d'Hermès
 
-Aux 5 briques fondatrices se sont ajoutées des briques nées de l'usage
+Aux briques fondatrices se sont ajoutées des briques nées de l'usage
 quotidien. Chacune suit la même philosophie : **déterminisme, sûreté,
 accessibilité** — Hermès protège le LLM et l'utilisateur.
 
@@ -539,7 +594,7 @@ CORRECTION  =  déclenchée par l'humain, par lots   (jugement requis)
 │  Chaque session repart  │  Contexte, leçons et conventions       │
 │  de zéro                │  conservés entre toutes les sessions   │
 ├─────────────────────────┼────────────────────────────────────────┤
-│  Toutes les commandes   │  Bypass déterministe : 29 patterns     │
+│  Toutes les commandes   │  Bypass déterministe : des patterns    │
 │  passent par le LLM     │  exécutés directement < 100 ms         │
 │  (latence + risque      │  sans consommer un seul token LLM      │
 │  d'hallucination)       │                                        │

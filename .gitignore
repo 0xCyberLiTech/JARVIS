@@ -4,6 +4,10 @@
 
 # ── SECRETS / CREDENTIALS — exclusion absolue ──────────────────
 scripts/jarvis_secret.key
+scripts/jarvis_auth.json
+scripts/jarvis_emergency.json
+scripts/jarvis_tls.crt
+scripts/jarvis_tls.key
 scripts/jarvis_pve.json
 scripts/soc_config.json
 *.key
@@ -103,3 +107,4 @@ AUDIT-DETTE-*.md
 # ── Doc interne / déploiement — LOCAL uniquement (vitrine = showcase, pas déployable) ──
 DOCUMENTATION/05-INSTALLATION.md
 DOCTRINE.md
+
