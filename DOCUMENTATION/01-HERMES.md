@@ -217,7 +217,7 @@ explique ses propres outils).
 
 ## Brique 1 — Synoptique temps réel
 
-Le synoptique est le **tableau de bord live d'Hermès** — visible en permanence dans l'interface. Il affiche l'état des 6 couches du moteur au moment présent.
+Le synoptique est le **tableau de bord live d'Hermès** — visible en permanence dans l'interface. Il affiche l'état des couches du moteur au moment présent.
 
 ```
 ┌─────────────────────────────────────────────────────────┐
