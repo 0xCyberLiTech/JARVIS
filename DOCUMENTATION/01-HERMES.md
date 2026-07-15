@@ -317,7 +317,6 @@ Entrée utilisateur
 │   ● lecture fich → open() local  │
 │   ● recharge RAG → rag.reload()  │
 │   ● briefing mat → brief()       │
-│   ● menu-lint    → lint()        │
 │   ● ... (+ autres patterns)      │
 └──────────┬───────────────────────┘
            │ Match ?

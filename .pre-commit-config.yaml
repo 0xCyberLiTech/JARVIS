@@ -110,7 +110,7 @@ repos:
 
       - id: doc-drift-lint-jarvis
         name: doc-drift-lint (termes périmés — JARVIS/docs)
-        entry: bash ../DEV/TOOLS/doc-drift-lint/doc-drift-lint.sh docs
+        entry: bash scripts/hermes/doc-drift-lint/doc-drift-lint.sh docs
         language: system
         pass_filenames: false
         always_run: true
@@ -161,6 +161,39 @@ repos:
         always_run: true
         stages: [pre-push]
 
+      # ── GATE VISUEL (stage pre-push) — le RENDU RÉEL des écrans, prouvé par une machine ──
+      # Ajout 2026-07-14. Des specs Playwright prouvent ce que les ÉCRANS DISENT : la tuile SANTÉ
+      # MÉMOIRE et l'UI mobile d'ARRÊT D'URGENCE (celle qui dit à la femme de Marc si elle peut
+      # couper le courant). Elles n'étaient câblées à AUCUN gate → elles ne tournaient que si un
+      # humain y pensait, et « un test qu'un humain doit penser à lancer finit par ne plus être
+      # lancé ». Marc est MALVOYANT : il ne peut pas « jeter un œil » pour rattraper.
+      #
+      # ⚠ CE HOOK NE BLOQUE JAMAIS SUR L'ABSENCE DE JARVIS. Playwright exige un JARVIS vivant :
+      # le câbler naïvement casserait le push dès que JARVIS est éteint → Marc contournerait le
+      # gate, et un gate contourné est un gate MORT (doctrine §2). Donc : JARVIS éteint → le gate
+      # est SAUTÉ, le push passe, et le saut est COMPTÉ (état persistant). JARVIS vivant → les
+      # specs tournent et un échec RÉEL bloque le push. Les sauts sont RATTRAPÉS par JARVIS
+      # LUI-MÊME — AUCUNE tâche planifiée (décision de Marc, 2026-07-14 : « ma machine n'est pas
+      # allumée en permanence » ; une tâche hebdo sur une machine éteinte ne tourne JAMAIS, elle
+      # dormirait comme les gardiens qu'elle doit réveiller). Deux déclencheurs : au DÉMARRAGE
+      # (thread bootstrap.threads.boot_maintenance) ET en COURS DE ROUTE (thread
+      # bootstrap.threads.maintenance_loop, période DÉRIVÉE) — sans le second, un JARVIS allumé
+      # des semaines ne re-vérifierait jamais rien. L'invariant de fraîcheur `gate_visuel`
+      # (memory-audit) surveille le gate, et `boucle_maintenance` surveille la BOUCLE elle-même
+      # (battement de cœur) : si elle meurt, ÇA CRIE.
+      # `verbose: true` = NON NÉGOCIABLE (a11y §5). pre-commit MASQUE la sortie d'un hook qui
+      # réussit : sans ce drapeau, un gate SAUTÉ afficherait un simple « Passed » et Marc ne
+      # saurait JAMAIS que le mécanisme dort (ni depuis combien de temps). L'état du circuit doit
+      # être ÉNONCÉ en toutes lettres à chaque push — un voyant qu'il faut deviner n'existe pas.
+      - id: jarvis-visual-gate
+        name: gate visuel (rendu réel des écrans — sauté si JARVIS est éteint, le saut est compté)
+        entry: python scripts/hermes/jarvis-visual-gate/jarvis-visual-gate.py --run
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+        stages: [pre-push]
+
       # ── ANTI-COMPLAISANCE (stage pre-push) — le verrou §32 voyage avec le push ──
       # Ajout 2026-06-30 (audit doctrine) : le --self-check fault-injection (PROUVE qu'un
       # détecteur n'est pas neutralisé par une exclusion sur-mesure) ne tournait QU'en
@@ -169,7 +202,7 @@ repos:
       # self-check des 3 gardiens DÉJÀ gatés ici (a11y ×2 + llm-audit). Échec = push bloqué.
       - id: guardians-self-check
         name: self-check gardiens (anti-complaisance fault-injection)
-        entry: bash -c 'for t in scan-inline-a11y/scan-inline-a11y jarvis-a11y-audit/jarvis-a11y-audit jarvis-llm-audit/jarvis-llm-audit jarvis-llm-registry-audit/jarvis-llm-registry-audit jarvis-persona-audit/jarvis-persona-audit secret-redact-audit/secret-redact-audit jarvis-read-denylist-guard/jarvis-read-denylist-guard; do python "../DEV/TOOLS/$t.py" --self-check || exit 1; done; bash ../DEV/TOOLS/doc-drift-lint/doc-drift-lint.sh --self-check || exit 1; powershell -NoProfile -ExecutionPolicy Bypass -File ../DEV/TOOLS/jarvis-watchdog-audit/jarvis-watchdog-audit.ps1 -SelfCheck || exit 1'
+        entry: bash -c 'for t in scan-inline-a11y/scan-inline-a11y jarvis-a11y-audit/jarvis-a11y-audit jarvis-llm-audit/jarvis-llm-audit jarvis-llm-registry-audit/jarvis-llm-registry-audit jarvis-persona-audit/jarvis-persona-audit secret-redact-audit/secret-redact-audit jarvis-read-denylist-guard/jarvis-read-denylist-guard; do python "../DEV/TOOLS/$t.py" --self-check || exit 1; done; for t in jarvis-visual-gate/jarvis-visual-gate memory-audit/memory-audit; do python "scripts/hermes/$t.py" --self-check || exit 1; done; bash scripts/hermes/doc-drift-lint/doc-drift-lint.sh --self-check || exit 1; powershell -NoProfile -ExecutionPolicy Bypass -File ../DEV/TOOLS/jarvis-watchdog-audit/jarvis-watchdog-audit.ps1 -SelfCheck || exit 1'
         language: system
         pass_filenames: false
         always_run: true
@@ -196,6 +229,21 @@ repos:
       - id: jarvis-code-exec-confinement-guard
         name: jarvis-code-exec-confinement-guard (exec root confiné à la VM dev jetable srv-dev-1)
         entry: python ../DEV/TOOLS/jarvis-code-exec-confinement-guard/jarvis-code-exec-confinement-guard.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      # ── RÈGLE ZÉRO — la frontière du produit (2026-07-14) ──
+      # Aucun fichier de JARVIS/scripts/** ne dépend d'un outil de l'ATELIER (DEV/) ni d'un dossier
+      # frère non déclaré, sur un chemin ATTEIGNABLE À L'EXÉCUTION. C'est l'invariant qui garantit
+      # que JARVIS RESSUSCITE SEUL après un sinistre (restaurer le coffre suffit). Fail-closed :
+      # une seule dépendance vers DEV/ hors allowlist justifiée → push bloqué. Scanne .py/.js ET
+      # .ps1/.sh. Le --self-check (injection de fautes, incl. la classe PowerShell) est joint pour
+      # prouver, à chaque push, que le détecteur a encore des dents (anti-complaisance §8).
+      - id: jarvis-prod-boundary-guard
+        name: jarvis-prod-boundary-guard (RÈGLE ZÉRO — le produit ne dépend pas de l'atelier)
+        entry: bash -c 'python ../DEV/TOOLS/jarvis-prod-boundary-guard/jarvis-prod-boundary-guard.py --self-check && python ../DEV/TOOLS/jarvis-prod-boundary-guard/jarvis-prod-boundary-guard.py -Quiet'
         language: system
         pass_filenames: false
         always_run: true

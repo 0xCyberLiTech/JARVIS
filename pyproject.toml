@@ -8,3 +8,17 @@ testpaths = ["tests/python"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
 addopts = "-q --tb=short"
+
+# ── Couverture : le PRODUIT, pas l'ATELIER migré ──────────────────────────────
+# RÈGLE ZÉRO (2026-07-14) : les ORGANES d'Hermès (memory-audit, jarvis-visual-gate,
+# jarvis-knowledge-audit, memory-real-drift, doc-drift-lint) ont DÉMÉNAGÉ dans
+# scripts/hermes/ — mais ce sont des OUTILS d'atelier (détecteurs/maintenance), pas du
+# code produit. Ils portent LEUR PROPRE suite (scripts/hermes/*/test_*.py), exécutée par
+# `audit-all.sh` (pytest memory-audit + jarvis-knowledge-audit) et leurs --self-check. Le
+# GATE de couverture du PRODUIT (--cov-fail-under=95) ne doit donc pas les mesurer : quand
+# ils vivaient dans DEV/TOOLS ils n'étaient PAS comptés, et la frontière produit/atelier ne
+# change pas parce que le fichier a changé de dossier. Sans cet omit, 3000+ lignes de tooling
+# non exercées depuis tests/python feraient chuter la couverture à ~88 % (mesuré) — un faux
+# échec de gate qui n'apprend RIEN sur la santé du produit.
+[tool.coverage.run]
+omit = ["scripts/hermes/*"]
