@@ -55,11 +55,11 @@ repos:
       # Lance la suite unitaire complète avant chaque push (compte LIVE — ne pas figer
       # ici : un nombre codé en dur dérive, cf. audit doctrine 2026-06-30).
       # Bloque si tests rouges OU si la couverture régresse sous le plancher.
-      # GATE --cov-fail-under : la couverture RÉELLE est ≈ 99 % (10329 stmts, mesurée
-      # 2026-06-30 après la campagne de couverture qui a porté la suite à ~2805 tests ;
-      # léger flottement selon l'env — gardes torch/CUDA/ollama). Plancher posé à 95 =
-      # anti-régression honnête AVEC ~4 pts de marge sous le réel (absorbe le bruit de
-      # mesure sans flaker, tout en bloquant une VRAIE régression). Aligné/supérieur au
+      # GATE --cov-fail-under=95 : PLANCHER anti-régression. Le % de couverture RÉEL et le
+      # nb de tests sont MESURÉS À CHAQUE RUN — NE PAS les figer ici. (Ce commentaire a
+      # LUI-MÊME dérivé : il annonçait « ≈99 % / ~2805 tests », faux — corrigé au titre de
+      # la dette #5 « compteurs figés » le 2026-07-15. La marge réelle = couverture mesurée
+      # − 95, léger flottement selon l'env : gardes torch/CUDA/ollama.) Aligné/supérieur au
       # gate SOC (88) → l'asymétrie signalée par l'audit 06-24 est levée.
       # Relever le plancher uniquement par action documentée (cf. feedback_scores_marbre).
       - id: pytest
