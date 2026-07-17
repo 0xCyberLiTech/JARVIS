@@ -32,6 +32,10 @@ export default [
         // (audio nodes, helpers, fonctions globales)
         _cssVar: 'writable',
         _esc: 'writable',
+        // appr_heart.js — animation cœur/réacteur, chargée via <script> sur l'accueil ET sur
+        // la page mobile (/m/asset/<v>/appr_heart.js) ; appelée cross-file dans mobile.js sous
+        // garde `typeof apprHeartStart === 'function'`. Déclarée global (mode script, pas de bundler).
+        apprHeartStart: 'readonly',
         // jarvis_main.js — helper a11y source-unique (role+tabindex+aria-label+keydown),
         // appelé cross-file (settings_ui/soc_tab/terminal_code/voice_print) · chantier a11y 2026-06-24
         _jvA11yButton: 'readonly',
