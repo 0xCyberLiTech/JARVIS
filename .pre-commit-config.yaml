@@ -26,14 +26,16 @@ repos:
 
       # ── ESLint — lint JS (utilise eslint.config.js du repo) ─────
       # Couvre TOUS les modules JS applicatifs : 4 historiques (jarvis_main,
-      # jarvis_mixing, recorder, voice_print) + les 18 modules extraits dans
-      # scripts/static/js/ (chantier refactor JS 2026-05-14/15). Aligné avec
-      # la liste `files:` de eslint.config.js — cohérence pre-commit/lint.
+      # jarvis_mixing, recorder, voice_print) + les modules extraits dans
+      # scripts/static/js/ (refactor JS 2026-05-14/15) + l'UI MOBILE
+      # scripts/static/mobile/ (L2 2026-07-18 : le JS mobile était le SEUL
+      # exclu du gate alors qu'eslint.config.js `files: scripts/static/**` le
+      # couvre — dérive fermée). Aligné avec eslint.config.js — cohérence pre-commit/lint.
       - id: eslint
         name: eslint (JS)
         entry: npx --no-install eslint
         language: system
-        files: ^scripts/static/(jarvis_main|jarvis_mixing|recorder|voice_print)\.js$|^scripts/static/js/.+\.js$
+        files: ^scripts/static/(jarvis_main|jarvis_mixing|recorder|voice_print)\.js$|^scripts/static/js/.+\.js$|^scripts/static/mobile/.+\.js$
         require_serial: true
         stages: [pre-commit]
 
