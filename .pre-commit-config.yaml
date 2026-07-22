@@ -182,6 +182,26 @@ repos:
         verbose: true
         stages: [pre-push]
 
+      # ── VIEWPORT DES SPECS MOBILES (stage pre-push) — « on ne teste pas un écran qui n'existe pas » ──
+      # Ajout 2026-07-22, APRÈS mesure. 9 tests étaient ROUGES depuis le 2026-07-18 sans que
+      # personne ne les nomme — donc le GATE VISUEL ci-dessous était NO-GO en permanence, y compris
+      # sur les 3 tests de l'écran d'ARRÊT D'URGENCE. Motif unique : les specs n'avaient aucun
+      # viewport, héritaient de Desktop Chrome 1280x720 = PAYSAGE, et en paysage la nav du bas est
+      # MASQUÉE PAR CONCEPTION (décision Marc 2026-07-17, « accueil paysage PARTOUT »).
+      # Le défaut était dans la SPEC (elle pilotait un téléphone dans une fenêtre de bureau), pas
+      # dans le produit. Ce hook est placé AVANT le gate visuel : il rend un verdict STATIQUE qui
+      # NOMME le fichier et la ligne, au lieu de laisser Marc lire 9 timeouts de 30 s.
+      # ⛔ Il verrouille aussi la voie MALHONNÊTE : faire verdir en modifiant mobile.css aurait
+      #    cassé un invariant ratifié et vert (mobile-paysage-partout.spec.js) — blanchiment (§8).
+      - id: jarvis-e2e-viewport-guard
+        name: viewport des specs mobiles (portrait obligatoire pour cliquer la nav)
+        entry: python scripts/hermes/jarvis-e2e-viewport-guard/jarvis-e2e-viewport-guard.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+        stages: [pre-push]
+
       # ── GATE VISUEL (stage pre-push) — le RENDU RÉEL des écrans, prouvé par une machine ──
       # Ajout 2026-07-14. Des specs Playwright prouvent ce que les ÉCRANS DISENT : la tuile SANTÉ
       # MÉMOIRE et l'UI mobile d'ARRÊT D'URGENCE (celle qui dit à la femme de Marc si elle peut
@@ -223,7 +243,7 @@ repos:
       # self-check des 3 gardiens DÉJÀ gatés ici (a11y ×2 + llm-audit). Échec = push bloqué.
       - id: guardians-self-check
         name: self-check gardiens (anti-complaisance fault-injection)
-        entry: bash -c 'for t in scan-inline-a11y/scan-inline-a11y jarvis-a11y-audit/jarvis-a11y-audit jarvis-llm-audit/jarvis-llm-audit jarvis-llm-registry-audit/jarvis-llm-registry-audit jarvis-persona-audit/jarvis-persona-audit secret-redact-audit/secret-redact-audit jarvis-read-denylist-guard/jarvis-read-denylist-guard; do python "../DEV/TOOLS/$t.py" --self-check || exit 1; done; for t in jarvis-visual-gate/jarvis-visual-gate memory-audit/memory-audit jarvis-e2e-silence-guard/jarvis-e2e-silence-guard; do python "scripts/hermes/$t.py" --self-check || exit 1; done; bash scripts/hermes/doc-drift-lint/doc-drift-lint.sh --self-check || exit 1; powershell -NoProfile -ExecutionPolicy Bypass -File ../DEV/TOOLS/jarvis-watchdog-audit/jarvis-watchdog-audit.ps1 -SelfCheck || exit 1'
+        entry: bash -c 'for t in scan-inline-a11y/scan-inline-a11y jarvis-a11y-audit/jarvis-a11y-audit jarvis-llm-audit/jarvis-llm-audit jarvis-llm-registry-audit/jarvis-llm-registry-audit jarvis-persona-audit/jarvis-persona-audit secret-redact-audit/secret-redact-audit jarvis-read-denylist-guard/jarvis-read-denylist-guard; do python "../DEV/TOOLS/$t.py" --self-check || exit 1; done; for t in jarvis-visual-gate/jarvis-visual-gate memory-audit/memory-audit jarvis-e2e-silence-guard/jarvis-e2e-silence-guard jarvis-e2e-viewport-guard/jarvis-e2e-viewport-guard; do python "scripts/hermes/$t.py" --self-check || exit 1; done; bash scripts/hermes/doc-drift-lint/doc-drift-lint.sh --self-check || exit 1; powershell -NoProfile -ExecutionPolicy Bypass -File ../DEV/TOOLS/jarvis-watchdog-audit/jarvis-watchdog-audit.ps1 -SelfCheck || exit 1'
         language: system
         pass_filenames: false
         always_run: true
