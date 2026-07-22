@@ -57,7 +57,7 @@
 <tr><td>🛡️ <b>SOC autonome 24/7</b></td><td>Détecte, bannit et redémarre <b>seul</b> · alertes vocales · contexte sécurité en direct.</td></tr>
 <tr><td>🎙️ <b>Voix qualité broadcast</b></td><td>Chaîne DSP pro (débruitage IA · compresseur · FX) + voix Edge, repli Kokoro neural local.</td></tr>
 <tr><td>⚡ <b>RTX 5080 maîtrisée</b></td><td>Modèle 100 % en VRAM, garde-fou anti-débordement, CUDA partout (Whisper · DeepFilterNet).</td></tr>
-<tr><td>♿ <b>Pensé accessible</b></td><td>Haute lisibilité, commandes vocales déterministes (&lt; 100 ms), briefing matinal.</td></tr>
+<tr><td>♿ <b>Pensé accessible</b></td><td>Haute lisibilité, commandes vocales <b>déterministes</b> (zéro LLM · budget de latence &lt; 100 ms), briefing matinal.</td></tr>
 </table>
 
 </div>
