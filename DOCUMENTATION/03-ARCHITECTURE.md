@@ -66,7 +66,7 @@
 │  ┌──────────────────────┐   ┌──────────────────────────────────────┐  │
 │  │  ZONE IA             │   │  ZONE SOC SERVEUR                    │  │
 │  │  Orchestrateur Flask │   │  auto-engine SOC (thread 60s)        │  │
-│  │  modules Python   │   │  ban/unban · restart · journal       │     │
+│  │  modules Python      │   │  ban/unban · restart · journal       │  │
 │  └──────────────────────┘   └──────────────────────────────────────┘  │
 └───────────────────────────────────────────────────────────────────────┘
             │ Ollama API                      │ monitoring.json
@@ -74,7 +74,7 @@
    ┌───────────────────┐              ┌────────────────────┐
    │  Ollama local     │              │  Dashboard SOC     │
    │  qwen3.5:9b (SOC) │              │  CrowdSec · F2B    │
-   │  qwen3.5 (VISION)  │              │  Suricata · nginx  │
+   │  qwen3.5:9b (VIS.)│              │  Suricata · nginx  │
    └───────────────────┘              └────────────────────┘
 ```
 
@@ -82,16 +82,19 @@
 
 ## Modèles LLM — stratégie VRAM
 
-| Mode | Modèle | VRAM | Usage |
-|------|--------|------|-------|
-| **SOC** (défaut · toujours chaud) | qwen3.5:9b | ~6.6 GB | Cybersécurité · raisonnement |
-| **GÉNÉRAL** | qwen3.5:9b | ~6.6 GB | Conversation (même modèle que SOC — zéro swap) |
-| **THINK** | qwen3.5:9b | ~6.6 GB | Raisonnement profond (think natif) |
-| **CODE** | qwen3.5:9b | ~6.6 GB | Développement · infogérance (même modèle — zéro swap) |
-| **VISION** | qwen3.5:9b | 6.6 GB | Multimodal natif — analyse d'images (même modèle que SOC/GÉNÉRAL/CODE/THINK) |
-| **RAG** (keep_alive 10m) | qwen3-embedding:4b | ~2.6 GB | Embeddings vectoriels (dim 2560) |
+| Rôle | Modèle | Usage |
+|------|--------|-------|
+| **SOC** (défaut · toujours chaud) | qwen3.5:9b | Cybersécurité · raisonnement |
+| **GÉNÉRAL** | qwen3.5:9b | Conversation (même modèle que SOC — zéro swap) |
+| **THINK** | qwen3.5:9b | Raisonnement profond (think natif) |
+| **CODE** | qwen3.5:9b | Développement · infogérance (même modèle — zéro swap) |
+| **VISION** | qwen3.5:9b | Multimodal natif — analyse d'images (même modèle que SOC/GÉNÉRAL/CODE/THINK) |
+| **RAG** (keep_alive 10m) | qwen3-embedding:4b | Embeddings vectoriels (dim 2560) |
 
 > qwen3.5:9b est toujours chaud (défaut SOC + GÉNÉRAL + CODE + THINK — un seul modèle, zéro swap entre tous les modes de raisonnement). La VISION utilise le même qwen3.5:9b (multimodal natif) — donc aucun swap VRAM, même pour l'analyse d'image.
+>
+> ⚠ **La table `rôle → modèle` et l'empreinte VRAM déclarée de chaque modèle vivent dans UN SEUL fichier** — le registre LLM source-unique lu au démarrage. Elles ne sont **pas recopiées ici** : un chiffre dupliqué dans une page de doc dérive au premier changement de modèle (c'est exactement ce qui était arrivé à la valeur du modèle d'embedding). Un garde-fou interdit tout nom de modèle écrit en dur hors de ce registre.
+> ⚠ Ne pas confondre l'empreinte **déclarée** (registre, sert au calcul *a priori* « Impact VRAM ») avec l'empreinte **réellement chargée** que le moniteur affiche en direct : ce sont **deux grandeurs différentes**.
 
 <div align="center">
   <img src="../Images/reglages.webp" alt="JARVIS — santé GPU RTX 5080 et paramètres LLM" width="340" />
@@ -103,34 +106,34 @@
 
 ## Architecture modulaire
 
-`jarvis.py` est l'**orchestrateur Flask** — il délègue à **ses modules Python** :
+`jarvis.py` est l'**orchestrateur Flask** — il délègue à **ses modules Python**. Le tableau ci-dessous cite **quelques** modules par domaine : ce n'est **pas un inventaire** (il dériverait), l'arborescence réelle fait foi.
 
-| Catégorie | Modules |
-|-----------|---------|
-| **Bypass Hermès** | `bypass/morning_brief.py`, `learn.py`, `sysctrl.py`, `backup.py` (menu vocal : sauvegardes, cerveau, lint), `wrappers.py` |
-| **Chat / LLM** | `chat/orchestrator.py`, `routing.py`, `soc_inject.py`, `soc_context.py` |
-| **RAG** | `rag/engine.py`, `rag/indexer.py`, `rag/retriever.py` |
-| **Voice** | `voice/tts_engines.py`, `voice/tts_cache.py` (cache WAV best-effort), `voice/stt.py`, `voice/voice_lab.py` |
+| Catégorie | Quelques modules |
+|-----------|------------------|
+| **Bypass Hermès** | `bypass/morning_brief.py`, `bypass/learn.py`, `bypass/system_ctrl.py`, `bypass/backup.py` (menu vocal : sauvegardes, cerveau, lint), `bypass/wrappers.py` |
+| **Chat / LLM** | `chat/orchestrator.py`, `chat/routing.py`, `chat/dispatcher.py`, `chat/soc_inject.py`, `chat/soc_context.py` |
+| **RAG** | `rag/engine.py` (moteur hybride vecteurs + BM25), `rag/routes.py` |
+| **Voice** | `voice/tts_engines.py`, `voice/tts_cache.py` (cache WAV best-effort), `voice/tts_dedup.py`, `voice/stt.py`, `voice/voice_lab.py` |
 | **Infra** | `ssh/tools.py`, `proxmox/api.py`, `ollama_circuit.py` |
-| **Sécurité** | `security_whitelists.py` |
+| **Sécurité** | `security_whitelists.py`, `security_origin.py`, `net_auth.py` |
 | **Blueprint SOC** | `blueprints/soc.py` — auto-engine + routes |
 
 ---
 
 ## Frontend — modules JS
 
-L'interface est entièrement en **Vanilla JS** (zéro framework) :
+L'interface est entièrement en **Vanilla JS** (zéro framework). Extrait — **pas un inventaire** (le nombre de modules est compté sur l'arborescence, jamais recopié ici) :
 
 | Module | Rôle |
 |--------|------|
-| `jarvis_main.js` | Point d'entrée unique — `_jarvisInit()` |
+| `jarvis_main.js` | Socle global — constantes de cadence (source unique des intervalles de polling), horloge, heartbeat UI |
 | `chat_core.js` | Pipeline chat + SSE streaming |
-| `soc_tab.js` | Interface SOC — Kill Chain, bans, alertes |
-| `audio_rack.js` | Rack DSP broadcast — 3 étages |
+| `soc_tab.js` | Interface SOC — Kill Chain, bans, alertes ; définit `_buildChatPayload()` |
+| `audio_rack.js` | Rack DSP intégré — faders gain/comp/EQ/widener, DeepFilterNet, VU-mètres, presets EQ et spectre |
 | `voice_lab.js` | Voice Lab — TTS/STT — comparateur A/B |
 | `gpu_monitor.js` | Métriques GPU RTX — jauges, graphiques |
 | `terminal_code.js` | xterm.js — terminal SSH |
-| `boot_init.js` | Initialisation et diagnostic au démarrage |
+| `boot_init.js` | Chargé **en dernier** — initialisation, diagnostic de démarrage et **point d'entrée** `_jarvisInit()` |
 
 ---
 
@@ -145,27 +148,35 @@ L'interface est pensée dès la conception pour un usage en **basse vision** :
 
 ---
 
-## Modules centralisés — source unique
+## Points de centralisation — source unique
 
-| Module | Centralise | Règle |
-|--------|-----------|-------|
-| `_buildChatPayload()` | 6/6 appels LLM | Injection contexte SOC centralisée |
-| `_jarvisInit()` | 1/1 DOMContentLoaded | Un seul point d'entrée JS |
-| `_SSH_LOCK` | Toutes connexions SSH | Une seule connexion à la fois |
-| `_TTS_LOCK` | Séquencement TTS | Évite les doublons vocaux |
+| Point | Centralise | Règle |
+|-------|-----------|-------|
+| `_buildChatPayload()` (front) | Le corps des requêtes du **fil de conversation** vers `/api/chat` | L'historique part **tel quel** : **aucune** incrustation de contexte SOC côté client. Le serveur injecte les données fraîches dans le *system prompt* à chaque appel → zéro donnée périmée dans l'historique. ⚠ D'autres écrans (apprentissage, terminal, infogérance) appellent `/api/chat` **directement**, sans passer par lui : c'est **sans effet sur la sécurité**, précisément parce que l'injection SOC est **100 % serveur** |
+| `_jarvisInit()` (front) | La **séquence de démarrage** de l'interface | Enregistré par le module chargé **en dernier**. Quelques widgets autonomes s'initialisent séparément — l'invariant porte sur la séquence de boot, pas sur l'unicité de l'écouteur |
+| `_ssh_host()` / son verrou (backend SOC) | **Toutes** les commandes SSH émises par le blueprint SOC, quel que soit l'hôte | Une seule connexion à la fois (sérialisation) — évite les timeouts par connexions parallèles ; backoff exponentiel sur retry |
+| Dédup TTS global (`voice/tts_dedup.py`) | Le séquencement des synthèses vocales | Coupe le doublon **cross-source** (alerte prononcée par le moteur Python **et** par l'auto-engine navigateur) : même texte revu dans la fenêtre de dédup ⇒ ignoré. Fenêtre définie dans le module, pas recopiée ici |
 
 ---
 
 ## Polling — architecture temporelle
 
+Toutes les cadences du front sont des **constantes nommées** déclarées à un seul endroit (`jarvis_main.js`) — aucune valeur n'est écrite en dur dans un `setInterval`.
+
 ```
-monitoring_gen.py ── cron 60s ──→ monitoring.json
-                                        │
-  Dashboard SOC   ── 60s ───────────────┤
-  JARVIS chatbot  ── 30s ───────────────┤  (Nyquist buffer)
-  JARVIS engine   ── 10s ───────────────┘  (GPU live)
-  Heartbeat       ── 15s → ping JARVIS
+monitoring.json  (produit périodiquement côté SOC — la cadence
+                  de production vit dans le projet SOC, pas ici)
+        │
+        ├── Dashboard SOC  ── 60 s ──→ relecture de monitoring.json
+        │
+        └── JARVIS, auto-engine SOC (thread Python) ── 60 s ──→ bans / restarts / alertes
+
+  JARVIS, rafraîchissement de l'onglet SOC (front) ── 30 s
+  JARVIS, jauges GPU de l'onglet Réglages (front)  ──  5 s
+  JARVIS, heartbeat de présence UI → serveur       ──  5 s   (< TTL serveur)
 ```
+
+> ⚠ Ces durées sont des **cadences**, pas des compteurs d'inventaire : elles sont lues dans les constantes citées ci-dessus. La cadence de génération de `monitoring.json` n'est **pas** documentée ici — elle appartient au projet SOC, et la recopier depuis JARVIS reviendrait à créer une seconde source de vérité.
 
 ---
 

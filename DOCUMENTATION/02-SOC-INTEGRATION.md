@@ -75,25 +75,32 @@ L'auto-engine tourne en **thread Python indépendant** — il surveille en conti
 
 ### Boucle de traitement
 
+Extrait — la boucle enchaîne davantage de contrôles que ceux listés ici (le code fait foi) :
+
 ```
 _soc_monitor_loop() — poll 60s
     │
-    ├── Détection EXPLOIT avant seuil
+    ├── Détection EXPLOIT avant seuil (ban même dashboard ouvert)
     │
+    ├── _check_threat_level()   ← alerte vocale (cooldown 30 min)
+    ├── _check_escalation()     ← IP qui progresse dans la Kill Chain (cooldown 10 min)
     ├── _soc_autoban()          ← BRUTE / SCAN / honeypot
-    ├── _soc_reqhour_check()    ← spike > 500 req/h → ban auto
-    ├── _soc_suricata_check()   ← alertes sévérité 1/2/3
-    └── _soc_threat_level()     ← alerte vocale (cooldown 30 min)
+    ├── _soc_reqhour_check()    ← spike req/h au-delà du seuil → ban auto
+    └── _soc_suricata_check()   ← alertes IDS sévérité 1/2/3
 ```
 
 ### Déclencheurs de ban automatique
 
 | Condition | Action |
 |-----------|--------|
-| > 500 requêtes/heure depuis une IP | Ban automatique |
-| Alerte Suricata sévérité 1 ou 2 | Ban + alerte vocale |
-| Hit sur honeypot | Ban immédiat |
+| Requêtes/heure d'une même IP au-delà du seuil configuré | Ban automatique |
+| Alerte Suricata **sévérité 1** (critique) | Ban + alerte vocale |
+| Suricata **sévérité 3** — scan de ports | Ban temporaire + alerte vocale |
+| Suricata **sévérité 2** (HIGH) | Alerte vocale ; **ban seulement au-delà d'un seuil de surge** — une alerte sév.2 isolée ne bannit pas |
+| Hit sur honeypot | Ban dès le premier hit |
 | Service critique down | Restart automatique (whitelist services) |
+
+> Les seuils (requêtes/heure, surges Suricata, durées de ban, cooldowns) sont des **constantes nommées** du blueprint SOC — elles ne sont pas recopiées ici, pour qu'un ajustement n'ait jamais à être répercuté dans deux endroits.
 
 > **Garde-fou absolu** : les IPs de plages privées (RFC1918) ne peuvent jamais être bannies.
 
@@ -106,7 +113,8 @@ Le contexte SOC est injecté **côté serveur** dans chaque prompt LLM en mode S
 - ThreatScore en cours (0–100)
 - IPs actives suspectes (filtrées RFC1918)
 - Bans récents
-- État Kill Chain (PROBE → RECON → SCAN → EXPLOIT → WAF → BRUTE → NEUTRALISÉ)
+- État **Kill Chain v4** — maillons **offensifs** : `RECON → SCAN → EXPLOIT → BRUTE → NEUTRALISÉ`
+  *(les couches purement **défensives** — sonde/pare-feu, WAF — ont été **sorties** de la Kill Chain : elles sont agrégées et visualisées à part, pour ne pas faire passer une défense qui a fonctionné pour une étape d'attaque)*
 - Alertes IDS actives
 
 **Important** : cette injection se fait en side-channel — elle n'entre **jamais** dans l'historique chat.
@@ -115,15 +123,18 @@ Le contexte SOC est injecté **côté serveur** dans chaque prompt LLM en mode S
 
 ## Routes SOC
 
+Extrait des routes du blueprint SOC — **pas un inventaire** (la liste réelle est celle des décorateurs de route, elle n'est pas figée ici) :
+
 | Route | Méthode | Description |
 |-------|---------|-------------|
-| `/api/soc/monitor` | GET | Données monitoring temps réel |
+| `/api/soc/monitor` | GET, POST | **Armement de l'auto-engine** — GET lit l'état (armé ou non), POST l'arme/le désarme (write ⇒ contrôle CSRF). ⚠ Ce n'est **pas** l'endpoint des données de monitoring |
+| `/api/soc/context` | GET | Contexte SOC formaté pour injection LLM (source de monitoring indisponible ⇒ **HTTP 503**, jamais un 200 trompeur) |
 | `/api/soc/ban-ip` | POST | Ban IP |
 | `/api/soc/unban-ip` | POST | Unban IP |
 | `/api/soc/restart-service` | POST | Restart service (whitelist stricte) |
 | `/api/soc/force-autoban` | POST | Scan immédiat candidats ban |
-| `/api/soc/actions` | GET | Journal actions 30 derniers jours |
-| `/api/soc/ip-history` | GET | Historique 30j d'une IP |
+| `/api/soc/actions` | GET | Journal des actions proactives (conservation 30 jours) + compteurs |
+| `/api/soc/ip-history` | POST | Historique CrowdSec + fail2ban d'une IP (endpoint léger pour le MCP) — l'IP voyage dans le **corps** de la requête, pas dans l'URL |
 
 ---
 

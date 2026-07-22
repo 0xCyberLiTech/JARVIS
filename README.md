@@ -80,7 +80,16 @@
   <img src="Images/interface.webp" alt="Cockpit JARVIS — interface neurale, modes de routage, télémétrie live" width="900"/>
 </div>
 
-Le poste de pilotage complet. À gauche, **l'interface neurale** (loopback-only · bind `127.0.0.1`) et la barre de commande avec ses **modes de routage** — `SOC · GÉN · CODE · THINK` + entrées `MIC`, `IMG` (vision), `WEB`, `AIDE` — qui orientent chaque requête vers le bon comportement, **un seul modèle `qwen3.5:9b`, zéro swap**. À droite, la **télémétrie temps réel** : cœur d'intégrité, coordonnées, **GPU** (VRAM, température, watts), système et modèle neural. Les modules sont accessibles d'un clic depuis la barre du haut — leur nombre n'est pas figé ici : c'est celui des onglets réellement déclarés dans l'interface.
+Le poste de pilotage complet. À gauche, **l'interface neurale** et la barre de commande avec ses **modes de routage** — `SOC · GÉN · CODE · THINK` + entrées `MIC`, `IMG` (vision), `WEB`, `AIDE` — qui orientent chaque requête vers le bon comportement, **un seul modèle `qwen3.5:9b`, zéro swap**. À droite, la **télémétrie temps réel** : cœur d'intégrité, coordonnées, **GPU** (VRAM, température, watts), système et modèle neural. Les modules sont accessibles d'un clic depuis la barre du haut — leur nombre n'est pas figé ici : c'est celui des onglets réellement déclarés dans l'interface.
+
+> 🔒 **Comment cette interface est servie — le périmètre réseau réel.**
+> JARVIS écoute sur **deux points d'entrée**, pas un seul :
+> 1. **Accès local** — HTTP sur la **boucle locale** (`127.0.0.1`), **sans login** : c'est l'usage nominal, au poste.
+> 2. **Accès réseau LAN/VPN** — **HTTPS sur toutes les interfaces**, où **toute** requête qui ne vient pas de la boucle locale exige une **session authentifiée**. Aucune configuration d'identifiants, ou authentification réseau non activée ⇒ **refus** (*fail-closed*) ; seule la page de connexion reste joignable.
+>
+> Par-dessus ces deux portes, une **seconde barrière** : les **actions privilégiées** (exécution, SSH, tâches, réglages, infrastructure, mémoire) restent **strictement loopback**. Le contrôle est ancré sur le **socket** de la requête — pas seulement sur l'en-tête `Origin`, falsifiable par omission — de sorte qu'un client réseau, **même authentifié**, ne les atteint pas : il n'obtient que le **conversationnel** (chat, voix). S'y ajoutent une allowlist d'en-tête `Host` (**anti-DNS-rebinding**) et un refus des origines tierces **y compris en loopback** (anti-CSRF/XSS).
+>
+> Le **terminal PTY**, lui, est bien **loopback-only** au sens strict (voir plus bas) : il n'est servi que sur `127.0.0.1`.
 
 <a id="sec-2"></a>
 
@@ -109,11 +118,11 @@ Le poste de pilotage complet. À gauche, **l'interface neurale** (loopback-only 
   <img src="Images/monitor.webp" alt="Moniteur RTX 5080 — GPU, VRAM, température, CPU, RAM temps réel" width="900"/>
 </div>
 
-Surveillance **temps réel** de toute la machine : six jauges (GPU, VRAM / 16 Go, température, puissance, CPU, RAM) puis le détail — **GPU Core** (horloges, encodeur/décodeur), **thermique & puissance**, **mémoire VRAM** (utilisée / libre), processeur (32 cœurs, fréquence, uptime), réseau et disque I/O.
+Surveillance **temps réel** de toute la machine : six jauges (GPU, VRAM / 16 Go, température, puissance, CPU, RAM) puis le détail — **GPU Core** (horloges, encodeur/décodeur), **thermique & puissance**, **mémoire VRAM** (utilisée / libre), processeur (cœurs, fréquence, uptime), réseau et disque I/O.
 
 <div align="center">
   <img src="Images/monitor-llm-vram.webp" alt="Empreinte LLM en VRAM — qwen3.5:9b + embedding RAG" width="900"/>
-  <br/><sub><em><b>Empreinte LLM en VRAM</b> — le modèle <code>qwen3.5:9b</code> (~5,5 Go) et l'embedding RAG <code>qwen3-embedding:4b</code> (~4,1 Go) cohabitent dans les 16 Go, ~40 % libre. Débit live (tok/s), <code>num_ctx</code> et <b>SWAP RAM = 0</b> : tout tient sur la carte, pleine vitesse.</em></sub>
+  <br/><sub><em><b>Empreinte LLM en VRAM</b> — le modèle <code>qwen3.5:9b</code> et l'embedding RAG <code>qwen3-embedding:4b</code> cohabitent dans les 16 Go ; la VRAM restante est affichée en clair. ⚠ Les gigaoctets lus sur cette capture sont l'empreinte <b>réellement chargée, mesurée à l'instant du cliché</b> — à ne pas confondre avec l'empreinte <b>déclarée</b> de chaque modèle, qui vit dans le registre source-unique et sert au calcul <b>a priori</b> de la carte « Impact VRAM » ci-dessus. Deux grandeurs différentes, jamais recopiées l'une de l'autre. Débit live (tok/s), <code>num_ctx</code> et <b>SWAP RAM = 0</b> : tout tient sur la carte, pleine vitesse.</em></sub>
 </div>
 
 C'est le garde-fou du LLM 100 % local : tant que le modèle **+ son cache KV** tiennent dans les 16 Go, l'inférence reste **pleine vitesse GPU** ; s'ils débordent, Ollama « spille » en RAM et la vitesse s'effondre — d'où la surveillance de l'empreinte.
@@ -271,7 +280,7 @@ Un **vrai terminal SSH interactif** (PTY `xterm-256color`) intégré à JARVIS �
   <img src="Images/hermes.webp" alt="Hermès — cœur de l'agent, état moteur et pipeline temps réel" width="920"/>
 </div>
 
-Le tableau de bord vivant de l'agent. Au centre, le **cœur** qui « respire » tant que JARVIS tourne — il **s'illumine** quand il parle (*JE PARLE*), vire à l'**or/ambre** quand la menace monte. Autour, le **diagnostic** (RAG, mémoire, connaissance) et l'**état moteur** (mode, modèle `qwen3.5:9b`, niveau de menace + sa cause). En bas, le **pipeline temps réel** : `ENTRÉE → BYPASS (< 100 ms, zéro LLM) → MÉMOIRE (RAG borné — plafond ET plancher) → SOC LIVE → WEB → PVE → LLM LOCAL → OUTILS → RÉPONSE` — **chaque brique affiche sa métrique live**. L'agentification rendue visible.
+Le tableau de bord vivant de l'agent. Au centre, le **cœur** qui « respire » tant que JARVIS tourne — il **s'illumine** quand il parle (*JE PARLE*), vire à l'**or/ambre** quand la menace monte. Autour, le **diagnostic** (RAG, mémoire, connaissance) et l'**état moteur** (mode, modèle `qwen3.5:9b`, niveau de menace + sa cause). En bas, le **pipeline temps réel** : `ENTRÉE → BYPASS (< 100 ms, zéro LLM) → MÉMOIRE (RAG borné — plafond ET plancher) → SOC LIVE → WEB → PVE → LLM LOCAL → OUTILS → RÉPONSE` — **chaque brique affiche sa métrique en direct**, à une exception assumée : le **budget de latence du bypass** est une **valeur de référence, pas une mesure** — elle porte donc un style distinct des métriques live, pour qu'on ne la lise jamais comme un relevé. L'agentification rendue visible.
 
 <h3 align="center">Schéma logique de la pile — le rôle de chaque tuile</h3>
 
@@ -306,7 +315,7 @@ Autour du flux, les **briques transversales** (enrichissent · protègent · agi
 <table align="center">
 <tr><th>Brique transversale</th><th>Rôle logique</th></tr>
 <tr><td><b>VISION</b></td><td>analyse d'images (<code>qwen3.5:9b</code> multimodal natif)</td></tr>
-<tr><td><b>MCP</b></td><td>pont gouverné vers Claude Desktop (outils exposés)</td></tr>
+<tr><td><b>MCP</b></td><td>pont gouverné vers un client compatible MCP — outils exposés en <b>boucle locale</b></td></tr>
 <tr><td><b>APPRENTISSAGE</b></td><td>mémorise les leçons (« souviens-toi… »)</td></tr>
 <tr><td><b>RÉFLEXION</b></td><td>apprend de tes corrections (proposées → validées)</td></tr>
 <tr><td><b>DR CERVEAU</b></td><td>sauvegarde / restauration de la mémoire</td></tr>
@@ -322,14 +331,14 @@ Autour du flux, les **briques transversales** (enrichissent · protègent · agi
 
 <div align="center">
   <img src="Images/hermes-briques.webp" alt="Briques transversales de l'agent" width="920"/>
-  <br/><sub><em>Les <b>briques transversales</b> qui enrichissent, protègent et prolongent l'agent — <b>Vision</b> (analyse d'images), <b>MCP</b> (pont gouverné vers Claude Desktop), <b>Apprentissage</b>, <b>Réflexion</b>, <b>DR Cerveau</b> (sauvegarde/restauration), <b>Briefing</b> matinal proactif, <b>Alarmes</b>, <b>Pédagogie</b> (explique vs analyse), <b>Infogérance</b> (état du parc + <b>journal</b> des MAJ, fail-closed — JARVIS ne lance pas la MAJ). Chacune affiche sa métrique live.</em></sub>
+  <br/><sub><em>Les <b>briques transversales</b> qui enrichissent, protègent et prolongent l'agent — <b>Vision</b> (analyse d'images), <b>MCP</b> (pont gouverné vers un client MCP), <b>Apprentissage</b>, <b>Réflexion</b>, <b>DR Cerveau</b> (sauvegarde/restauration), <b>Briefing</b> matinal proactif, <b>Alarmes</b>, <b>Pédagogie</b> (explique vs analyse), <b>Infogérance</b> (état du parc + <b>journal</b> des MAJ, fail-closed — JARVIS ne lance pas la MAJ). Chacune porte un <b>état</b> ; la plupart affichent en plus une <b>métrique en direct</b> (outils MCP joignables, leçons, corrections apprises, date de sauvegarde, alarmes actives). Les rares briques dont la valeur ne se mesure pas affichent une <b>valeur de référence</b> dans un style distinct — jamais présentée comme un relevé.</em></sub>
 </div>
 
 <h3 align="center">Le tableau de bord vivant</h3>
 
 <div align="center">
   <img src="Images/hermes-sante.webp" alt="Six panneaux de santé de l'agent" width="920"/>
-  <br/><sub><em>Six panneaux d'auto-diagnostic d'un coup d'œil — <b>Cerveau/Mémoire</b> (leçons apprises, rythme), <b>Sauvegarde</b> (instantané + auto quotidien 21 h), <b>Santé mémoire</b> (verdict GO/NO-GO, intégrité : 0 orphelin, 0 lien cassé), <b>SOC Auto-engine</b>, <b>Historique</b> persisté, <b>Réflexion</b> (corrections proposées vs apprises, taux d'apprentissage).</em></sub>
+  <br/><sub><em>Six panneaux d'auto-diagnostic d'un coup d'œil — <b>Cerveau/Mémoire</b> (leçons apprises, rythme), <b>Sauvegarde</b> (instantané + auto quotidien 21 h), <b>Santé mémoire</b> (verdict GO/NO-GO, puis l'<b>intégrité chiffrée</b> : nombre de fiches orphelines, de liens cassés, dépassement de taille — « saine » n'est écrit que si <b>tout</b> est à zéro, sinon les compteurs réels sont affichés en toutes lettres), <b>SOC Auto-engine</b>, <b>Historique</b> persisté, <b>Réflexion</b> (corrections proposées vs apprises, taux d'apprentissage).</em></sub>
 </div>
 
 <table>
@@ -344,21 +353,19 @@ Autour du flux, les **briques transversales** (enrichissent · protègent · agi
 > **Le pari : un agent qui ne se contente pas d'apprendre — il se maintient lui-même en vie.**
 > Hermès reste *sain* indéfiniment **sans intervention** : il se diagnostique, se répare, se borne, et **alerte seul** si sa propre mécanique d'entretien s'arrête.
 
-Un **moteur d'entretien autonome** enchaîne des étapes **idempotentes et réversibles** — chaque échec force une sortie en erreur (*fail-closed cumulatif*) : un entretien partiel ne se fait **jamais** passer pour un succès.
+Un **moteur d'entretien autonome** enchaîne des étapes **idempotentes et réversibles** — chaque échec force une sortie en erreur (*fail-closed cumulatif*) : un entretien partiel ne se fait **jamais** passer pour un succès. Il audite notamment l'index de la mémoire, décide des purges, vérifie la structure et les ressources, consolide les leçons, contrôle les sources de vérité, la dérive mémoire ↔ réel et les termes périmés.
+
+> ⚠ **Le nombre et le nom des étapes ne sont pas recopiés ici** — ils viennent du moteur lui-même, qui **trace chaque étape nommément** (`nom` + succès) dans le rapport machine qu'il émet à chaque passage. Les figer dans cette page garantirait qu'elles dérivent à la première évolution.
 
 ```mermaid
 flowchart TB
-    subgraph CYCLE["♻️ Boucle d'entretien autonome — étapes définies par le moteur (source unique)"]
+    subgraph CYCLE["♻️ Boucle d'entretien autonome — la liste des étapes est définie par le moteur (source unique), jamais dupliquée ici"]
         direction LR
-        A["Audit<br/>de l'index"] --> B["Décision<br/>de purge"]
-        B --> C["Signal<br/>qualité"]
-        C --> D["Structure<br/>de la mémoire"]
-        D --> E["Ressources<br/>+ seuils RAG"]
-        E --> F["Consolidation<br/>des leçons"]
-        F --> G["Sources<br/>de vérité"]
-        G --> H["Termes<br/>périmés"]
+        A["Étape 1<br/>audit de l'index"] --> B["Étape 2<br/>décision"]
+        B --> C["…"]
+        C --> N["Étape N<br/>vérification finale"]
     end
-    H --> V{"Toutes les<br/>étapes OK ?"}
+    N --> V{"Toutes les<br/>étapes OK ?"}
     V -->|oui| OK["✅ Mémoire saine<br/>état publié au cockpit"]
     V -->|non| ERR["🛑 Sortie en erreur<br/>entretien invalidé"]
     OK --> COCK[("◈ Cockpit Hermès<br/>santé · leçons · croissance")]

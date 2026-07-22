@@ -44,7 +44,7 @@
 </div>
 
 ---
-# MCP Server — outils Claude Desktop
+# MCP Server — outils exposés à Claude Code (VSCode)
 
 ## Objectif
 Le MCP Server est le pont qui permet à **Claude Code** (dans VSCode) d'interroger JARVIS
