@@ -54,7 +54,27 @@ function loadContract(file) {
       throw new Error('silence-channels.json : canal incomplet (method/path/response) — ' + JSON.stringify(b));
     }
   }
+  const bv = c.browser_voice;
+  if (!bv || typeof bv.chromium_flag !== 'string' || !bv.chromium_flag.startsWith('--')) {
+    throw new Error('silence-channels.json : browser_voice.chromium_flag manquant — la VOIX DU '
+      + 'NAVIGATEUR (speechSynthesis, zero reseau) ne serait neutralisee par rien');
+  }
   return c;
+}
+
+/** VOIX DU NAVIGATEUR — arguments de lancement qui SUPPRIMENT la capacite de parole du
+ *  navigateur de test. Zero reseau => le proxy n'y peut RIEN ; le seul levier global au niveau
+ *  de la config Playwright est `launchOptions.args` (aucun script d'init global n'existe en
+ *  1.60 : `initScript` absent de TestOptions — verifie dans les types). Le drapeau vient du
+ *  CONTRAT (source unique) : il n'est jamais ecrit en dur dans playwright.config.js.
+ *  ⛔ PORTEE TESTS UNIQUEMENT : le code produit n'est pas touche — la voix de secours de Marc
+ *  (edge-tts mort -> speechSynthesis) reste intacte dans SON navigateur. */
+function browserVoiceArgs(c) {
+  const bv = (c || {}).browser_voice;
+  if (!bv || !bv.chromium_flag) {
+    throw new Error('browserVoiceArgs : contrat sans browser_voice.chromium_flag (fail-closed)');
+  }
+  return [bv.chromium_flag];
 }
 
 /** Empreinte du CONTRAT (pas du fichier entier) : elle voyage dans l'URL de santé, si bien
@@ -141,7 +161,8 @@ function createServer(contract, log) {
   return server;
 }
 
-module.exports = { loadContract, contractFingerprint, healthUrlPath, matches, createServer, CONTRACT_PATH };
+module.exports = { loadContract, contractFingerprint, healthUrlPath, matches, createServer,
+  browserVoiceArgs, CONTRACT_PATH };
 
 if (require.main === module) {
   const contract = loadContract();          // illisible => exception => webServer en échec => 0 spec

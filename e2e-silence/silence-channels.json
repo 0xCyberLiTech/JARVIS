@@ -47,6 +47,28 @@
     }
   ],
 
+  "browser_voice": {
+    "_README": "VOIX DU NAVIGATEUR (speechSynthesis) — 2e canal d'émission réelle, AJOUTÉ le 2026-07-22 (lot P1-bis). ZÉRO RÉSEAU : aucun proxy ne peut l'intercepter. C'est le canal que MARC A IDENTIFIÉ À L'OREILLE (« ce n'est pas la voix d'Antoine, on dirait la voix du navigateur », puis « ça disait chat chat »). Chemin MESURÉ : templates/mobile/index.html (bouton nav « Chat ») -> mobile.js:913 écouteur délégué -> _say -> _sayVoice -> speechSynthesis.speak ; et static/js/audio_viz.js:683/703 (annonces de repli voix serveur). AUCUNE trace dans tts.log : ce fichier ne peut pas servir de preuve pour ce canal.",
+
+    "_mesure_avant": "SONDE sur le chemin RÉEL (2 clics de nav sur /m, espion sans relais) : {api:true, n:2, said:['Chat','Actions']}. Le produit DEMANDE bien la parole au navigateur à chaque tap.",
+
+    "_mitigation_precedente_REFUTEE": "Le contrat disait, avant ce lot : « atténué par --mute-audio et par le mode HEADLESS (aucune voix installée dans le Chromium de test) ». C'est FAUX — MESURÉ le 2026-07-22 : le Chromium de Playwright expose 3 voix SAPI FR (Microsoft Hortense / Julie / Paul), en HEADLESS **comme** en headed. Ce sont les voix SYSTÈME Windows, hors du pipeline audio du navigateur : --mute-audio ne les concerne pas. La « voix de secours système » entendue par Marc, c'est exactement ça.",
+
+    "chromium_flag": "--disable-speech-api",
+
+    "_pourquoi_ce_levier": "Il faut que l'API NE PARLE PAS — pas seulement que le son soit coupé. Playwright 1.60 n'offre AUCUN script d'init global au niveau de la config (vérifié : `initScript` absent de TestOptions dans node_modules/playwright/types/test.d.ts) et REFUSE tout hook global (mesuré au lot P1). Une fixture exigerait de toucher l'import des 25 specs — la 26e rouvrirait le trou. Le SEUL point de passage commun à toutes les specs, présentes ET FUTURES, au niveau du navigateur, est donc `launchOptions.args`. Ce drapeau SUPPRIME la capacité elle-même : mesuré, `speechSynthesis`, `SpeechSynthesisUtterance` et `SpeechSynthesis.prototype` deviennent tous `undefined`. Un produit qui teste `'speechSynthesis' in window` (audio_viz.js:680, mobile.js:897) tombe alors dans sa branche muette, PAR SON PROPRE CHEMIN.",
+
+    "_flags_MESURES_INOPERANTS": "--disable-speech-synthesis-api : MESURÉ SANS AUCUN EFFET (l'API reste présente et fonctionnelle). Un nom de drapeau plausible ne prouve rien — c'est PRÉCISÉMENT pourquoi le gardien ne se contente PAS de chercher la chaîne dans la config : il LANCE le navigateur et VÉRIFIE l'absence.",
+
+    "expect_absent": ["speechSynthesis", "SpeechSynthesisUtterance"],
+
+    "_portee_TESTS_UNIQUEMENT": "Ce drapeau est un argument de lancement du navigateur DE TEST, écrit dans playwright.config.js. Le code produit n'est PAS modifié : la vraie voix de secours de Marc (audio_viz.js::_voiceFallbackSpeak quand edge-tts tombe, mobile.js::_sayCritical pour les alarmes) reste INTACTE dans son navigateur à lui. ⛔ Ne JAMAIS neutraliser speechSynthesis dans le code produit : ce serait une régression grave d'accessibilité (§5) — c'est ce qui fait que JARVIS continue de parler à Marc quand internet est coupé.",
+
+    "_effet_de_bord_verifie": "--disable-speech-api coupe AUSSI la reconnaissance vocale du navigateur (Web Speech recognition). Sans effet ici : ZÉRO occurrence de SpeechRecognition/webkitSpeechRecognition dans tout le dépôt JARVIS (le STT passe par faster-whisper côté serveur).",
+
+    "_residuel_NOMME": "3 specs (mobile-voix-critique, mobile-menace-soc, mobile-chat-robustesse) installent un espion qui RELAIE vers l'API réelle (`try { orig(u); }`). Avec le drapeau, `orig` n'existe pas : elles prennent leur branche stub, muette. Ce motif n'est PAS flaggé par le gardien (il est légitime et neutralisé à la source) — il est NOMMÉ ici pour qu'on sache ce qui parlerait si le drapeau sautait. C'est le gardien qui interdit qu'il saute."
+  },
+
   "_canaux_connus_NON_bloques": {
     "_regle": "doctrine §4 — un canal non traité n'est pas un canal tu. Chacun est NOMMÉ ici avec son effet réel et le motif de non-blocage. Les ajouter au blocage est un lot À PART (chacun peut casser une spec légitime : à faire spec par spec, sur preuve).",
     "POST /api/chat": "Les BYPASS exécutent de VRAIES actions infra (une question a déclenché une sauvegarde de 4 VMs le 2026-07-22). Non bloqué : chat-llm-smoke.spec.js l'appelle DÉLIBÉRÉMENT (inférence réelle), et par la fixture `request` — qui ne passe PAS par le proxy (cf ci-dessous). Toutes les specs de PAGE l'interceptent déjà.",
@@ -62,6 +84,6 @@
     "MAIL": "Aucun endpoint HTTP JARVIS n'envoie de mail (le rapport quotidien est un cron sur srv-nginx, hors de portée d'une spec) — vérifié par recherche d'endpoint, PAS par lecture exhaustive du serveur SOC.",
     "TROU STRUCTUREL — la fixture `request` (APIRequestContext)": "MESURÉ le 2026-07-22 dans un bac à sable isolé : `use.proxy` NE s'applique PAS à la fixture `request` — un `request.post('/api/tts')` atteindrait le VRAI serveur. Playwright n'offre aucun moyen de le proxifier globalement. C'est le gardien jarvis-e2e-silence-guard qui ferme ce trou, STATIQUEMENT : toute spec qui vise un canal bloqué via `request`/`apiRequest` => NO-GO.",
     "TROU STRUCTUREL — https:// (CONNECT)": "Un CONNECT est un tunnel CHIFFRÉ opaque : le proxy ne voit pas le chemin. Une spec qui viserait https://<hote>:8444/api/tts passerait. Fermé lui aussi STATIQUEMENT par le gardien.",
-    "speechSynthesis (voix du NAVIGATEUR, zéro réseau)": "mobile.js prononce les libellés au tap (earcons + énoncé). Aucun proxy ne peut l'intercepter : c'est local. Atténué par --mute-audio et par le mode HEADLESS (aucune voix installée dans le Chromium de test). NON PROUVÉ en mode --headed : à traiter dans un lot dédié."
+    "speechSynthesis (voix du NAVIGATEUR, zéro réseau)": "TRAITÉ le 2026-07-22 (lot P1-bis) — voir la section `browser_voice` ci-dessus. N'est plus un canal non bloqué : la capacité est SUPPRIMÉE du navigateur de test par `browser_voice.chromium_flag`, prouvé par lancement réel (gardien I5), pas par une chaîne de caractères."
   }
 }

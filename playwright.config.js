@@ -59,6 +59,15 @@ export default defineConfig({
         // Ceinture ET bretelles : coupe le son du navigateur (Web Audio, <audio>). Ne remplace
         // PAS le blocage réseau — une requête NON ÉMISE vaut mieux qu'un son coupé.
         '--mute-audio',
+        // ⛔ VOIX DU NAVIGATEUR (2026-07-22, lot P1-bis) — le 2e canal d'émission réelle, celui que
+        // Marc a reconnu à l'oreille (« ça disait chat chat »). ZÉRO RÉSEAU : le proxy ci-dessus n'y
+        // peut RIEN. MESURÉ : 2 clics de nav sur /m => 2 appels à speechSynthesis.speak
+        // (« Chat », « Actions ») via mobile.js:913 -> _say. Et le Chromium de test a bien 3 voix
+        // SAPI FR (Hortense/Julie/Paul) EN HEADLESS : la prétendue atténuation par --mute-audio +
+        // headless est FAUSSE, mesurée. Ce drapeau SUPPRIME l'API (pas seulement le son) — le
+        // produit retombe alors dans sa propre branche muette (`'speechSynthesis' in window`).
+        // Le drapeau vient du CONTRAT (source unique), jamais écrit en dur ici.
+        ...silence.browserVoiceArgs(SILENCE),
       ],
     },
   },
