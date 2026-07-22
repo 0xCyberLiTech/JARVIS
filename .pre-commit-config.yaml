@@ -163,6 +163,25 @@ repos:
         always_run: true
         stages: [pre-push]
 
+      # ── VERROU DE SILENCE E2E (stage pre-push) — « un test ne fait pas parler la production » ──
+      # Ajout 2026-07-22, APRÈS incident MESURÉ. mobile-emergency-render.spec.js interceptait
+      # /api/mobile/** mais PAS /api/tts : elle a fait prononcer 3 fois à voix haute (tts.log,
+      # source=mobile, 17:50:06 / 18:04:21 / 18:06:43) « ARRÊT COMPLET TERMINÉ — VOUS POUVEZ
+      # COUPER LE COURANT » — l'écran d'urgence ORAGE que la FEMME de Marc utilise — pendant que
+      # les 4 VMs tournaient. CLASSE, pas instance : 19 des 25 specs ne citent même pas /api/tts.
+      # Le verrou lui-même est STRUCTUREL (e2e-silence/silence-proxy.cjs en `use.proxy` : le seul
+      # point de passage commun à toutes les specs, présentes ET futures). Ce hook PROUVE qu'il
+      # est entier. Il est placé AVANT le gate visuel : on ne lance pas des specs contre la
+      # production sans avoir prouvé qu'elles resteront muettes.
+      - id: jarvis-e2e-silence-guard
+        name: verrou de silence E2E (aucune spec ne peut faire parler JARVIS)
+        entry: python scripts/hermes/jarvis-e2e-silence-guard/jarvis-e2e-silence-guard.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+        stages: [pre-push]
+
       # ── GATE VISUEL (stage pre-push) — le RENDU RÉEL des écrans, prouvé par une machine ──
       # Ajout 2026-07-14. Des specs Playwright prouvent ce que les ÉCRANS DISENT : la tuile SANTÉ
       # MÉMOIRE et l'UI mobile d'ARRÊT D'URGENCE (celle qui dit à la femme de Marc si elle peut
@@ -204,7 +223,7 @@ repos:
       # self-check des 3 gardiens DÉJÀ gatés ici (a11y ×2 + llm-audit). Échec = push bloqué.
       - id: guardians-self-check
         name: self-check gardiens (anti-complaisance fault-injection)
-        entry: bash -c 'for t in scan-inline-a11y/scan-inline-a11y jarvis-a11y-audit/jarvis-a11y-audit jarvis-llm-audit/jarvis-llm-audit jarvis-llm-registry-audit/jarvis-llm-registry-audit jarvis-persona-audit/jarvis-persona-audit secret-redact-audit/secret-redact-audit jarvis-read-denylist-guard/jarvis-read-denylist-guard; do python "../DEV/TOOLS/$t.py" --self-check || exit 1; done; for t in jarvis-visual-gate/jarvis-visual-gate memory-audit/memory-audit; do python "scripts/hermes/$t.py" --self-check || exit 1; done; bash scripts/hermes/doc-drift-lint/doc-drift-lint.sh --self-check || exit 1; powershell -NoProfile -ExecutionPolicy Bypass -File ../DEV/TOOLS/jarvis-watchdog-audit/jarvis-watchdog-audit.ps1 -SelfCheck || exit 1'
+        entry: bash -c 'for t in scan-inline-a11y/scan-inline-a11y jarvis-a11y-audit/jarvis-a11y-audit jarvis-llm-audit/jarvis-llm-audit jarvis-llm-registry-audit/jarvis-llm-registry-audit jarvis-persona-audit/jarvis-persona-audit secret-redact-audit/secret-redact-audit jarvis-read-denylist-guard/jarvis-read-denylist-guard; do python "../DEV/TOOLS/$t.py" --self-check || exit 1; done; for t in jarvis-visual-gate/jarvis-visual-gate memory-audit/memory-audit jarvis-e2e-silence-guard/jarvis-e2e-silence-guard; do python "scripts/hermes/$t.py" --self-check || exit 1; done; bash scripts/hermes/doc-drift-lint/doc-drift-lint.sh --self-check || exit 1; powershell -NoProfile -ExecutionPolicy Bypass -File ../DEV/TOOLS/jarvis-watchdog-audit/jarvis-watchdog-audit.ps1 -SelfCheck || exit 1'
         language: system
         pass_filenames: false
         always_run: true
