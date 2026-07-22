@@ -80,7 +80,7 @@
   <img src="Images/interface.webp" alt="Cockpit JARVIS — interface neurale, modes de routage, télémétrie live" width="900"/>
 </div>
 
-Le poste de pilotage complet. À gauche, **l'interface neurale** (loopback-only · bind `127.0.0.1`) et la barre de commande avec ses **modes de routage** — `SOC · GÉN · CODE · THINK` + entrées `MIC`, `IMG` (vision), `WEB`, `AIDE` — qui orientent chaque requête vers le bon comportement, **un seul modèle `qwen3.5:9b`, zéro swap**. À droite, la **télémétrie temps réel** : cœur d'intégrité, coordonnées, **GPU** (VRAM, température, watts), système et modèle neural. Onze modules accessibles d'un clic depuis la barre du haut.
+Le poste de pilotage complet. À gauche, **l'interface neurale** (loopback-only · bind `127.0.0.1`) et la barre de commande avec ses **modes de routage** — `SOC · GÉN · CODE · THINK` + entrées `MIC`, `IMG` (vision), `WEB`, `AIDE` — qui orientent chaque requête vers le bon comportement, **un seul modèle `qwen3.5:9b`, zéro swap**. À droite, la **télémétrie temps réel** : cœur d'intégrité, coordonnées, **GPU** (VRAM, température, watts), système et modèle neural. Les modules sont accessibles d'un clic depuis la barre du haut — leur nombre n'est pas figé ici : c'est celui des onglets réellement déclarés dans l'interface.
 
 <a id="sec-2"></a>
 
@@ -91,7 +91,7 @@ Le poste de pilotage complet. À gauche, **l'interface neurale** (loopback-only 
 <table>
 <tr>
 <td width="50%" align="center"><img src="Images/set-gpu-health.webp" width="410" alt="GPU Health"/><br/><sub><b>GPU Health</b> — VRAM / 16 Go, charge, température et puissance de la RTX 5080, en direct.</sub></td>
-<td width="50%" align="center"><img src="Images/set-impact.webp" width="410" alt="Impact VRAM"/><br/><sub><b>Impact VRAM</b> — coût mémoire estimé <em>avant</em> lancement (~9 Go : modèle ~5,5 Go + cache KV), garde la « zone sûre ».</sub></td>
+<td width="50%" align="center"><img src="Images/set-impact.webp" width="410" alt="Impact VRAM"/><br/><sub><b>Impact VRAM</b> — coût mémoire estimé <em>avant</em> lancement : empreinte du modèle (lue dans le registre source-unique) + cache KV dérivé de <code>num_predict</code>, avec verdict « zone sûre ».</sub></td>
 </tr>
 <tr>
 <td width="50%" align="center"><img src="Images/set-profils.webp" width="410" alt="Profils RTX 5080"/><br/><sub><b>Profils RTX 5080</b> — 6 préréglages en un clic : Rapide · Équilibré · Code · Créatif · Précis · MAX.</sub></td>
@@ -122,8 +122,7 @@ C'est le garde-fou du LLM 100 % local : tant que le modèle **+ son cache KV** t
 
 <h3 align="center">4 · Studio audio DSP — le rack broadcast</h3>
 
-Une **chaîne broadcast complète** appliquée à la voix de synthèse, accélérée **CUDA** :
-`TTS → DeepFilterNet → Compresseur → Stereo → Analyseur → FX → EQ → Output`. **Huit étages**, chacun sa fonction — tout en Web Audio, temps réel, en local.
+Une **chaîne broadcast complète** appliquée à la voix de synthèse, en deux temps : un **traitement serveur** en Python/CUDA sur l'audio rendu par le TTS, puis un **rack Web Audio** temps réel dans le navigateur. Le studio expose une carte par fonction — chacune pilote un étage réel de l'une ou l'autre moitié.
 
 <table>
 <tr>
@@ -146,15 +145,23 @@ Une **chaîne broadcast complète** appliquée à la voix de synthèse, accélé
 
 <h4 align="center">Schéma logique du circuit — état des étages & CUDA</h4>
 
-*Le signal vocal traverse une chaîne de circuits : un étage **CUDA (GPU)** pour le débruitage IA, le reste en **Web Audio** temps réel dans le navigateur.*
+*Le signal vocal traverse **deux moitiés** : d'abord le **traitement serveur** (Python/numpy, dont un étage **CUDA** pour le débruitage IA), qui rend un WAV stéréo ; puis le **rack Web Audio** temps réel dans le navigateur.*
 
 ```mermaid
 flowchart LR
-    TTS["🎙️ TTS<br/>Edge · Kokoro"] --> DFN
-    subgraph CUDA["⚡ CUDA — GPU RTX 5080"]
-        DFN["DeepFilterNet3<br/>débruitage IA"]
+    TTS["🎙️ TTS<br/>Edge · Kokoro"] --> SEQ
+    subgraph SRV["🐍 Serveur — Python · numpy/scipy"]
+        SEQ["EQ + gain"] --> DFN
+        subgraph CUDA["⚡ CUDA — GPU"]
+            DFN["DeepFilterNet3<br/>débruitage IA"]
+        end
+        DFN --> ENR["Enrichisseur<br/>harmonique"] --> SFX["FX Rack<br/>reverb · delay · chorus…"] --> HAAS["Upmix stéréo<br/>Haas L/R"]
     end
-    DFN --> CMP["Compresseur<br/>VCA"] --> STE["Stereo<br/>Widener"] --> EQ["EQ<br/>4 bandes"] --> FX["FX Rack<br/>convolution"] --> AN["Analyseur<br/>FFT + phase"] --> OUT["🎚️ Output L+R<br/>gain · VU"]
+    HAAS --> AN
+    subgraph WA["🌐 Navigateur — Web Audio"]
+        AN["Analyseur<br/>FFT + phase"] --> EQ["EQ 4 bandes<br/>Low·Mid·High·Air"] --> CMP["Compresseur<br/>VCA"] --> LIM["Limiter voix"] --> CONV["Convolver<br/>dry / wet"] --> MST["Limiter master"]
+    end
+    MST --> OUT["🎚️ Sortie L+R<br/>gain · VU"]
 ```
 
 <div align="center">
@@ -162,13 +169,16 @@ flowchart LR
 <table align="center">
 <tr><th>Étage</th><th>Rôle logique</th><th>Circuit</th></tr>
 <tr><td><b>TTS</b></td><td>synthèse vocale — Edge Antoine / Kokoro neural local</td><td>source</td></tr>
+<tr><td><b>EQ + gain</b></td><td>modelage du timbre à la source — bandes LOW · MID · HIGH · AIR</td><td>serveur (Python)</td></tr>
 <tr><td><b>DeepFilterNet3</b></td><td>débruitage IA — retire bruit de fond + artefacts TTS</td><td><b>⚡ CUDA (GPU)</b></td></tr>
-<tr><td><b>Compresseur</b></td><td>homogénéise le volume (seuil · ratio · attaque · relâche, VCA)</td><td>Web Audio</td></tr>
-<tr><td><b>Stereo Widener</b></td><td>élargit l'image stéréo (effet Haas), compatibilité mono</td><td>Web Audio</td></tr>
-<tr><td><b>EQ</b></td><td>modelage du timbre — bandes LOW · MID · HIGH · AIR</td><td>Web Audio</td></tr>
-<tr><td><b>FX Rack</b></td><td>reverb · echo · delay · chorus (convolution)</td><td>Web Audio</td></tr>
+<tr><td><b>Enrichisseur</b></td><td>enrichissement harmonique de la voix</td><td>serveur (Python)</td></tr>
+<tr><td><b>FX Rack</b></td><td>reverb · echo · delay · chorus · flanger · exciter</td><td>serveur (Python)</td></tr>
+<tr><td><b>Stereo Widener</b></td><td>upmix mono → stéréo (effet Haas), largeur réglable jusqu'au mono</td><td>serveur (Python)</td></tr>
 <tr><td><b>Analyseur</b></td><td>FFT temps réel + goniomètre de phase</td><td>Web Audio</td></tr>
-<tr><td><b>Output L+R</b></td><td>bus master : gain de sortie + VU-mètres</td><td>Web Audio</td></tr>
+<tr><td><b>EQ 4 bandes</b></td><td>correction finale à l'écoute — LOW · MID · HIGH · AIR</td><td>Web Audio</td></tr>
+<tr><td><b>Compresseur</b></td><td>homogénéise le volume (seuil · ratio · attaque · relâche, VCA)</td><td>Web Audio</td></tr>
+<tr><td><b>Convolver dry/wet</b></td><td>réverbération par convolution, dosée dry/wet</td><td>Web Audio</td></tr>
+<tr><td><b>Sortie L+R</b></td><td>bus master : limiteur brick-wall, gain de sortie + VU-mètres</td><td>Web Audio</td></tr>
 </table>
 
 </div>
@@ -261,7 +271,7 @@ Un **vrai terminal SSH interactif** (PTY `xterm-256color`) intégré à JARVIS �
   <img src="Images/hermes.webp" alt="Hermès — cœur de l'agent, état moteur et pipeline temps réel" width="920"/>
 </div>
 
-Le tableau de bord vivant de l'agent. Au centre, le **cœur** qui « respire » tant que JARVIS tourne — il **s'illumine** quand il parle (*JE PARLE*), vire à l'**or/ambre** quand la menace monte. Autour, le **diagnostic** (RAG, mémoire, connaissance) et l'**état moteur** (mode, modèle `qwen3.5:9b`, niveau de menace + sa cause). En bas, le **pipeline temps réel** : `ENTRÉE → BYPASS (< 100 ms, zéro LLM) → MÉMOIRE (RAG auto-borné à 4 000 chunks) → SOC LIVE → WEB → PVE → LLM LOCAL → OUTILS → RÉPONSE` — **chaque brique affiche sa métrique live**. L'agentification rendue visible.
+Le tableau de bord vivant de l'agent. Au centre, le **cœur** qui « respire » tant que JARVIS tourne — il **s'illumine** quand il parle (*JE PARLE*), vire à l'**or/ambre** quand la menace monte. Autour, le **diagnostic** (RAG, mémoire, connaissance) et l'**état moteur** (mode, modèle `qwen3.5:9b`, niveau de menace + sa cause). En bas, le **pipeline temps réel** : `ENTRÉE → BYPASS (< 100 ms, zéro LLM) → MÉMOIRE (RAG borné — plafond ET plancher) → SOC LIVE → WEB → PVE → LLM LOCAL → OUTILS → RÉPONSE` — **chaque brique affiche sa métrique live**. L'agentification rendue visible.
 
 <h3 align="center">Schéma logique de la pile — le rôle de chaque tuile</h3>
 
@@ -278,7 +288,7 @@ flowchart LR
 <tr><th>Tuile du flux</th><th>Rôle logique</th></tr>
 <tr><td><b>ENTRÉE</b></td><td>voix (STT Whisper) · texte · image (vision multimodale)</td></tr>
 <tr><td><b>BYPASS</b></td><td>commandes directes <b>déterministes</b>, &lt; 100 ms, <b>zéro LLM</b></td></tr>
-<tr><td><b>MÉMOIRE</b></td><td>faits + leçons <b>RAG</b>, auto-borné à 4 000 chunks</td></tr>
+<tr><td><b>MÉMOIRE</b></td><td>faits + leçons <b>RAG</b> — corpus borné des <b>deux côtés</b> : un plafond (dérive) <em>et</em> un plancher (index éventré). Les deux seuils viennent d'une seule constante de référence, jamais d'un chiffre recopié</td></tr>
 <tr><td><b>SOC LIVE</b></td><td>injecte le <b>contexte sécurité</b> temps réel</td></tr>
 <tr><td><b>WEB</b></td><td>recherche <b>gouvernée</b> (allowlist, lecture seule)</td></tr>
 <tr><td><b>PVE</b></td><td>état <b>Proxmox</b> temps réel</td></tr>
@@ -312,7 +322,7 @@ Autour du flux, les **briques transversales** (enrichissent · protègent · agi
 
 <div align="center">
   <img src="Images/hermes-briques.webp" alt="Briques transversales de l'agent" width="920"/>
-  <br/><sub><em>Les <b>briques transversales</b> qui enrichissent, protègent et prolongent l'agent — <b>Vision</b> (analyse d'images), <b>MCP</b> (pont gouverné vers Claude Desktop), <b>Apprentissage</b>, <b>Réflexion</b>, <b>DR Cerveau</b> (sauvegarde/restauration), <b>Briefing</b> matinal proactif, <b>Alarmes</b>, <b>Pédagogie</b> (explique vs analyse), <b>Infogérance</b> (MAJ des VMs, fail-closed). Chacune affiche sa métrique live.</em></sub>
+  <br/><sub><em>Les <b>briques transversales</b> qui enrichissent, protègent et prolongent l'agent — <b>Vision</b> (analyse d'images), <b>MCP</b> (pont gouverné vers Claude Desktop), <b>Apprentissage</b>, <b>Réflexion</b>, <b>DR Cerveau</b> (sauvegarde/restauration), <b>Briefing</b> matinal proactif, <b>Alarmes</b>, <b>Pédagogie</b> (explique vs analyse), <b>Infogérance</b> (état du parc + <b>journal</b> des MAJ, fail-closed — JARVIS ne lance pas la MAJ). Chacune affiche sa métrique live.</em></sub>
 </div>
 
 <h3 align="center">Le tableau de bord vivant</h3>
@@ -338,15 +348,17 @@ Un **moteur d'entretien autonome** enchaîne des étapes **idempotentes et réve
 
 ```mermaid
 flowchart TB
-    subgraph CYCLE["♻️ Boucle d'entretien autonome"]
+    subgraph CYCLE["♻️ Boucle d'entretien autonome — étapes définies par le moteur (source unique)"]
         direction LR
-        A["1 · Intégrité"] --> B["2 · Santé<br/>GO / NO-GO"]
-        B --> C["3 · Consolidation<br/>des leçons"]
-        C --> D["4 · Ré-indexation<br/>auto-bornée"]
-        D --> E["5 · Ressources<br/>+ purge RAG"]
-        E --> F["6 · Anti-dérive<br/>fail-closed"]
+        A["Audit<br/>de l'index"] --> B["Décision<br/>de purge"]
+        B --> C["Signal<br/>qualité"]
+        C --> D["Structure<br/>de la mémoire"]
+        D --> E["Ressources<br/>+ seuils RAG"]
+        E --> F["Consolidation<br/>des leçons"]
+        F --> G["Sources<br/>de vérité"]
+        G --> H["Termes<br/>périmés"]
     end
-    F --> V{"Toutes les<br/>étapes OK ?"}
+    H --> V{"Toutes les<br/>étapes OK ?"}
     V -->|oui| OK["✅ Mémoire saine<br/>état publié au cockpit"]
     V -->|non| ERR["🛑 Sortie en erreur<br/>entretien invalidé"]
     OK --> COCK[("◈ Cockpit Hermès<br/>santé · leçons · croissance")]
@@ -360,7 +372,22 @@ flowchart TB
 - 🚨 **Aucune panne silencieuse** — si l'entretien s'arrête, une sentinelle alerte.
 - 🔒 **Fail-closed de bout en bout** — au moindre doute, refuser ; sauvegarde avant toute écriture.
 
-> Détail technique complet — moteur d'entretien, états publiés, garde-fous outillés, l'inventaire des briques, comparatif Avant / Après — dans **[01 — Hermès](DOCUMENTATION/01-HERMES.md)**.
+<h3 align="center">Où vivent ces organes — la frontière du produit</h3>
+
+> **Un outil de développement peut dépendre du produit. Le produit ne doit jamais dépendre des outils de développement.**
+
+Ce n'est pas une préférence de rangement, c'est une **condition de survie**. Les organes qui maintiennent Hermès en vie — moteur d'entretien de la mémoire, moteur de réparation, audit de la connaissance, contrôle du rendu réel des écrans — vivaient dans l'**atelier de développement**. Conséquence prouvée : restaurer le seul coffre de JARVIS après un sinistre ressuscitait l'assistant… **avec toute sa pile d'entretien morte**, sans une erreur, sans un log.
+
+Ils ont donc **déménagé dans le produit** — ils n'existent plus qu'à **un seul endroit**, sauvegardé avec lui :
+
+- **Une seule copie** — l'atelier n'en garde aucune : zéro duplication, donc zéro dérive entre deux versions.
+- **Une seule source pour leurs chemins** — les modules de production qui les lancent lisent tous la même déclaration, jamais leur propre variante.
+- **Fail-closed** — un organe manquant est **dit** (log + voix), jamais sauté en silence.
+- **Vérifié par la machine** — un garde-fou refuse tout chemin de production qui pointerait vers l'atelier, et un contrôle jumeau exige que tout chemin externe atteint à l'exécution soit couvert par le coffre.
+
+> ✅ **Le test qui compte : restaurer le seul coffre suffit à faire revivre la pile.**
+
+> Détail technique complet — moteur d'entretien, briques détaillées, inventaire live, comparatif Avant / Après — dans **[01 — Hermès](DOCUMENTATION/01-HERMES.md)**.
 
 ---
 
@@ -392,7 +419,7 @@ flowchart TB
 <tr><td><b>RAG</b></td><td>qwen3-embedding:4b (dim 2560) · BM25 hybride · auto-borné · TTL 5 min</td></tr>
 <tr><td><b>TTS</b></td><td>edge-tts fr-CA Antoine → repli Kokoro CUDA neural (hors-ligne, local)</td></tr>
 <tr><td><b>STT</b></td><td>faster-whisper large-v3-turbo CUDA · vocabulaire SOC</td></tr>
-<tr><td><b>Frontend</b></td><td>Vanilla JS · Web Audio API · xterm.js · Monaco Editor</td></tr>
+<tr><td><b>Frontend</b></td><td>Vanilla JS · Web Audio API · xterm.js · Monaco Editor <em>(éditeur de code chargé depuis un CDN — seule dépendance réseau externe du front, en dégradation gracieuse hors ligne)</em></td></tr>
 <tr><td><b>Agent Hermès</b></td><td>synoptique · bypass regex · scheduler daemon · indépendant du LLM</td></tr>
 <tr><td><b>Qualité</b></td><td>suite pytest · gate de couverture pré-push · ruff 0 · eslint 0 · hooks pré-commit/pré-push</td></tr>
 </table>

@@ -99,7 +99,7 @@ et bornée en taille avant émission.
 | `jarvis_infra_status` | État des serveurs SSH (nginx, clt, pa85, Proxmox) |
 | `jarvis_proxmox_vms` | État des VMs Proxmox (`qm list` live) |
 | `jarvis_read_file` | Lire un fichier sur un serveur via SSH (lecture seule) |
-| `jarvis_model_switch` | Changer le modèle Ollama actif (SOC/GÉNÉRAL/CODE) |
+| `jarvis_model_switch` | Changer le modèle Ollama actif — bascule réversible, refusée si le modèle n'est pas installé |
 | `jarvis_last_response` | Derniers échanges de la conversation JARVIS en cours |
 | `jarvis_code_exec` | Écrire + SCP + exécuter un fichier sur le serveur de dev |
 | `jarvis_defense_24h` | Résumé défense SOC 24 h : bans, Kill Chain, IDS, WAF |

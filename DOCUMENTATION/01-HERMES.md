@@ -198,14 +198,15 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 | BRIEFING | résumé proactif au réveil | ✎ |
 | ALARMES | rappels à l'heure · 0 LLM | — |
 | PÉDAGOGIE | tuteur : explique vs analyse | ✎ |
-| INFOGÉRANCE | MAJ VM orchestrée · fail-closed | ✎ |
+| INFOGÉRANCE | état du parc + journal des MAJ (lecture seule) · fail-closed | ✎ |
 
 Le **cache vocal** (restitution TTS instantanée) agit sur la brique `RÉPONSE` (détaillé plus bas).
 
 **Sections détaillées sans nœud `data-brick`** (capacités réelles, hors schéma live) : *Brique 1 —
 Synoptique* (le tableau de bord d'observabilité lui-même, pas une brique du pipeline), *Brique 9 —
 Cache vocal* (agit sur `RÉPONSE`), *Brique 10 — Connaissance vérifiable / anti-dérive* (moteur de
-non-dérive, `memory-audit`).
+non-dérive), *Brique 11 — Moteur d'entretien + frontière du produit* (ce qui maintient la pile en
+vie et lui permet de ressusciter seule).
 
 **Capacités agentiques présentes côté backend / autres tuiles mais ABSENTES du SCHÉMA HERMÈS**
 (le schéma sous-représente donc l'agent — à trancher : les promouvoir en nœuds `data-brick` ou les
@@ -224,11 +225,11 @@ Le synoptique est le **tableau de bord live d'Hermès** — visible en permanenc
       ◈  HERMÈS  --  SYNOPTIQUE  MOTEUR                        
 ├─────────────────┬───────────────────────────────────────┤
 │  LLM ACTIF      │  qwen3.5:9b  ●  CHAUD  (en mémoire)  │
-│  RAG            │  1151 chunks  ●  PRÊT  TTL: 4m32s     │
+│  RAG            │  <n> chunks  ●  PRÊT  TTL: <reste>    │
 │  STT            │  large-v3-turbo  ●  EN ÉCOUTE         │
 │  TTS            │  edge-tts  Antoine fr-CA  ●  ACTIF    │
-│  AUTO-ENGINE    │  ●  ACTIF  —  dernier scan: 42s       │
-│  MÉMOIRE        │  96 leçons  ●  résumés  ●  SYNC       │
+│  AUTO-ENGINE    │  ●  ACTIF  —  dernier scan: <âge>     │
+│  MÉMOIRE        │  <n> leçons  ●  résumés  ●  SYNC      │
 └─────────────────┴───────────────────────────────────────┘
 ```
 
@@ -284,7 +285,7 @@ jarvis_memory.json  (persistant sur disque)
 ├── résumés       : condensés des longues conversations
 └── contexte      : état de l'échange en cours
 
-Base vectorielle RAG  (~1150 chunks)
+Base vectorielle RAG  (taille LIVE — jamais figée ici)
 ├── documentation technique locale
 ├── leçons apprises  (injection automatique)
 └── résumés de sessions
@@ -297,7 +298,7 @@ Base vectorielle RAG  (~1150 chunks)
 ### Le problème sans bypass
 
 Quand on passe toutes les commandes par le LLM, on accepte deux risques :
-- **Latence** : le modèle 14b prend 2 à 8 secondes pour répondre
+- **Latence** : le modèle local prend plusieurs secondes pour répondre
 - **Hallucination** : le LLM peut inventer une heure, un nom de fichier, un état de service
 
 Pour des commandes simples et prévisibles, ce comportement est inacceptable.
@@ -454,42 +455,45 @@ compétence sur la cybersécurité défensive.
 
 ---
 
-## Brique 7 — Infogérance assistée (orchestration sûre)
+## Brique 7 — Infogérance : l'agent OBSERVE, il ne lance pas la mise à jour
 
-**Rôle : exécuter une opération multi-étapes risquée en un seul geste, avec garde-fous.**
+**Rôle : donner l'état du parc et le journal des mises à jour — sans jamais les déclencher.**
 
-Mettre à jour une machine demande normalement une séquence manuelle (mise à
-jour → redémarrage → re-vérification de l'intégrité fichier). Hermès
-l'orchestre derrière **un seul bouton**, sans jamais sacrifier la sûreté.
+> ⚠️ **Cette brique a changé de nature.** Elle a été livrée en « orchestration » :
+> un bouton unique enchaînait mise à jour → redémarrage → re-base d'intégrité.
+> Cette capacité **n'existe plus dans le produit**, et cette page la décrivait
+> encore. La route HTTP qui la lançait a été **retirée** : elle appelait un outil
+> de l'**atelier de développement**, donc le produit ne survivait pas à une
+> restauration nue. **L'atelier agit, le produit observe.**
 
 ```
-1 bouton « MAJ complète »
-        │
-        ▼  1 seule confirmation OUI / NON
-        │
-   ┌────┴─────────────────────────────────────────────┐
-   │  ① mise à jour des paquets                       │
-   │  ② redémarrage SI requis                         │
-   │     └─ preuve du reboot (uptime vérifié)         │
-   │  ③ re-base de l'intégrité fichier (post-reboot)  │
-   └────┬─────────────────────────────────────────────┘
-        │
-        ▼  FAIL-CLOSED : toute étape qui échoue STOPPE la chaîne
-        │
-   Journal horodaté (JSONL) de chaque étape
+Ce que JARVIS FAIT                      Ce qu'il NE FAIT PLUS
+──────────────────────────────────      ─────────────────────────────
+● état du parc (une carte par hôte)     ✗ lancer la MAJ complète
+● journal des MAJ — LECTURE SEULE       ✗ redémarrer après la MAJ
+● « copier la commande » (0 exécution)  ✗ re-baser l'intégrité fichier
+● dire ce qu'il ne peut PAS vérifier
 ```
 
-Trois principes non négociables :
+Ce qui reste — et pourquoi c'est plus sûr :
 
-- **Fail-closed** — une étape qui échoue interrompt tout (jamais de re-base sur
-  un état non vérifié).
-- **Ordre prouvé** — la re-base d'intégrité n'a lieu **qu'après** un
-  redémarrage prouvé (uptime), jamais avant.
-- **Traçabilité** — chaque étape est journalisée (JSONL horodaté), comme toute
-  opération sensible.
+- **Lecture seule** — le blueprint n'expose plus **aucune** mutation. La garde
+  anti-CSRF est pourtant **conservée** : le jour où une route mutante y naîtra,
+  elle naîtra **déjà protégée**, plutôt que de dépendre de quelqu'un qui penserait
+  à la reposer.
+- **Copier ≠ exécuter** — la commande de mise à jour est placée dans le
+  presse-papiers, à coller dans une console **hors de JARVIS**. C'est le **seul**
+  endroit où elle est écrite : deux textes ne peuvent pas diverger.
+- **Journal borné et hors de l'atelier** — seules les dernières lignes sont lues
+  (mémoire bornée : un fichier qui grossit ne peut pas faire enfler JARVIS), et le
+  journal survit à une restauration.
+- **Fail-closed sur la donnée** — une valeur que l'agent ne sait pas vérifier
+  (index de paquets périmé, sonde en échec) est **dite**, jamais repeinte en
+  « à jour » : un total n'additionne que le connu et **compte à part** l'inconnu.
 
 Pensée pour l'**accessibilité** : gros boutons, confirmation OUI/NON
-inconfondable, verdict lu à voix haute.
+inconfondable, verdict lu à voix haute, raison écrite **en toutes lettres** —
+jamais un simple code couleur.
 
 ---
 
@@ -508,7 +512,7 @@ après sinistre, pilotable **à la voix**.
                               └─ "latest" pour restauration 1-geste
                                    │
 "Restaure le cerveau"   ──►  retour à la dernière sauvegarde
-                              └─ vocal : "Cerveau restauré. 96 leçons."
+                              └─ vocal : "Cerveau restauré. <n> leçons."
 ```
 
 Le fichier des leçons est **cumulatif** : la rotation ne supprime jamais le
@@ -583,6 +587,59 @@ CORRECTION  =  déclenchée par l'humain, par lots   (jugement requis)
 
 ---
 
+## Brique 11 — Le moteur d'entretien, et où vivent les organes
+
+**Rôle : garder Hermès sain indéfiniment, sans intervention — et survivre à un sinistre.**
+
+### Le moteur d'entretien
+
+JARVIS lance ce moteur **au démarrage et en boucle**. Il enchaîne des étapes
+**idempotentes et réversibles** — audit de l'index, décision de purge, signal
+qualité, structure de la mémoire, ressources et seuils du corpus, consolidation
+des leçons, sources de vérité, chasse aux termes périmés.
+
+**Le nombre et l'ordre des étapes ne sont pas figés ici** : ils sont définis dans
+le moteur lui-même, seule source. Ce qui est invariant, c'est la règle de sortie :
+
+```
+chaque étape échoue  ──►  cumul fail-closed  ──►  SORTIE EN ERREUR
+                                                  (entretien INVALIDÉ)
+
+toutes les étapes OK ──►  état publié au cockpit
+```
+
+Un entretien **partiel ne se fait jamais passer pour un succès**. Et le verdict
+**dérive du code de sortie** — pas d'une seconde logique de verdict qui pourrait
+diverger de la première.
+
+### Où vivent les organes — la frontière du produit
+
+> **Un outil de développement peut dépendre du produit.
+> Le produit ne doit JAMAIS dépendre des outils de développement.**
+
+Ces organes sont le **système nerveux** de JARVIS. Ils vivaient dans l'**atelier
+de développement**. Le coût, mesuré et non supposé : après restauration du seul
+coffre de JARVIS — **le scénario même du sinistre** — toute la pile Hermès
+**mourait**, parce que son moteur n'avait jamais été sauvegardé avec le produit.
+Pire, une des briques répondait « **aucun outil** » **sans une erreur, sans un
+log** : l'agent affirmait sereinement une contre-vérité.
+
+Ils ont donc **déménagé dans le produit**. Ce que cela impose :
+
+| Règle | Ce qu'elle garantit |
+|---|---|
+| **Une seule copie** — l'atelier n'en garde aucune | Deux copies divergent ; une seule ne peut pas dériver |
+| **Une seule déclaration de leurs chemins** | Les modules de production qui les lancent lisent tous la même ; aucun ne peut mentir en silence quand un organe bouge |
+| **Fail-closed audible** | Un organe absent est **dit** (log **et** voix) — jamais une étape sautée en silence |
+| **Vérifié par la machine** | Un garde-fou refuse tout chemin de production qui pointerait vers l'atelier ; son jumeau exige que tout chemin externe atteint à l'exécution soit couvert par le coffre |
+
+> **Le test qui compte n'est pas « est-ce rangé proprement ? » mais
+> « si je restaure le seul coffre après un sinistre, est-ce que ça marche
+> encore ? ».** C'est la seule façon de garantir qu'un produit puisse
+> **ressusciter seul**.
+
+---
+
 ## Bilan — Ce qu'Hermès apporte à JARVIS
 
 ```
@@ -618,8 +675,8 @@ CORRECTION  =  déclenchée par l'humain, par lots   (jugement requis)
 │  (analyse même quand on │  expliquer d'analyser — devient un     │
 │  veut comprendre)       │  tuteur cybersécurité                  │
 ├─────────────────────────┼────────────────────────────────────────┤
-│  Opérations système     │  Infogérance orchestrée : 1 bouton,    │
-│  manuelles, risquées    │  fail-closed, ordre prouvé, journal    │
+│  Opérations système     │  Infogérance en lecture seule : état   │
+│  sans visibilité        │  du parc, journal des MAJ, fail-closed  │
 ├─────────────────────────┼────────────────────────────────────────┤
 │  La mémoire peut être   │  DR du cerveau : sauvegarde/restaure   │
 │  perdue                 │  pilotable à la voix, savoir cumulatif │
