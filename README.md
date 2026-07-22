@@ -64,7 +64,7 @@
 
 <div align="center">
 
-**Visite guidée** &nbsp;·&nbsp; [🕹️ Cockpit](#sec-1) &nbsp;·&nbsp; [🧠 Réglages](#sec-2) &nbsp;·&nbsp; [📊 Monitoring](#sec-3) &nbsp;·&nbsp; [🎛️ Studio DSP](#sec-4) &nbsp;·&nbsp; [🎙️ Voice Lab](#sec-5) &nbsp;·&nbsp; [🌐 Accès Web](#sec-6) &nbsp;·&nbsp; [🛡️ SOC](#sec-7) &nbsp;·&nbsp; [✦ Hermès](#hermes)
+**Visite guidée** &nbsp;·&nbsp; [🕹️ Cockpit](#sec-1) &nbsp;·&nbsp; [🧠 Réglages](#sec-2) &nbsp;·&nbsp; [📊 Monitoring](#sec-3) &nbsp;·&nbsp; [🎛️ Studio DSP](#sec-4) &nbsp;·&nbsp; [🎙️ Voice Lab](#sec-5) &nbsp;·&nbsp; [🌐 Accès Web](#sec-6) &nbsp;·&nbsp; [🛡️ SOC](#sec-7) &nbsp;·&nbsp; [◈ Infogérance](#sec-8) &nbsp;·&nbsp; [✦ Hermès](#hermes)
 
 </div>
 
@@ -207,6 +207,35 @@ Le **centre de défense** de JARVIS. Courbe d'**activité sur 30 jours** (pics o
 
 > 🔒 Volontairement **non publiés** : le journal des IP d'attaquants, le terminal d'actions SOC, les leçons apprises. La vitrine *décrit* le SOC et montre son activité **agrégée** — **aucune donnée actionnable, aucune IP**.
 
+<a id="sec-8"></a>
+
+<h3 align="center">8 · Infogérance — le parc en direct</h3>
+
+<div align="center">
+  <img src="Images/infogerance.webp" alt="Onglet Infogérance de JARVIS — quatre compteurs de parc puis une carte par hôte (VMs, hyperviseur, routeur) avec leurs boutons d'action" width="920"/>
+  <br/><sub><em>Le <b>parc entier sur un seul écran</b> : quatre compteurs <b>comptés en direct</b> (hôtes suivis · en ligne · MAJ en attente · redémarrages requis), puis <b>une carte par hôte</b> — toutes au <b>même gabarit</b> (ÉTAT · CPU · RAM · DISQUE · MAJ · REBOOT), pour qu'une ligne manquante se <em>voie</em>. Chaque carte <b>date sa sonde</b> (« Sondé il y a … », et <b>« ⚠ SONDE PÉRIMÉE »</b> au-delà de 10 min) et lève une pastille <b>« ⚠ À L'ATTENTION »</b> <b>en toutes lettres</b>, jamais un simple code couleur. <b>IP WAN et version de firmware caviardées</b> par un aplat opaque appliqué <em>avant</em> la capture.</em></sub>
+</div>
+
+**Le produit observe, l'atelier agit.** JARVIS ne déclenche pas la mise à jour complète d'une VM : le bandeau du haut rappelle la commande à passer côté atelier, et JARVIS en affiche l'**état** puis le **journal**. Une valeur qu'il ne sait pas vérifier — index de paquets périmé, sonde en échec — est **dite** (« ⚠ Non vérifiable », avec sa raison) et **jamais** repeinte en « ✓ à jour » : un total n'additionne que ce qui est connu, et compte à part ce qui ne l'est pas.
+
+<div align="center">
+
+<table align="center">
+<tr><th>Bouton</th><th>Ce qu'il fait — vraiment</th></tr>
+<tr><td><b>▶ Démarrer</b></td><td>Demande d'abord une <b>confirmation</b> dans l'onglet, puis démarre la VM sur l'hyperviseur (<code>qm start</code>) par une commande <b>déterministe, sans LLM</b>. JARVIS <b>attend ensuite le retour de la machine</b> (jusqu'à ~2 min de sondage SSH) et <b>vérifie service par service</b> ce qui doit tourner sur cet hôte précis, puis annonce le verdict <b>à la voix</b>. Inactif si la VM tourne déjà.</td></tr>
+<tr><td><b>⏹ Arrêter</b></td><td>Même chemin en <code>qm stop</code>, avec <b>deux verrous</b> : l'arrêt passe par une <b>clé SSH d'administration dédiée</b> — la clé courante est bridée côté hyperviseur et <b>refuse</b> stop / shutdown / reset —, et une <b>liste noire de VMs qu'on n'arrête jamais</b> protège le pare-feu réseau. Inactif si la VM est déjà arrêtée.</td></tr>
+<tr><td><b>🔄 Redémarrer</b></td><td>Volontairement <b>pas</b> un <code>qm reboot</code> : le verbe « redémarre » est <b>exclu</b> de la détection VM, la demande part donc sur le redémarrage <b>du système invité</b> en SSH — et exige une <b>seconde confirmation</b> dans la conversation (« oui » / « non »). Une seule phrase ne peut jamais redémarrer une machine. Sur l'hyperviseur, c'est un <b>refus net</b> : le redémarrer couperait toutes les VMs, ça passe par le menu et sa triple confirmation.</td></tr>
+<tr><td><b>📄 Journal MAJ</b></td><td><b>Lecture seule.</b> Affiche les dernières étapes de la mise à jour complète de cet hôte (✅ / ❌ + détail). Le journal vit <b>hors de l'atelier</b> — il survit donc à une restauration — et sa lecture est <b>bornée en mémoire</b> : un fichier qui grossit ne peut pas faire enfler JARVIS. Le nombre d'étapes est <b>annoncé au lecteur d'écran</b>. Présent sur toutes les cartes sauf le routeur.</td></tr>
+<tr><td><b>📋 Copier cmd MAJ</b></td><td><b>Copie, n'exécute rien.</b> Place dans le presse-papiers la commande de mise à jour complète de cet hôte, à coller côté atelier. La route HTTP qui <em>lançait</em> la mise à jour a été <b>retirée</b> : le produit ne déclenche plus un outil de développement. Délibérément <b>absent sur l'hyperviseur</b> — la routine post-MAJ le refuse, et un raccourci aurait contourné ce garde-fou.</td></tr>
+<tr><td><b>⟳ Actualiser</b></td><td>Relit <b>tout le parc en un seul appel</b> et repeint. Anti-clignotement : les cartes ne sont re-rendues que si l'<b>état réel</b> a changé — l'âge de la sonde est exclu de la signature —, pour ne pas remettre à zéro le focus ni le défilement toutes les <b>25 s</b>, cadence à laquelle l'onglet se rafraîchit seul tant qu'il est visible.</td></tr>
+</table>
+
+</div>
+
+> 🔒 **Deux cartes n'ont aucun bouton d'action** — et le **disent en toutes lettres** au lieu de griser un bouton : l'hyperviseur (« Lecture seule — arrêt PVE = bouton d'urgence ») et le routeur (« Lecture seule — reboot routeur = coupe le réseau »). La raison est **lisible et audible** ; elle ne se devine pas à une couleur.
+
+En bas de l'onglet, quatre **raccourcis de diagnostic** (vérifier la routine post-MAJ, logs nginx, état de nginx, « pourquoi un serveur peut-il être lent ? ») et une **question libre** adressent la demande à l'agent, qui répond dans la zone de réponse — et à la voix.
+
 ---
 
 <h2 align="center">⌨️ Terminal SSH intégré (mode Code)</h2>
@@ -274,7 +303,7 @@ Autour du flux, les **briques transversales** (enrichissent · protègent · agi
 <tr><td><b>BRIEFING</b></td><td>résumé proactif au réveil</td></tr>
 <tr><td><b>ALARMES</b></td><td>rappels à l'heure</td></tr>
 <tr><td><b>PÉDAGOGIE</b></td><td>explique vs analyse (mode tuteur)</td></tr>
-<tr><td><b>INFOGÉRANCE</b></td><td>mise à jour des VMs, fail-closed</td></tr>
+<tr><td><b>INFOGÉRANCE</b></td><td>parc unifié <b>VMs · hyperviseur · routeur</b> : état, CPU/RAM/disque, MAJ et redémarrage requis en direct · démarrer / arrêter / redémarrer sous <b>double confirmation</b>, journal des MAJ, <b>lecture seule</b> là où l'arrêt est critique · <b>fail-closed</b> : une valeur non vérifiable se <em>dit</em>, elle ne se déguise pas en « à jour » (<a href="#sec-8">détail</a>)</td></tr>
 </table>
 
 </div>
