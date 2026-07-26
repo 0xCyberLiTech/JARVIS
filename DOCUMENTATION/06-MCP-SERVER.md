@@ -104,6 +104,7 @@ et bornée en taille avant émission.
 | `jarvis_code_exec` | Écrire + SCP + exécuter un fichier sur le serveur de dev |
 | `jarvis_defense_24h` | Résumé défense SOC 24 h : bans, Kill Chain, IDS, WAF |
 | `jarvis_ioc_status` | Score IoC **post-compromission** (0-100, niveau OK/WARN/CRIT) + 6 signaux : AIDE drift, C2 alerts, SSH anomaly, webshells, AppArmor denials, sudo events |
+| `jarvis_vision` | Analyser une **image** via le modèle multimodal **LOCAL** (100% privé, sur la GPU du poste) — décrire une capture d'écran, lire un graphique/tableau, extraire du texte. Wrappe `POST /api/vision` (base64 + prompt optionnel ; jpeg/png/gif/webp/bmp) |
 
 > Le catalogue d'outils est **compté LIVE** (dérivé de la source unique, jamais figé dans la prose) —
 > un garde-fou refuse tout nombre d'outils codé en dur dans la documentation.
@@ -120,7 +121,7 @@ un **endpoint déterministe** de JARVIS, **jamais** le LLM. Seuls les outils d'*
 | Nature | Exemples | Source |
 |--------|----------|--------|
 | **Fait** (déterministe) | `jarvis_infra_status`, `jarvis_proxmox_vms`, `jarvis_investigate_ip`, `jarvis_soc_status` | endpoints JARVIS (API/collecteurs) |
-| **Analyse** (LLM) | `jarvis_chat`, `jarvis_soc_ask` | modèle qwen3.5:9b |
+| **Analyse** (LLM) | `jarvis_chat`, `jarvis_soc_ask`, `jarvis_vision` | modèle qwen3.5:9b (multimodal pour la vision) |
 
 Un garde-fou vérifie qu'aucun handler de « fait » n'appelle la route de chat LLM.
 
