@@ -24,6 +24,10 @@ export default [
         // couverture lint par le glob 2026-06-23) : http.js, sse_stream.js, audio_math.js,
         // chat_core.js. Déclarés ici pour le mode script (pas de bundler → résolution cross-file).
         postJSON: 'writable',       // js/http.js
+        // Ajouté par le lot a11y du 2026-07-25 dans le MÊME fichier http.js, mais jamais déclaré
+        // ici → 13 `no-undef` dans 8 fichiers, gate eslint (pre-commit) ROUGE depuis. Même patron
+        // que postJSON ci-dessus (helper source-unique global, mode script sans bundler).
+        dspSaveSurface: 'readonly', // js/http.js
         sseForEach: 'writable',     // js/sse_stream.js
         linToDb: 'readonly',        // js/audio_math.js
         dbStr: 'readonly',          // js/audio_math.js
