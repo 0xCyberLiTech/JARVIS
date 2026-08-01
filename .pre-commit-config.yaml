@@ -308,6 +308,41 @@ repos:
         always_run: true
         stages: [pre-push]
 
+      # ── BARRIÈRE DE PUBLICATION (stage pre-push) — « rien ne part en public sans preuve » ──
+      # Ajout 2026-08-01, sur DÉCISION DE MARC, APRÈS MESURE. `vitrine-push-hook --status`
+      # rendait 24/25 : sur les 25 dépôts PUBLICS du workspace (surface dérivée de `git remote`),
+      # JARVIS était le SEUL dont un `git push` partait SANS barrière de publication. Motif : il a
+      # déjà ce pre-push riche, qu'on n'écrase PAS — et le câbler DEPUIS `DEV/` était BLOQUÉ, à
+      # raison, par le gardien actif de Marc (R4-dev-coupling) : un gate PRODUIT versionné qui
+      # référence l'atelier viole la Règle Zéro. Le contournement (`|| true`, exception) aurait été
+      # un BLANCHIMENT (§8) : on éteignait l'alarme, pas le feu.
+      #
+      # ⛔ RÈGLE ZÉRO (§0) — CE QUI A CHANGÉ : le gardien a DÉMÉNAGÉ dans le produit
+      # (`scripts/hermes/jarvis-public-doc-guard/`, copie UNIQUE — `DEV/` ne le garde PAS). Ce
+      # câblage ne pointe donc QUE dans JARVIS : restaurer le seul coffre suffit à rejouer cette
+      # barrière. C'est exactement le motif des hooks `jarvis-visual-gate` / `jarvis-e2e-*`.
+      #
+      # CE QU'IL PROUVE, dans cet ordre (le self-check D'ABORD — doctrine V1, anti-complaisance :
+      # un détecteur neutralisé rendrait un VERT MENSONGER, et « un gardien qu'on n'a pas essayé de
+      # casser ne garde rien ») puis le RUN LIVE :
+      #   I1 — aucune IP privée CONCRÈTE dans un .md tracké de la vitrine JARVIS ;
+      #   I2 — aucun IDENTIFIANT NOMINATIF (X:\Users\<nom>, /home/<nom>) dans les fichiers texte
+      #        trackés des dépôts PUBLICS du workspace (surface DÉRIVÉE de `git remote`).
+      # PORTÉE ASSUMÉE ET DITE : I2 scanne TOUTES les vitrines, pas seulement celle qu'on pousse —
+      # une fuite dormant ailleurs bloque donc aussi ce push. Ce n'est PAS un faux positif : un
+      # dépôt public est indexé POUR TOUJOURS, et le message NOMME le fichier et la ligne fautifs.
+      # `verbose: true` (a11y §5, Marc est MALVOYANT) : pre-commit MASQUE la sortie d'un hook qui
+      # réussit — sans ce drapeau, Marc ne saurait ni ce qui a été scanné, ni combien.
+      # ⛔ `--no-verify` n'est PAS le chemin : faire taire cette barrière est un BLANCHIMENT (§8).
+      - id: jarvis-public-doc-guard
+        name: barrière de publication (ni IP interne ni identifiant nominatif ne part en vitrine)
+        entry: bash -c 'python scripts/hermes/jarvis-public-doc-guard/jarvis-public-doc-guard.py --self-check -Quiet && python scripts/hermes/jarvis-public-doc-guard/jarvis-public-doc-guard.py'
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+        stages: [pre-push]
+
       # ── RÈGLE ZÉRO — la frontière du produit (2026-07-14) ──
       # Aucun fichier de JARVIS/scripts/** ne dépend d'un outil de l'ATELIER (DEV/) ni d'un dossier
       # frère non déclaré, sur un chemin ATTEIGNABLE À L'EXÉCUTION. C'est l'invariant qui garantit
