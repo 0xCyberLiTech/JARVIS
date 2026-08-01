@@ -72,6 +72,39 @@ repos:
         always_run: true
         stages: [pre-push]
 
+      # ── SUITES DES ORGANES HERMÈS (stage pre-push) — « on ne casse plus un détecteur en vert » ──
+      # Ajout 2026-08-01, APRÈS MESURE. Le hook `pytest` ci-dessus n'exécute QUE la suite
+      # canonique du produit (`testpaths = ["tests/python"]`, pyproject.toml) ; les organes
+      # d'Hermès (scripts/hermes/) portent LEUR PROPRE suite et n'étaient câblés qu'à
+      # `audit-all.sh`, lancé à la main. Conséquence MESURÉE : le commit `f93ef5a`
+      # (2026-07-31 19:17) est passé VERT AU PUSH tout en cassant la preuve de son propre
+      # détecteur d'intégrité mémoire, et le NO-GO a été porté 2 JOURS (rapports audit-all
+      # du 2026-07-31_0730, 2026-08-01_0730, 2026-08-01_1022). Seul l'audit quotidien l'a vu.
+      # C'est la CLASSE, pas l'instance : tout lot peut rendre rouge un détecteur qu'aucun
+      # gate ne regarde — et un détecteur rouge pour une raison bénigne rend une VRAIE
+      # régression indiscernable (§2 « un gardien qui crie au loup », §8.8 « un faux NO-GO
+      # est pire qu'un silence »). Le `--self-check` de memory-audit (hook guardians-self-check
+      # plus bas) ne couvre PAS ce trou : il prouve le détecteur de fraîcheur, pas la suite.
+      #
+      # ⛔ RÈGLE ZÉRO (§0) : ces suites vivent DANS le produit (scripts/hermes/) — le câblage
+      # ne pointe QUE là, jamais vers l'atelier DEV/. Restaurer le seul coffre JARVIS suffit
+      # à les rejouer.
+      # §3 ZÉRO LISTE ÉCRITE : les dossiers sont DÉRIVÉS de l'arborescence (`find`), jamais
+      # énumérés ici — une 3ᵉ suite ajoutée demain est couverte sans que personne y pense.
+      # FAIL-CLOSED : si l'énumération ne trouve RIEN, on REFUSE le push au lieu de passer
+      # vert sur un gate vacant (une sonde qui ne trouve plus sa cible doit CRIER, pas se taire).
+      # `verbose: true` (a11y §5) : pre-commit masque la sortie d'un hook qui réussit — sans
+      # ce drapeau, Marc (MALVOYANT) ne verrait NI quelles suites ont tourné, NI si l'une a
+      # silencieusement disparu de la liste dérivée. Coût mesuré : ~11 s.
+      - id: hermes-suites
+        name: suites pytest des organes Hermès (les détecteurs du produit gardent leurs dents)
+        entry: bash -c 'set -u; dirs=$(find scripts/hermes -name "test_*.py" -not -path "*/__pycache__/*" -exec dirname {} \; | sort -u); if [ -z "$dirs" ]; then echo "NO-GO -- aucune suite pytest trouvee sous scripts/hermes/ -- ce gate serait VACANT"; exit 1; fi; rc=0; for d in $dirs; do echo "--- suite Hermes >> $d"; ( cd "$d" && python -m pytest -q --no-header ) || rc=1; done; if [ $rc -ne 0 ]; then echo "NO-GO -- au moins un detecteur Hermes est ROUGE -- push refuse"; fi; exit $rc'
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+        stages: [pre-push]
+
       # ── Gardiens DOCTRINE (stage pre-push) — anti-dérive LLM-config + termes périmés doc ──
       # Ajout 2026-06-24 (re-audit doctrine F4) : ces gardiens ne tournaient QUE dans audit-all
       # (manuel) → une dérive (modèle LLM incohérent / hardcodé UI, « phi4 » ré-apparu dans la doc)
