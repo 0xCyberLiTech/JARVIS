@@ -57,7 +57,7 @@
 <tr><td>🛡️ <b>SOC autonome 24/7</b></td><td>Détecte, bannit et redémarre <b>seul</b> · alertes vocales · contexte sécurité en direct.</td></tr>
 <tr><td>🎙️ <b>Voix qualité broadcast</b></td><td>Chaîne DSP pro (débruitage IA · compresseur · FX) + voix Edge, repli Kokoro neural local.</td></tr>
 <tr><td>⚡ <b>RTX 5080 maîtrisée</b></td><td>Modèle 100 % en VRAM, garde-fou anti-débordement, CUDA partout (Whisper · DeepFilterNet).</td></tr>
-<tr><td>♿ <b>Pensé accessible</b></td><td>Haute lisibilité, commandes vocales <b>déterministes</b> (zéro LLM · budget de latence &lt; 100 ms), briefing matinal.</td></tr>
+<tr><td>♿ <b>Pensé accessible</b></td><td>Haute lisibilité, commandes vocales <b>déterministes</b> (zéro token LLM · budget de conception &lt; 100 ms pour les bypass <b>purement locaux</b>, jamais un relevé), briefing matinal.</td></tr>
 </table>
 
 </div>
@@ -280,7 +280,7 @@ Un **vrai terminal SSH interactif** (PTY `xterm-256color`) intégré à JARVIS �
   <img src="Images/hermes.webp" alt="Hermès — cœur de l'agent, état moteur et pipeline temps réel" width="920"/>
 </div>
 
-Le tableau de bord vivant de l'agent. Au centre, le **cœur** qui « respire » tant que JARVIS tourne — il **s'illumine** quand il parle (*JE PARLE*), vire à l'**or/ambre** quand la menace monte. Autour, le **diagnostic** (RAG, mémoire, connaissance) et l'**état moteur** (mode, modèle `qwen3.5:9b`, niveau de menace + sa cause). En bas, le **pipeline temps réel** : `ENTRÉE → BYPASS (< 100 ms, zéro LLM) → MÉMOIRE (RAG borné — plafond ET plancher) → SOC LIVE → WEB → PVE → LLM LOCAL → OUTILS → RÉPONSE` — **chaque brique affiche sa métrique en direct**, à une exception assumée : le **budget de latence du bypass** est une **valeur de référence, pas une mesure** — elle porte donc un style distinct des métriques live, pour qu'on ne la lise jamais comme un relevé. L'agentification rendue visible.
+Le tableau de bord vivant de l'agent. Au centre, le **cœur** qui « respire » tant que JARVIS tourne — il **s'illumine** quand il parle (*JE PARLE*), vire à l'**or/ambre** quand la menace monte. Autour, le **diagnostic** (RAG, mémoire, connaissance) et l'**état moteur** (mode, modèle `qwen3.5:9b`, niveau de menace + sa cause). En bas, le **pipeline temps réel** : `ENTRÉE → BYPASS (zéro token LLM) → MÉMOIRE (RAG borné — plafond ET plancher) → SOC LIVE → WEB → PVE → LLM LOCAL → OUTILS → RÉPONSE` — **chaque brique affiche sa métrique en direct**, à une exception assumée : le **budget de latence du bypass** est une **valeur de référence, pas une mesure** — elle porte donc un style distinct des métriques live, pour qu'on ne la lise jamais comme un relevé, et elle ne vaut que pour les bypass **purement locaux**. L'agentification rendue visible.
 
 <h3 align="center">Schéma logique de la pile — le rôle de chaque tuile</h3>
 
@@ -288,7 +288,7 @@ Le tableau de bord vivant de l'agent. Au centre, le **cœur** qui « respire » 
 
 ```mermaid
 flowchart LR
-    IN["ENTRÉE"] --> BY["BYPASS<br/>&lt; 100 ms"] --> MEM["MÉMOIRE<br/>RAG"] --> SOC["SOC<br/>LIVE"] --> WEB["WEB"] --> PVE["PVE"] --> LLM["LLM LOCAL<br/>qwen3.5:9b"] --> TL["OUTILS"] --> OUT["RÉPONSE<br/>texte + voix"]
+    IN["ENTRÉE"] --> BY["BYPASS<br/>zéro token LLM"] --> MEM["MÉMOIRE<br/>RAG"] --> SOC["SOC<br/>LIVE"] --> WEB["WEB"] --> PVE["PVE"] --> LLM["LLM LOCAL<br/>qwen3.5:9b"] --> TL["OUTILS"] --> OUT["RÉPONSE<br/>texte + voix"]
 ```
 
 <div align="center">
@@ -296,7 +296,7 @@ flowchart LR
 <table align="center">
 <tr><th>Tuile du flux</th><th>Rôle logique</th></tr>
 <tr><td><b>ENTRÉE</b></td><td>voix (STT Whisper) · texte · image (vision multimodale)</td></tr>
-<tr><td><b>BYPASS</b></td><td>commandes directes <b>déterministes</b>, &lt; 100 ms, <b>zéro LLM</b></td></tr>
+<tr><td><b>BYPASS</b></td><td>commandes directes <b>déterministes</b> — <b>zéro token LLM</b>, donc zéro hallucination possible. Le « &lt; 100 ms » est un <b>budget de conception, pas un relevé</b>, et il ne vaut que pour les bypass <b>purement locaux</b> : ceux qui sortent de la machine (SSH, sauvegardes, mises à jour) sont bornés par des délais d'attente bien plus longs (<a href="DOCUMENTATION/01-HERMES.md">détail</a>)</td></tr>
 <tr><td><b>MÉMOIRE</b></td><td>faits + leçons <b>RAG</b> — corpus borné des <b>deux côtés</b> : un plafond (dérive) <em>et</em> un plancher (index éventré). Les deux seuils viennent d'une seule constante de référence, jamais d'un chiffre recopié</td></tr>
 <tr><td><b>SOC LIVE</b></td><td>injecte le <b>contexte sécurité</b> temps réel</td></tr>
 <tr><td><b>WEB</b></td><td>recherche <b>gouvernée</b> (allowlist, lecture seule)</td></tr>
@@ -444,7 +444,7 @@ Ils ont donc **déménagé dans le produit** — ils n'existent plus qu'à **un 
 <tr><td><b>100 % local</b></td><td>JARVIS filtre et agrège localement — rien ne part vers un LLM cloud</td></tr>
 <tr><td><b>RFC1918 immuable</b></td><td>Les plages IP privées ne peuvent jamais être bannies</td></tr>
 <tr><td><b>SSH lecture seule</b></td><td>Patterns dangereux bloqués · whitelist explicite pour l'écriture</td></tr>
-<tr><td><b>SOC side-channel</b></td><td>Le contexte sécurité n'entre jamais dans l'historique chat</td></tr>
+<tr><td><b>SOC en canal latéral</b></td><td>Le contexte sécurité est posé dans le <em>prompt système</em> par le serveur — il n'entre jamais dans l'historique de conversation, et ne peut donc pas être confondu avec une commande de l'utilisateur. Vérifié au <em>pre-push</em> par un garde-fou dédié (<a href="DOCUMENTATION/02-SOC-INTEGRATION.md">détail et portée exacte</a>)</td></tr>
 <tr><td><b>Audit forensique</b></td><td>Toute opération SSH d'écriture tracée dans un journal JSONL</td></tr>
 </table>
 

@@ -4,6 +4,52 @@ Toutes les évolutions notables de la vitrine **JARVIS** sont consignées dans c
 
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [Non publié] — 2026-08-11
+
+Le contexte injecté ne peut plus se faire passer pour une commande — et la vitrine est
+réalignée sur le code réel.
+
+> *Aucune version n'est revendiquée ici : cette section décrit l'état livré au 2026-08-11 et
+> attend son étiquette. Les sections datées ci-dessous ne sont pas réécrites — un journal
+> s'ajoute, il ne se refait pas.*
+
+### Sécurité
+- **Un contexte injecté n'atteint plus les détecteurs déterministes.** Devant le modèle, JARVIS
+  place des détecteurs qui exécutent des commandes directes — certains **écrivent**. Leur surface
+  d'entrée doit être la parole de l'utilisateur, et rien d'autre. Un outil d'analyse collait le
+  contexte de sécurité **devant** la question, dans le même champ : le bloc de données traversait
+  donc ces détecteurs, et l'un d'eux a mordu sur une tournure venue **des données** — JARVIS a
+  répondu à une commande que personne n'avait tapée, pendant que la question, tronquée, n'atteignait
+  jamais le modèle. L'injection est désormais **demandée au serveur** ; ce qui n'a pas de chemin
+  serveur passe par un **canal dédié** qui n'atteint que le *prompt système*.
+- **Garde-fou de classe, pas de rustine.** Un contrôle statique (analyse du code, pas une liste de
+  formes interdites : il **suit la valeur**) refuse, chez les clients internes, tout envoi où un
+  texte de contexte dérive jusqu'au message — et refuse qu'un envoi ne **déclare** pas sa pureté.
+  Il est câblé à la barrière de publication. **Sa portée est écrite noir sur blanc dans la
+  documentation, limites comprises** : la garde à l'exécution est *déclarative*, et un client
+  externe n'est pas couvert.
+
+### Corrigé — documentation publique réalignée sur le code
+- **Audio** : le débruitage IA était annoncé « désactivé par défaut » — il est **actif** par défaut ;
+  une « règle absolue » de calibration des effets n'en était pas une (repli neutre pour les effets
+  non calibrés) ; le schéma décrivait une topologie d'effets *send/return* qui n'existe plus, et
+  omettait l'étage de compensation de gain. La chaîne **serveur**, jusqu'ici absente, est décrite —
+  avec ce qu'elle ne contient pas.
+- **Agent** : la brique de mémoire nommait des fichiers qui ne portaient pas ce qu'on leur prêtait ;
+  le pont MCP était présenté comme destiné à un client qui n'est pas celui qui est configuré ; le
+  mode pédagogique était dit couper la documentation locale, alors qu'il l'injecte.
+- **Latences non mesurées** : les durées avancées pour les commandes déterministes étaient des
+  **valeurs jamais instrumentées**, et fausses pour les commandes qui sortent de la machine. Ce qui
+  est vrai de toutes est conservé : **zéro token consommé, zéro hallucination possible**.
+- **Outils MCP** : la description de l'état d'infrastructure annonçait des accès SSH par machine —
+  l'outil agrège en réalité deux endpoints de faits, et ne passe jamais par le modèle.
+
+### Modifié
+- **Zéro constante recopiée** : seuils, ratios, gains et bornes de rotation des journaux ne sont
+  plus dupliqués dans ces pages. Ils avaient **déjà dérivé** — le code porte encore, en commentaire,
+  les anciennes valeurs que la vitrine publiait comme actuelles. Une page publique cite désormais
+  *où* vit la valeur, jamais la valeur elle-même.
+
 ## [1.1.0] — 2026-06-24
 
 Accessibilité — l'interface pensée pour un usage en **basse vision**.

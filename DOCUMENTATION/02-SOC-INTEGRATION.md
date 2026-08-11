@@ -117,7 +117,43 @@ Le contexte SOC est injecté **côté serveur** dans chaque prompt LLM en mode S
   *(les couches purement **défensives** — sonde/pare-feu, WAF — ont été **sorties** de la Kill Chain : elles sont agrégées et visualisées à part, pour ne pas faire passer une défense qui a fonctionné pour une étape d'attaque)*
 - Alertes IDS actives
 
-**Important** : cette injection se fait en side-channel — elle n'entre **jamais** dans l'historique chat.
+**La règle** : cette injection est un **canal latéral**. Le contexte est posé dans le **prompt
+système**, à chaque appel, et n'entre **jamais** dans l'historique de conversation. Deux raisons,
+d'importance très inégale :
+
+1. **Pas de donnée périmée.** Un contexte laissé dans l'historique serait rejoué tour après tour :
+   le modèle raisonnerait sur l'état de sécurité d'il y a dix minutes en le croyant actuel.
+2. **Et surtout — un contexte injecté ne doit jamais pouvoir passer pour une commande.**
+
+### Pourquoi le point 2 est le vrai enjeu *(incident du 2026-08-11)*
+
+Devant le LLM, JARVIS place des **détecteurs déterministes** : ils reconnaissent les commandes
+directes et les exécutent sans modèle. Certains **écrivent** (alarmes, rappels), d'autres touchent
+l'**infrastructure**. Leur surface d'entrée doit être **la parole de l'utilisateur, et rien d'autre**.
+
+Un outil d'analyse SOC a collé le contexte live **devant** la question, dans le même champ. Le bloc
+de données a donc traversé ces détecteurs. Une tournure banale, **venue des données**, en a fait
+mordre un — **qui écrit** : JARVIS a répondu à une commande que personne n'avait tapée, et la
+question, elle, avait été tronquée avant d'atteindre le modèle.
+
+> **La classe : un contexte injecté qui voyage dans le même champ que la parole de l'utilisateur
+> en devient indiscernable.** Il traverse alors tout ce qui est placé en amont — y compris ce qui
+> écrit ou exécute. Le test tient en une phrase :
+> *« ce détecteur peut-il mordre sur du texte que l'utilisateur n'a pas tapé ? »*
+> Si oui, sa surface d'entrée n'est plus l'utilisateur.
+
+**Ce qui a changé.** L'injection est désormais **demandée au serveur**, jamais fabriquée par
+l'appelant : plus aucun chemin ne préfixe la question. Les données qui n'ont pas de chemin serveur
+passent par un **canal dédié** qui n'atteint que le prompt système. Un garde-fou
+(`jarvis-chat-context-guard`) énumère à l'**AST** les points d'envoi des clients **internes** et
+refuse qu'un texte de contexte dérive jusqu'au message — en **suivant la valeur**, pas en listant
+des syntaxes interdites ; il est câblé au *pre-push*.
+
+> ⚠ **Portée dite = portée tenue.** La barrière côté serveur est **déclarative** — elle refuse les
+> détecteurs à un message *qui se déclare mélangé* ; elle ne relit pas le texte. Le garde-fou AST
+> couvre les clients **internes** ; un client **externe** n'est pas couvert par ce mécanisme.
+> C'est écrit plutôt que maquillé : une garantie surestimée déplace la vigilance là où elle n'est
+> plus nécessaire.
 
 ---
 

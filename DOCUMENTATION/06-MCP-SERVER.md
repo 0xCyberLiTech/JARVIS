@@ -93,10 +93,10 @@ et bornée en taille avant émission.
 |-------|-------------|
 | `jarvis_chat` | Envoyer un message à JARVIS (chat complet avec contexte LLM) |
 | `jarvis_soc_status` | État temps réel : bans actifs, ThreatScore, alertes récentes |
-| `jarvis_soc_ask` | Question SOC enrichie — injecte l'historique 30j si une IPv4 est détectée |
+| `jarvis_soc_ask` | Question SOC — le contexte sécurité est injecté **côté serveur**, jamais mêlé à la question (voir « Le contexte n'entre pas dans le message » ci-dessous). Si une IPv4 est reconnue dans la question, l'historique 30 j de cette IP est joint sur un **canal dédié** qui n'atteint que le *prompt système* |
 | `jarvis_investigate_ip` | Investigation approfondie d'une IP (géoloc, historique, corrélation) via l'endpoint SOC dédié |
 | `jarvis_stats` | Stats JARVIS : uptime, sessions de chat, appels TTS/STT, modèle actif, état RAG |
-| `jarvis_infra_status` | État des serveurs SSH (nginx, clt, pa85, Proxmox) |
+| `jarvis_infra_status` | État agrégé de l'infrastructure — inventaire des machines virtuelles de l'hyperviseur **+** services et niveau de menace issus du contexte SOC. **Déterministe** : deux endpoints de faits, jamais le LLM |
 | `jarvis_proxmox_vms` | État des VMs Proxmox (`qm list` live) |
 | `jarvis_read_file` | Lire un fichier sur un serveur via SSH (lecture seule) |
 | `jarvis_model_switch` | Changer le modèle Ollama actif — bascule réversible, refusée si le modèle n'est pas installé |
@@ -109,6 +109,45 @@ et bornée en taille avant émission.
 
 > Le catalogue d'outils est **compté LIVE** (dérivé de la source unique, jamais figé dans la prose) —
 > un garde-fou refuse tout nombre d'outils codé en dur dans la documentation.
+
+---
+
+## Le contexte n'entre pas dans le message *(2026-08-11)*
+
+Un outil « question enrichie » a une tentation évidente : **coller le contexte devant la question**
+et envoyer le tout comme un seul message. C'est ce que faisait `jarvis_soc_ask`. Deux conséquences,
+**mesurées sur un cas réel**, pas supposées :
+
+1. **Le message dépassait le plafond de taille** de la route de chat et se faisait tronquer — la
+   question et sa consigne disparaissaient purement : l'outil « posait » une question que le modèle
+   ne voyait jamais.
+2. Surtout : ce bloc de données traversait les **détecteurs déterministes** placés **en amont** du
+   LLM. Une tournure ordinaire, venue des **données** et non de l'utilisateur, a fait mordre un
+   détecteur — **qui écrit**. L'assistant a répondu à une commande que personne n'avait tapée.
+
+> **La classe, pas l'instance.** Un contexte injecté qui voyage dans **le même champ** que la parole
+> de l'utilisateur en devient **indiscernable**, et traverse alors tout ce qui est placé en amont —
+> y compris ce qui **écrit** ou **exécute**. Le test tient en une phrase :
+> *« ce détecteur peut-il mordre sur du texte que l'utilisateur n'a pas tapé ? »*
+
+**Le chemin conforme, désormais le seul.** L'outil ne fabrique plus de contexte : il **demande au
+serveur** de l'injecter (le serveur va chercher les données fraîches et les pose dans le *prompt
+système*, comme pour l'interface). Les données jointes qui n'ont pas de chemin serveur voyagent sur
+un **canal dédié** qui n'atteint **que** le prompt système — jamais l'historique, jamais les
+détecteurs. Le message utilisateur ne porte plus que **la question**.
+
+**Ce qui l'empêche de revenir — et jusqu'où seulement.** Un garde-fou dédié
+(`jarvis-chat-context-guard`, organe du produit) énumère à l'**AST** les points d'envoi vers la
+route de chat des clients **internes** et refuse (a) qu'un texte de contexte **dérive** jusqu'au
+message, quelle que soit la syntaxe employée — c'est une **propagation de teinte**, pas une liste de
+formes interdites —, (b) qu'un envoi ne **déclare** pas sa pureté, et (c) que la garde du serveur
+soit posée **à l'envers**. Il est câblé au *pre-push*.
+
+> ⚠ **Portée dite = portée tenue.** La barrière côté serveur est **déclarative** : elle refuse les
+> détecteurs à un message **qui se déclare mélangé**. Elle ne relit pas le texte. Ce sont le
+> garde-fou AST et la revue qui couvrent les clients **internes** ; un client **externe** (script
+> tiers, `curl`) n'est **pas** couvert par ce mécanisme. C'est un fait, il est écrit plutôt que
+> maquillé : une garantie surestimée déplace la vigilance là où elle n'est plus nécessaire.
 
 ---
 
@@ -209,8 +248,9 @@ La tuile MCP du dashboard affiche la stabilité en direct : uptime, nombre d'app
 
 ## Observabilité — log applicatif
 
-Le serveur écrit un log applicatif borné `scripts/jarvis_mcp.log`
-(`RotatingFileHandler`, 512 Ko × 3 fichiers). Il trace le démarrage (port + état de l'auth),
+Le serveur écrit un log applicatif **borné par rotation** (`RotatingFileHandler`) — la taille de
+coupure et le nombre de fichiers conservés sont des constantes du module, jamais recopiées ici.
+Il trace le démarrage (port + état de l'auth),
 les erreurs d'outil et les cas où JARVIS:5000 est injoignable.
 Avant l'audit 2026-06-22 le MCP n'avait aucun log (uvicorn `log_level=error`, sortie redirigée
 vers `DEVNULL`) — toute panne était invisible.

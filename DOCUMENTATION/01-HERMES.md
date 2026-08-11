@@ -77,7 +77,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
               │                           │
               │  ┌─────────────────────┐  │
               │  │ 1. Bypass ?         │  │  ← commande déterministe ?
-              │  │    OUI → action     │  │     exécution directe < 100ms
+              │  │    OUI → action     │  │     exécution directe
               │  │    NON ↓            │  │     zéro LLM consommé
               │  └─────────────────────┘  │
               │  ┌─────────────────────┐  │
@@ -116,7 +116,8 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 > bas — et par des briques nées de l'usage (web, PVE, vision, MCP, alarmes). **Le compte
 > exact des briques n'est PAS figé ici : il VIT dans le schéma d'agentification (interface,
 > onglet APPRENTISSAGE → SCHÉMA HERMÈS, nœuds `data-brick`)** — cf. l'inventaire live ci-dessous.
-> Doctrine « compté LIVE, jamais figé » ; verrou : garde-fou `jarvis-frozen-count-guard`.
+> Doctrine « compté LIVE, jamais figé » ; **audit** `jarvis-frozen-count-guard`, **lancé à la
+> demande** — ce n'est **pas un verrou** : aucun `pre-push` ne le déclenche.
 
 ```
 ┌───────────────────────────────────────────────┐
@@ -142,7 +143,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 │  │                  │   │                  │  │
 │  │  Interception    │   │  "Souviens-toi"  │  │
 │  │  avant LLM       │   │  → persisté RAG  │  │
-│  │  < 100ms         │   │  → réinjecté     │  │
+│  │  0 LLM consommé  │   │  → réinjecté     │  │
 │  │  0 hallucination │   │    auto futures  │  │
 │  └──────────────────┘   └──────────────────┘  │
 │                                               │
@@ -167,7 +168,17 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 
 > **Source de vérité = le SCHÉMA HERMÈS** rendu dans l'interface (onglet APPRENTISSAGE),
 > pas ce tableau. Il est reproduit ici pour référence, dérivé des nœuds `data-brick` réels ;
-> le **compte n'est jamais figé** dans la prose (verrou `jarvis-frozen-count-guard`).
+> le **compte n'est jamais figé** dans la prose (**audit à la demande** `jarvis-frozen-count-guard`).
+>
+> ⚠ **FAIT CORRIGÉ le 2026-08-11** (§16 : preuve, daté, jamais en silence — décision de Marc).
+> Cette page présentait `jarvis-frozen-count-guard` comme un « **verrou** », **deux fois**. C'en est
+> un **audit**, pas un verrou : il se lance **à la demande**, il n'est câblé à **aucun** `pre-push`,
+> et il rend **NO-GO aujourd'hui**. Preuves : le fichier vit hors du produit
+> (`DEV/TOOLS/jarvis-frozen-count-guard/`) · `grep jarvis-frozen-count-guard` dans le
+> `.pre-commit-config.yaml` de JARVIS → **aucune occurrence** (il n'est référencé que par
+> `DEV/TOOLS/audit-all.sh`, un audit manuel) · exécution du jour → **exit 1**.
+> *Annoncer un verrou qui ne verrouille rien fait croire la propriété tenue par la machine alors
+> qu'elle ne tient que sur la discipline (doctrine §0, Règle Zéro · §6, honnêteté).*
 > Les briques marquées ✎ ont une section détaillée plus bas ; les autres, nées de l'usage,
 > sont opérationnelles et instrumentées mais pas (encore) déroulées en profondeur.
 
@@ -178,7 +189,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 
 | Brique | Rôle | Détaillée |
 |--------|------|:---------:|
-| BYPASS | commandes directes déterministes · 0 LLM (< 100 ms) | ✎ |
+| BYPASS | commandes directes déterministes · **0 LLM** (budget de latence, cf. Brique 3) | ✎ |
 | MÉMOIRE | faits + leçons (RAG) · persistance inter-sessions | ✎ |
 | SOC LIVE | contexte sécurité — injection avant LLM (détail : `02-SOC-INTEGRATION.md`) | — |
 | WEB | recherche internet à la demande | — |
@@ -191,7 +202,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 | Brique | Rôle | Détaillée |
 |--------|------|:---------:|
 | VISION | analyse d'images (multimodal) | — |
-| MCP | pont vers Claude Desktop | — |
+| MCP | pont MCP local — outils exposés à un client externe compatible MCP | — |
 | APPRENTISSAGE | « souviens-toi » → leçons du cerveau | ✎ |
 | RÉFLEXION | apprend de tes corrections (cumul) · famille de la boucle d'apprentissage | — |
 | DR CERVEAU | sauvegarde / restaure la mémoire | ✎ |
@@ -263,7 +274,7 @@ Session 2 :  "Bonjour JARVIS"
 Session 1 :  "Souviens-toi : les backups le samedi soir"
                 │
                 ▼
-             Leçon indexée dans jarvis_facts.json
+             Leçon APPENDUE, horodatée, au cerveau appris
              + vecteur créé dans la base RAG
 
 Session 2 (lendemain) :
@@ -276,20 +287,31 @@ Session 2 (lendemain) :
 ### Structure de la mémoire
 
 ```
-jarvis_facts.json  (persistant sur disque)
-├── leçons        : règles et conventions apprises
-├── tâches        : TODO persistants entre sessions
-└── préférences   : comportements personnalisés
+CERVEAU APPRIS  (fichier Markdown cumulatif, persistant sur disque)
+└── leçons        : append horodaté à chaque « souviens-toi » — indexé RAG,
+                    sauvegardé/restauré, consolidé (dédup) par l'entretien
 
-jarvis_memory.json  (persistant sur disque)
-├── résumés       : condensés des longues conversations
-└── contexte      : état de l'échange en cours
+FAITS STATIQUES  (fichier JSON, persistant — LECTURE seule au runtime)
+└── faits         : contexte stable injecté au prompt système
+
+HISTORIQUE DES ÉCHANGES  (fichier JSON, persistant)
+└── messages      : le fil brut de la conversation
+
+RÉSUMÉS DE SESSION  (fichier JSON distinct)
+└── condensés     : les longues conversations, compressées
 
 Base vectorielle RAG  (taille LIVE — jamais figée ici)
 ├── documentation technique locale
 ├── leçons apprises  (injection automatique)
 └── résumés de sessions
 ```
+
+> ⚠ **FAIT CORRIGÉ le 2026-08-11.** Ce bloc décrivait **un seul** fichier de « faits » portant à la
+> fois leçons, tâches et préférences, et un fichier de « mémoire » portant les résumés. **C'était
+> faux sur les deux points** : les leçons vont dans le **cerveau appris** (un Markdown cumulatif,
+> pas le JSON de faits, qui n'est jamais écrit par la boucle d'apprentissage), et les résumés vivent
+> dans un fichier **séparé** de l'historique. Les noms de fichiers ne sont plus recopiés ici : leur
+> source est le code, et une page publique qui les épelle vieillit au premier renommage.
 
 ---
 
@@ -326,15 +348,24 @@ Entrée utilisateur
     ▼             ▼
 Action       Continuer vers
 directe      LLM (étapes 2-5)
-< 100ms
 0 token LLM
 ```
+
+> ⏱️ **Le « < 100 ms » du bypass est un BUDGET DE CONCEPTION, pas un relevé** — et il ne vaut que
+> pour les bypass **purement locaux** (heure, alarmes, aide, rechargement d'index). Les bypass qui
+> **sortent de la machine** (état des VMs par SSH, sauvegardes, mises à jour) sont bornés par des
+> **délais d'attente** de l'ordre de la dizaine de secondes à l'heure, déclarés dans leurs modules :
+> les annoncer « en moins de 100 ms » serait faux. Ce qui est vrai de **tous** les bypass, sans
+> exception, c'est ce qui compte ici : **zéro token LLM, zéro hallucination possible.**
+> *(Fait corrigé le 2026-08-11 : cette page présentait « < 100 ms » comme une propriété de toute la
+> brique. Aucune instrumentation de latence de bypass n'existe dans le code — c'était une valeur
+> **non mesurée**, publiée comme un fait.)*
 
 ### Exemples concrets
 
 | Commande vocale | Sans Hermès | Avec Hermès |
 |-----------------|-------------|-------------|
-| `"Quelle heure est-il ?"` | LLM invoqué — 4 secondes — risque hallucination | Python `datetime.now()` direct — 8 ms — exact |
+| `"Quelle heure est-il ?"` | LLM invoqué — plusieurs secondes — risque d'hallucination | Python `datetime.now()` direct — instantané — exact |
 | `"État des VMs"` | LLM génère une commande SSH — risque d'erreur de syntaxe | `qm list` SSH direct — résultat brut exact |
 | `"Recharge le RAG"` | LLM interprète — résultat incertain | `rag_engine.reload()` direct — confirmation immédiate |
 | `"Bonjour JARVIS"` | LLM génère un bonjour générique | Briefing matinal complet : SOC + infra + alertes 24h |
@@ -353,8 +384,8 @@ UTILISATEUR :  "Souviens-toi que X"  (texte ou voix)
                     │
          ┌──────────▼────────────────────┐
          │   PERSISTANCE                 │
-         │   ├── jarvis_facts.json       │  ← écriture disque
-         │   └── jarvis_memory.json      │
+         │   └── cerveau appris          │  ← append horodaté sur disque
+         │       (Markdown cumulatif)    │
          └──────────┬────────────────────┘
                     │
          ┌──────────▼────────────────────┐
@@ -409,7 +440,7 @@ Au lieu d'attendre une question, JARVIS prend l'initiative de livrer un résumé
          │
          ▼  Synthèse vocale TTS Antoine fr-CA
          │
-    Briefing complet lu en < 30 secondes
+    Briefing complet lu à voix haute,
     sans interaction clavier
 ```
 
@@ -448,10 +479,17 @@ chaque sollicitation — y compris quand l'utilisateur veut simplement
 
 Un détecteur d'intention unique (source unique, réutilisé partout) reconnaît
 les tournures pédagogiques (*explique, décris, apprends-moi, à quoi sert,
-différence entre…*). En explication, Hermès **n'injecte ni le contexte
-sécurité live ni la documentation** : il sert un prompt pédagogique neutre.
+différence entre…*). En explication, Hermès **coupe tout ce qui est LIVE** —
+contexte sécurité temps réel, accès web, état de l'hyperviseur — et sert un prompt
+pédagogique dédié. La **documentation locale (RAG)**, elle, **reste injectée** : c'est
+la matière même de l'explication.
 JARVIS devient alors le **tuteur** de son utilisateur — utile pour monter en
 compétence sur la cybersécurité défensive.
+
+> ⚠ **FAIT CORRIGÉ le 2026-08-11.** Ce paragraphe affirmait que le mode pédagogique n'injectait
+> « **ni le contexte sécurité live ni la documentation** ». La seconde moitié est **fausse** : sur ce
+> chemin, le RAG documentaire est injecté — et même **inconditionnellement**, là où le chemin normal
+> le soumet à une condition de pertinence.
 
 ---
 
@@ -651,7 +689,7 @@ Ils ont donc **déménagé dans le produit**. Ce que cela impose :
 │  de zéro                │  conservés entre toutes les sessions   │
 ├─────────────────────────┼────────────────────────────────────────┤
 │  Toutes les commandes   │  Bypass déterministe : des patterns    │
-│  passent par le LLM     │  exécutés directement < 100 ms         │
+│  passent par le LLM     │  exécutés directement,                 │
 │  (latence + risque      │  sans consommer un seul token LLM      │
 │  d'hallucination)       │                                        │
 ├─────────────────────────┼────────────────────────────────────────┤

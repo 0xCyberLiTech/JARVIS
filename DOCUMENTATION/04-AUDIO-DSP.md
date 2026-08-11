@@ -47,12 +47,17 @@
 # Audio DSP — Chaîne broadcast
 
 ## Objectif
-La chaîne audio de JARVIS est inspirée d'un **processeur voix broadcast** (Symetrix 528).
-3 étages : Voice Channel Strip → FX Send/Return → Master Bus.
+La chaîne audio de JARVIS est inspirée d'un **processeur voix broadcast** (Symetrix 528) :
+un *voice channel strip*, une branche d'effets en parallèle, puis un *master bus* qui protège
+la sortie.
+
+> ⚠ **Le schéma ci-dessous décrit le rack `Web Audio` du navigateur** — la moitié temps réel de la
+> chaîne. La moitié **serveur** (Python/CUDA, appliquée au fichier rendu par le TTS) est décrite
+> plus bas et n'a **pas** la même topologie : ne pas lire l'une pour l'autre.
 
 ---
 
-## Topologie des 3 étages
+## Topologie — le rack Web Audio
 
 ```
 SOURCE TTS (edge-tts Antoine / Kokoro)
@@ -61,27 +66,39 @@ SOURCE TTS (edge-tts Antoine / Kokoro)
        │
 ┌─────────────────────────────────────────┐
 │  ÉTAGE 1 — VOICE CHANNEL STRIP          │
-│  EQ 4 bandes (Low · Mid · High · Air)   │
-│  Compresseur : -24 dBFS · ratio 4:1     │
-│  Limiter voix : -0.5 dBFS · ratio 20:1  │
+│  EQ paramétrique (Low · Mid · High · Air)│
+│  Compresseur VCA  (seuil · ratio ·      │
+│      attaque · relâche : voir ci-dessous)│
+│  Makeup gain — restaure le niveau perçu │
+│  Limiter voix (brick-wall souple)       │
 └──────────────────┬──────────────────────┘
                    │
         ┌──────────┴──────────┐
         ▼                     ▼
-   DRY PATH              ÉTAGE 2 — AUX FX
-   (cos x-fade)          Reverb · Echo · Delay
-                         _fxConvolver (normalize=true)
+   DRY PATH              ÉTAGE 2 — BRANCHE WET
+   (cos x-fade)          _fxConvolver (normalize=true)
+                         type d'effet sélectionnable
                          Calibration loudness par type
         └──────────┬──────────┘
                    ▼
 ┌──────────────────────────────────────────┐
 │  ÉTAGE 3 — MASTER BUS                    │
 │  Sommation dry + wet                     │
-│  Limiter final : -0.3 dBFS · ratio 20:1  │
+│  Limiter final brick-wall                │
 └─────────────────┬────────────────────────┘
                   ▼
         audioCtx.destination
 ```
+
+> ⚠ **Aucun seuil, ratio ni gain n'est recopié dans cette page.** Ces valeurs vivent dans le module
+> audio (défauts d'usine côté serveur, réglables en direct depuis le rack) — **une seule source**.
+> *(Fait corrigé le 2026-08-11 : cette page publiait un seuil de compresseur, un ratio et un seuil
+> de limiter voix qui étaient **périmés** — le code porte encore, en commentaire, les anciennes
+> valeurs qu'il a remplacées. C'est exactement ce que produit une constante recopiée : elle ne dérive
+> pas bruyamment, elle vieillit en silence.)*
+>
+> Il n'y a **plus** de bus *send/return* séparé : la branche wet est **parallèle** au dry, et le
+> *send* calibré est appliqué directement sur son gain.
 
 <div align="center">
   <img src="../Images/studio-dsp.webp" alt="JARVIS — rack DSP audio broadcast : DeepFilterNet, compresseur, stereo, analyseur" width="720" />
@@ -131,16 +148,47 @@ mémorisées après leur première synthèse et resservies sans re-génération.
 
 ---
 
-## Calibration loudness FX (`_FX_SEND_CAL`)
+## La moitié SERVEUR de la chaîne — Python / CUDA
+
+Avant d'atteindre le navigateur, l'audio rendu par le TTS traverse une chaîne **côté serveur**,
+appliquée au fichier entier :
+
+```
+WAV/MP3 rendu par le TTS
+   │
+   ▼  EQ + gain                (numpy/scipy — Nyquist clampé selon le taux d'échantillonnage)
+   ▼  DeepFilterNet 3          (débruitage IA — GPU si CUDA disponible)
+   ▼  Enrichisseur harmonique
+   ▼  FX rack                  (type sélectionnable)
+   ▼  Upmix mono → stéréo      (effet Haas, largeur réglable)
+   │
+   ▼  WAV stéréo servi au navigateur
+```
+
+> ⚠ **Les deux moitiés n'ont pas la même topologie.** Il n'y a **ni compresseur ni limiter** dans
+> la chaîne serveur : la dynamique et la protection brick-wall sont **entièrement** l'affaire du
+> rack Web Audio. Les réglages de compression exposés côté serveur **pilotent le compresseur du
+> navigateur** — ils ne traitent pas le fichier serveur.
+> *(Précision ajoutée le 2026-08-11 : cette page ne décrivait que le rack navigateur, tout en
+> laissant croire qu'elle décrivait « la » chaîne. Un lecteur pouvait en déduire un traitement
+> serveur qui n'existe pas.)*
+
+---
+
+## Calibration loudness FX
 
 La convolution avec taps discrets (echo, delay) crée une perception loudness plus élevée
-qu'une réverb diffuse à RMS égal. Chaque effet est calibré :
+qu'une réverb diffuse à RMS égal. Un trim par type d'effet compense — **extrait**, la table
+de calibration réelle vit dans le module et n'est pas recopiée ici :
 
 | Effet | Send gain | dB |
 |-------|-----------|-----|
 | reverb | 1.00 | 0 dB — référence |
 | echo | 0.35 | -9 dB — taps stéréo forts |
 | delay | 0.45 | -7 dB — taps mono forts |
+
+> Les types d'effets **non listés** dans cette table tombent sur le repli neutre (cf. « Règles de
+> conception » ci-dessous).
 
 ---
 
@@ -160,19 +208,28 @@ dry_gain = cos(wet × π/2)
 
 | Bloc | Rôle |
 |------|------|
-| **DeepFilterNet** | Débruitage IA GPU (désactivé par défaut — activer manuellement) |
-| **Haas stéréo** | Élargissement image (canal R retardé 18 ms) |
-| **Analyseur FFT** | 4 modes : mirror / scope / piano / split |
+| **DeepFilterNet 3** | Débruitage IA **actif par défaut** — bypass possible depuis le rack. Chargement paresseux au premier usage ; s'exécute **sur le GPU dès que CUDA est disponible**, sinon repli CPU (le choix du device vient de la bibliothèque, il n'est pas imposé par JARVIS) |
+| **Haas stéréo** | Élargissement image (canal R retardé — délai réglable, défaut déclaré côté serveur) |
+| **Analyseur FFT** | Plusieurs modes d'affichage (miroir, oscilloscope, piano, split) + goniomètre de phase |
+
+> ⚠ **FAIT CORRIGÉ le 2026-08-11.** Cette page annonçait DeepFilterNet « **désactivé par défaut —
+> activer manuellement** ». C'est l'inverse : le défaut d'usine, comme l'état courant, est **activé**.
 
 ---
 
-## Règles absolues
+## Règles de conception du rack
 
 | # | Règle | Raison |
 |---|-------|--------|
 | 1 | Ne jamais reconnecter analyser → analyserL/R | Boucle de rétroaction — sifflement |
-| 2 | Tout nouveau FX doit avoir une entrée `_FX_SEND_CAL` | Sinon loudness incohérente |
+| 2 | Tout FX **devrait** avoir son entrée de calibration loudness | Sinon loudness incohérente d'un effet à l'autre |
 | 3 | Ne jamais connecter directement à `audioCtx.destination` | Bypass du brick-wall |
+
+> ⚠ **FAIT CORRIGÉ le 2026-08-11 — la règle 2 était énoncée comme un invariant (« règle absolue »),
+> alors que rien ne la fait respecter.** Les effets sans entrée de calibration tombent sur un
+> **repli neutre** (gain 1.00) : le rendu reste correct, mais la loudness n'est pas compensée pour
+> eux. C'est une **convention de conception**, pas une propriété prouvée — et une page publique n'a
+> pas le droit d'appeler « absolue » une règle que le produit n'applique pas.
 
 ---
 
