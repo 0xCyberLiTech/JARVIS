@@ -288,6 +288,15 @@ export default [
         // Symboles cross-file jarvis_main.js ↔ js/chat_core.js
         // (CHAT CORE extrait — sendMessage, SSE, modes, diagnostic — chantier dette 2026-05-15)
         _CR_POLL_MS: 'readonly',
+        // infogerance.js — SOURCE UNIQUE de la cadence de l'onglet INFOGERANCE et de la table
+        // des mots d'etat, LUES cross-file par infogerance_dr.js (bloc DR des sauvegardes).
+        // ⛔ MEME PATRON, MEME CAUSE que postJSON/dspSaveSurface ci-dessus : un symbole
+        //   partage en mode script (pas de bundler) qu'on OUBLIE de declarer ici rend le gate
+        //   eslint ROUGE — mesure du 2026-08-14 : 3 `no-undef` sur le seul bloc DR, alors que
+        //   l'arbre vivant etait a exit 0. On declare la SOURCE, on n'ajoute pas un second
+        //   mecanisme (`/* global */` en tete de fichier) qui divergerait de celui-ci.
+        INFOG_POLL_MS: 'readonly',
+        _INFOG_WORDS: 'readonly',
         _chatAbortController: 'writable',
         _codeStore: 'writable',
         _hideModelPopup: 'writable',
