@@ -1,0 +1,30 @@
+{
+  "python.defaultInterpreterPath": "C:\\Users\\mmsab\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "python.analysis.typeCheckingMode": "off",
+  "python.analysis.diagnosticSeverityOverrides": {
+    "reportMissingImports": "none",
+    "reportMissingModuleSource": "none",
+    "reportMissingTypeStubs": "none",
+    "reportUndefinedVariable": "none",
+    "reportGeneralTypeIssues": "none",
+    "reportOptionalMemberAccess": "none",
+    "reportOptionalSubscript": "none",
+    "reportPrivateImportUsage": "none",
+    "reportAttributeAccessIssue": "none",
+    "reportUnknownMemberType": "none",
+    "reportUnknownVariableType": "none",
+    "reportUnknownArgumentType": "none"
+  },
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/scripts",
+    "${workspaceFolder}",
+    "./scripts",
+    "."
+  ],
+  "python.autoComplete.extraPaths": [
+    "${workspaceFolder}/scripts",
+    "${workspaceFolder}",
+    "./scripts",
+    "."
+  ]
+}
