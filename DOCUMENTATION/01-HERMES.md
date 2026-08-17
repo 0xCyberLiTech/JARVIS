@@ -47,6 +47,8 @@
 
 # Hermès — L'agent persistant
 
+> *Dernière mise à jour : 2026-08-16 (Refactoring modulaire et étanchéité)*
+
 ## Qu'est-ce qu'Hermès ?
 
 Un **assistant** répond à des questions — et oublie tout dès que la session se ferme.

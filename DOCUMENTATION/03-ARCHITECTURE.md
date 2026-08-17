@@ -46,6 +46,8 @@
 ---
 # Architecture globale
 
+> *Dernière mise à jour : 2026-08-16 (Refactoring modulaire et étanchéité)*
+
 ## Vue d'ensemble — 5 zones
 
 ```
@@ -108,15 +110,21 @@
 
 `jarvis.py` est l'**orchestrateur Flask** — il délègue à **ses modules Python**. Le tableau ci-dessous cite **quelques** modules par domaine : ce n'est **pas un inventaire** (il dériverait), l'arborescence réelle fait foi.
 
-| Catégorie | Quelques modules |
-|-----------|------------------|
-| **Bypass Hermès** | `bypass/morning_brief.py`, `bypass/learn.py`, `bypass/system_ctrl.py`, `bypass/backup.py` (menu vocal : sauvegardes, cerveau, lint), `bypass/wrappers.py` |
+| Catégorie | Circuits & Modules Spécialisés |
+|-----------|--------------------------------|
+| **Cœur Flask** | `jarvis.py` (orchestrateur), `mcp_supervisor.py`, `server_runners.py`, `command_security.py` |
+| **Bypass Hermès** | `bypass/morning_brief.py`, `bypass/learn.py`, `bypass/system_ctrl.py`, `bypass/backup.py`, `bypass/wrappers.py` |
 | **Chat / LLM** | `chat/orchestrator.py`, `chat/routing.py`, `chat/dispatcher.py`, `chat/soc_inject.py`, `chat/soc_context.py` |
-| **RAG** | `rag/engine.py` (moteur hybride vecteurs + BM25), `rag/routes.py` |
-| **Voice** | `voice/tts_engines.py`, `voice/tts_cache.py` (cache WAV best-effort), `voice/tts_dedup.py`, `voice/stt.py`, `voice/voice_lab.py` |
-| **Infra** | `ssh/tools.py`, `proxmox/api.py`, `ollama_circuit.py` |
-| **Sécurité** | `security_whitelists.py`, `security_origin.py`, `net_auth.py` |
-| **Blueprint SOC** | `blueprints/soc.py` — auto-engine + routes |
+| **SOC & Cyberdéfense** | `blueprints/soc.py`, `blueprints/soc_ssh_collector.py`, `blueprints/soc_autoban_engine.py`, `blueprints/soc_monitor_engine.py`, `blueprints/soc_rsyslog_engine.py`, `blueprints/soc_report_voice.py` |
+| **Bootstrap Threads** | `bootstrap/threads.py`, `bootstrap/alarm_voice_channel.py`, `bootstrap/infra_monitors.py`, `bootstrap/models_prewarm.py`, `bootstrap/maintenance_engine.py` |
+| **Mémoire Conversationnelle** | `memory/routes.py`, `memory/memory_stats_service.py`, `memory/memory_health_service.py`, `memory/memory_self_heal_service.py`, `memory/store.py` |
+| **RAG & Vectoriel** | `rag/engine.py`, `rag/rag_storage.py`, `rag/rag_indexer.py`, `rag/rag_searcher.py`, `rag/rag_prompt_injector.py`, `rag/routes.py` |
+| **Mobile BFF** | `mobile_bus.py`, `mobile/mobile_emergency.py`, `mobile/mobile_proxmox.py`, `mobile/mobile_soc.py`, `mobile/mobile_system.py`, `mobile/__init__.py` |
+| **Disaster Recovery (DR)** | `dr_watch.py`, `dr/dr_io_contract.py`, `dr/dr_state_evaluator.py`, `dr/dr_speech_composer.py` |
+| **Serveur MCP** | `jarvis_mcp_server.py`, `mcp_tools/mcp_tools_system.py`, `mcp_tools/mcp_tools_soc.py`, `mcp_tools/mcp_tools_multimodal.py` |
+| **Sécurité & Whitelists** | `security_whitelists.py`, `security_whitelists_sub/patterns.py`, `security_whitelists_sub/exfil_guard.py`, `security_whitelists_sub/validator.py`, `security_origin.py`, `net_auth.py` |
+| **Voice & DSP** | `voice/tts_engines.py`, `voice/tts_cache.py`, `voice/tts_dedup.py`, `voice/stt.py`, `voice/voice_lab.py`, `dsp_config.py` |
+| **Infra & Hyperviseur** | `ssh/tools.py`, `proxmox/api.py`, `proxmox/routes.py`, `ollama_circuit.py` |
 
 ---
 

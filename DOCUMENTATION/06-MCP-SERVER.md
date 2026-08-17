@@ -46,6 +46,8 @@
 ---
 # MCP Server — outils exposés à Claude Code (VSCode)
 
+> *Dernière mise à jour : 2026-08-16 (Refactoring modulaire et étanchéité)*
+
 ## Objectif
 Le MCP Server est le pont qui permet à **Claude Code** (dans VSCode) d'interroger JARVIS
 et d'accéder aux données SOC en temps réel — sans exposer les données brutes vers le cloud.
