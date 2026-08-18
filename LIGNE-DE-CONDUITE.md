@@ -32,7 +32,14 @@ ne code pas à sa place, il mesure. Et personne ne décide de la direction sauf 
 4. **Tout revient au contrôle** : mise en conformité, avis sur le fond, cohérence d'ensemble.
    Puis le propriétaire tranche.
 
-**Le laboratoire ne remonte jamais vers la production de lui-même.** Un seul sens, un geste humain.
+**Le laboratoire ne remonte jamais vers la production DE LUI-MÊME.** Ce qui est interdit, c'est
+**l'automatisme**, pas le retour : aucun lien permanent entre les deux emplacements, aucune synchronisation,
+aucune tâche planifiée. L'échange se fait dans les **deux sens**, par un fichier inerte qu'il faut tirer à
+la main — et au retour, **le contrôle passe AVANT tout merge**.
+
+> ⚠ **Corrigé le 2026-08-19, sur décision du propriétaire.** Cette ligne disait *« un seul sens »* — trop
+> restrictive, et en contradiction avec le point 4 ci-dessus qui décrit déjà un retour vers le contrôle.
+> Le garde-fou n'a jamais été le sens unique : c'est **le geste manuel**.
 
 ---
 
