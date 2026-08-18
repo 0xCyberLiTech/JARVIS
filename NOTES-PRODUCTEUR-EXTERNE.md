@@ -138,10 +138,10 @@ paragraphe.
 fonctionne parfaitement. Mais deux organes qui *lisent* cette déclaration se sont retrouvés à
 compter **zéro** outil :
 - le **loader du catalogue** — conséquence mesurée **au point de livraison vocal** : l'assistant
-  a annoncé à voix haute *« J'ai 158 outils de développement locaux et **0 outils MCP** »* et
+  a annoncé à voix haute *« J'ai N outils de développement locaux et **0 outils MCP** »* et
   *« Je n'ai pas d'outil pour investiguer une IP »*, alors que l'outil existait. L'utilisateur est
   **malvoyant** : la voix est son interface, pas un confort ;
-- un **audit d'intégrité** qui a rendu un **faux NO-GO** : « 15 handlers SANS outil ».
+- un **audit d'intégrité** qui a rendu un **faux NO-GO** : « des handlers SANS outil ».
 
 ### B. Déplacer un fichier rend AVEUGLE tout garde-fou ancré dessus
 `mobile_bus.py` → `mobile/mobile_emergency.py`, `jarvis.py` → `command_security.py`.
