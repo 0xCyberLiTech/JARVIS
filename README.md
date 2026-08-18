@@ -409,6 +409,7 @@ Ils ont donc **déménagé dans le produit** — ils n'existent plus qu'à **un 
 <tr><td>03</td><td><a href="DOCUMENTATION/03-ARCHITECTURE.md">Architecture&nbsp;globale</a></td><td>Flask · 9 pôles logiques · modules</td></tr>
 <tr><td>04</td><td><a href="DOCUMENTATION/04-AUDIO-DSP.md">Audio&nbsp;DSP</a></td><td>Broadcast · TTS · STT · DSP</td></tr>
 <tr><td>06</td><td><a href="DOCUMENTATION/06-MCP-SERVER.md">MCP&nbsp;Server</a></td><td>Outils exposés · conception</td></tr>
+<tr><td>07</td><td><a href="DOCUMENTATION/07-ANATOMIE.md">Anatomie</a></td><td>Circuits · déterminisme · garde-fous</td></tr>
 <tr><td>🗺️</td><td><a href="CARTOGRAPHIE_CIRCUITS_LOGIQUES.md">Cartographie</a></td><td>Architecture modulaire multi-circuits</td></tr>
 </table>
 

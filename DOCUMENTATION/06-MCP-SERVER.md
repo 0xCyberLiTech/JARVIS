@@ -259,7 +259,7 @@ vers `DEVNULL`) — toute panne était invisible.
 
 ---
 
-**Précédent ←** [04 — Audio DSP](04-AUDIO-DSP.md) &nbsp;&nbsp; **Retour →** [README](../README.md)
+**Précédent ←** [04 — Audio DSP](04-AUDIO-DSP.md) &nbsp;&nbsp; **Suivant →** [07 — Anatomie](07-ANATOMIE.md)
 
 ---
 
