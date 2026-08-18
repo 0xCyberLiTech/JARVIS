@@ -57,9 +57,11 @@ dans la version antérieure (`exit=0`).
 ## 3. Les 3 exigences pour le prochain chantier
 
 **(1) La suite COMPLÈTE, jamais une sélection.**
-Le rapport listait 12 fichiers de test. La suite en compte **184** (~4 024 tests). Les 4
-régressions étaient hors de la sélection. Un sous-ensemble choisi par le producteur teste ce
-qu'il avait en tête, pas ce qu'il a cassé ailleurs.
+Le rapport ne listait qu'une **poignée** de fichiers de test ; la suite en compte **plus d'un
+ordre de grandeur au-dessus** — le compte du jour se lit en une commande, il ne se recopie pas :
+`python -m pytest --collect-only -q | tail -1` depuis `JARVIS/`. Les régressions étaient hors de
+la sélection. Un sous-ensemble choisi par le producteur teste ce qu'il avait en tête, pas ce
+qu'il a cassé ailleurs.
 
 **(2) Le CODE DE RETOUR RÉEL, affiché.**
 « 100 % passés » n'est pas un verdict ; `exit=0` en est un. Deux pièges vécus, le même jour, par
@@ -79,9 +81,17 @@ C'est celle-ci qui a mordu. Sans le hash, le verdict périme au commit suivant, 
 
 **a) La procédure de déploiement doit décrire le DISQUE, pas l'intention.**
 La section 5 du rapport indiquait `scripts/blueprints/soc_ssh_collector.py` et 4 autres. Ces
-fichiers sont à la **racine de `scripts/`**. Appliquée à la lettre, l'étape 1 échouait sur 5
-modules. De même : 29 modules annoncés, **40** présents ; et 13 fichiers front (CSS/JS/HTML,
-dont le template principal) modifiés mais **absents de la procédure**.
+fichiers sont à la **racine de `scripts/`**. Appliquée à la lettre, l'étape 1 échouait sur cinq
+modules. De même, le nombre de sous-modules **annoncé** par la procédure était **inférieur** à
+celui réellement présent sur le disque ; et des fichiers front (CSS / JS / HTML, dont le
+template principal) étaient modifiés mais **absents de la procédure**.
+
+> **Pourquoi aucun de ces nombres n'est recopié ici.** Un compte d'inventaire écrit dans une
+> prose se périme au commit suivant, **en silence**, et devient alors une source d'erreur pour
+> celui qui le relit. La règle du projet est donc : **un inventaire se DÉRIVE, il ne s'écrit
+> pas** — et un garde-fou automatisé refuse le dépôt d'un tel compteur. L'écart ci-dessus se
+> **re-mesure**, il ne se cite pas : comparer la liste des modules de la procédure à la sortie
+> de `git diff --name-only <base>..<tête>`.
 
 **b) « -7 910 lignes » mesure autre chose que ce qu'il suggère.**
 Le total du code Python **augmente** de 60 707 à 62 012 lignes (+1 305). Ce qui diminue, ce sont
