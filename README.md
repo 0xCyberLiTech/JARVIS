@@ -406,9 +406,11 @@ Ils ont donc **déménagé dans le produit** — ils n'existent plus qu'à **un 
 <tr><th>#</th><th>Document</th><th>Description</th></tr>
 <tr><td>01</td><td><a href="DOCUMENTATION/01-HERMES.md">Hermès</a></td><td>Mémoire · bypass · RAG · DR</td></tr>
 <tr><td>02</td><td><a href="DOCUMENTATION/02-SOC-INTEGRATION.md">Intégration&nbsp;SOC</a></td><td>Auto-engine · bans · alertes</td></tr>
-<tr><td>03</td><td><a href="DOCUMENTATION/03-ARCHITECTURE.md">Architecture&nbsp;globale</a></td><td>Flask · Blueprints · modules</td></tr>
+<tr><td>03</td><td><a href="DOCUMENTATION/03-ARCHITECTURE.md">Architecture&nbsp;globale</a></td><td>Flask · 9 pôles logiques · modules</td></tr>
 <tr><td>04</td><td><a href="DOCUMENTATION/04-AUDIO-DSP.md">Audio&nbsp;DSP</a></td><td>Broadcast · TTS · STT · DSP</td></tr>
 <tr><td>06</td><td><a href="DOCUMENTATION/06-MCP-SERVER.md">MCP&nbsp;Server</a></td><td>Outils exposés · conception</td></tr>
+<tr><td>07</td><td><a href="DOCUMENTATION/07-ANATOMIE.md">Anatomie</a></td><td>Circuits · déterminisme · garde-fous</td></tr>
+<tr><td>🗺️</td><td><a href="CARTOGRAPHIE_CIRCUITS_LOGIQUES.md">Cartographie</a></td><td>Architecture modulaire multi-circuits</td></tr>
 </table>
 
 </div>

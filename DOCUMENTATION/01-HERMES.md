@@ -47,6 +47,8 @@
 
 # Hermès — L'agent persistant
 
+> *Dernière mise à jour : 2026-08-16 (Refactoring modulaire et étanchéité)*
+
 ## Qu'est-ce qu'Hermès ?
 
 Un **assistant** répond à des questions — et oublie tout dès que la session se ferme.
@@ -170,7 +172,7 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 > pas ce tableau. Il est reproduit ici pour référence, dérivé des nœuds `data-brick` réels ;
 > le **compte n'est jamais figé** dans la prose (**audit à la demande** `jarvis-frozen-count-guard`).
 >
-> ⚠ **FAIT CORRIGÉ le 2026-08-11** (§16 : preuve, daté, jamais en silence — décision de Marc).
+> ⚠ **FAIT CORRIGÉ le 2026-08-11** (§16 : preuve, daté, jamais en silence — décision de l operateur).
 > Cette page présentait `jarvis-frozen-count-guard` comme un « **verrou** », **deux fois**. C'en est
 > un **audit**, pas un verrou : il se lance **à la demande**, il n'est câblé à **aucun** `pre-push`,
 > et il rend **NO-GO aujourd'hui**. Preuves : le fichier vit hors du produit
@@ -260,7 +262,7 @@ C'est la brique qui différencie le plus radicalement un agent d'un chatbot.
 ### Sans mémoire persistante (chatbot classique)
 
 ```
-Session 1 :  "Appelle-moi Marc"      → JARVIS apprend
+Session 1 :  "Appelle-moi Alex"      → JARVIS apprend
              Session fermée          → TOUT OUBLIÉ
 
 Session 2 :  "Bonjour JARVIS"

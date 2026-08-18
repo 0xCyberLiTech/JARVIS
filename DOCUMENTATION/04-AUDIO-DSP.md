@@ -46,6 +46,8 @@
 ---
 # Audio DSP — Chaîne broadcast
 
+> *Dernière mise à jour : 2026-08-16 (Refactoring modulaire et étanchéité)*
+
 ## Objectif
 La chaîne audio de JARVIS est inspirée d'un **processeur voix broadcast** (Symetrix 528) :
 un *voice channel strip*, une branche d'effets en parallèle, puis un *master bus* qui protège

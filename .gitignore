@@ -103,6 +103,10 @@ build_vitrine.py
 
 # ── Audits de dette internes (constats datés, infra réelle) — LOCAL ──
 AUDIT-DETTE-*.md
+AUDIT_*.md
+BILAN_*.md
+CARTOGRAPHIE_*.md
+COMPTE_RENDU_*.md
 # ── Dossier d'ANALYSES internes (impact/dette/plan/Hermès, infra réelle) — LOCAL, jamais publié (préservé par la DR JARVIS) ──
 ANALYSES/
 

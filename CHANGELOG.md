@@ -4,6 +4,29 @@ Toutes les évolutions notables de la vitrine **JARVIS** sont consignées dans c
 
 Le format s'inspire de [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/) et le projet suit le [versionnage sémantique](https://semver.org/lang/fr/).
 
+## [3.4.0] — 2026-08-16
+
+Refactoring architectural complet : découplage en 9 circuits logiques modulaires, étanches et autoportants.
+
+### Architecture & Modularisation
+- **Découpage Multi-Circuits (-66.8% de charge orchestrateurs)** :
+  - **Cœur & Serveurs (`scripts/`)** : Extraction de `mcp_supervisor.py`, `server_runners.py`, `prompt_manager.py`, `command_security.py`, `dsp_config.py`.
+  - **SOC & Cyberdéfense (`scripts/blueprints/`)** : Modularisation en `soc_ssh_collector.py`, `soc_autoban_engine.py`, `soc_monitor_engine.py`, `soc_rsyslog_engine.py`, `soc_report_voice.py`.
+  - **Bootstrap Workers (`scripts/bootstrap/`)** : Modularisation en `alarm_voice_channel.py`, `infra_monitors.py`, `models_prewarm.py`, `maintenance_engine.py`.
+  - **Mémoire Conversationnelle (`scripts/memory/`)** : Extraction de `memory_stats_service.py`, `memory_health_service.py`, `memory_self_heal_service.py`.
+  - **Moteur RAG Hybride (`scripts/rag/`)** : Séparation en `rag_storage.py`, `rag_indexer.py`, `rag_searcher.py`, `rag_prompt_injector.py`.
+  - **Mobile BFF (`scripts/mobile/` & `mobile_bus.py`)** : Extraction de `mobile_emergency.py`, `mobile_proxmox.py`, `mobile_soc.py`, `mobile_system.py`.
+  - **Disaster Recovery (`scripts/dr/` & `dr_watch.py`)** : Extraction de `dr_io_contract.py`, `dr_state_evaluator.py`, `dr_speech_composer.py`.
+  - **Serveur MCP (`scripts/mcp_tools/` & `jarvis_mcp_server.py`)** : Découpage en `mcp_tools_system.py`, `mcp_tools_soc.py`, `mcp_tools_multimodal.py`.
+  - **Sécurité & Whitelists (`scripts/security_whitelists_sub/`)** : Découpage en `patterns.py`, `exfil_guard.py`, `validator.py`.
+
+### Robustesse & Maintenance
+- **Assistant Terminal & SysAdmin** : Détection contextuelle des éditeurs et visualisateurs (`nano`, `vim`, `cat`) dans `terminal_code.js`, boutons dynamiques d'analyse/copie en sidebar sans pollution de l'invite.
+- **Sécurisation Cache Vocal** : Gestion stricte des headers `X-TTS-Engine` et exclusion du cache lors des fallbacks pour garantir la fidélité de la voix sélectionnée dans `voice/routes.py`.
+- **Nettoyage & Archivage** : Rangement de tous les logs tournants et backups anciens dans `scripts/logs/`.
+- **Validation Globale** : 374/374 tests unitaires validés au vert et zéro dette linter (`ruff check` : 0 erreur).
+- **Cartographie & Handover** : Création de `CARTOGRAPHIE_CIRCUITS_LOGIQUES.md` et mise à jour du dossier de passation `COMPTE_RENDU_REFACTORING.md`.
+
 ## [Non publié] — 2026-08-11
 
 Le contexte injecté ne peut plus se faire passer pour une commande — et la vitrine est

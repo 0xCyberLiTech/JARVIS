@@ -46,6 +46,8 @@
 ---
 # Intégration SOC ↔ JARVIS
 
+> *Dernière mise à jour : 2026-08-16 (Refactoring modulaire et étanchéité)*
+
 ## Objectif
 JARVIS devient le bras armé du dashboard SOC :
 - Il lit les métriques de sécurité en temps réel
