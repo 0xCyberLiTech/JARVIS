@@ -15,6 +15,9 @@
     <a href="https://github.com/0xCyberLiTech/JARVIS/tags">
       <img src="https://img.shields.io/github/v/tag/0xCyberLiTech/JARVIS?sort=semver&label=version&style=flat-square&color=8B5CF6" alt="Dernière version" />
     </a>
+    <a href="https://github.com/0xCyberLiTech/JARVIS/commits/main">
+      <img src="https://img.shields.io/github/last-commit/0xCyberLiTech/JARVIS?style=flat-square&label=dernier%20commit&color=8B5CF6" alt="Date du dernier commit" />
+    </a>
     <a href="https://github.com/0xCyberLiTech/JARVIS/blob/main/CHANGELOG.md">
       <img src="https://img.shields.io/badge/%F0%9F%93%84%20Changelog-JARVIS-8B5CF6?style=flat-square" alt="Changelog" />
     </a>
