@@ -266,3 +266,46 @@ résument pour un producteur externe :
 
 Le travail produit est utile et il est en production. Ces notes visent uniquement à ce que le
 prochain rapport soit **aussi solide que le code qu'il décrit**.
+
+---
+
+## 8. CE QUI A ÉTÉ RÉPARÉ LE 18/08 — NE PAS LE DÉFAIRE
+
+Cette section existe pour une raison simple : **tu ne peux pas deviner ce qui a été corrigé après
+ton lot.** Sans elle, tu risques de « nettoyer » de bonne foi du code qui répare un bug réel, ou de
+restaurer une forme qui a coûté une régression. La liste ci-dessous est **dérivée des commits**,
+pas écrite de mémoire.
+
+### 8.1 Fichiers de PRODUCTION corrigés — toute modification demande de relire le commit d'abord
+
+| Fichier | Ce qui y a été réparé | Ne surtout pas |
+|---|---|---|
+| `bootstrap/threads.py` | Le câblage des singletons appartient à l'instance qui pilote ; l'ORDRE des deux gardes ; la marque est un **registre**, plus une case écrasable | Remettre un appel de câblage au niveau MODULE. Inverser l'ordre des gardes. Retransformer le registre en booléen ou en champ unique. |
+| `jarvis_tools_catalog.py` | Le chargeur d'outils ne rend plus une liste vide en silence : trois états distincts, dont un refus explicite | Faire retomber le cas d'échec sur un `return []`. C'est ce vide-là qui a fait dire au produit qu'il n'avait plus ses outils. |
+| `bypass/aide.py` | La fonction DÉGRADE au lieu de lever, parce que l'appelant n'a aucun `try/except` : lever ici = erreur 500 = **plus aucune voix** | « Simplifier » en relançant l'exception. |
+| `soc_config_loader.py` | Ajusté avec le câblage ci-dessus | — |
+
+### 8.2 Tests — DEUX d'entre eux verrouillaient un bug, ils ont été INVERSÉS
+
+`tests/python/test_jarvis_tools_catalog.py` · `test_bootstrap_wiring_ownership.py` · `test_log_isolation.py`
+
+⚠ Deux tests affirmaient `assert result == []` : ils avaient transformé une panne en **contrat**.
+Ils sont désormais inversés. **Si un test te paraît « faux » parce qu'il échoue sur du code qui te
+semble correct, ne le réaligne pas sur le code — remonte-le.** C'est exactement ainsi qu'un bug se
+fait re-graver.
+
+### 8.3 Un lot NON CONTRÔLÉ, à traiter comme tel
+`hermes/jarvis-commit-guard/` est entré dans le dépôt en **WIP explicitement non contrôlé**. Ne
+t'appuie pas dessus comme s'il était validé, et ne le durcis pas non plus sans mandat.
+
+### 8.4 Des garde-fous ont été DURCIS le même jour
+Plusieurs gardiens ont été rendus voyants (surfaces DÉRIVÉES au lieu d'ÉNUMÉRÉES, refus de publier
+un compte partiel, bornes annoncées alignées sur les bornes posées). **Conséquence pour toi : ils
+mordent maintenant sur des formes qu'ils laissaient passer avant.** Si l'un d'eux te bloque, ce
+n'est probablement pas un faux positif — lis son message, il nomme sa cause.
+
+### 8.5 La règle de travail qui en découle
+> **Avant de modifier un fichier de cette liste : lis le commit qui l'a touché le 18/08.**
+> `git log --oneline -- <fichier>` puis `git show <sha>`. Le message de commit dit ce que le
+> changement empêche. Défaire un correctif sans avoir lu ce qu'il protégeait, c'est rouvrir un
+> incident déjà payé.
