@@ -124,6 +124,72 @@ propriétaire du projet, pas une défiance envers l'outil.
 
 ---
 
+## 5 bis. CE QUE LA MIGRATION A COÛTÉ, MESURÉ LE 18/08 — la leçon la plus utile de ce dossier
+
+Ajouté après la mise en production. Ce n'est pas un reproche : ce sont **quatre classes de
+dégâts** qu'un refactoring de masse produit et que personne ne voit sur le moment, parce que
+**la suite de tests reste verte** dans les quatre cas. Elles ont demandé six contrôles adverses
+et six cycles de correction. Elles se préviennent toutes par **une seule règle**, en fin de ce
+paragraphe.
+
+### A. Changer la FORME d'une déclaration casse les organes qui la LISENT
+`_TOOLS_DEFS` est passé d'une **liste littérale** d'outils à une **concaténation de trois appels**
+(`mcp_tools_system.get_…() + mcp_tools_soc.get_…() + mcp_tools_multimodal.get_…()`). Le code
+fonctionne parfaitement. Mais deux organes qui *lisent* cette déclaration se sont retrouvés à
+compter **zéro** outil :
+- le **loader du catalogue** — conséquence mesurée **au point de livraison vocal** : l'assistant
+  a annoncé à voix haute *« J'ai 158 outils de développement locaux et **0 outils MCP** »* et
+  *« Je n'ai pas d'outil pour investiguer une IP »*, alors que l'outil existait. L'utilisateur est
+  **malvoyant** : la voix est son interface, pas un confort ;
+- un **audit d'intégrité** qui a rendu un **faux NO-GO** : « 15 handlers SANS outil ».
+
+### B. Déplacer un fichier rend AVEUGLE tout garde-fou ancré dessus
+`mobile_bus.py` → `mobile/mobile_emergency.py`, `jarvis.py` → `command_security.py`.
+**Six** garde-fous étaient ancrés sur les anciens chemins. Un garde-fou ancré sur un chemin
+disparu ne crie pas : **il rend succès sans rien regarder**. C'est le pire état possible — il
+éteint l'alarme sans éteindre le feu, et il y arrive exactement au moment où l'on a le plus
+besoin de lui. Pire encore : leurs **auto-tests** injectaient des fautes dans du code **qui
+n'existait plus** — verts, et aveugles.
+🔎 Effet de bord révélateur : en remplaçant une liste écrite à la main par une dérivation sur le
+code réel, on a découvert que la chaîne d'**arrêt d'urgence** avait migré et **n'était plus
+gardée du tout**.
+
+### C. Deux tests VERROUILLAIENT le bug
+Deux tests affirmaient `assert result == []` sur la dérivation cassée. Ils ne *décrivaient* pas
+le défaut : ils le **garantissaient**. Tant qu'ils étaient verts, « l'assistant ne voit aucun
+outil » était un **contrat** — et toute correction aurait fait rougir la suite. Un test peut
+protéger un bug aussi solidement qu'une garantie ; la seule différence tient à ce que l'assertion
+affirme, et personne ne le relit une fois qu'il est vert.
+
+### D. Un appel au niveau MODULE peut voler l'état d'un singleton
+Un câblage de sous-modules appelé **au niveau module** faisait que toute seconde exécution du
+fichier (sous un autre nom, via un chargeur) recâblait un **singleton de process** vers les
+variables d'une instance jetable, jamais initialisée. L'instance qui pilotait réellement se
+retrouvait débranchée **sans une erreur, sans un log** : un rappel de médicaments mourait en
+silence total. Quatre régressions de la sortie vocale venaient de là.
+
+### ⇒ LA RÈGLE QUI PRÉVIENT LES QUATRE
+> **Un refactoring n'est pas terminé quand le code marche et que les tests passent. Il est
+> terminé quand les organes qui LISENT la structure ont été ré-ancrés DANS LE MÊME LOT** —
+> loaders, garde-fous, auto-tests, et tout ce qui dérive un chemin, un nom ou une forme de
+> déclaration.
+
+Deux réflexes concrets, qui auraient suffi :
+1. **Pour chaque fichier déplacé ou renommé**, chercher qui le nomme ailleurs (garde-fous,
+   loaders, fixtures, documentation) et le corriger dans le même lot. Un nom de fichier écrit en
+   dur quelque part est une dépendance invisible.
+2. **Pour chaque déclaration dont la FORME change** (littéral → appel, liste → fonction, fichier
+   → paquet), se demander *« qui lit ceci, et par quel moyen ? »*. Si la réponse est « une
+   expression régulière » ou « un parcours de syntaxe », cet organe est cassé — même si rien ne
+   le dit.
+
+⚠ Et la mesure qui compte : **aucun de ces quatre dégâts n'a fait échouer la suite de tests.**
+Tous ont été trouvés par des contrôles adverses mandatés pour *mettre le livrable en défaut*, ou
+par un garde-fou qui a refusé un commit. Une suite verte prouve que le code fait ce que les tests
+demandent ; elle ne prouve jamais que rien n'a été rendu aveugle.
+
+---
+
 
 ## 6. Le cadre de travail — posé par le propriétaire du projet
 
