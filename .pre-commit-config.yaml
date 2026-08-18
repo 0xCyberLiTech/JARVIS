@@ -94,7 +94,7 @@ repos:
       # FAIL-CLOSED : si l'énumération ne trouve RIEN, on REFUSE le push au lieu de passer
       # vert sur un gate vacant (une sonde qui ne trouve plus sa cible doit CRIER, pas se taire).
       # `verbose: true` (a11y §5) : pre-commit masque la sortie d'un hook qui réussit — sans
-      # ce drapeau, Marc (MALVOYANT) ne verrait NI quelles suites ont tourné, NI si l'une a
+      # ce drapeau, l'opérateur ne verrait NI quelles suites ont tourné, NI si l'une a
       # silencieusement disparu de la liste dérivée. Coût mesuré : ~11 s.
       - id: hermes-suites
         name: suites pytest des organes Hermès (les détecteurs du produit gardent leurs dents)
@@ -151,7 +151,7 @@ repos:
         always_run: true
         stages: [pre-push]
 
-      # ── Gardiens ACCESSIBILITÉ (stage pre-push) — Marc MALVOYANT = règle ABSOLUE ──
+      # ── Gardiens ACCESSIBILITÉ (stage pre-push) — règle ABSOLUE du projet ──
       # Ajout 2026-06-30 (audit doctrine F1) : ces 2 gardiens ne tournaient QUE dans
       # audit-all (§12 + §24, manuel) → une régression a11y (contraste sous-plancher,
       # fonte < 10px, canvas/contrôle sans nom accessible, JS-clic non clavier) passait
@@ -240,7 +240,7 @@ repos:
       # MÉMOIRE et l'UI mobile d'ARRÊT D'URGENCE (celle qui dit à la femme de Marc si elle peut
       # couper le courant). Elles n'étaient câblées à AUCUN gate → elles ne tournaient que si un
       # humain y pensait, et « un test qu'un humain doit penser à lancer finit par ne plus être
-      # lancé ». Marc est MALVOYANT : il ne peut pas « jeter un œil » pour rattraper.
+      # lancé ». Ici le rattrapage visuel n'est pas une option : rien ne remplace le gate.
       #
       # ⚠ CE HOOK NE BLOQUE JAMAIS SUR L'ABSENCE DE JARVIS. Playwright exige un JARVIS vivant :
       # le câbler naïvement casserait le push dès que JARVIS est éteint → Marc contournerait le
@@ -331,8 +331,8 @@ repos:
       # PORTÉE ASSUMÉE ET DITE : I2 scanne TOUTES les vitrines, pas seulement celle qu'on pousse —
       # une fuite dormant ailleurs bloque donc aussi ce push. Ce n'est PAS un faux positif : un
       # dépôt public est indexé POUR TOUJOURS, et le message NOMME le fichier et la ligne fautifs.
-      # `verbose: true` (a11y §5, Marc est MALVOYANT) : pre-commit MASQUE la sortie d'un hook qui
-      # réussit — sans ce drapeau, Marc ne saurait ni ce qui a été scanné, ni combien.
+      # `verbose: true` (a11y §5) : pre-commit MASQUE la sortie d'un hook qui
+      # réussit — sans ce drapeau, on ne saurait ni ce qui a été scanné, ni combien.
       # ⛔ `--no-verify` n'est PAS le chemin : faire taire cette barrière est un BLANCHIMENT (§8).
       - id: jarvis-public-doc-guard
         name: barrière de publication (ni IP interne ni identifiant nominatif ne part en vitrine)

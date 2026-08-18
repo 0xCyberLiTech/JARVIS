@@ -86,9 +86,9 @@ vide en croyant décider. **Et quand c'est possible, un avis se teste avant d'ê
 
 ## 6. Ce que seul l'humain peut fermer
 
-Le propriétaire du projet est **malvoyant** : la voix est son interface, pas un confort. Une
-régression vocale ne se prouve ni par un test vert, ni par une lecture de code — **elle se prouve à
-l'oreille, et seul lui peut le faire.**
+Dans ce système, **la voix est l'interface primaire, pas un confort** : c'est une propriété de
+conception, pas une préférence. Une régression vocale ne se prouve donc ni par un test vert, ni par
+une lecture de code — **elle se prouve à l'oreille, et seul un humain peut le faire.**
 
 Aucun agent, producteur ou contrôleur, ne ferme cette étape à sa place. Un livrable qui touche à la
 voix reste **non validé** tant qu'il ne l'a pas entendu.

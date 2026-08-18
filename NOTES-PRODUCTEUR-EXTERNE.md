@@ -139,8 +139,9 @@ fonctionne parfaitement. Mais deux organes qui *lisent* cette déclaration se so
 compter **zéro** outil :
 - le **loader du catalogue** — conséquence mesurée **au point de livraison vocal** : l'assistant
   a annoncé à voix haute *« J'ai N outils de développement locaux et **0 outils MCP** »* et
-  *« Je n'ai pas d'outil pour investiguer une IP »*, alors que l'outil existait. L'utilisateur est
-  **malvoyant** : la voix est son interface, pas un confort ;
+  *« Je n'ai pas d'outil pour investiguer une IP »*, alors que l'outil existait. Dans ce système,
+  **la voix est l'interface primaire, pas un confort** — un mensonge prononcé est donc un défaut
+  critique, pas une gêne d'affichage ;
 - un **audit d'intégrité** qui a rendu un **faux NO-GO** : « des handlers SANS outil ».
 
 ### B. Déplacer un fichier rend AVEUGLE tout garde-fou ancré dessus
@@ -259,8 +260,8 @@ résument pour un producteur externe :
    dit « je ne sais pas encore ».
 2. **Toute action se prouve par une mise à l'épreuve.** Un correctif est validé quand on a
    montré que la cible ÉCHOUE sans lui.
-3. **L'accessibilité n'est pas une option.** Le propriétaire du projet est malvoyant : la voix
-   est un canal d'information, pas un confort. Tout échec silencieux doit crier. C'est pourquoi
+3. **L'accessibilité n'est pas une option.** Dans ce système, la voix est un canal d'information
+   primaire, pas un confort — c'est une propriété de conception. Tout échec silencieux doit crier. C'est pourquoi
    les 4 régressions de ce chantier — toutes sur la synthèse vocale — ont bloqué la mise en
    service, alors que le reste du travail était bon.
 
