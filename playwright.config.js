@@ -3,10 +3,10 @@ import silence from './e2e-silence/silence-proxy.cjs';
 
 // ⛔ VERROU DE SILENCE — POURQUOI IL EST ICI ET PAS DANS LES SPECS (2026-07-22).
 // `baseURL` ci-dessous pointe sur l'instance de PRODUCTION : les specs pilotent le VRAI JARVIS
-// de Marc, avec son VRAI haut-parleur. Le 2026-07-22, mobile-emergency-render.spec.js a fait
+// de l operateur, avec son VRAI haut-parleur. Le 2026-07-22, mobile-emergency-render.spec.js a fait
 // prononcer 3 fois à voix haute « ARRÊT COMPLET TERMINÉ — VOUS POUVEZ COUPER LE COURANT »
 // (tts.log 17:50:06 / 18:04:21 / 18:06:43) alors que les 4 VMs tournaient — l'écran d'urgence
-// orage que la FEMME de Marc utilise. Elle interceptait /api/mobile/**, mais pas /api/tts.
+// orage que un PROCHE du foyer utilise. Elle interceptait /api/mobile/**, mais pas /api/tts.
 // 19 des 25 specs ne citent même pas /api/tts : c'est une CLASSE, pas une instance.
 // Playwright REFUSE tout hook global posé ici (mesuré : « did not expect test.beforeEach() to be
 // called here ») et aucune fixture ne s'applique sans toucher l'import de chaque spec — donc le
@@ -60,7 +60,7 @@ export default defineConfig({
         // PAS le blocage réseau — une requête NON ÉMISE vaut mieux qu'un son coupé.
         '--mute-audio',
         // ⛔ VOIX DU NAVIGATEUR (2026-07-22, lot P1-bis) — le 2e canal d'émission réelle, celui que
-        // Marc a reconnu à l'oreille (« ça disait chat chat »). ZÉRO RÉSEAU : le proxy ci-dessus n'y
+        // l operateur a reconnu à l'oreille (« ça disait chat chat »). ZÉRO RÉSEAU : le proxy ci-dessus n'y
         // peut RIEN. MESURÉ : 2 clics de nav sur /m => 2 appels à speechSynthesis.speak
         // (« Chat », « Actions ») via mobile.js:913 -> _say. Et le Chromium de test a bien 3 voix
         // SAPI FR (Hortense/Julie/Paul) EN HEADLESS : la prétendue atténuation par --mute-audio +

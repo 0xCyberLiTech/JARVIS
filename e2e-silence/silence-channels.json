@@ -1,5 +1,5 @@
 {
-  "_README": "SOURCE UNIQUE du VERROU DE SILENCE E2E (2026-07-22). Playwright tourne contre l'instance de PRODUCTION (playwright.config.js -> baseURL = le JARVIS de Marc). Une spec qui charge un écran fait donc PARLER LE VRAI HAUT-PARLEUR, dans le vrai salon. MESURÉ le 2026-07-22 : la spec mobile-emergency-render.spec.js a fait prononcer 3 fois (17:50:06, 18:04:21, 18:06:43 — JARVIS/scripts/tts.log, source=mobile) « ARRÊT COMPLET TERMINÉ — VOUS POUVEZ COUPER LE COURANT », l'écran d'urgence ORAGE que la FEMME de Marc utilise, pendant que les 4 VMs tournaient. Ce fichier liste les CANAUX D'ÉMISSION RÉELLE que le proxy de silence intercepte, et NOMME ceux qu'il n'intercepte pas (doctrine §4 : aucun canal ne reste tu). Lecteurs : e2e-silence/silence-proxy.cjs (il BLOQUE) + scripts/hermes/jarvis-e2e-silence-guard (il PROUVE). Zéro duplication : ni le proxy ni le gardien ne réécrivent cette liste.",
+  "_README": "SOURCE UNIQUE du VERROU DE SILENCE E2E (2026-07-22). Playwright tourne contre l'instance de PRODUCTION (playwright.config.js -> baseURL = l instance de production). Une spec qui charge un écran fait donc PARLER LE VRAI HAUT-PARLEUR, dans la vraie piece de vie. MESURÉ le 2026-07-22 : la spec mobile-emergency-render.spec.js a fait prononcer 3 fois (17:50:06, 18:04:21, 18:06:43 — JARVIS/scripts/tts.log, source=mobile) « ARRÊT COMPLET TERMINÉ — VOUS POUVEZ COUPER LE COURANT », l'écran d'urgence ORAGE que un PROCHE du foyer utilise, pendant que les 4 VMs tournaient. Ce fichier liste les CANAUX D'ÉMISSION RÉELLE que le proxy de silence intercepte, et NOMME ceux qu'il n'intercepte pas (doctrine §4 : aucun canal ne reste tu). Lecteurs : e2e-silence/silence-proxy.cjs (il BLOQUE) + scripts/hermes/jarvis-e2e-silence-guard (il PROUVE). Zéro duplication : ni le proxy ni le gardien ne réécrivent cette liste.",
 
   "_pourquoi_un_proxy": "Playwright REFUSE tout hook global posé dans la config (mesuré : « Playwright Test did not expect test.beforeEach() to be called here »), et il n'existe aucune fixture applicable à toutes les specs sans modifier leurs imports — donc aucun verrou par page.route ne peut couvrir la 26e spec écrite demain. Le seul point de passage OBLIGÉ et commun à TOUTES les specs, présentes et futures, est le RÉSEAU du navigateur : `use.proxy`. Il est ORIGIN-TRANSPARENT (le navigateur croit toujours parler à http://localhost:5000 : Host et Origin sont préservés — vérifié, sans quoi security_origin.loopback_origins() refuserait les POST).",
 
@@ -29,7 +29,7 @@
     {
       "method": "GET",
       "path": "/api/speak/queue",
-      "canal": "VOIX SERVEUR REJOUÉE PAR LA PAGE + VOL D'ANNONCE. jarvis_mixing.js poll cet endpoint TOUTES LES 2 s sur / : il DRAINE la file TTS Python et joue chaque phrase (queueSpeech). Deux dégâts : la page de test PARLE les alertes SOC réelles, ET Marc PERD l'annonce (l'endpoint vide la file — un GET destructif).",
+      "canal": "VOIX SERVEUR REJOUÉE PAR LA PAGE + VOL D'ANNONCE. jarvis_mixing.js poll cet endpoint TOUTES LES 2 s sur / : il DRAINE la file TTS Python et joue chaque phrase (queueSpeech). Deux dégâts : la page de test PARLE les alertes SOC réelles, ET l operateur PERD l'annonce (l'endpoint vide la file — un GET destructif).",
       "response": { "status": 200, "content_type": "application/json", "body": "{\"items\":[]}" },
       "_pourquoi_cette_reponse": "Forme EXACTE de la file vide du vrai endpoint : api-coverage.spec.js n'assert que la présence d'un tableau `items`."
     },
@@ -42,7 +42,7 @@
     {
       "method": "POST",
       "path": "/api/shutdown",
-      "canal": "ARRÊT DE JARVIS LUI-MÊME (health/routes.py). Une spec qui l'atteint tue l'instance de Marc au milieu du run.",
+      "canal": "ARRÊT DE JARVIS LUI-MÊME (health/routes.py). Une spec qui l'atteint tue l'instance de l operateur au milieu du run.",
       "response": { "status": 403, "content_type": "application/json", "body": "{\"ok\":false,\"error\":\"e2e_silence: arret de JARVIS INTERDIT depuis une spec\"}" }
     }
   ],
@@ -52,7 +52,7 @@
 
     "_mesure_avant": "SONDE sur le chemin RÉEL (2 clics de nav sur /m, espion sans relais) : {api:true, n:2, said:['Chat','Actions']}. Le produit DEMANDE bien la parole au navigateur à chaque tap.",
 
-    "_mitigation_precedente_REFUTEE": "Le contrat disait, avant ce lot : « atténué par --mute-audio et par le mode HEADLESS (aucune voix installée dans le Chromium de test) ». C'est FAUX — MESURÉ le 2026-07-22 : le Chromium de Playwright expose 3 voix SAPI FR (Microsoft Hortense / Julie / Paul), en HEADLESS **comme** en headed. Ce sont les voix SYSTÈME Windows, hors du pipeline audio du navigateur : --mute-audio ne les concerne pas. La « voix de secours système » entendue par Marc, c'est exactement ça.",
+    "_mitigation_precedente_REFUTEE": "Le contrat disait, avant ce lot : « atténué par --mute-audio et par le mode HEADLESS (aucune voix installée dans le Chromium de test) ». C'est FAUX — MESURÉ le 2026-07-22 : le Chromium de Playwright expose 3 voix SAPI FR (Microsoft Hortense / Julie / Paul), en HEADLESS **comme** en headed. Ce sont les voix SYSTÈME Windows, hors du pipeline audio du navigateur : --mute-audio ne les concerne pas. La « voix de secours système » entendue par l operateur, c'est exactement ça.",
 
     "chromium_flag": "--disable-speech-api",
 
@@ -62,7 +62,7 @@
 
     "expect_absent": ["speechSynthesis", "SpeechSynthesisUtterance"],
 
-    "_portee_TESTS_UNIQUEMENT": "Ce drapeau est un argument de lancement du navigateur DE TEST, écrit dans playwright.config.js. Le code produit n'est PAS modifié : la vraie voix de secours de Marc (audio_viz.js::_voiceFallbackSpeak quand edge-tts tombe, mobile.js::_sayCritical pour les alarmes) reste INTACTE dans son navigateur à lui. ⛔ Ne JAMAIS neutraliser speechSynthesis dans le code produit : ce serait une régression grave d'accessibilité (§5) — c'est ce qui fait que JARVIS continue de parler à Marc quand internet est coupé.",
+    "_portee_TESTS_UNIQUEMENT": "Ce drapeau est un argument de lancement du navigateur DE TEST, écrit dans playwright.config.js. Le code produit n'est PAS modifié : la vraie voix de secours du poste (audio_viz.js::_voiceFallbackSpeak quand edge-tts tombe, mobile.js::_sayCritical pour les alarmes) reste INTACTE dans son navigateur à lui. ⛔ Ne JAMAIS neutraliser speechSynthesis dans le code produit : ce serait une régression grave d'accessibilité (§5) — c'est ce qui fait que JARVIS continue de parler à l operateur quand internet est coupé.",
 
     "_effet_de_bord_verifie": "--disable-speech-api coupe AUSSI la reconnaissance vocale du navigateur (Web Speech recognition). Sans effet ici : ZÉRO occurrence de SpeechRecognition/webkitSpeechRecognition dans tout le dépôt JARVIS (le STT passe par faster-whisper côté serveur).",
 
@@ -72,16 +72,16 @@
   "_canaux_connus_NON_bloques": {
     "_regle": "doctrine §4 — un canal non traité n'est pas un canal tu. Chacun est NOMMÉ ici avec son effet réel et le motif de non-blocage. Les ajouter au blocage est un lot À PART (chacun peut casser une spec légitime : à faire spec par spec, sur preuve).",
     "POST /api/chat": "Les BYPASS exécutent de VRAIES actions infra (une question a déclenché une sauvegarde de 4 VMs le 2026-07-22). Non bloqué : chat-llm-smoke.spec.js l'appelle DÉLIBÉRÉMENT (inférence réelle), et par la fixture `request` — qui ne passe PAS par le proxy (cf ci-dessous). Toutes les specs de PAGE l'interceptent déjà.",
-    "POST /api/tasks/<id>/run · POST /api/code/exec": "EXÉCUTION SHELL / de code sur le poste de Marc.",
+    "POST /api/tasks/<id>/run · POST /api/code/exec": "EXÉCUTION SHELL / de code sur le poste de l operateur.",
     "POST /api/save-code · POST /api/read-file": "ÉCRITURE / LECTURE de fichiers hors test-results/.",
     "POST /api/memory · /api/memory/brain-restore · /api/memory/self-heal · /api/memory/summarize-session": "MUTATION de la mémoire persistante de JARVIS (et inférence LLM pour la synthèse).",
-    "POST /api/models · /api/llm-params · /api/dsp-params · /api/prompt-profiles · /api/voices · /api/welcome*": "MUTATION de la CONFIG PERSISTANTE de Marc (modèle Ollama actif = swap VRAM, voix, DSP audio, profils).",
-    "POST /api/mode": "MUTATION du mode actif. api.spec.js et mode-ui.spec.js le changent puis le REMETTENT — un run interrompu laisse le mode de Marc déplacé.",
+    "POST /api/models · /api/llm-params · /api/dsp-params · /api/prompt-profiles · /api/voices · /api/welcome*": "MUTATION de la CONFIG PERSISTANTE du poste (modèle Ollama actif = swap VRAM, voix, DSP audio, profils).",
+    "POST /api/mode": "MUTATION du mode actif. api.spec.js et mode-ui.spec.js le changent puis le REMETTENT — un run interrompu laisse le mode actif du poste déplacé.",
     "POST /api/rag/note · /api/rag/index-file · /api/rag/refresh": "RÉINDEXATION RAG (GPU + écriture d'index).",
-    "POST /api/speak/stop": "COUPE la phrase que JARVIS est en train de dire à Marc.",
+    "POST /api/speak/stop": "COUPE la phrase que JARVIS est en train de dire à l operateur.",
     "POST /api/stt · /api/vision · /api/dsp/process-audio": "Charge GPU réelle (whisper / vision / DeepFilterNet).",
-    "WebSocket ws://localhost:<ws_port>/ws/ssh/<hote>": "SESSION SSH RÉELLE vers srv-dev-1 (terminal_code.js). Le proxy TUNNELISE l'upgrade sans l'inspecter — il ne peut PAS le filtrer.",
-    "MAIL": "Aucun endpoint HTTP JARVIS n'envoie de mail (le rapport quotidien est un cron sur srv-nginx, hors de portée d'une spec) — vérifié par recherche d'endpoint, PAS par lecture exhaustive du serveur SOC.",
+    "WebSocket ws://localhost:<ws_port>/ws/ssh/<hote>": "SESSION SSH RÉELLE vers la VM de dev jetable (terminal_code.js). Le proxy TUNNELISE l'upgrade sans l'inspecter — il ne peut PAS le filtrer.",
+    "MAIL": "Aucun endpoint HTTP JARVIS n'envoie de mail (le rapport quotidien est un cron sur le serveur de supervision, hors de portée d'une spec) — vérifié par recherche d'endpoint, PAS par lecture exhaustive du serveur SOC.",
     "TROU STRUCTUREL — la fixture `request` (APIRequestContext)": "MESURÉ le 2026-07-22 dans un bac à sable isolé : `use.proxy` NE s'applique PAS à la fixture `request` — un `request.post('/api/tts')` atteindrait le VRAI serveur. Playwright n'offre aucun moyen de le proxifier globalement. C'est le gardien jarvis-e2e-silence-guard qui ferme ce trou, STATIQUEMENT : toute spec qui vise un canal bloqué via `request`/`apiRequest` => NO-GO.",
     "TROU STRUCTUREL — https:// (CONNECT)": "Un CONNECT est un tunnel CHIFFRÉ opaque : le proxy ne voit pas le chemin. Une spec qui viserait https://<hote>:8444/api/tts passerait. Fermé lui aussi STATIQUEMENT par le gardien.",
     "speechSynthesis (voix du NAVIGATEUR, zéro réseau)": "TRAITÉ le 2026-07-22 (lot P1-bis) — voir la section `browser_voice` ci-dessus. N'est plus un canal non bloqué : la capacité est SUPPRIMÉE du navigateur de test par `browser_voice.chromium_flag`, prouvé par lancement réel (gardien I5), pas par une chaîne de caractères."

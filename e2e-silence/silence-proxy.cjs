@@ -4,10 +4,10 @@
  * POURQUOI IL EXISTE (mesuré, pas supposé). playwright.config.js pointe
  * `baseURL` sur l'instance de PRODUCTION de JARVIS. Le 2026-07-22, la spec
  * mobile-emergency-render.spec.js — qui intercepte proprement /api/mobile/** mais
- * PAS /api/tts — a fait prononcer TROIS FOIS à voix haute, dans le salon de Marc :
+ * PAS /api/tts — a fait prononcer TROIS FOIS à voix haute, dans la piece de vie :
  *   « ARRÊT COMPLET TERMINÉ — VOUS POUVEZ COUPER LE COURANT »
  * (JARVIS/scripts/tts.log, 17:50:06 / 18:04:21 / 18:06:43, source=mobile), alors que
- * les 4 VMs tournaient. C'est l'écran d'urgence ORAGE que la FEMME de Marc lit.
+ * les 4 VMs tournaient. C'est l'écran d'urgence ORAGE que un PROCHE du foyer lit.
  *
  * CE N'EST PAS UNE INSTANCE, C'EST UNE CLASSE : 19 des 25 specs (compté live) ne
  * citent même pas /api/tts. Corriger spec par spec laisserait parler la 26e.
@@ -67,7 +67,7 @@ function loadContract(file) {
  *  de la config Playwright est `launchOptions.args` (aucun script d'init global n'existe en
  *  1.60 : `initScript` absent de TestOptions — verifie dans les types). Le drapeau vient du
  *  CONTRAT (source unique) : il n'est jamais ecrit en dur dans playwright.config.js.
- *  ⛔ PORTEE TESTS UNIQUEMENT : le code produit n'est pas touche — la voix de secours de Marc
+ *  ⛔ PORTEE TESTS UNIQUEMENT : le code produit n'est pas touche — la voix de secours du poste
  *  (edge-tts mort -> speechSynthesis) reste intacte dans SON navigateur. */
 function browserVoiceArgs(c) {
   const bv = (c || {}).browser_voice;

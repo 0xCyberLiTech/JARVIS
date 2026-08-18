@@ -200,7 +200,7 @@ repos:
       # Ajout 2026-07-22, APRÈS incident MESURÉ. mobile-emergency-render.spec.js interceptait
       # /api/mobile/** mais PAS /api/tts : elle a fait prononcer 3 fois à voix haute (tts.log,
       # source=mobile, 17:50:06 / 18:04:21 / 18:06:43) « ARRÊT COMPLET TERMINÉ — VOUS POUVEZ
-      # COUPER LE COURANT » — l'écran d'urgence ORAGE que la FEMME de Marc utilise — pendant que
+      # COUPER LE COURANT » — l'écran d'urgence ORAGE que un PROCHE du foyer utilise — pendant que
       # les 4 VMs tournaient. CLASSE, pas instance : 19 des 25 specs ne citent même pas /api/tts.
       # Le verrou lui-même est STRUCTUREL (e2e-silence/silence-proxy.cjs en `use.proxy` : le seul
       # point de passage commun à toutes les specs, présentes ET futures). Ce hook PROUVE qu'il
@@ -220,10 +220,10 @@ repos:
       # personne ne les nomme — donc le GATE VISUEL ci-dessous était NO-GO en permanence, y compris
       # sur les 3 tests de l'écran d'ARRÊT D'URGENCE. Motif unique : les specs n'avaient aucun
       # viewport, héritaient de Desktop Chrome 1280x720 = PAYSAGE, et en paysage la nav du bas est
-      # MASQUÉE PAR CONCEPTION (décision Marc 2026-07-17, « accueil paysage PARTOUT »).
+      # MASQUÉE PAR CONCEPTION (décision l operateur 2026-07-17, « accueil paysage PARTOUT »).
       # Le défaut était dans la SPEC (elle pilotait un téléphone dans une fenêtre de bureau), pas
       # dans le produit. Ce hook est placé AVANT le gate visuel : il rend un verdict STATIQUE qui
-      # NOMME le fichier et la ligne, au lieu de laisser Marc lire 9 timeouts de 30 s.
+      # NOMME le fichier et la ligne, au lieu de laisser l operateur lire 9 timeouts de 30 s.
       # ⛔ Il verrouille aussi la voie MALHONNÊTE : faire verdir en modifiant mobile.css aurait
       #    cassé un invariant ratifié et vert (mobile-paysage-partout.spec.js) — blanchiment (§8).
       - id: jarvis-e2e-viewport-guard
@@ -237,17 +237,17 @@ repos:
 
       # ── GATE VISUEL (stage pre-push) — le RENDU RÉEL des écrans, prouvé par une machine ──
       # Ajout 2026-07-14. Des specs Playwright prouvent ce que les ÉCRANS DISENT : la tuile SANTÉ
-      # MÉMOIRE et l'UI mobile d'ARRÊT D'URGENCE (celle qui dit à la femme de Marc si elle peut
+      # MÉMOIRE et l'UI mobile d'ARRÊT D'URGENCE (celle qui dit à un proche du foyer si elle peut
       # couper le courant). Elles n'étaient câblées à AUCUN gate → elles ne tournaient que si un
       # humain y pensait, et « un test qu'un humain doit penser à lancer finit par ne plus être
       # lancé ». Ici le rattrapage visuel n'est pas une option : rien ne remplace le gate.
       #
       # ⚠ CE HOOK NE BLOQUE JAMAIS SUR L'ABSENCE DE JARVIS. Playwright exige un JARVIS vivant :
-      # le câbler naïvement casserait le push dès que JARVIS est éteint → Marc contournerait le
+      # le câbler naïvement casserait le push dès que JARVIS est éteint → l operateur contournerait le
       # gate, et un gate contourné est un gate MORT (doctrine §2). Donc : JARVIS éteint → le gate
       # est SAUTÉ, le push passe, et le saut est COMPTÉ (état persistant). JARVIS vivant → les
       # specs tournent et un échec RÉEL bloque le push. Les sauts sont RATTRAPÉS par JARVIS
-      # LUI-MÊME — AUCUNE tâche planifiée (décision de Marc, 2026-07-14 : « ma machine n'est pas
+      # LUI-MÊME — AUCUNE tâche planifiée (décision de l operateur, 2026-07-14 : « ma machine n'est pas
       # allumée en permanence » ; une tâche hebdo sur une machine éteinte ne tourne JAMAIS, elle
       # dormirait comme les gardiens qu'elle doit réveiller). Deux déclencheurs : au DÉMARRAGE
       # (thread bootstrap.threads.boot_maintenance) ET en COURS DE ROUTE (thread
@@ -256,7 +256,7 @@ repos:
       # (memory-audit) surveille le gate, et `boucle_maintenance` surveille la BOUCLE elle-même
       # (battement de cœur) : si elle meurt, ÇA CRIE.
       # `verbose: true` = NON NÉGOCIABLE (a11y §5). pre-commit MASQUE la sortie d'un hook qui
-      # réussit : sans ce drapeau, un gate SAUTÉ afficherait un simple « Passed » et Marc ne
+      # réussit : sans ce drapeau, un gate SAUTÉ afficherait un simple « Passed » et l operateur ne
       # saurait JAMAIS que le mécanisme dort (ni depuis combien de temps). L'état du circuit doit
       # être ÉNONCÉ en toutes lettres à chaque push — un voyant qu'il faut deviner n'existe pas.
       - id: jarvis-visual-gate
@@ -296,12 +296,12 @@ repos:
         always_run: true
         stages: [pre-push]
       # ── Confinement exec root (audit indépendant Q2, 2026-07-04) ──
-      # /api/code/exec + MCP jarvis_code_exec EXÉCUTENT du code root sur srv-dev-1. Risque résiduel
+      # /api/code/exec + MCP jarvis_code_exec EXÉCUTENT du code root sur la VM de dev jetable. Risque résiduel
       # (injection de prompt → code arbitraire) ASSUMÉ car la cible est une VM dev JETABLE SANS PIVOT.
-      # Ce gardien verrouille la condition d'acceptation : la cible reste srv-dev-1, jamais une IP prod
+      # Ce gardien verrouille la condition d'acceptation : la cible reste la VM de dev jetable, jamais une IP prod
       # (I3) ni en dur (I2). Sécurité-critique (blast-radius) → gaté à CHAQUE push. --self-check = live.
       - id: jarvis-code-exec-confinement-guard
-        name: jarvis-code-exec-confinement-guard (exec root confiné à la VM dev jetable srv-dev-1)
+        name: jarvis-code-exec-confinement-guard (exec root confiné à la VM de dev jetable)
         entry: python ../DEV/TOOLS/jarvis-code-exec-confinement-guard/jarvis-code-exec-confinement-guard.py
         language: system
         pass_filenames: false
@@ -313,7 +313,7 @@ repos:
       # rendait 24/25 : sur les 25 dépôts PUBLICS du workspace (surface dérivée de `git remote`),
       # JARVIS était le SEUL dont un `git push` partait SANS barrière de publication. Motif : il a
       # déjà ce pre-push riche, qu'on n'écrase PAS — et le câbler DEPUIS `DEV/` était BLOQUÉ, à
-      # raison, par le gardien actif de Marc (R4-dev-coupling) : un gate PRODUIT versionné qui
+      # raison, par le gardien actif du projet (R4-dev-coupling) : un gate PRODUIT versionné qui
       # référence l'atelier viole la Règle Zéro. Le contournement (`|| true`, exception) aurait été
       # un BLANCHIMENT (§8) : on éteignait l'alarme, pas le feu.
       #
