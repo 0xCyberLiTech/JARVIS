@@ -48,7 +48,7 @@
   ],
 
   "browser_voice": {
-    "_README": "VOIX DU NAVIGATEUR (speechSynthesis) — 2e canal d'émission réelle, AJOUTÉ le 2026-07-22 (lot P1-bis). ZÉRO RÉSEAU : aucun proxy ne peut l'intercepter. C'est le canal que MARC A IDENTIFIÉ À L'OREILLE (« ce n'est pas la voix d'Antoine, on dirait la voix du navigateur », puis « ça disait chat chat »). Chemin MESURÉ : templates/mobile/index.html (bouton nav « Chat ») -> mobile.js:913 écouteur délégué -> _say -> _sayVoice -> speechSynthesis.speak ; et static/js/audio_viz.js:683/703 (annonces de repli voix serveur). AUCUNE trace dans tts.log : ce fichier ne peut pas servir de preuve pour ce canal.",
+    "_README": "VOIX DU NAVIGATEUR (speechSynthesis) — 2e canal d'émission réelle, AJOUTÉ le 2026-07-22 (lot P1-bis). ZÉRO RÉSEAU : aucun proxy ne peut l'intercepter. C'est le canal que IDENTIFIÉ À L'OREILLE (« ce n'est pas la voix d'Antoine, on dirait la voix du navigateur », puis « ça disait chat chat »). Chemin MESURÉ : templates/mobile/index.html (bouton nav « Chat ») -> mobile.js:913 écouteur délégué -> _say -> _sayVoice -> speechSynthesis.speak ; et static/js/audio_viz.js:683/703 (annonces de repli voix serveur). AUCUNE trace dans tts.log : ce fichier ne peut pas servir de preuve pour ce canal.",
 
     "_mesure_avant": "SONDE sur le chemin RÉEL (2 clics de nav sur /m, espion sans relais) : {api:true, n:2, said:['Chat','Actions']}. Le produit DEMANDE bien la parole au navigateur à chaque tap.",
 

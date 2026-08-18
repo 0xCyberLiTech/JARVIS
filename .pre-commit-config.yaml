@@ -309,7 +309,7 @@ repos:
         stages: [pre-push]
 
       # ── BARRIÈRE DE PUBLICATION (stage pre-push) — « rien ne part en public sans preuve » ──
-      # Ajout 2026-08-01, sur DÉCISION DE MARC, APRÈS MESURE. `vitrine-push-hook --status`
+      # Ajout 2026-08-01, sur DÉCISION DU PROPRIÉTAIRE, APRÈS MESURE. `vitrine-push-hook --status`
       # rendait 24/25 : sur les 25 dépôts PUBLICS du workspace (surface dérivée de `git remote`),
       # JARVIS était le SEUL dont un `git push` partait SANS barrière de publication. Motif : il a
       # déjà ce pre-push riche, qu'on n'écrase PAS — et le câbler DEPUIS `DEV/` était BLOQUÉ, à
