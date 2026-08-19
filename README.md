@@ -233,10 +233,7 @@ Le **centre de défense** de JARVIS. Courbe d'**activité sur 30 jours** (pics o
 
 <h3 align="center">8 · Infogérance — le parc en direct</h3>
 
-<div align="center">
-  <img src="Images/infogerance.webp" alt="Onglet Infogérance de JARVIS — quatre compteurs de parc puis une carte par hôte (VMs, hyperviseur, routeur) avec leurs boutons d'action" width="920"/>
-  <br/><sub><em>Le <b>parc entier sur un seul écran</b> : quatre compteurs <b>comptés en direct</b> (hôtes suivis · en ligne · MAJ en attente · redémarrages requis), puis <b>une carte par hôte</b> — toutes au <b>même gabarit</b> (ÉTAT · CPU · RAM · DISQUE · MAJ · REBOOT), pour qu'une ligne manquante se <em>voie</em>. Chaque carte <b>date sa sonde</b> (« Sondé il y a … », et <b>« ⚠ SONDE PÉRIMÉE »</b> au-delà de 10 min) et lève une pastille <b>« ⚠ À L'ATTENTION »</b> <b>en toutes lettres</b>, jamais un simple code couleur. <b>IP WAN et version de firmware caviardées</b> par un aplat opaque appliqué <em>avant</em> la capture.</em></sub>
-</div>
+Le **parc entier sur un seul écran** : quatre compteurs **comptés en direct** (hôtes suivis · en ligne · MAJ en attente · redémarrages requis), puis **une carte par hôte** — toutes au **même gabarit** (ÉTAT · CPU · RAM · DISQUE · MAJ · REBOOT), pour qu'une ligne manquante se *voie*. Chaque carte **date sa sonde** (« Sondé il y a … », et **« ⚠ SONDE PÉRIMÉE »** au-delà de 10 min) et lève une pastille **« ⚠ À L'ATTENTION »** **en toutes lettres**, jamais un simple code couleur.
 
 **JARVIS observe, il n'agit pas.** JARVIS ne déclenche pas la mise à jour complète d'une VM : elle se lance **hors de JARVIS**, dans une console. Le bandeau le **dit en toutes lettres** et renvoie au bouton **« Copier cmd MAJ »** — qui reste le **seul** endroit où la commande existe, pour qu'un chemin ne puisse pas dériver entre deux textes. JARVIS, lui, en affiche l'**état** puis le **journal**. Une valeur qu'il ne sait pas vérifier — index de paquets périmé, sonde en échec — est **dite** (« ⚠ Non vérifiable », avec sa raison) et **jamais** repeinte en « ✓ à jour » : un total n'additionne que ce qui est connu, et compte à part ce qui ne l'est pas.
 
@@ -262,13 +259,9 @@ En bas de l'onglet, quatre **raccourcis de diagnostic** (vérifier la routine po
 
 <h2 align="center">⌨️ Terminal SSH intégré (mode Code)</h2>
 
-<div align="center">
-  <img src="Images/terminal.webp" alt="Terminal SSH JARVIS — PTY xterm-256color, raccourcis, HUD ressources, chat inline" width="920"/>
-</div>
-
 Un **vrai terminal SSH interactif** (PTY `xterm-256color`) intégré à JARVIS — pour piloter le serveur de dev **sans quitter l'interface**. À gauche, des **raccourcis en un clic** (SYS : `ls`, `df`, `uptime`, `ports`, `ps`, `top`… · DEV : `git`, `python3`, `find`, `syslog`…). En bas, un **HUD ressources en direct** (load · RAM · disque · réseau · uptime) et une barre **« Demandez à JARVIS depuis le terminal »** : l'agent lit la sortie et propose la commande suivante. Sortie **couleur** complète, redimensionnement à chaud.
 
-> 🔒 **Gouverné** : le PTY est **loopback-only** — bind `127.0.0.1` + contrôle d'origine WebSocket + anti-DNS-rebinding, jamais exposé hors la machine. L'IP réelle est masquée sur cette capture (`192.168.x.x`).
+> 🔒 **Gouverné** : le PTY est **loopback-only** — bind `127.0.0.1` + contrôle d'origine WebSocket + anti-DNS-rebinding, jamais exposé hors la machine.
 
 ---
 
