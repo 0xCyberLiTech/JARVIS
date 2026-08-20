@@ -385,6 +385,45 @@ repos:
         verbose: true
         stages: [pre-push]
 
+      # ── LE CONTENU DES IMAGES QUI PARTENT (stage pre-push) — « ce qui est PEINT est REGARDÉ » ──
+      # Ajout 2026-08-20, APRÈS MESURE. Les deux barrières ci-dessus ne regardent que du TEXTE :
+      # `_read_text()` du gardien de publication rend `None` sur toute extension d'image et le scan
+      # fait `continue` — AUCUNE image n'atteignait AUCUN détecteur, PAR CONSTRUCTION. Le 2026-08-19,
+      # DEUX captures exposant l'infrastructure ont dû être RETIRÉES d'une vitrine pendant que ces
+      # barrières étaient VERTES. Le gardien de POIDS, lui, ne pèse que les octets (l'image fautive
+      # tenait sous son plafond).
+      #
+      # ⛔ CE QUE CE HOOK FERME, ET C'ÉTAIT LE DERNIER TROU DE LA CLASSE : le shim `vitrine-push-hook`
+      # couvrait les 24 AUTRES vitrines ; JARVIS, dont le gate est VERSIONNÉ, ne pouvait PAS être
+      # câblé tant que l'organe vivait dans `DEV/` — `R4-dev-coupling` refuse, à raison, qu'un gate
+      # PRODUIT référence l'atelier. Or c'est PRÉCISÉMENT dans ce dépôt qu'un blob image de fuite est
+      # armé : un blob d'un commit ANCÊTRE non publié, que ni `git diff` ni `git ls-tree HEAD` ne
+      # montrent, et qui PART QUAND MÊME. Le contournement (`|| true`) aurait été un BLANCHIMENT (§8).
+      #
+      # ⛔ RÈGLE ZÉRO (§0) : l'organe a DÉMÉNAGÉ dans le produit
+      # (`scripts/hermes/vitrine-image-content-guard/`), copie UNIQUE — `DEV/` ne le garde PAS —, et
+      # SON PONT OCR (`ocr-bridge.ps1`) a voyagé AVEC LUI, dans le même dossier. Sans le pont, un
+      # JARVIS restauré seul aurait le gardien SANS ses yeux, et le canari rendrait `exit 2` à chaque
+      # push. Ce câblage ne pointe donc QUE dans JARVIS — même motif que `jarvis-public-doc-guard`,
+      # `jarvis-doc-path-guard` et `jarvis-visual-gate`.
+      #
+      # `--depot .` BORNE la surface au dépôt réellement poussé : sans lui, un blob dormant dans une
+      # AUTRE vitrine bloquerait CE push en AFFIRMANT qu'une image « partirait » — un FAUX NO-GO
+      # (§8.8), et c'est ainsi qu'on fabrique le réflexe `--no-verify`.
+      # Le `--self-check` passe D'ABORD (anti-complaisance V1 : un détecteur neutralisé rendrait un
+      # vert mensonger), le RUN LIVE ensuite.
+      # `verbose: true` (a11y §5) : pre-commit MASQUE la sortie d'un hook qui réussit — le
+      # propriétaire doit ENTENDRE combien d'images ont été rastérisées, et que le CANARI était VIVANT.
+      # ⛔ `--no-verify` n'est PAS le chemin : faire taire cette barrière est un BLANCHIMENT (§8).
+      - id: vitrine-image-content-guard
+        name: contenu des images qui partent (rien de sensible ne part PEINT dans une capture)
+        entry: bash -c 'python scripts/hermes/vitrine-image-content-guard/vitrine-image-content-guard.py --self-check --quiet && python scripts/hermes/vitrine-image-content-guard/vitrine-image-content-guard.py --depot .'
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+        stages: [pre-push]
+
       # ── RÈGLE ZÉRO — la frontière du produit (2026-07-14) ──
       # Aucun fichier de JARVIS/scripts/** ne dépend d'un outil de l'ATELIER (DEV/) ni d'un dossier
       # frère non déclaré, sur un chemin ATTEIGNABLE À L'EXÉCUTION. C'est l'invariant qui garantit
