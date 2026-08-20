@@ -95,7 +95,14 @@ repos:
       # vert sur un gate vacant (une sonde qui ne trouve plus sa cible doit CRIER, pas se taire).
       # `verbose: true` (a11y §5) : pre-commit masque la sortie d'un hook qui réussit — sans
       # ce drapeau, l'opérateur ne verrait NI quelles suites ont tourné, NI si l'une a
-      # silencieusement disparu de la liste dérivée. Coût mesuré : ~11 s.
+      # silencieusement disparu de la liste dérivée.
+      # COÛT — MESURÉ LE 2026-08-19, 3 passes (38,6 / 38,6 / 38,3 s) : ~38 s pour les suites
+      # DÉRIVÉES ce jour-là. ⚠ Ce n'est PAS un contrat, c'est une PHOTO : le coût SUIT la liste
+      # dérivée, donc il monte tout seul dès qu'un organe gagne une suite. Ce commentaire a
+      # d'ailleurs DÉJÀ menti — il annonçait « ~11 s », valeur du jour de sa création, laissée
+      # derrière par les suites ajoutées depuis (dont celle de `jarvis-public-doc-guard`, posée
+      # le 2026-08-19). ⛔ LE REMESURER, JAMAIS LE RECOPIER (doctrine §3, COMPTÉ LIVE) : relancer
+      # l'`entry` de ce hook, ci-dessous, et lire le temps réel.
       - id: hermes-suites
         name: suites pytest des organes Hermès (les détecteurs du produit gardent leurs dents)
         entry: bash -c 'set -u; dirs=$(find scripts/hermes -name "test_*.py" -not -path "*/__pycache__/*" -exec dirname {} \; | sort -u); if [ -z "$dirs" ]; then echo "NO-GO -- aucune suite pytest trouvee sous scripts/hermes/ -- ce gate serait VACANT"; exit 1; fi; rc=0; for d in $dirs; do echo "--- suite Hermes >> $d"; ( cd "$d" && python -m pytest -q --no-header ) || rc=1; done; if [ $rc -ne 0 ]; then echo "NO-GO -- au moins un detecteur Hermes est ROUGE -- push refuse"; fi; exit $rc'
@@ -337,6 +344,41 @@ repos:
       - id: jarvis-public-doc-guard
         name: barrière de publication (ni IP interne ni identifiant nominatif ne part en vitrine)
         entry: bash -c 'python scripts/hermes/jarvis-public-doc-guard/jarvis-public-doc-guard.py --self-check -Quiet && python scripts/hermes/jarvis-public-doc-guard/jarvis-public-doc-guard.py'
+        language: system
+        pass_filenames: false
+        always_run: true
+        verbose: true
+        stages: [pre-push]
+
+      # ── VÉRITÉ DES CHEMINS PUBLIÉS (stage pre-push) — « un doc publié ne désigne que ce qui existe » ──
+      # Ajout 2026-08-19, APRÈS MESURE sur les `.md` TRACKÉS de ce dépôt. `DOCUMENTATION/03-ARCHITECTURE.md`
+      # annonçait CINQ modules SOC sous `blueprints/` alors qu'ils vivent à la RACINE de `scripts/`, et le
+      # README public portait un lien vers un document qui n'a JAMAIS existé (`git log --all` : 0 commit).
+      # AUCUN gardien ne voyait cette CLASSE : `doc-drift-lint` traque des TERMES périmés (terms.conf), pas
+      # des CHEMINS ; `jarvis-public-doc-guard` garde ce qui FUIT, pas ce qui MENT sur l'arborescence ;
+      # `scan-dead-refs` ne scanne que des .ps1. Le COÛT est déjà écrit dans `NOTES-PRODUCTEUR-EXTERNE.md` :
+      # « appliquée à la lettre, l'étape 1 échouait sur cinq modules ». Un chemin faux n'échoue JAMAIS chez
+      # celui qui l'écrit — il échoue chez le producteur externe qui suit la procédure.
+      #
+      # ⛔ RÈGLE ZÉRO (§0) : l'organe vit DANS le produit (`scripts/hermes/jarvis-doc-path-guard/`), copie
+      # UNIQUE, zéro dépendance vers `DEV/`. Ce câblage ne pointe donc QUE dans JARVIS — même motif que
+      # `jarvis-public-doc-guard`, `jarvis-visual-gate` et `jarvis-e2e-*`.
+      # §2 SURFACE DÉRIVÉE : la liste des documents vient de `git ls-files '*.md'`, jamais d'une liste
+      # écrite — un `.md` neuf entre dans la surface TOUT SEUL. L'existence des cibles se teste sur le
+      # DISQUE (jamais sur git : `scripts/` est gitignoré, §6 « la recherche aveugle au .gitignore »).
+      # §S FAIL-CLOSED : git KO / dépôt introuvable ⇒ REFUS (exit 2), jamais un GO par défaut ; surface
+      # vide ou extracteur mort ⇒ NO-GO ANTI-VACANT.
+      # ⛔ ZÉRO DENYLIST : le gardien ne contient AUCUN nom de fichier ni numéro de ligne. Une citation
+      # volontairement inexistante se déclare DANS LE DOCUMENT
+      # (`<!-- doc-path-guard: <chemin> -- <justification> -->`), et un marqueur devenu MORT rend NO-GO —
+      # c'est ce qui le distingue d'une exclusion cachée qui survit en silence à sa propre cause.
+      # `verbose: true` (a11y §5) : pre-commit MASQUE la sortie d'un hook qui réussit — le propriétaire
+      # doit ENTENDRE combien de documents et combien de désignations ont été scannés.
+      # Le `--self-check` passe D'ABORD (anti-complaisance V1 : un détecteur neutralisé rendrait un vert
+      # mensonger), le RUN LIVE ensuite.
+      - id: jarvis-doc-path-guard
+        name: vérité des chemins publiés (aucun document ne désigne un fichier inexistant)
+        entry: bash -c 'python scripts/hermes/jarvis-doc-path-guard/jarvis-doc-path-guard.py --self-check -Quiet && python scripts/hermes/jarvis-doc-path-guard/jarvis-doc-path-guard.py'
         language: system
         pass_filenames: false
         always_run: true

@@ -115,7 +115,7 @@
 | **Cœur Flask** | `jarvis.py` (orchestrateur), `mcp_supervisor.py`, `server_runners.py`, `command_security.py` |
 | **Bypass Hermès** | `bypass/morning_brief.py`, `bypass/learn.py`, `bypass/system_ctrl.py`, `bypass/backup.py`, `bypass/wrappers.py` |
 | **Chat / LLM** | `chat/orchestrator.py`, `chat/routing.py`, `chat/dispatcher.py`, `chat/soc_inject.py`, `chat/soc_context.py` |
-| **SOC & Cyberdéfense** | `blueprints/soc.py`, `blueprints/soc_ssh_collector.py`, `blueprints/soc_autoban_engine.py`, `blueprints/soc_monitor_engine.py`, `blueprints/soc_rsyslog_engine.py`, `blueprints/soc_report_voice.py` |
+| **SOC & Cyberdéfense** | `blueprints/soc.py`, `soc_ssh_collector.py`, `soc_autoban_engine.py`, `soc_monitor_engine.py`, `soc_rsyslog_engine.py`, `soc_report_voice.py` |
 | **Bootstrap Threads** | `bootstrap/threads.py`, `bootstrap/alarm_voice_channel.py`, `bootstrap/infra_monitors.py`, `bootstrap/models_prewarm.py`, `bootstrap/maintenance_engine.py` |
 | **Mémoire Conversationnelle** | `memory/routes.py`, `memory/memory_stats_service.py`, `memory/memory_health_service.py`, `memory/memory_self_heal_service.py`, `memory/store.py` |
 | **RAG & Vectoriel** | `rag/engine.py`, `rag/rag_storage.py`, `rag/rag_indexer.py`, `rag/rag_searcher.py`, `rag/rag_prompt_injector.py`, `rag/routes.py` |

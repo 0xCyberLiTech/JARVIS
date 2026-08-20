@@ -184,6 +184,8 @@ Un **agent** est fondamentalement différent : il **observe** son environnement 
 > Les briques marquées ✎ ont une section détaillée plus bas ; les autres, nées de l'usage,
 > sont opérationnelles et instrumentées mais pas (encore) déroulées en profondeur.
 
+<!-- doc-path-guard: DEV/TOOLS/audit-all.sh -- chemin de l'ATELIER (dépôt DEV, hors de cette vitrine). Il ne peut PAS résoudre ici, et la Règle Zéro interdit au produit d'aller le vérifier chez l'atelier. Citation VOLONTAIRE, pas une erreur. -->
+
 **Flux d'une requête** : `ENTRÉE` → **Hermès** → `LLM LOCAL` → `OUTILS` → `RÉPONSE`
 (`ENTRÉE` et `RÉPONSE` sont les E/S du flux, pas des briques).
 

@@ -87,6 +87,7 @@ C'est celle-ci qui a mordu. Sans le hash, le verdict périme au commit suivant, 
 
 ## 4. Quatre points de méthode, mesurés
 
+<!-- doc-path-guard: scripts/blueprints/soc_ssh_collector.py -- chemin FAUX cité VOLONTAIREMENT : c'est l'erreur que ce paragraphe RAPPORTE et corrige juste après. Le remplacer par le chemin réel détruirait la phrase. -->
 **a) La procédure de déploiement doit décrire le DISQUE, pas l'intention.**
 La section 5 du rapport indiquait `scripts/blueprints/soc_ssh_collector.py` et 4 autres. Ces
 fichiers sont à la **racine de `scripts/`**. Appliquée à la lettre, l'étape 1 échouait sur cinq
@@ -695,3 +696,222 @@ document **ne** prouve **pas** :
 **Rien de tout cela n'est un reproche envers qui que ce soit.** C'est la carte du terrain
 meuble — pour que tu ne marches pas dessus, et pour que le prochain rapport soit aussi solide
 que le code qu'il décrit.
+
+---
+
+# COMPTE RENDU DU 2026-08-19 — ce qui a bougé, et ce sur quoi NE PAS s'appuyer
+
+> **À lire en premier si tu reprends ce code après le 19 août 2026.**
+> Trois lots ont été produits ce jour-là. **Aucun n'a été validé.** Le détail est plus bas :
+> ils sont dans l'historique que tu reçois, mais leur qualité n'est **pas** garantie.
+
+## La méthode appliquée ce jour-là
+
+Chaque lot est passé par **deux agents indépendants** : un qui produit, un autre — qui n'a
+jamais vu le premier — mandaté pour **le mettre en défaut**. Le second n'a pas pour mission de
+confirmer : il a pour mission de casser. Les trois contrôles ont rendu **NO-GO**.
+
+C'est le résultat attendu, pas un échec : **rien de refusé n'est parti en ligne**.
+
+## Ce qui a été PUBLIÉ, et qui est SÛR
+
+**Deux captures d'écran ont été retirées de la vitrine publique.** Elles laissaient voir des
+noms de machines internes et un numéro de port d'administration — visibles depuis la mise en
+ligne, sans que personne ne le sache. Retrait vérifié au point de livraison : les deux fichiers
+répondent désormais « introuvable » sur le web.
+
+⚠ **Leurs octets restent dans l'historique public** et sont extractibles depuis un ancien état.
+Le propriétaire a refusé une réécriture d'historique en connaissance de cause. **C'est un fait
+connu, pas un oubli.**
+
+**Le détecteur anti-secret du transfert a été resserré et éprouvé.** Il refuse maintenant tout
+fichier au nom sensible, même rangé dans un dossier de tests. Six tentatives de le contourner
+ont été jouées : les six ont échoué.
+
+⚠ **Un défaut réel a été trouvé dans une version antérieure de ce détecteur** : une seconde
+barrière annoncée comme active était en réalité **sans effet**. Corrigé à la cause. Si tu lis
+un commentaire ou un message de commit antérieur qui la décrit comme opérante, **il ment**.
+
+## LES TROIS LOTS REFUSÉS — ne construis pas dessus sans les relire
+
+**1 · Les captures d'écran refaites.** Le masquage des données sensibles ne couvre **que le
+texte de la page**, pas les libellés d'aide des champs de saisie. Résultat : une image « nettoyée »
+contient encore un nom de machine interne. De plus, une vue **sans consigne de masquage** est
+capturée **en clair sans le moindre avertissement** — le comportement par défaut est ouvert là
+où il devrait être fermé.
+
+**2 · La correction des chemins de fichiers dans la documentation.** Six chemins faux ont été
+corrigés, mais **le même défaut subsiste dans le journal des modifications**, qui est public et
+annonce en plus la création de deux documents qui n'existent nulle part. Le garde-fou créé pour
+cette classe de défaut **ne voit pas** ce fichier-là.
+
+**3 · Le garde-fou lui-même.** Un de ses trois piliers **n'est protégé par aucun test** : on peut
+le neutraliser sans que rien ne rougisse. Et son échec au moment de la publication est **muet** —
+un refus sans un mot d'explication, ce qui est inacceptable ici (le propriétaire est malvoyant ;
+un échec silencieux n'existe pas pour lui).
+
+## CE QUI N'EST PAS PROUVÉ — dit franchement
+
+- Le contenu des fichiers de test n'est **pas** examiné par le détecteur anti-secret dans un
+  dépôt reconnu comme corpus de tests. C'est le prix assumé du relâchement, pas un oubli.
+- Les images publiées n'ont **pas** toutes été relues visuellement. Une partie n'est validée que
+  par des mesures indirectes.
+- Le masquage repose sur une **liste de motifs connus**, pas sur une autorisation explicite.
+  Une forme non prévue passe.
+
+## Ce que tu peux faire, et ce que tu ne dois pas faire
+
+**Tu peux** : lire, analyser, proposer, corriger, expérimenter dans ton laboratoire.
+
+**Tu ne dois pas** : traiter les trois lots ci-dessus comme validés, ni rien renvoyer
+directement vers la production. Le retour passe par le contrôle **avant** toute fusion — c'est
+la ligne de conduite du projet, et elle n'a pas changé.
+
+
+---
+
+# MANDAT DE TRAVAIL — ce que tu peux prendre, comment, et ce que j'attends en retour
+
+> Émis le 2026-08-19 par le contrôle. **Six chantiers**, du plus utile au moins urgent.
+> Prends-les **dans l'ordre**. Chacun est borné, mesurable, et sans risque pour la production.
+
+## AVANT DE COMMENCER — les trois bornes
+
+1. **INTERDIT D'ÉCRIRE EN PRODUCTION.** Le laboratoire est ton terrain, rien d'autre.
+2. **Aucune fusion vers la production.** Ton travail revient au contrôle, qui le mesure avant
+   que le propriétaire ne tranche. C'est la ligne de conduite du projet.
+3. **NE TOUCHE PAS À LA VOIX.** Ni la synthèse, ni la reconnaissance, ni l'interruption de
+   parole, ni les alertes vocales. Une régression vocale ne se prouve **ni par un test vert, ni
+   par une lecture de code** — seul le propriétaire peut l'entendre. C'est sa règle, elle est bonne.
+
+## LA MÉTHODE — non négociable, c'est ce qui rend ton travail utilisable
+
+Elle tient en une phrase : **un correctif n'existe pas tant qu'on n'a pas prouvé qu'il ferme
+quelque chose.**
+
+- **Mesure avant de conclure.** Une cause n'est pas une hypothèse crédible : c'est une mesure.
+  Si tu ne l'as pas mesurée, écris « je ne sais pas encore » et va la chercher.
+- **Prouve en cassant.** Retire ta correction : le test doit **rougir**. S'il reste vert, tu
+  n'as rien prouvé — tu as écrit du code qui ne garde rien.
+- **Lis les codes de sortie réels**, jamais derrière un `| tail` ou un `| head` : ça masque le
+  code de retour, la faute a déjà été commise ici.
+- **Un garde-fou dans le même lot que la correction.** Sinon la classe revient au prochain lot.
+- **Un verdict qui refuse doit DIRE pourquoi, en toutes lettres.** Le propriétaire est
+  malvoyant : un refus silencieux n'existe pas pour lui.
+- **Zéro contournement.** Si un contrôle te bloque, tu le lis — tu ne le désactives pas. Faire
+  passer un contrôle sans supprimer la cause est le pire résultat possible : ça éteint l'alarme,
+  pas le feu.
+- **Petit et souvent.** Un chantier par lot, prouvé, puis le suivant. Cinq lots arrivés d'un
+  bloc ont coûté six cycles de contrôle le 18 août.
+
+---
+
+## 1 · LE MASQUAGE DES CAPTURES NE COUVRE PAS TOUT — *le plus utile, commence par là*
+
+**Le défaut, mesuré :** l'outil qui masque les données sensibles avant une capture d'écran ne
+parcourt que le **texte visible** de la page. Les libellés d'aide des champs de saisie
+(attribut `placeholder`) ne sont **ni masqués, ni vus par les deux vérifications**. Résultat
+concret : une image déclarée « propre » contient encore un nom de serveur interne, en clair.
+
+**Deuxième défaut, même famille :** une vue **sans consigne de masquage** est photographiée
+**en clair, sans le moindre avertissement**. Le comportement par défaut est ouvert là où il
+devrait être fermé.
+
+**Ce que j'attends :** le masquage couvre les **porteurs** de texte, pas seulement le texte —
+et la vérification lit **la même surface** que ce qu'elle masque. Une vue sans consigne doit
+être **REFUSÉE**, jamais capturée. Prouve les deux en cassant.
+
+## 2 · LES TROIS DÉFAUTS LATENTS QUI TRAÎNENT
+
+Trois faiblesses connues, mesurées, jamais fermées. Le patron de correction **existe déjà** dans
+le projet — il a été appliqué ailleurs avec succès. Cherche-le avant d'inventer.
+
+- une chaîne d'appels traverse une barrière sans être vue par elle ;
+- une fenêtre horaire peut faire taire une alerte, y compris une alerte qui doit passer ;
+- un contrôle repose sur une liste de formes interdites au lieu d'une liste de formes autorisées
+  — chaque forme nouvelle rouvre le trou.
+
+⚠ Le second touche des alertes. **Tu corriges la mécanique, tu ne touches pas à la voix.**
+
+## 3 · LE JOURNAL DES MODIFICATIONS PUBLIC EST FAUX
+
+`CHANGELOG.md` est publié. Il annonce cinq modules dans un dossier où ils ne sont pas, et
+**la création de deux documents qui n'existent nulle part**.
+
+**Deux choses, pas une :** corrige le texte, **et** explique pourquoi le garde-fou censé
+attraper cette classe ne voit pas ce fichier. Le corriger sans fermer la cause ne sert à rien.
+
+## 4 · UN GARDE-FOU DONT UN PILIER N'EST PROTÉGÉ PAR RIEN
+
+Le contrôle qui vérifie les chemins cités dans la documentation repose sur trois mécanismes.
+**On peut en neutraliser un sans qu'aucun test ne rougisse.** Son auto-vérification affirme le
+contraire — l'assertion censée le protéger est vraie dans les deux cas.
+
+**Ce que j'attends :** une épreuve qui **échoue réellement** quand ce mécanisme est neutralisé,
+et le libellé menteur corrigé. Deux autres formes de contournement sont connues et non déclarées :
+trouve-les, ferme-les ou écris-les.
+
+## 5 · UN REFUS DE PUBLICATION QUI NE DIT RIEN
+
+Au moment de publier, deux contrôles tournent en mode silencieux. Quand ils **refusent**, ils
+refusent **sans écrire un mot** : zéro octet en sortie. C'est le signal le plus important du
+dispositif, et c'est celui qu'on n'entend pas.
+
+Correction simple — mais **vérifie les deux endroits**, la même faute existe en double.
+
+## 6 · UN OUTIL EN DOUBLE EXEMPLAIRE
+
+Un même contrôle existe en **deux copies** à deux endroits du projet. Deux copies dérivent
+toujours : l'une est corrigée, l'autre pas, et personne ne sait laquelle fait foi.
+
+**Mesure d'abord** : sont-elles identiques ? Laquelle est appelée ? Puis **propose** — ne
+tranche pas seul, c'est une décision d'architecture qui revient au propriétaire.
+
+---
+
+# CE QUE J'ATTENDS EN RETOUR — le format, et il n'est pas négociable
+
+Écris un fichier `RETOUR-LABORATOIRE.md` à la racine, et **structure-le comme ceci**. Ce n'est
+pas de la bureaucratie : c'est ce qui me permet de te contrôler sans tout refaire.
+
+**Pour CHAQUE chantier pris :**
+
+**1. LE DÉFAUT** — ce qu'il est, et **comment tu l'as mesuré**. Pas « il semble que » : la
+commande, le résultat.
+
+**2. LA CAUSE** — la vraie, mesurée. Si tu ne l'as pas trouvée, **dis-le** : « cause non
+établie » vaut infiniment mieux qu'une explication plausible et fausse. Une histoire cohérente
+n'est pas une preuve.
+
+**3. LE CORRECTIF** — ce que tu as changé, et **pourquoi cette approche plutôt qu'une autre**.
+
+**4. LA PREUVE PAR LA RUPTURE** — retire ta correction : qu'est-ce qui rougit ? Donne les
+**codes de sortie réels**. Sans cette section, je considère le chantier **non validé**, quelle
+que soit sa qualité apparente.
+
+**5. CE QUI N'EST PAS PROUVÉ** — tes angles morts, franchement. Ce que tu n'as pas pu tester,
+les formes que ton correctif ne couvre pas, les doutes qui restent. **Cette section a autant de
+valeur que les quatre autres.** Un rapport qui prétend tout couvrir est suspect ; un rapport qui
+nomme ses trous est utilisable.
+
+**6. CE QUE TU AS TROUVÉ EN CHEMIN** — les défauts hors de ton mandat. **Ne les corrige pas**,
+mais **nomme-les avec leur preuve**. Les taire est une faute ; les corriger sans mandat en est
+une autre.
+
+**Et pour finir, deux lignes :**
+
+- **CE QUE TU N'AS PAS PRIS**, et pourquoi.
+- **CE QUE TU RECOMMANDES ENSUITE**, si tu vois quelque chose que je ne vois pas.
+
+---
+
+## Un mot pour finir
+
+Tu as le droit de **me contredire**. Si une prémisse de ce mandat est fausse, prouve-le et
+dis-le — un producteur qui l'a fait aujourd'hui m'a évité d'introduire trois fautes dans un
+document public. **Contredire avec une preuve n'est pas de l'insubordination : c'est le travail.**
+
+Ce que je ne veux pas, c'est un rapport qui dit « c'est fait, ça marche ». Ce que je veux, c'est
+un rapport dont je peux **rejouer chaque ligne**.
+
+Bon travail.

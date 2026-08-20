@@ -11,7 +11,7 @@ Refactoring architectural complet : découplage en 9 circuits logiques modulaire
 ### Architecture & Modularisation
 - **Découpage Multi-Circuits (-66.8% de charge orchestrateurs)** :
   - **Cœur & Serveurs (`scripts/`)** : Extraction de `mcp_supervisor.py`, `server_runners.py`, `prompt_manager.py`, `command_security.py`, `dsp_config.py`.
-  - **SOC & Cyberdéfense (`scripts/blueprints/`)** : Modularisation en `soc_ssh_collector.py`, `soc_autoban_engine.py`, `soc_monitor_engine.py`, `soc_rsyslog_engine.py`, `soc_report_voice.py`.
+  - **SOC & Cyberdéfense (`scripts/`)** : Modularisation en `soc_ssh_collector.py`, `soc_autoban_engine.py`, `soc_monitor_engine.py`, `soc_rsyslog_engine.py`, `soc_report_voice.py` (et `scripts/blueprints/soc.py`).
   - **Bootstrap Workers (`scripts/bootstrap/`)** : Modularisation en `alarm_voice_channel.py`, `infra_monitors.py`, `models_prewarm.py`, `maintenance_engine.py`.
   - **Mémoire Conversationnelle (`scripts/memory/`)** : Extraction de `memory_stats_service.py`, `memory_health_service.py`, `memory_self_heal_service.py`.
   - **Moteur RAG Hybride (`scripts/rag/`)** : Séparation en `rag_storage.py`, `rag_indexer.py`, `rag_searcher.py`, `rag_prompt_injector.py`.
@@ -25,7 +25,7 @@ Refactoring architectural complet : découplage en 9 circuits logiques modulaire
 - **Sécurisation Cache Vocal** : Gestion stricte des headers `X-TTS-Engine` et exclusion du cache lors des fallbacks pour garantir la fidélité de la voix sélectionnée dans `voice/routes.py`.
 - **Nettoyage & Archivage** : Rangement de tous les logs tournants et backups anciens dans `scripts/logs/`.
 - **Validation Globale** : 374/374 tests unitaires validés au vert et zéro dette linter (`ruff check` : 0 erreur).
-- **Cartographie & Handover** : Création de `CARTOGRAPHIE_CIRCUITS_LOGIQUES.md` et mise à jour du dossier de passation `COMPTE_RENDU_REFACTORING.md`.
+- **Cartographie & Handover** : Cartographie des circuits logiques et mise à jour du dossier de passation — documents de travail **internes**, non publiés dans cette vitrine.
 
 ## [Non publié] — 2026-08-11
 

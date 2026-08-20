@@ -874,7 +874,6 @@ quelqu'un dont la voix est le seul canal de vérification.
 <tr><td>04</td><td><a href="DOCUMENTATION/04-AUDIO-DSP.md">Audio&nbsp;DSP</a></td><td>Broadcast · TTS · STT · DSP</td></tr>
 <tr><td>06</td><td><a href="DOCUMENTATION/06-MCP-SERVER.md">MCP&nbsp;Server</a></td><td>Outils exposés · conception</td></tr>
 <tr><td>07</td><td><a href="DOCUMENTATION/07-ANATOMIE.md">Anatomie</a></td><td>Circuits · déterminisme · garde-fous</td></tr>
-<tr><td>🗺️</td><td><a href="CARTOGRAPHIE_CIRCUITS_LOGIQUES.md">Cartographie</a></td><td>Architecture modulaire multi-circuits</td></tr>
 </table>
 
 </div>
