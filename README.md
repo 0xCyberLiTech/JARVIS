@@ -46,7 +46,15 @@
 > [!IMPORTANT]
 > **Vitrine Technologique : Architecture & Démonstration d'Ingénierie**  
 > Ce dépôt présente le système d'intelligence artificielle locale **JARVIS** conçu par Marc (0xCyberLiTech). Il expose la doctrine d'ingénierie cognitive, les schémas d'intégration et les interfaces opérationnelles.  
-> 🔒 **Propriété Intellectuelle & Sécurité Opérationnelle** : Les modèles pré-entraînés personnalisés, la base vectorielle interne, les clés privées et les automatisations d'infogérance matérielle restent **strictement confinés** au sein de l'Atelier souverain 0xCyberLiTech.
+> 🔒 **Propriété Intellectuelle & Sécurité Opérationnelle** : Les modèles personnalisés, la base vectorielle interne, les clés privées et les automatisations d'infogérance matérielle restent **strictement confinés** au sein de l'Atelier souverain 0xCyberLiTech.
+
+> [!NOTE]
+> ### 🔄 La Grande Mutation des 2 Derniers Mois : Du Banc d'Essais Audio à l'IA Agentique Pure
+> À l'origine de son développement, JARVIS accumulait une multitude d'outils et de modules expérimentaux axés sur le traitement du signal sonore et les studios DSP audio. Cette surcharge fonctionnelle créait une dispersion technique inutile avec beaucoup trop de fonctionnalités hétéroclites.
+> 
+> **Le tournant stratégique majeur opéré ces deux derniers mois par l'Atelier 0xCyberLiTech :**
+> - ❌ **Élimination de la dispersion sonore** : Purge intégrale de la suite DSP audio, des égaliseurs et des expérimentations sonores périphériques.
+> - 🎯 **Concentration exclusive sur l'IA Souveraine** : Recentrage à 100 % sur **JARVIS IA** — l'Agent Cognitif Souverain, la mémoire persistante Hermès, le Fast-Path déterministe (< 200 ms), la matrice topologique 3D (The Grid), l'infogérance active de l'infrastructure Proxmox, et la station de diagnostic aéronautique BITE MK-IX.
 
 ---
 
@@ -70,268 +78,136 @@
 
 ---
 
-## 🗺️ Sommaire Pédagogique
+## 🧭 Le Grand Dossier d'Ingénierie · Les 6 Sous-Systèmes
 
-- 🎯 [1. Manifeste & Recentrement Stratégique : De l'Expérimentation Audio à l'IA Agentique Pure](#section-1)
-- 🧠 [2. L'Agent Cognitif vs Simple Chatbot : La Pile Hermès & Mémoire Persistante](#section-2)
-- ⚡ [3. Le Déterminisme Absolu & le Fast-Path Machine (< 200 ms)](#section-3)
-- 🌐 [4. La Matrice 3D The Grid & le Blason Cyber (Silicon Metropolis)](#section-4)
-- 🤖 [5. La Dualité des Modèles LLM & les Modes d'Inférence Spécialisés](#section-5)
-- 🖥️ [6. L'Infogérance Active : Surveillance Proxmox VE, Flotte de VMs & Réseaux](#section-6)
-- 🚀 [7. Le Monitoring Matériel & Inférence GPU RTX 5080](#section-7)
-- 📱 [8. L'Accessibilité Mobile Nomade via Tunnel Sécurisé WireGuard](#section-8)
-- 🎙️ [9. La Voix Souveraine Antoine HD & la Passerelle Native Windows MCI](#section-9)
-- 🧪 [10. L'Armure Qualité : BITE Diag, Tests Unitaires & Gardiens Déterministes](#section-10)
-- 📐 [11. Dette Technique Zéro : La Règle d'Or du Plafond des 400 Lignes](#section-11)
-- 🔄 [12. Résilience & Sauvegardes DR des Coffres](#section-12)
-
----
-
-<a id="section-1"></a>
-## 1. 🎯 Manifeste & Recentrement Stratégique : De l'Expérimentation Audio à l'IA Agentique Pure
-
-À l'origine de son développement, JARVIS embarquait une suite expérimentale complexe dédiée au traitement du signal sonore (studios DSP, égaliseurs graphiques, compresseurs multibandes, filtres vocaux). Bien qu'instructive, cette surcharge fonctionnelle dispersait l'attention et introduisait une dette technique importante.
-
-**Au cours des deux derniers mois, une refonte stratégique majeure a été opérée par Marc et Antigravity : épurer radicalement le laboratoire audio pour recentrer 100 % de la puissance de JARVIS sur ce qui constitue son véritable cœur de métier.**
-
-Aujourd'hui, JARVIS n'est pas un lecteur multimédia ni un simple chatbot conversationnel passif. **C'est un agent autonome d'intelligence artificielle locale**, conçu pour ausculter en temps réel une infrastructure critique, assister l'opérateur dans la prise de décision cyber et administrer un environnement homelab complexe avec une rigueur absolue.
-
-| Axe d'Évaluation | Chatbot Générique Ordinaire | Agent Souverain JARVIS |
-|:-----------------|:----------------------------|:-----------------------|
-| **Mémoire Conversationnelle** | Éphémère, réinitialisée à chaque session | **Persistante (Pile Hermès)** : capitalisation continue des faits et retours |
-| **Exécution & Faits** | Hallucinations fréquentes, estimations vagues | **Fast-Path Déterministe** : 0 LLM sur les états matériels et chiffrés |
-| **Périmètre Opérationnel** | Confiné dans une boîte de texte isolée | **Infogérance vivante** : lecture continue de Proxmox VE, VMs et pare-feux |
-| **Souveraineté des Données** | Dépendance totale aux APIs cloud distantes | **100 % Local & Déconnectable** : accéléré sur GPU physique dédié |
-| **Accessibilité Opérateur** | Interface web bureautique unique | **Bi-frontière** : Cockpit Extreme HUD grand écran et interface mobile VPN |
-
----
-
-<a id="section-2"></a>
-## 2. 🧠 L'Agent Cognitif vs Simple Chatbot : La Pile Hermès & Mémoire Persistante
-
-Ce qui sépare fondamentalement JARVIS d'un modèle de langage standard, c'est son architecture cognitive articulée autour de la **Pile Hermès** :
-
-```
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                                 LA PILE COGNITIVE HERMÈS                                │
-├─────────────────────────────────────────────────────────────────────────────────────────┤
-│                                                                                         │
-│   [ Requête Opérateur (Texte / Voix / Mobile) ]                                         │
-│                          │                                                              │
-│                          ▼                                                              │
-│   ┌─────────────────────────────────────────────────────────────────────────────────┐   │
-│   │ 1. ROUTEUR D'ARBITRAGE FAST-PATH (< 200 ms)                                     │   │
-│   │ • Détection des mots-clés d'état (santé, disques, VM, SOC, température, réseau) │   │
-│   │ • Si factuel ➔ Résolution machine déterministe immédiate (BYPASS TOTAL DU LLM)   │   │
-│   │ • Si analyse complexe ➔ Aiguillage vers le pipeline cognitif approfondi         │   │
-│   └──────────────────────┬──────────────────────────────────────────────────────────┘   │
-│                          │ Demande d'analyse cognitive                                  │
-│                          ▼                                                              │
-│   ┌─────────────────────────────────────────────────────────────────────────────────┐   │
-│   │ 2. MOTEUR RAG VECTORIEL & MÉMOIRE ÉPISODIQUE                                     │   │
-│   │ • Embeddings locaux haute densité (qwen3-embedding:4b)                          │   │
-│   │ • Base de connaissances active : historique d'incidents, règles, topologie       │   │
-│   │ • Injection contextuelle chirurgicale dans le prompt système                    │   │
-│   └──────────────────────┬──────────────────────────────────────────────────────────┘   │
-│                          │ Contexte enrichi                                             │
-│                          ▼                                                              │
-│   ┌─────────────────────────────────────────────────────────────────────────────────┐   │
-│   │ 3. RÉACTEUR D'INFÉRENCE GPU (MISTRAL-NEMO 12B)                                  │   │
-│   │ • Modèle quantifié local hébergé sous Ollama avec 16 Go VRAM GDDR7              │   │
-│   │ • Restitution structurée, concise et directement orientée action                │   │
-│   └─────────────────────────────────────────────────────────────────────────────────┘   │
-│                                                                                         │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
-```
-
-[![Apprentissage Hermès](assets/jarvis-hermes-apprentissage.png)](assets/jarvis-hermes-apprentissage.png)
-
-*Console d'apprentissage Hermès : monitoring du cœur d'activité cognitive, graphes de croissance vectorielle, distribution des connaissances et pulse RAG en direct.*
-
-### Les Capacités Maîtresses d'Hermès :
-* **Apprentissage Incrémental Continu :** Chaque directive, correction ou fait d'infrastructure validé par Marc est scellé dans la mémoire persistante d'Hermès. JARVIS ne perd jamais son contexte entre deux sessions.
-* **Audit Déterministe de Mémoire :** Un gardien dédié (`jarvis-knowledge-audit.py`) vérifie en continu l'absence de dérive, de contradiction ou de factual drift entre la mémoire stockée et la réalité machine.
-
----
-
-<a id="section-3"></a>
-## 3. ⚡ Le Déterminisme Absolu & le Fast-Path Machine (< 200 ms)
-
-Dans un centre de commandement, l'erreur ou l'approximation n'est pas tolérée. Si l'opérateur interroge JARVIS sur l'état de l'onduleur, la mémoire vive libre sur Proxmox ou le statut des sauvegardes nocturnes, **le modèle de langage a interdiction formelle d'intervenir**.
-
-* **Le Principe du Fast-Path Déterministe :**
-  Les requêtes portant sur des grandeurs physiques ou des états machine sont interceptées dès l'entrée par des parseurs déterministes. Le système interroge directement les APIs internes, les sockets Unix et les sondes matérielles, formulant une réponse certifiée en **moins de 200 millisecondes**.
-* **Zéro Hallucination Garantie :**
-  En séparant strictement les tâches de calcul factuel (code direct) et les tâches de raisonnement sémantique (LLM), JARVIS élimine à la racine 100 % des hallucinations propres aux intelligences génératives.
-
----
-
-<a id="section-4"></a>
-## 4. 🌐 La Matrice 3D The Grid & le Blason Cyber (Silicon Metropolis)
-
-Pour piloter l'architecture complexe du homelab d'un seul regard, JARVIS intègre **The Grid**, une matrice topologique tridimensionnelle développée en **Three.js pur** :
-
-[![Matrice 3D The Grid](assets/jarvis-synoptic-3d-grid.png)](assets/jarvis-synoptic-3d-grid.png)
-
-*The Grid (Silicon Metropolis) : modélisation spatiale 3D interactive de l'infrastructure homelab, Central Switch virtuel, 4 anneaux VLANs, nœud hyperviseur et Blason Cyber souverain.*
-
-### Les Composants de la Scène 3D :
-* **Le Central Switch & les 4 Anneaux VLANs :** Représentation volumétrique des flux réseau isolant le réseau de gestion, la zone DMZ publique, le segment de stockage sécurisé et le réseau d'inférence IA.
-* **Le Blason Protecteur Souverain :** Bouclier holographique central matérialisant l'état de défense active du homelab. Sa pulsation chromatique réagit instantanément aux alertes de sécurité et aux blocages de flux hostiles.
-* **Contrôles de Vol & Pupitres Flottants :** Navigation orbitale fluide à 60 FPS, gestion dynamique des éclairages de scène (spots de zone, contraste au sol) et cadrage automatique sur les équipements en alerte.
-
----
-
-<a id="section-5"></a>
-## 5. 🤖 La Dualité des Modèles LLM & les Modes d'Inférence Spécialisés
-
-Loin d'imposer un modèle unique et rigide pour l'ensemble des cas d'usage, JARVIS orchestre une flotte de modèles d'inférence spécialisés :
-
-* **Mode Raisonnement Approfondi (Mistral-Nemo 12B) :** Modèle d'élite quantifié, déployé sur le GPU local avec un contexte de travail étendu. Il dissèque les requêtes d'ingénierie, les plans de refactoring et les logs forensiques complexes.
-* **Mode Embeddings Haute Densité (Qwen3-Embedding 4B) :** Moteur vectoriel dédié au calcul de similarité cosinus et à l'indexation sémantique des documents de doctrine de l'Atelier.
-* **Les 6 Modes Opérationnels au Bouton :**
-  1. *Mode SOC :* Corrélation de menaces, analyse de signatures et support aux contre-mesures.
-  2. *Mode Infogérance :* Diagnostic d'équipements, santé système et aide à la remédiation.
-  3. *Mode Général :* Échanges interactifs, gestion des tâches et synthèse vocale.
-  4. *Mode Code :* Refactoring strict $\le 400$ lignes, revue de syntaxe et respect des linters.
-  5. *Mode Think :* Raisonnement pas-à-pas avec réflexion explicite (*chain-of-thought*).
-  6. *Mode Web :* Moissonnage documentaire sécurisé et veille technologique en circuit fermé.
-
----
-
-<a id="section-6"></a>
-## 6. 🖥️ L'Infogérance Active : Surveillance Proxmox VE, Flotte de VMs & Réseaux
-
-JARVIS agit comme un copilote d'exploitation vigilant pour l'ensemble du homelab de Marc :
-
-[![Parc Machines & Infogérance](assets/jarvis-parc-infogerance.png)](assets/jarvis-parc-infogerance.png)
-
-*Tableau de bord de l'Infogérance active : télémétrie Proxmox VE, santé des machines virtuelles et conteneurs, volumétrie ZFS et cartographie des ponts réseau.*
-
-* **Supervision Directe de l'Hyperviseur :** Auscultation continue des charges CPU, allocation RAM et état de santé du nœud bare-metal Proxmox VE.
-* **Flotte de VMs Confinées :** Suivi individualisé du Reverse Proxy Nginx, de la Sandbox de qualification, du conteneur d'inférence et des passerelles réseau.
-* **Sas des Alertes & Remédiation Découplée :** Si une anomalie ou un cron en échec est détecté, JARVIS centralise l'événement sans saturer l'opérateur, préparant le diagnostic pour les sessions d'infogérance active.
-
----
-
-<a id="section-7"></a>
-## 7. 🚀 Le Monitoring Matériel & Inférence GPU RTX 5080
-
-Pour garantir une disponibilité totale et prévenir toute surchauffe matérielle lors des sessions d'inférence lourdes, JARVIS intègre un module de monitoring matériel de précision :
-
-[![Monitoring GPU RTX 5080](assets/jarvis-monitoring-gpu.png)](assets/jarvis-monitoring-gpu.png)
-
-*Monitoring haute précision du réacteur matériel : consommation énergétique, thermie des cœurs Tensor, remplissage VRAM GDDR7 et oscilloscopes de charge en temps réel.*
-
-* **Surveillance VRAM Dédiée :** Mesure instantanée de l'empreinte mémoire des modèles chargés sous Ollama (éliminant tout risque de débordement vers la mémoire système lente).
-* **Oscilloscopes de Puissance & Fréquence :** Visualisation continue des variations de wattage et de température du GPU NVIDIA RTX 5080 (architecture Blackwell).
-
----
-
-<a id="section-8"></a>
-## 8. 📱 L'Accessibilité Mobile Nomade via Tunnel Sécurisé WireGuard
-
-Parce qu'un centre de commande doit rester joignable en toute circonstance, JARVIS propose une **interface mobile native et responsive**, utilisable en toute sécurité en déplacement :
+Pour préserver la clarté architecturale sans imposer une page monolithique interminable, la documentation de JARVIS est structurée en **6 dossiers techniques dédiés**, enrichis de captures haute fidélité en pleine hauteur :
 
 <div align="center">
 
-<img src="assets/jarvis-mobile-interface.png" alt="Interface Mobile JARVIS" width="380" style="border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5);"/>
-
-<br/><sub><em>Interface mobile JARVIS : ergonomie tactile Extreme HUD, consultation des alertes en direct et interaction vocale via VPN chiffré WireGuard.</em></sub>
+| Sous-Système | Objet Technique & Captures Dédiées | Documentation Complète |
+|:---:|:---|:---:|
+| <img src="https://img.icons8.com/color/48/000000/brain.png" width="36"/><br/>**01 · Hermès & RAG** | **Pile Cognitive & Cœur Arc Reactor**<br/>5 couches, Qwen3-Embedding, base ChromaDB 4469 chunks, Arc Reactor vivant. | [Consulter la Fiche 01 ➔](docs/01-PILE-HERMES-ET-RAG.md) |
+| <img src="https://img.icons8.com/color/48/000000/video-card.png" width="36"/><br/>**02 · GPU RTX 5080** | **Monitoring Matériel & Inférence Blackwell**<br/>VRAM GDDR7 16 Go, oscilloscopes live, puissance, thermie, mode hybride. | [Consulter la Fiche 02 ➔](docs/02-MONITORING-GPU-ET-SYSTEME.md) |
+| <img src="https://img.icons8.com/color/48/000000/network-cable.png" width="36"/><br/>**03 · The Grid 3D** | **Matrice Spatiale Three.js (Silicon Metropolis)**<br/>Switch central 3D, 4 VLANs volumétriques, Blason Cyber souverain. | [Consulter la Fiche 03 ➔](docs/03-THE-GRID-3D-SYNOPTIQUE.md) |
+| <img src="https://img.icons8.com/color/48/000000/server.png" width="36"/><br/>**04 · Infogérance PVE** | **Supervision Proxmox VE, VMs & Passerelles**<br/>Topologie réseau sécurisée, flux SDN, isolation des 4 VMs et CT 109. | [Consulter la Fiche 04 ➔](docs/04-INFOGERANCE-PARC-ET-VMS.md) |
+| <img src="https://img.icons8.com/color/48/000000/inspection.png" width="36"/><br/>**05 · Station BITE** | **Autodiagnostic Avionique MK-IX & Simulation**<br/>Pupitre 8 LRU, double bus MIL-STD-1553B, simulateur d'avaries & matrice DTC. | [Consulter la Fiche 05 ➔](docs/05-BITE-DIAGNOSTIC-STATION.md) |
+| <img src="https://img.icons8.com/color/48/000000/iphone.png" width="36"/><br/>**06 · Mobile & Voix** | **Accès Nomade WireGuard & Voix Native Windows MCI**<br/>Interface responsive PWA, passerelle vocale Antoine HD locale (< 100 ms). | [Consulter la Fiche 06 ➔](docs/06-MOBILE-ET-VOIX-SOUVERAINE.md) |
 
 </div>
 
-* **Connexion Chiffrée de Bout en Bout :** L'accès mobile s'effectue exclusivement au travers d'un tunnel VPN souverain (WireGuard / Tailscale privé), sans aucune exposition de port direct sur Internet.
-* **Ergonomie Pensée pour le Pouce :** Vue compactée, accès rapide aux synthèses de santé, déclenchement vocal mobile et bascule instantanée entre les modes opérationnels.
+---
+
+## 🎯 1. Manifeste : De la Dispersion Audio à l'IA Agentique Pure
+
+À l'origine de son développement, JARVIS embarquait une suite expérimentale complexe dédiée au traitement du signal sonore (studios DSP, égaliseurs graphiques, compresseurs multibandes, filtres vocaux). Bien qu'instructive, cette prolifération d'outils hétéroclites surchargeait le socle applicatif, dispersait l'attention et introduisait une dette technique résiduelle.
+
+**Au cours des deux derniers mois, une décision stratégique et un refactoring en profondeur ont été menés par Marc et Antigravity : purger l'intégralité du laboratoire sonore pour recentrer 100 % des ressources et du code sur ce qui fait l'âme et la puissance du projet — l'Intelligence Artificielle Souveraine (JARVIS IA).**
+
+### 📊 Matrice d'Évolution : 2 Mois de Transformation Radicale
+
+| Dimension | ⏳ Il y a 2 mois (Labo Audio & Dispersion DSP) | ⚡ Aujourd'hui (Cœur Réacteur JARVIS IA) |
+|:---|:---|:---|
+| **Cœur de Mission** | Traitement du signal sonore, égaliseurs DSP, multiplicité d'outils audio | **Agent Cognitif IA Dédié** : arbitrage souverain, cyberdéfense & infogérance |
+| **Périmètre Applicatif** | Surcharge fonctionnelle, prolifération de modules hétéroclites | **Recentrage chirurgical** : chaque ligne de code sert l'intelligence machine |
+| **Gestion Cognitive** | Pas de mémoire structurée, requêtes éphémères isolées | **Pile Hermès & RAG Vectoriel** : apprentissage continu et mémoire long-terme |
+| **Vitesse d'Exécution** | Temps de réponse aléatoires, latences de traitement | **Fast-Path Déterministe** : résolution machine en **< 200 ms** (0 hallucination) |
+| **Supervision Système** | Supervision passive ou cloisonnée | **Infogérance vivante** : pilotage Proxmox VE, VMs, passerelles et matrice 3D |
+| **Accélération Matérielle** | Sollicitation CPU dispersée | **Inférence Tensor/CUDA** : exploitation directe du GPU NVIDIA RTX 5080 |
+| **Architecture Code** | Fichiers volumineux avec dette technique résiduelle | **Dette Zéro** : règle d'or inviolable des $\le 400$ lignes par module |
 
 ---
 
-<a id="section-9"></a>
-## 9. 🎙️ La Voix Souveraine Antoine HD & la Passerelle Native Windows MCI
+## 🏛️ 2. Les Trois Piliers Fondateurs de JARVIS
 
-L'accessibilité étant une priorité cardinale (l'ergonomie étant spécialement conçue pour un confort auditif et un retour vocal immédiat de l'opérateur), JARVIS privilégie le **canal audio direct** comme vecteur d'information prioritaire :
+```mermaid
+flowchart TD
+    subgraph PILIERS["LES 3 PILIERS D'INGÉNIERIE SOUVERAINE"]
+        P1["⚡ <b>1. LE FAST-PATH DÉTERMINISTE</b><br/>Temps de réponse < 200 ms<br/>0 LLM sur les faits matériels<br/>Sondes directes Bare-Metal"]
+        P2["🔒 <b>2. SOUVERAINETÉ 100% LOCALE</b><br/>0% API Cloud externe<br/>Inférence GPU RTX 5080 (Blackwell)<br/>Voix native locale Windows MCI"]
+        P3["📐 <b>3. DETTE TECHNIQUE ZÉRO</b><br/>Plafond strict ≤ 400 lignes (Règle 14)<br/>Modulaire & Découplé<br/>BITE Avionique ARINC 604 & Invariants"]
+    end
+```
 
-* **Synthèse Vocale Haute Fidélité :** Voix naturelle d'Antoine HD générée localement et relayée instantanément.
-* **Moteur Natif Windows MCI :** La diffusion sonore s'effectue directement au niveau du système d'exploitation de la station hôte via l'API multimédia MCI de Windows, sans dépendre du navigateur ni nécessiter qu'un onglet web reste actif au premier plan.
-* **Hiérarchie Vocale d'Urgence :** Les alertes critiques coupent immédiatement les annonces de statut standard pour transmettre l'information de défense prioritaire.
+### 1. Le Fast-Path Déterministe (< 200 ms)
+Dans un centre de commandement, l'erreur ou l'approximation n'est pas tolérée. Si l'opérateur interroge JARVIS sur l'état de l'onduleur, la mémoire vive libre sur Proxmox ou le statut des sauvegardes nocturnes, **le modèle de langage a interdiction formelle d'intervenir** :
+* Les requêtes portant sur des grandeurs physiques sont interceptées dès l'entrée par des parseurs lexicaux stricts.
+* Le système interroge directement les APIs internes, les sockets Unix et les sondes matérielles.
+* Réponse certifiée par la télémétrie réelle en moins de 200 ms, éliminant 100 % des hallucinations.
 
----
+### 2. Souveraineté & Confinement 100 % Local
+* **Zéro Dépendance Cloud :** Aucun flux de conversation, aucune télémétrie d'infrastructure ni aucun document ne transite par des serveurs tiers.
+* **Inférence GPU Haute Performance :** Modèles d'élite déployés localement sur GPU NVIDIA RTX 5080 (16 Go VRAM GDDR7) avec accélération CUDA.
+* **Voix Native Windows MCI :** Restitution audio par Antoine HD directement au niveau de l'OS hôte, indépendante des processus de navigation.
 
-<a id="section-10"></a>
-## 10. 🧪 L'Armure Qualité : BITE Diag, Tests Unitaires & Gardiens Déterministes
-
-La fiabilité de JARVIS repose sur une chaîne d'assurance qualité industrielle inspirée de l'aéronautique :
-
-[![BITE Diag & Tests](assets/jarvis-bite-health.png)](assets/jarvis-bite-health.png)
-
-*Console BITE (Built-In Test Equipment) : audit automatique des sous-systèmes, tests de cohérence matérielle, intégrité des ponts réseau et verdict unifié.*
-
-| Gardien / Banc d'Épreuve | Rôle & Périmètre de Validation | Statut Requis |
-|:-------------------------|:-------------------------------|:-------------:|
-| **BITE Système (Banc 109)** | Vérification au démarrage de l'ensemble des modules (GPU, LLM, TTS, Sockets) | **100 % VERT** |
-| **Gardiens Anti-Fuite Publication** | Scan cryptographique interdisant la fuite d'adresses IP privées ou d'identités | **0 violation** |
-| **Gardien de Plafond 400L** | Contrôle statique interdisant tout fichier excédant 400 lignes de code | **100 % conforme** |
-| **Linters & Typage Strict** | Validation de la syntaxe et des contrats d'interface (Ruff, PSScriptAnalyzer) | **0 warning** |
-| **Tests Unitaires Automatisés** | Batterie de tests de non-régression sur le pipeline Hermès et les connecteurs | **100 % succès** |
-
----
-
-<a id="section-11"></a>
-## 11. 📐 Dette Technique Zéro : La Règle d'Or du Plafond des 400 Lignes
-
-À l'instar du SOC, le socle applicatif de JARVIS obéit scrupuleusement à la **Règle 14.7 de la Doctrine Universelle de l'Atelier 0xCyberLiTech** :
-
-* **Plafond Inviolable de 400 Lignes :** Aucun script, composant JavaScript ou module Python ne dépasse 400 lignes.
-* **Modularité Découplée :** Les responsabilités sont isolées dans des micro-modules dédiés (`*_state.js`, `*_render.js`, `*_controls.js`, `*_topo.js`), garantissant une lisibilité absolue, une maintenance simplifiée et l'élimination définitive de tout code spaghetti.
+### 3. Dette Technique Zéro & Règle des 400 Lignes
+* **Plafond Inviolable :** Conformément à la Règle 14 de l'Atelier, aucun module applicatif ne dépasse 400 lignes.
+* **Architecture Modulaire :** Séparation stricte de l'état (`*_state.js`), du rendu (`*_render.js`) et des contrôleurs (`*_controls.js`).
+* **Assurance Qualité BITE :** Tests unitaires, linters au vert absolu (`ruff`, `eslint`, `PSScriptAnalyzer`) et gardiens d'invariants exécutés en pré-commit.
 
 ---
 
-<a id="section-12"></a>
-## 12. 🔄 Résilience & Sauvegardes DR des Coffres
-
-Le système d'IA et son historique de connaissances sont protégés par une stratégie de sauvegarde souveraine :
-
-* **Coffres DR Scellés :** Sauvegardes automatisées quotidiennes de la base de connaissances Hermès vers le stockage central sécurisé.
-* **Reprise d'Activité Immédiate :** Capacité de redémarrage à chaud du conteneur IA et restauration instantanée des index vectoriels en cas de panne matérielle.
-
----
+## 🛠️ 3. Stack Technologique & Écosystème
 
 <div align="center">
 
 <table>
 <tr>
-<td align="center"><b>🖥️ Infrastructure &amp; Sécurité</b></td>
-<td align="center"><b>💻 Développement &amp; Web</b></td>
-<td align="center"><b>🤖 Intelligence Artificielle</b></td>
+<td align="center" width="25%"><b>🖥️ Infrastructure &amp; Virtualisation</b></td>
+<td align="center" width="25%"><b>💻 Développement &amp; Moteur</b></td>
+<td align="center" width="25%"><b>🤖 Intelligence Artificielle</b></td>
+<td align="center" width="25%"><b>🎨 Interface &amp; 3D</b></td>
 </tr>
 <tr>
-<td align="center">
-  <a href="https://www.kernel.org/"><img src="https://skillicons.dev/icons?i=linux" width="48" title="Linux" /></a>
-  <a href="https://www.debian.org"><img src="https://skillicons.dev/icons?i=debian" width="48" title="Debian" /></a>
-  <a href="https://www.gnu.org/software/bash/"><img src="https://skillicons.dev/icons?i=bash" width="48" title="Bash" /></a>
-  <br/>
-  <a href="https://nginx.org"><img src="https://skillicons.dev/icons?i=nginx" width="48" title="Nginx" /></a>
-  <a href="https://git-scm.com"><img src="https://skillicons.dev/icons?i=git" width="48" title="Git" /></a>
+<td align="center" valign="top">
+  <img src="https://skillicons.dev/icons?i=linux,debian,bash" width="110"/><br/><br/>
+  <b>Proxmox VE 9</b><br/>
+  Nœud bare-metal Minisforum MS-01<br/>
+  4 VMs Debian &amp; CT 109<br/>
+  ZFS Pool &amp; NAS OMV8
 </td>
-<td align="center">
-  <a href="https://www.python.org"><img src="https://skillicons.dev/icons?i=python" width="48" title="Python" /></a>
-  <a href="https://flask.palletsprojects.com"><img src="https://skillicons.dev/icons?i=flask" width="48" title="Flask" /></a>
-  <a href="https://developer.mozilla.org/docs/Web/HTML"><img src="https://skillicons.dev/icons?i=html" width="48" title="HTML5" /></a>
-  <br/>
-  <a href="https://developer.mozilla.org/docs/Web/CSS"><img src="https://skillicons.dev/icons?i=css" width="48" title="CSS3" /></a>
-  <a href="https://developer.mozilla.org/docs/Web/JavaScript"><img src="https://skillicons.dev/icons?i=js" width="48" title="JavaScript" /></a>
-  <a href="https://threejs.org/"><img src="https://skillicons.dev/icons?i=threejs" width="48" title="Three.js" /></a>
+<td align="center" valign="top">
+  <img src="https://skillicons.dev/icons?i=python,flask,git" width="110"/><br/><br/>
+  <b>Python 3.12 / Flask</b><br/>
+  Serveur WSGI Waitress (:5000)<br/>
+  Superviseur MCP (:5010)<br/>
+  Terminal PTY WebSocket (:5001)
 </td>
-<td align="center">
-  <a href="https://ollama.com"><img src="https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white" alt="Ollama" /></a>
-  <br/><br/>
-  <a href="https://developer.nvidia.com/cuda-zone"><img src="https://img.shields.io/badge/NVIDIA%20CUDA-76B900?style=for-the-badge&logo=nvidia&logoColor=white" alt="NVIDIA CUDA" /></a>
+<td align="center" valign="top">
+  <img src="https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white" alt="Ollama"/><br/>
+  <img src="https://img.shields.io/badge/NVIDIA%20CUDA-76B900?style=for-the-badge&logo=nvidia&logoColor=white" alt="NVIDIA CUDA"/><br/><br/>
+  <b>Mistral-Nemo 12B</b> (Inférence)<br/>
+  <b>Qwen3-Embedding 4B</b> (RAG)<br/>
+  <b>RTX 5080</b> (16 Go GDDR7)
+</td>
+<td align="center" valign="top">
+  <img src="https://skillicons.dev/icons?i=html,css,js,threejs" width="140"/><br/><br/>
+  <b>Extreme HUD Master</b><br/>
+  Vanilla JS pur (Zéro NPM)<br/>
+  Three.js Silicon Metropolis<br/>
+  SVG Avionique MIL-STD-1553B
 </td>
 </tr>
 </table>
 
-<br/>
+</div>
 
-<sub>🔒 Conçu et maintenu par <a href="https://github.com/0xCyberLiTech">Marc (0xCyberLiTech)</a> · Ingénierie souveraine & Pair-Programming IA d'élite 🔒</sub>
+---
+
+## 🔒 4. Gouvernance & Sécurité de l'Atelier
+
+1. **Double Circuit Sanctuarisé :**
+   * `D:\0xCyberLiTech` = L'Atelier & le Lab de R&D (conception, refactoring, tests adverses).
+   * `C:\Users\...\Documents` = La Production stable, alimentée en flux unidirectionnel exclusif `D:` ➔ `C:`.
+2. **Filet de Sauvegarde Permanent :**
+   * À chaque étape validée, les coffres de secours (`BACKUP-*`) et les bundles Git sont rafraîchis.
+   * Procédure de reprise après sinistre opérationnelle en moins de 5 minutes.
+3. **Protection des Données & Anonymisation Publique :**
+   * Un gardien cryptographique dédié (`jarvis-public-doc-guard.py`) audite chaque document public avant publication afin d'interdire formellement toute fuite d'adresses IP réelles, d'identifiants ou de clés privées.
+
+---
+
+<div align="center">
+
+<sub>🔒 Conçu et maintenu avec passion par <a href="https://github.com/0xCyberLiTech">Marc (0xCyberLiTech)</a> · Ingénierie souveraine & Pair-Programming IA d'élite 🔒</sub>
 
 </div>

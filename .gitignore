@@ -97,7 +97,6 @@ Thumbs.db
 scripts/
 tests/
 tools/
-docs/
 CLAUDE.md
 build_vitrine.py
 
