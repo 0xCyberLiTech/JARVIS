@@ -1,19 +1,55 @@
 <div align="center">
 
-<a href="../README.md"><img src="https://img.shields.io/badge/🏠_Hub-Principal-8B5CF6?style=for-the-badge" alt="Hub Principal" /></a>
-<a href="01-PILE-HERMES-ET-RAG.md"><img src="https://img.shields.io/badge/🧠_01-Hermès_%26_RAG-1e1b4b?style=for-the-badge" alt="01 Hermès & RAG" /></a>
-<a href="02-MONITORING-GPU-ET-SYSTEME.md"><img src="https://img.shields.io/badge/🖥️_02-GPU_RTX_5080-1e1b4b?style=for-the-badge" alt="02 GPU RTX 5080" /></a>
-<a href="03-THE-GRID-3D-SYNOPTIQUE.md"><img src="https://img.shields.io/badge/🌐_03-The_Grid_3D-3b82f6?style=for-the-badge" alt="03 The Grid 3D" /></a>
-<a href="04-INFOGERANCE-PARC-ET-VMS.md"><img src="https://img.shields.io/badge/🏢_04-Infogérance_PVE-1e1b4b?style=for-the-badge" alt="04 Infogérance PVE" /></a>
-<a href="05-BITE-DIAGNOSTIC-STATION.md"><img src="https://img.shields.io/badge/🧪_05-Station_BITE-1e1b4b?style=for-the-badge" alt="05 Station BITE" /></a>
-<a href="06-MOBILE-ET-VOIX-SOUVERAINE.md"><img src="https://img.shields.io/badge/📱_06-Mobile_%26_Voix-1e1b4b?style=for-the-badge" alt="06 Mobile & Voix" /></a>
+  <br></br>
 
-<br/><br/>
+  <a href="../README.md">
+    <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=40&duration=6000&pause=1000000000&color=8B5CF6&center=true&vCenter=true&width=1100&lines=%3EJARVIS+·+03+THE+GRID+3D+SYNOPTIQUE_" alt="Fiche 03 The Grid 3D" />
+  </a>
 
-# 🌐 Fiche 03 · The Grid 3D Synoptique & Topologie Spatiale
-### Modélisation Spatiale "Silicon Metropolis" · Three.js Pur · Central Switch & Blason Cyber
+  <br></br>
+
+  <h2>Fiche 03 · The Grid 3D Synoptique & Topologie Spatiale</h2>
+
+  <p align="center">
+    <a href="../README.md">
+      <img src="https://img.shields.io/badge/🏠_Hub-Principal-8B5CF6?style=flat-square" alt="Hub Principal" />
+    </a>
+    <a href="01-PILE-HERMES-ET-RAG.md">
+      <img src="https://img.shields.io/badge/🧠_01-Hermès_%26_RAG-181717?style=flat-square" alt="01 Hermès & RAG" />
+    </a>
+    <a href="02-MONITORING-GPU-ET-SYSTEME.md">
+      <img src="https://img.shields.io/badge/🖥️_02-GPU_RTX_5080-181717?style=flat-square" alt="02 GPU RTX 5080" />
+    </a>
+    <a href="03-THE-GRID-3D-SYNOPTIQUE.md">
+      <img src="https://img.shields.io/badge/🌐_03-The_Grid_3D-00d9ff?style=flat-square" alt="03 The Grid 3D" />
+    </a>
+    <a href="04-INFOGERANCE-PARC-ET-VMS.md">
+      <img src="https://img.shields.io/badge/🏢_04-Infogérance_PVE-181717?style=flat-square" alt="04 Infogérance PVE" />
+    </a>
+    <a href="05-BITE-DIAGNOSTIC-STATION.md">
+      <img src="https://img.shields.io/badge/🧪_05-Station_BITE-181717?style=flat-square" alt="05 Station BITE" />
+    </a>
+    <a href="06-MOBILE-ET-VOIX-SOUVERAINE.md">
+      <img src="https://img.shields.io/badge/📱_06-Mobile_%26_Voix-181717?style=flat-square" alt="06 Mobile & Voix" />
+    </a>
+  </p>
 
 </div>
+
+<div align="center">
+  <img src="https://img.icons8.com/fluency/96/000000/cube.png" alt="3D Grid Icon" width="80"/>
+</div>
+
+<div align="center">
+  <p>
+    <strong>Matrice Three.js Matérielle</strong> &nbsp;•&nbsp; <strong>Blason Cyber Souverain</strong> &nbsp;•&nbsp; <strong>4 Anneaux VLANs Volumétriques</strong>
+  </p>
+</div>
+
+> [!IMPORTANT]
+> **Vitrine Technologique : Architecture & Démonstration d'Ingénierie**  
+> Ce document technique détaille le synoptique tridimensionnel **The Grid** rendu en WebGL matériel par Three.js pur.  
+> 🔒 **Propriété Intellectuelle & Sécurité Opérationnelle** : Les coordonnées réelles de topologie, plans d'adressage et topologies matérielles restent **strictement confinés** au sein de l'Atelier souverain 0xCyberLiTech.
 
 ---
 
@@ -46,8 +82,8 @@ L'interface offre une perception volumétrique instantanée :
 Au centre de la topologie se dresse le commutateur virtuel de l'Atelier. Il répartit les flux réseau entre 4 anneaux concentriques clairement isolés :
 * **Anneau 10 · Zone Production :** Conteneur JARVIS Core, Reverse Proxy public et services applicatifs.
 * **Anneau 20 · Gestion & Hypervision :** Interfaces d'administration du nœud bare-metal Proxmox VE.
-* **Anneau 30 · Zone DMZ & Passerelle :** Routeur matériel ASUS ROG et interfaces WAN.
-* **Anneau 40 · Réseau Inférence & Stockage :** Liaisons dédiées au réacteur IA et aux volumes ZFS du NAS OMV8.
+* **Anneau 30 · Zone DMZ & Passerelle :** Routeur matériel frontal et interfaces WAN.
+* **Anneau 40 · Réseau Inférence & Stockage :** Liaisons dédiées au réacteur IA et aux volumes ZFS du NAS de stockage.
 
 ### 2. Le Blason Protecteur Souverain
 Hologramme en suspension au-dessus du switch central, le Blason incarne l'intégrité de la cyberdéfense :
@@ -77,5 +113,43 @@ Hologramme en suspension au-dessus du switch central, le Blason incarne l'intég
 
 | [← 🖥️ Page Précédente : Moniteur GPU](02-MONITORING-GPU-ET-SYSTEME.md) | [🏠 Hub Principal](../README.md) | [🏢 Page Suivante : Infogérance Parc ➔](04-INFOGERANCE-PARC-ET-VMS.md) |
 |:---|:---:|---:|
+
+<br/>
+
+<table>
+<tr>
+<td align="center"><b>🖥️ Infrastructure &amp; Sécurité</b></td>
+<td align="center"><b>💻 Développement &amp; Web</b></td>
+<td align="center"><b>🤖 Intelligence Artificielle</b></td>
+</tr>
+<tr>
+<td align="center">
+  <a href="https://www.kernel.org/"><img src="https://skillicons.dev/icons?i=linux" width="48" title="Linux" /></a>
+  <a href="https://www.debian.org"><img src="https://skillicons.dev/icons?i=debian" width="48" title="Debian" /></a>
+  <a href="https://www.gnu.org/software/bash/"><img src="https://skillicons.dev/icons?i=bash" width="48" title="Bash" /></a>
+  <br/>
+  <a href="https://nginx.org"><img src="https://skillicons.dev/icons?i=nginx" width="48" title="Nginx" /></a>
+  <a href="https://git-scm.com"><img src="https://skillicons.dev/icons?i=git" width="48" title="Git" /></a>
+</td>
+<td align="center">
+  <a href="https://www.python.org"><img src="https://skillicons.dev/icons?i=python" width="48" title="Python" /></a>
+  <a href="https://flask.palletsprojects.com"><img src="https://skillicons.dev/icons?i=flask" width="48" title="Flask" /></a>
+  <a href="https://developer.mozilla.org/docs/Web/HTML"><img src="https://skillicons.dev/icons?i=html" width="48" title="HTML5" /></a>
+  <br/>
+  <a href="https://developer.mozilla.org/docs/Web/CSS"><img src="https://skillicons.dev/icons?i=css" width="48" title="CSS3" /></a>
+  <a href="https://developer.mozilla.org/docs/Web/JavaScript"><img src="https://skillicons.dev/icons?i=js" width="48" title="JavaScript" /></a>
+  <a href="https://threejs.org/"><img src="https://skillicons.dev/icons?i=threejs" width="48" title="Three.js" /></a>
+</td>
+<td align="center">
+  <a href="https://ollama.com"><img src="https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white" alt="Ollama" /></a>
+  <br/><br/>
+  <a href="https://developer.nvidia.com/cuda-zone"><img src="https://img.shields.io/badge/NVIDIA%20CUDA-76B900?style=for-the-badge&logo=nvidia&logoColor=white" alt="NVIDIA CUDA" /></a>
+</td>
+</tr>
+</table>
+
+<br/>
+
+<sub>🔒 Conçu et maintenu par <a href="https://github.com/0xCyberLiTech">Marc (0xCyberLiTech)</a> · Ingénierie souveraine & Pair-Programming IA d'élite 🔒</sub>
 
 </div>

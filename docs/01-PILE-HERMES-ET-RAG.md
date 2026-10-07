@@ -1,19 +1,55 @@
 <div align="center">
 
-<a href="../README.md"><img src="https://img.shields.io/badge/🏠_Hub-Principal-8B5CF6?style=for-the-badge" alt="Hub Principal" /></a>
-<a href="01-PILE-HERMES-ET-RAG.md"><img src="https://img.shields.io/badge/🧠_01-Hermès_%26_RAG-3b82f6?style=for-the-badge" alt="01 Hermès & RAG" /></a>
-<a href="02-MONITORING-GPU-ET-SYSTEME.md"><img src="https://img.shields.io/badge/🖥️_02-GPU_RTX_5080-1e1b4b?style=for-the-badge" alt="02 GPU RTX 5080" /></a>
-<a href="03-THE-GRID-3D-SYNOPTIQUE.md"><img src="https://img.shields.io/badge/🌐_03-The_Grid_3D-1e1b4b?style=for-the-badge" alt="03 The Grid 3D" /></a>
-<a href="04-INFOGERANCE-PARC-ET-VMS.md"><img src="https://img.shields.io/badge/🏢_04-Infogérance_PVE-1e1b4b?style=for-the-badge" alt="04 Infogérance PVE" /></a>
-<a href="05-BITE-DIAGNOSTIC-STATION.md"><img src="https://img.shields.io/badge/🧪_05-Station_BITE-1e1b4b?style=for-the-badge" alt="05 Station BITE" /></a>
-<a href="06-MOBILE-ET-VOIX-SOUVERAINE.md"><img src="https://img.shields.io/badge/📱_06-Mobile_%26_Voix-1e1b4b?style=for-the-badge" alt="06 Mobile & Voix" /></a>
+  <br></br>
 
-<br/><br/>
+  <a href="../README.md">
+    <img src="https://readme-typing-svg.herokuapp.com?font=JetBrains+Mono&size=40&duration=6000&pause=1000000000&color=8B5CF6&center=true&vCenter=true&width=1100&lines=%3EJARVIS+·+01+PILE+HERMES+%26+RAG_" alt="Fiche 01 Hermès & RAG" />
+  </a>
 
-# 🧠 Fiche 01 · La Pile Cognitive Hermès & Moteur RAG Vectoriel
-### Cœur Réacteur Arc Stark · Fast-Path Déterministe · Mémoire Long-Terme Anti-Dérive
+  <br></br>
+
+  <h2>Fiche 01 · La Pile Cognitive Hermès & Moteur RAG Vectoriel</h2>
+
+  <p align="center">
+    <a href="../README.md">
+      <img src="https://img.shields.io/badge/🏠_Hub-Principal-8B5CF6?style=flat-square" alt="Hub Principal" />
+    </a>
+    <a href="01-PILE-HERMES-ET-RAG.md">
+      <img src="https://img.shields.io/badge/🧠_01-Hermès_%26_RAG-00d9ff?style=flat-square" alt="01 Hermès & RAG" />
+    </a>
+    <a href="02-MONITORING-GPU-ET-SYSTEME.md">
+      <img src="https://img.shields.io/badge/🖥️_02-GPU_RTX_5080-181717?style=flat-square" alt="02 GPU RTX 5080" />
+    </a>
+    <a href="03-THE-GRID-3D-SYNOPTIQUE.md">
+      <img src="https://img.shields.io/badge/🌐_03-The_Grid_3D-181717?style=flat-square" alt="03 The Grid 3D" />
+    </a>
+    <a href="04-INFOGERANCE-PARC-ET-VMS.md">
+      <img src="https://img.shields.io/badge/🏢_04-Infogérance_PVE-181717?style=flat-square" alt="04 Infogérance PVE" />
+    </a>
+    <a href="05-BITE-DIAGNOSTIC-STATION.md">
+      <img src="https://img.shields.io/badge/🧪_05-Station_BITE-181717?style=flat-square" alt="05 Station BITE" />
+    </a>
+    <a href="06-MOBILE-ET-VOIX-SOUVERAINE.md">
+      <img src="https://img.shields.io/badge/📱_06-Mobile_%26_Voix-181717?style=flat-square" alt="06 Mobile & Voix" />
+    </a>
+  </p>
 
 </div>
+
+<div align="center">
+  <img src="https://img.icons8.com/fluency/96/000000/brain.png" alt="Brain Icon" width="80"/>
+</div>
+
+<div align="center">
+  <p>
+    <strong>Mémoire Long-Terme Anti-Dérive</strong> &nbsp;•&nbsp; <strong>Fast-Path Déterministe (< 200 ms)</strong> &nbsp;•&nbsp; <strong>Indexation Vectorielle Locale</strong>
+  </p>
+</div>
+
+> [!IMPORTANT]
+> **Vitrine Technologique : Architecture & Démonstration d'Ingénierie**  
+> Ce document technique détaille l'architecture de la **Pile Cognitive Hermès** et du moteur vectoriel RAG de JARVIS.  
+> 🔒 **Propriété Intellectuelle & Sécurité Opérationnelle** : Les scripts d'automatisation interne, clés privées et configurations physiques restent **strictement confinés** au sein de l'Atelier souverain 0xCyberLiTech.
 
 ---
 
@@ -130,7 +166,45 @@ flowchart TD
 
 <div align="center">
 
-| [← 🏠 Hub Principal](../README.md) | [🖥️ Page Suivante : Moniteur GPU RTX 5080 ➔](02-MONITORING-GPU-ET-SYSTEME.md) |
+| [← 🏠 Retour au Hub Principal](../README.md) | [🖥️ Page Suivante : Fiche 02 · Moniteur GPU RTX 5080 ➔](02-MONITORING-GPU-ET-SYSTEME.md) |
 |:---|---:|
+
+<br/>
+
+<table>
+<tr>
+<td align="center"><b>🖥️ Infrastructure &amp; Sécurité</b></td>
+<td align="center"><b>💻 Développement &amp; Web</b></td>
+<td align="center"><b>🤖 Intelligence Artificielle</b></td>
+</tr>
+<tr>
+<td align="center">
+  <a href="https://www.kernel.org/"><img src="https://skillicons.dev/icons?i=linux" width="48" title="Linux" /></a>
+  <a href="https://www.debian.org"><img src="https://skillicons.dev/icons?i=debian" width="48" title="Debian" /></a>
+  <a href="https://www.gnu.org/software/bash/"><img src="https://skillicons.dev/icons?i=bash" width="48" title="Bash" /></a>
+  <br/>
+  <a href="https://nginx.org"><img src="https://skillicons.dev/icons?i=nginx" width="48" title="Nginx" /></a>
+  <a href="https://git-scm.com"><img src="https://skillicons.dev/icons?i=git" width="48" title="Git" /></a>
+</td>
+<td align="center">
+  <a href="https://www.python.org"><img src="https://skillicons.dev/icons?i=python" width="48" title="Python" /></a>
+  <a href="https://flask.palletsprojects.com"><img src="https://skillicons.dev/icons?i=flask" width="48" title="Flask" /></a>
+  <a href="https://developer.mozilla.org/docs/Web/HTML"><img src="https://skillicons.dev/icons?i=html" width="48" title="HTML5" /></a>
+  <br/>
+  <a href="https://developer.mozilla.org/docs/Web/CSS"><img src="https://skillicons.dev/icons?i=css" width="48" title="CSS3" /></a>
+  <a href="https://developer.mozilla.org/docs/Web/JavaScript"><img src="https://skillicons.dev/icons?i=js" width="48" title="JavaScript" /></a>
+  <a href="https://threejs.org/"><img src="https://skillicons.dev/icons?i=threejs" width="48" title="Three.js" /></a>
+</td>
+<td align="center">
+  <a href="https://ollama.com"><img src="https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white" alt="Ollama" /></a>
+  <br/><br/>
+  <a href="https://developer.nvidia.com/cuda-zone"><img src="https://img.shields.io/badge/NVIDIA%20CUDA-76B900?style=for-the-badge&logo=nvidia&logoColor=white" alt="NVIDIA CUDA" /></a>
+</td>
+</tr>
+</table>
+
+<br/>
+
+<sub>🔒 Conçu et maintenu par <a href="https://github.com/0xCyberLiTech">Marc (0xCyberLiTech)</a> · Ingénierie souveraine & Pair-Programming IA d'élite 🔒</sub>
 
 </div>
