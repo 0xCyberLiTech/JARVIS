@@ -131,9 +131,110 @@ Visualisation de l'interconnexion réseau isolant les segments :
 * `vmbr2` : Zone Démilitarisée (DMZ).
 * `vmbr3` : Segment Laboratoire & Tests.
 
-### 5. Sas Forensique & Bannette IA à Traitement Unitaire
-* **Sas d'Ingestion Centralisé :** Capture automatique des rapports cron, alertes SMART et notifications de sécurité.
-* **Principe de l'Alimentation Mesurée (Règle 10.5) :** Afin de prévenir toute fatigue décisionnelle, les anomalies sont traitées une par une à leur cause racine dans l'Atelier D:, garantissant un homelab sain et silencieux.
+### 5. Pupitre de Convergence // Sas & Triage IA (#INF-07 à #INF-10)
+
+L'une des innovations majeures de l'Atelier 0xCyberLiTech réside dans la **sanctuarisation absolue de la boîte de messagerie personnelle de Marc** et l'interception chirurgicale de 100 % des signaux techniques du Homelab via un sas forensique souverain.
+
+<div align="center">
+  <br/>
+  <img src="../assets/jarvis-infog-sas-convergence.png" alt="Pupitre de Convergence // Sas & Triage IA Homelab" width="100%"/>
+  <p><em>Figure 4.1 — Pupitre de Convergence // Sas & Triage IA : Goulot de filtration déterministe (< 50ms), Canaux souverains sans SMTP et Bannette unitaire anti-fatigue.</em></p>
+  <br/>
+</div>
+
+#### 🏛️ Philosophie Fondatrice : Zéro Bruit & Zéro SMTP Sortant
+Dans une infrastructure classique, les serveurs, hyperviseurs et équipements réseau inondent l'administrateur de courriels d'alertes redondants (cron jobs, synchronisations, logs de scan).  
+**La doctrine de l'Atelier 0xCyberLiTech inverse ce paradigme :**
+* **0 SMTP Sortant :** Aucun octet d'alerte ne quitte le réseau local vers Internet. Tout est capté, horodaté et traité localement.
+* **Boîte Marc Sanctuarisée :** Interception déterministe en amont ; la messagerie personnelle de Marc reste vierge de tout spam d'exploitation.
+
+---
+
+#### 🧱 Analyse Détaillée Brique par Brique du Synoptique
+
+```mermaid
+flowchart TD
+    classDef capt fill:#0e1e38,stroke:#00f0ff,stroke-width:1.5px,color:#fff;
+    classDef filtre fill:#142850,stroke:#00ff9d,stroke-width:1.5px,color:#fff;
+    classDef goulot fill:#2a1b4e,stroke:#a855f7,stroke-width:2px,color:#fff;
+    classDef ia fill:#3b122d,stroke:#ff0055,stroke-width:2px,color:#fff;
+    classDef atelier fill:#08241b,stroke:#10b981,stroke-width:2px,color:#fff;
+
+    subgraph CAPTAGE["📡 1. CAPTAGE INFRA & BUS LOCAL (.1.0/24)"]
+        S1["srv-dev-1 (VM 101)"]:::capt
+        S2["srv-clt (VM 106)"]:::capt
+        S3["srv-pa05 (VM 107)"]:::capt
+        S4["kali (VM 108)"]:::capt
+        S5["PVE Host (Bare-Metal)"]:::capt
+        LOGS["Journal Forensique Local<br/><code>/var/log/soc-mail.jsonl</code>"]:::capt
+    end
+
+    subgraph FILTRES["⚡ 2. LES 4 FILTRES DÉTERMINISTES (< 50ms · 0 LLM)"]
+        F1["FILTRE 01 · CYBER (SOC)<br/>CrowdSec · WAF · Blocages"]:::filtre
+        F2["FILTRE 02 · CRONS & SYSTÈME<br/>Détection Dérives & Pannes"]:::filtre
+        F3["FILTRE 03 · ROUTEUR ROG<br/>Syslog UDP 514 · AiProtection"]:::filtre
+        F4["FILTRE 04 · COFFRES DR<br/>Snapshots ZFS · 16 Coffres"]:::filtre
+    end
+
+    subgraph CONVERGENCE["🔀 3. GOULOT DE CONVERGENCE & ARBITRAGE NEURAL"]
+        PIPE["Conduits Fil de Fer & Goulot Central"]:::goulot
+        ARBITRE["Arbitrage Neural & Bascule Déterministe<br/>(LLM Local + Fail-Safe RTC < 1ms)"]:::goulot
+        VOIX["Synthèse Vocale Antoine HD<br/>(Enceintes Windows Marc)"]:::goulot
+    end
+
+    subgraph GOUVERNANCE["🧠 4. CERVEAU IA & BANNETTE UNITAIRE (RÈGLE 10.5)"]
+        BANNETTE["Bannette IA Cadenassée<br/>(1 seul micro-chantier à la fois)"]:::ia
+    end
+
+    subgraph REMEDIATION["🛠️ 5. REMÉDIATION RACINE ATELIER D:"]
+        ATELIER["Atelier D: (Marc & Antigravity)<br/>Correction Racine · Zéro Rustine · Scellé Git"]:::atelier
+    end
+
+    S1 & S2 & S3 & S4 & S5 --> LOGS
+    LOGS --> F1 & F2 & F3 & F4
+    F1 & F2 & F3 & F4 --> PIPE
+    PIPE --> ARBITRE
+    ARBITRE --> VOIX
+    ARBITRE --> BANNETTE
+    BANNETTE --> ATELIER
+```
+
+##### 1. Brique #INF-07 · Pupitre de Convergence & Compteurs Étalons
+Le bandeau supérieur restitue en temps réel l'impact de la sanctuarisation :
+* **908 Mails Épargnés (28j) :** Nombre exact de courriels d'exploitation neutralisés et évités sur la boîte personnelle de Marc.
+* **4 577 Signaux Absorbés Bus :** Télémétrie brute captée par le bus local et analysée sans latence.
+* **0 En Cours (Dossier Qualifié par l'IA) :** Indique qu'aucun blocage non résolu n'est en suspens.
+* **100% Fiabilisation Racine :** Taux de résolution définitive sans contournement ni rustine temporaire.
+
+##### 2. Brique #INF-10 · Goulot de Convergence & Les 4 Filtres Déterministes (< 50 ms)
+Le cœur du moteur s'appuie sur une bipartition stricte : **aucun LLM n'intervient sur le calcul d'état des machines**. Tout est évalué par du code machine déterministe en moins de 50 millisecondes :
+* **Filtre 01 · Cyber (SOC) :** Traque permanente sur le réseau `/24`, synchronisation avec la Kill Chain et CrowdSec (270 événements traités, 0 fuite SMTP).
+* **Filtre 02 · Crons & Système :** Auscultation des tâches planifiées des VMs Linux et de l'hyperviseur (3 638 événements filtrés, élimination des crons verbeux).
+* **Filtre 03 · Routeur ROG :** Collecte des trames Syslog UDP 514 en provenance du routeur central Wi-Fi 7 et des modules de sécurité Trend Micro AiProtection (133 événements).
+* **Filtre 04 · Coffres DR :** Contrôle de fraîcheur et de cohérence des 16 coffres souverains de sauvegarde Proxmox VE et NAS OMV8 (39 signaux, 100% GO).
+
+##### 3. Conduits Fil de Fer & Arbitrage Neural
+* **Esthétique Vectorielle Fil de Fer :** Reprenant le langage graphique des coffres-forts DR, les conduits représentent l'entonnoir où convergent les flux hétérogènes de l'infrastructure.
+* **Bascule Déterministe Fail-Safe (< 1 ms) :** Le moteur dispose d'un basculement instantané (RTC swap) : si le moteur neural local est sollicité, il est encadré par des gardiens déterministes inviolables. Les alertes critiques sont synthétisées vocalement par **Antoine HD** directement sur les enceintes Windows de Marc via le moteur MCI souverain, sans dépendance réseau externe.
+
+##### 4. Brique #INF-01 · Captage Infra & Bus Local (.1.0/24)
+Surveillance passive et dérivation en continu vers `/var/log/soc-mail.jsonl`. Les 5 cœurs vitaux du réseau sont auscultés sans agents lourds :
+* `srv-dev-1` (VM 101) · Segment laboratoire
+* `srv-clt` (VM 106) · Serveur web
+* `srv-pa05` (VM 107) · Applicatifs internes
+* `kali` (VM 108) · Passerelle sécurité & SOC
+* `PVE Host` (Nœud MS-01) · Hyperviseur bare-metal
+
+##### 5. Brique #INF-08 · Cerveau IA & Bannette Unitaire (Règle 10.5 AGENTS.md)
+* **Principe de l'Alimentation Mesurée :** Pour préserver la clarté d'esprit de l'opérateur et prévenir toute fatigue décisionnelle face au flux technique, le débit est strictement régulé.
+* **Débit Régulé :** La Bannette IA ne présente **qu'un seul micro-chantier prioritaire à la fois**. Quand le homelab est sain, la bannette affiche fièrement son état cadenassé : *"Bannette 100% vidée — Aucun chantier en attente — Homelab sain"*.
+
+##### 6. Brique #INF-09 · Remédiation Atelier D: & Registre Workflow Scellé
+* **Mandat Exclusif Atelier D: :** JARVIS est strictement confiné en lecture seule. L'infogérance active (remédiations, scripts de maintenance, modifications crontab) est exécutée exclusivement par Antigravity et Marc sur l'Atelier `D:\0xCyberLiTech`.
+* **Registre Immuable des Actions Scellées :** Chaque remédiation fait l'objet d'un ticket forensique vérifiable, avec l'action PowerShell exécutée, la preuve machine associée et l'horodatage UTC inviolable.
+
+##### 7. Sas Forensique Temps Réel (`/var/log/soc-mail.jsonl`)
+Un terminal déroulant en pied de page permet à l'opérateur d'inspecter à tout moment le flux brut des signaux captés pour une traçabilité forensic totale.
 
 ---
 

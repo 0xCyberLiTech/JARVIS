@@ -46,6 +46,7 @@
 > [!IMPORTANT]
 > **Vitrine Technologique : Architecture & Démonstration d'Ingénierie**  
 > Ce dépôt présente le système d'intelligence artificielle locale **JARVIS** conçu par Marc (0xCyberLiTech). Il expose la doctrine d'ingénierie cognitive, les schémas d'intégration et les interfaces opérationnelles.  
+> 📚 **Dossier d'Ingénierie Interne Maître :** [Consulter le Référentiel Technique & Sommaire des 3 Piliers (`docs/README.md`)](./docs/README.md)  
 > 🔒 **Propriété Intellectuelle & Sécurité Opérationnelle** : Les modèles personnalisés, la base vectorielle interne, les clés privées et les automatisations d'infogérance matérielle restent **strictement confinés** au sein de l'Atelier souverain 0xCyberLiTech.
 
 ---
@@ -263,7 +264,23 @@ flowchart TB
 
 * **Supervision Directe de l'Hyperviseur :** Auscultation continue des charges CPU, allocation RAM et état de santé du nœud bare-metal Proxmox VE.
 * **Flotte de VMs Confinées :** Suivi individualisé du Reverse Proxy Nginx, de la Sandbox de qualification, du conteneur d'inférence et des passerelles réseau.
-* **Sas des Alertes & Remédiation Découplée :** Si une anomalie ou un cron en échec est détecté, JARVIS centralise l'événement sans saturer l'opérateur, préparant le diagnostic pour les sessions d'infogérance active.
+
+<div align="center">
+  <br/>
+  <a href="assets/jarvis-infog-sas-convergence.png">
+    <img src="assets/jarvis-infog-sas-convergence.png" alt="Pupitre de Convergence // Sas & Triage IA" width="100%" style="border-radius: 8px; border: 1px solid rgba(0,240,255,0.3);"/>
+  </a>
+  <br/>
+  <sub><em>Pupitre de Convergence // Sas & Triage IA : Sanctuarisation de la boîte personnelle de Marc (0 SMTP sortant), Goulot des 4 filtres déterministes (< 50ms), Bannette unitaire anti-fatigue et registre de remédiation Atelier D:.</em></sub>
+  <br/><br/>
+</div>
+
+* **Sanctuarisation Boîte Marc & Zéro SMTP Sortant :** 100% des signaux d'alertes des machines et crons sont interceptés localement en amont, évitant tout spam d'exploitation dans la messagerie personnelle de l'opérateur.
+* **Goulot des 4 Filtres Déterministes (< 50 ms) :** Cyber (SOC), Crons & Système, Routeur ROG et Coffres DR sont analysés par du code machine direct (0 hallucination LLM sur les états).
+* **Bannette IA Unitaire & Remédiation Racine :** Traitement unitaire des micro-chantiers (Règle 10.5) sans submersion cognitive, avec résolution définitive à la cause racine dans l'Atelier D: (Règle 14).
+* **Sas Forensique Découplé :** Journalisation brute temps réel dans `/var/log/soc-mail.jsonl` pour une traçabilité forensic infalsifiable.
+<br/>
+*Consulter le dossier d'ingénierie complet : [Fiche 04 · Infogérance Active Proxmox VE & Flotte de VMs](docs/04-INFOGERANCE-PARC-ET-VMS.md).*
 
 ---
 
