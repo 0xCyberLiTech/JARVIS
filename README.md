@@ -275,10 +275,86 @@ flowchart TB
   <br/><br/>
 </div>
 
-* **Sanctuarisation Boîte Marc & Zéro SMTP Sortant :** 100% des signaux d'alertes des machines et crons sont interceptés localement en amont, évitant tout spam d'exploitation dans la messagerie personnelle de l'opérateur.
-* **Goulot des 4 Filtres Déterministes (< 50 ms) :** Cyber (SOC), Crons & Système, Routeur ROG et Coffres DR sont analysés par du code machine direct (0 hallucination LLM sur les états).
-* **Bannette IA Unitaire & Remédiation Racine :** Traitement unitaire des micro-chantiers (Règle 10.5) sans submersion cognitive, avec résolution définitive à la cause racine dans l'Atelier D: (Règle 14).
-* **Sas Forensique Découplé :** Journalisation brute temps réel dans `/var/log/soc-mail.jsonl` pour une traçabilité forensic infalsifiable.
+### 🏛️ Pupitre de Convergence & Sas Forensique : L'Analyse Brique par Brique
+
+L'une des plus grandes innovations d'ingénierie de JARVIS réside dans sa capacité à **sanctuariser la boîte personnelle de l'opérateur** en dérivant 100% des signaux d'alertes des serveurs et crons vers un bus local souverain.
+
+```mermaid
+flowchart TD
+    classDef capt fill:#0e1e38,stroke:#00f0ff,stroke-width:1.5px,color:#fff;
+    classDef filtre fill:#142850,stroke:#00ff9d,stroke-width:1.5px,color:#fff;
+    classDef goulot fill:#2a1b4e,stroke:#a855f7,stroke-width:2px,color:#fff;
+    classDef ia fill:#3b122d,stroke:#ff0055,stroke-width:2px,color:#fff;
+    classDef atelier fill:#08241b,stroke:#10b981,stroke-width:2px,color:#fff;
+
+    subgraph CAPTAGE["📡 1. CAPTAGE INFRA & BUS LOCAL (.1.0/24)"]
+        S1["srv-dev-1 (VM 101)"]:::capt
+        S2["srv-clt (VM 106)"]:::capt
+        S3["srv-pa05 (VM 107)"]:::capt
+        S4["kali (VM 108)"]:::capt
+        S5["PVE Host (Bare-Metal)"]:::capt
+        LOGS["Journal Forensique Local<br/><code>/var/log/soc-mail.jsonl</code>"]:::capt
+    end
+
+    subgraph FILTRES["⚡ 2. LES 4 FILTRES DÉTERMINISTES (< 50ms · 0 LLM)"]
+        F1["FILTRE 01 · CYBER (SOC)<br/>CrowdSec · WAF · Blocages"]:::filtre
+        F2["FILTRE 02 · CRONS & SYSTÈME<br/>Détection Dérives & Pannes"]:::filtre
+        F3["FILTRE 03 · ROUTEUR ROG<br/>Syslog UDP 514 · AiProtection"]:::filtre
+        F4["FILTRE 04 · COFFRES DR<br/>Snapshots ZFS · 16 Coffres"]:::filtre
+    end
+
+    subgraph CONVERGENCE["🔀 3. GOULOT DE CONVERGENCE & ARBITRAGE NEURAL"]
+        PIPE["Conduits Fil de Fer & Goulot Central"]:::goulot
+        ARBITRE["Arbitrage Neural & Bascule Déterministe<br/>(LLM Local + Fail-Safe RTC < 1ms)"]:::goulot
+        VOIX["Synthèse Vocale Antoine HD<br/>(Enceintes Windows Marc)"]:::goulot
+    end
+
+    subgraph GOUVERNANCE["🧠 4. CERVEAU IA & BANNETTE UNITAIRE (RÈGLE 10.5)"]
+        BANNETTE["Bannette IA Cadenassée<br/>(1 seul micro-chantier à la fois)"]:::ia
+    end
+
+    subgraph REMEDIATION["🛠️ 5. REMÉDIATION RACINE ATELIER D:"]
+        ATELIER["Atelier D: (Marc & Antigravity)<br/>Correction Racine · Zéro Rustine · Scellé Git"]:::atelier
+    end
+
+    S1 & S2 & S3 & S4 & S5 --> LOGS
+    LOGS --> F1 & F2 & F3 & F4
+    F1 & F2 & F3 & F4 --> PIPE
+    PIPE --> ARBITRE
+    ARBITRE --> VOIX
+    ARBITRE --> BANNETTE
+    BANNETTE --> ATELIER
+```
+
+#### 1. Brique #INF-07 · Pupitre de Convergence & Compteurs Étalons
+* **908 Mails Épargnés (28j) :** Volume réel de courriels d'exploitation interceptés et neutralisés localement (zéro fuite vers la messagerie personnelle).
+* **4 577 Signaux Absorbés Bus :** Télémétrie brute captée par le bus local et analysée sans saturation réseau.
+* **0 En Cours & 100% Fiabilisation Racine :** Garantie qu'aucune anomalie n'est laissée avec une rustine temporaire.
+
+#### 2. Brique #INF-10 · Goulot de Convergence & 4 Filtres Déterministes (< 50 ms)
+Le code machine direct évalue les états en **moins de 50 ms sans solliciter le LLM** :
+* **Filtre 01 · Cyber (SOC) :** Corrélation en direct avec la Kill Chain et CrowdSec (270 événements, 0 fuite SMTP).
+* **Filtre 02 · Crons & Système :** Surveillance des tâches planifiées des VMs Linux et de l'hyperviseur (3 638 événements filtrés, élimination des faux positifs récurrents).
+* **Filtre 03 · Routeur ROG :** Trames Syslog UDP 514 issues du routeur central Wi-Fi 7 et des modules de sécurité AiProtection Trend Micro (133 événements).
+* **Filtre 04 · Coffres DR :** Contrôle de fraîcheur et de cohérence des 16 coffres souverains de sauvegarde PVE & NAS OMV8 (39 signaux, 100% GO).
+
+#### 3. Conduits Fil de Fer & Arbitrage Neural Fail-Safe (< 1 ms)
+* **Esthétique Vectorielle Fil de Fer :** Héritée des coffres-forts DR de haute précision, matérialisant les flux d'ingestion sous forme de conduits convergents.
+* **Double Circuit :** Le moteur dispose d'un basculement immédiat (RTC swap < 1ms) : le modèle neural est encadré par des gardiens déterministes inviolables. Les alertes critiques sont synthétisées vocalement par **Antoine HD** sur les enceintes de l'opérateur via le moteur MCI Windows sans dépendance de navigateur.
+
+#### 4. Brique #INF-01 · Captage Infra & Bus Local (.1.0/24)
+Auscultation passive continue des 5 machines clés du réseau (`srv-dev-1`, `srv-clt`, `srv-pa05`, `kali`, `PVE Host`) dérivée vers le journal forensique `/var/log/soc-mail.jsonl`.
+
+#### 5. Brique #INF-08 · Cerveau IA & Bannette Unitaire (Règle 10.5)
+* **Principe de l'Alimentation Mesurée :** Pour préserver la clarté d'esprit de l'opérateur et éviter toute fatigue décisionnelle, la Bannette IA ne présente **qu'un seul micro-chantier prioritaire à la fois**. Quand le homelab est sain, la file est 100% vidée.
+
+#### 6. Brique #INF-09 · Remédiation Atelier D: (Règle 14)
+* **Mandat Exclusif Atelier D: :** JARVIS reste confiné en lecture seule. L'infogérance active (remédiations, modifications système) est opérée exclusivement dans l'Atelier `D:\0xCyberLiTech` avec preuve machine et scellement Git.
+* **Registre Workflow Immuable :** Chaque action exécutée est horodatée UTC avec sa commande et sa preuve déterministe.
+
+#### 7. Sas Forensique Temps Réel (`/var/log/soc-mail.jsonl`)
+Un terminal déroulant en bas de page permet d'examiner en direct les événements bruts Jsonl pour une traçabilité forensic absolue.
+
 <br/>
 *Consulter le dossier d'ingénierie complet : [Fiche 04 · Infogérance Active Proxmox VE & Flotte de VMs](docs/04-INFOGERANCE-PARC-ET-VMS.md).*
 
