@@ -296,6 +296,12 @@ Parce qu'un centre de commande doit rester joignable en toute circonstance, JARV
 
 <br/><sub><em>Interface tactile mobile JARVIS : ergonomie pensée pour le pouce, Cœur Réacteur Arc Reactor vivant, sélection instantanée des modes et dialogue vocal chiffré via VPN WireGuard.</em></sub>
 
+<br/><br/>
+
+<img src="assets/jarvis-mobile-network-quad.png" alt="Hub Réseau Mobile JARVIS — Routeur ASUS ROG, Freebox Ultra v9, Proxmox VE MS-01, Serveur NAS MS-A2" width="100%" style="border-radius: 12px; border: 1px solid rgba(0, 240, 255, 0.3); box-shadow: 0 8px 30px rgba(0,0,0,0.6);"/>
+
+<br/><sub><em>Télémétrie & Borniers Réseau Vectoriels en Temps Réel : Routeur ASUS ROG GT-BE19000-AI, Freebox Ultra v9 (10G-EPON), Hyperviseur Proxmox VE MS-01 et Serveur NAS MS-A2 (OMV8). Diodes IEEE 802.3 animées au débit physique réel.</em></sub>
+
 </div>
 
 * **Connexion Chiffrée de Bout en Bout :** L'accès mobile s'effectue exclusivement au travers d'un tunnel VPN souverain (WireGuard privé), sans aucune exposition de port direct sur Internet.
