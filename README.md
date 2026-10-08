@@ -17,7 +17,7 @@
     <a href="https://github.com/0xCyberLiTech">
       <img src="https://img.shields.io/badge/Profil-GitHub-181717?logo=github&style=flat-square" alt="🔗 Profil GitHub" />
     </a>
-    <a href="https://github.com/0xCyberLiTech/JARVIS/releases/tag/v2.0.0">
+    <a href="https://github.com/0xCyberLiTech/JARVIS/releases">
       <img src="https://img.shields.io/badge/Release-v2.0.0%20(Octobre%202026)-8B5CF6?style=flat-square&logo=git" alt="Release v2.0.0" />
     </a>
     <a href="https://github.com/0xCyberLiTech/JARVIS">
@@ -46,7 +46,7 @@
 > [!IMPORTANT]
 > **Vitrine Technologique : Architecture & Démonstration d'Ingénierie**  
 > Ce dépôt présente le système d'intelligence artificielle locale **JARVIS** conçu par Marc (0xCyberLiTech). Il expose la doctrine d'ingénierie cognitive, les schémas d'intégration et les interfaces opérationnelles.  
-> 📚 **Dossier d'Ingénierie Interne Maître :** [Consulter le Référentiel Technique & Sommaire des 3 Piliers (`docs/README.md`)](./docs/README.md)  
+> 📚 **Référentiel d'Ingénierie Maître :** L'intégralité des spécifications d'ingénierie, schémas d'intégration et guides opérationnels des 3 Piliers est exposée en détail ci-dessous.  
 > 🔒 **Propriété Intellectuelle & Sécurité Opérationnelle** : Les modèles personnalisés, la base vectorielle interne, les clés privées et les automatisations d'infogérance matérielle restent **strictement confinés** au sein de l'Atelier souverain 0xCyberLiTech.
 
 ---
@@ -355,8 +355,6 @@ Auscultation passive continue des 5 machines clés du réseau (`srv-dev-1`, `srv
 #### 7. Sas Forensique Temps Réel (`/var/log/soc-mail.jsonl`)
 Un terminal déroulant en bas de page permet d'examiner en direct les événements bruts Jsonl pour une traçabilité forensic absolue.
 
-<br/>
-*Consulter le dossier d'ingénierie complet : [Fiche 04 · Infogérance Active Proxmox VE & Flotte de VMs](docs/04-INFOGERANCE-PARC-ET-VMS.md).*
 
 ---
 
