@@ -67,9 +67,42 @@ Le système met en œuvre deux canaux d'accès souverains complémentaires :
 
 <div align="center">
 
-<img src="../assets/jarvis-mobile-interface.png" alt="Interface Mobile JARVIS" width="380" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6);"/>
+<img src="../assets/jarvis-mobile-interface.png" alt="Interface Mobile JARVIS" width="360" style="border-radius: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.6);"/>
 
 <br/><sub><em>Interface tactile mobile JARVIS : ergonomie pensée pour le pouce, Cœur Réacteur Arc Reactor vivant, consultation instantanée de la santé globale et dialogue vocal chiffré.</em></sub>
+
+<br/><br/>
+
+### 🌐 Hub Réseau Mobile Tactile · Physique & Télémétrie des Borniers en Temps Réel
+
+<table align="center" style="border: none; background: transparent;">
+<tr>
+  <td align="center" style="padding: 10px;">
+    <img src="../assets/jarvis-mobile-net-router.png" alt="Routeur ASUS ROG" width="220" style="border-radius: 10px; border: 1px solid rgba(0, 240, 255, 0.3);"/><br/>
+    <b>ASUS ROG GT-BE19000-AI</b><br/>
+    <sub>Quad 2.5G + Dual 10G · LEDs d'activité dynamiques</sub>
+  </td>
+  <td align="center" style="padding: 10px;">
+    <img src="../assets/jarvis-mobile-net-freebox.png" alt="Freebox Ultra v9" width="220" style="border-radius: 10px; border: 1px solid rgba(0, 240, 255, 0.3);"/><br/>
+    <b>Freebox Ultra (FTTH 10G)</b><br/>
+    <sub>Switch 2.5G & Laser SFP+ modulation réelle</sub>
+  </td>
+</tr>
+<tr>
+  <td align="center" style="padding: 10px;">
+    <img src="../assets/jarvis-mobile-net-proxmox.png" alt="Proxmox VE MS-01" width="220" style="border-radius: 10px; border: 1px solid rgba(217, 70, 239, 0.3);"/><br/>
+    <b>Proxmox VE MS-01</b><br/>
+    <sub>Ponts virtuels SDN & Diodes physiques IPMI/Trunk</sub>
+  </td>
+  <td align="center" style="padding: 10px;">
+    <img src="../assets/jarvis-mobile-net-nas.png" alt="SRV-NAS OMV8" width="220" style="border-radius: 10px; border: 1px solid rgba(0, 255, 157, 0.3);"/><br/>
+    <b>Serveur NAS MS-A2</b><br/>
+    <sub>Baies NVMe, Lien 2.5G actif & Cages SFP+</sub>
+  </td>
+</tr>
+</table>
+
+<sub><em>Borniers vectoriels SVG réalistes conformes à la norme IEEE 802.3 : diode Link gauche fixe pour maintien de porteuse, diode d'activité droite clignotant au débit réel mesuré.</em></sub>
 
 </div>
 
