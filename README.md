@@ -48,7 +48,6 @@
 | **04 · Mémoire Hermès & Pont MCP** | Persistance **SQLite WAL**, indexation vectorielle **RAG** (`SQLite-vec` & `qwen3-embedding:4b`) et serveur **MCP natif (22 outils)** en lecture seule stricte. | [<img src="https://raw.githubusercontent.com/0xCyberLiTech/0xcyberlitech/main/assets/btn-explore.svg" alt="Dossier R&D JARVIS" />](https://0xcyberlitech.com/jarvis-rd.html) |
 
 ```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': { 'primaryColor': '#091326', 'primaryTextColor': '#f8fafc', 'primaryBorderColor': '#38bdf8', 'lineColor': '#38bdf8'}}}%%
 flowchart LR
     MIC["[STT] Entree Audio WebRTC<br/>Faster-Whisper STT"] --> ROUTER["[ROUTER] Routeur Deterministe<br/>Fast-Path < 200 ms"]
     ROUTER -->|"Etat SOC / Infra (0 LLM)"| COLLECT["[SONDES] Sondes Read-Only<br/>SOC · Proxmox · NAS"]
